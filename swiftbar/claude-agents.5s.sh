@@ -313,21 +313,26 @@ ROWS_JQ='
     elif .shown == "uncertain" then "no activity"
     else "working" end;
   def since: .shownSince // .stateSince // $now;
-  def duration:
-    (($now - since) / 1000 | floor | if . < 0 then 0 else . end) as $s
-    | if $s < 60 then "\($s)s"
-      elif $s < 3600 then "\($s / 60 | floor)m"
-      elif $s < 86400 then "\($s / 3600 | floor)h"
-      else "\($s / 86400 | floor)d" end;
+  # Time since $t (epoch ms) as 12s, 4m, 2h or 3d.
+  def ago($t): (($now - $t) / 1000 | floor | if . < 0 then 0 else . end) as $s
+    | if $s < 60 then "\($s)s" elif $s < 3600 then "\($s / 60 | floor)m"
+      elif $s < 86400 then "\($s / 3600 | floor)h" else "\($s / 86400 | floor)d" end;
+  def duration: ago(since);
   # Title source, best first: herdr terminal title, a user-given session name,
   # the first prompt.
   def nonempty: select(. != null and . != "");
   def row_title: [($titles[.sessionId] | nonempty), (.sessionName | nonempty), (.promptPreview | nonempty), ""] | first;
   def project: (.cwd // "") | split("/") | map(select(. != "")) | last // "unknown";
-  def row_label:
-    (project + (row_title as $t | if $t == "" then "" else " — " + $t end))
-    | gsub("\\|"; "│")
+  def fit: gsub("\\|"; "│")
     | if length > $width then .[0:$width - 1] + "…" else . + (" " * ($width - length)) end;
+  def row_label: (project + (row_title as $t | if $t == "" then "" else " — " + $t end)) | fit;
+
+  # Subagents: indented under their parent, informational only.
+  def subagent_rows:
+    if $showSubagents then
+      (.subagents // {}) | to_entries | sort_by(.value.since) | .[]
+      | "  \("↳ subagent: \(.value.type)" | fit)  working · \(ago(.value.since // $now)) | font=Menlo size=12 color=gray"
+    else empty end;
 
   # A submenu item that runs this plugin with an action and the session ID.
   def action($text; $name):
@@ -346,7 +351,8 @@ ROWS_JQ='
     action("Copy session ID"; "copy-id"),
     action("Copy working directory"; "copy-cwd"),
     (if .cwd then action("Open folder in Finder"; "open-folder") else empty end),
-    (if .transcriptPath then action("Reveal transcript"; "reveal-transcript") else empty end)
+    (if .transcriptPath then action("Reveal transcript"; "reveal-transcript") else empty end),
+    subagent_rows
 '
 
 # Seconds `herdr agent list` may take before titles are skipped for this refresh.
@@ -379,6 +385,7 @@ render() {
     --arg plugin "$plugin_path" \
     --argjson herdr "$(if [ -n "$(find_herdr)" ]; then echo true; else echo false; fi)" \
     --argjson titles "$(load_herdr_titles)" \
+    --argjson showSubagents "$([ "$cfg_show_subagents" = 1 ] && echo true || echo false)" \
     "$HEADER_JQ"'
     , "---"
     , (if .invalid > 0 then "\(.invalid) state file(s) could not be read | color=gray" else empty end)

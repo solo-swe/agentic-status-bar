@@ -131,6 +131,39 @@ herdr_lists() {
   [[ "$(row_of s1)" == "● s1 — first prompt "* ]]
 }
 
+# --- Subagents ------------------------------------------------------------
+
+sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
+
+@test "subagents are listed under their parent" {
+  now=$(( $(date +%s) * 1000 ))
+  add_state s1 "{\"state\":\"busy\",\"subagents\":{\"a1\":{\"type\":\"Explore\",\"since\":$(( now - 12000 ))},\"a2\":{\"type\":\"general-purpose\",\"since\":$(( now - 60000 ))}}}"
+  add_state s2 '{"state":"idle"}'
+  run PLUGIN
+  [ "$(sub_rows | wc -l | tr -d ' ')" -eq 2 ]
+  [[ "$(sub_rows | sed -n 1p)" == "  ↳ subagent: general-purpose "*"  working · 1m | font=Menlo size=12 color=gray" ]]
+  [[ "$(sub_rows | sed -n 2p)" == "  ↳ subagent: Explore "*"  working · 1"[0-9]"s | font=Menlo size=12 color=gray" ]]
+  # They come after the parent row, not after the other session.
+  parent_line=$(printf '%s\n' "${lines[@]}" | grep -n ' s1 ' | head -1 | cut -d: -f1)
+  sub_line=$(printf '%s\n' "${lines[@]}" | grep -n '↳ subagent' | head -1 | cut -d: -f1)
+  other_line=$(printf '%s\n' "${lines[@]}" | grep -n ' s2 ' | head -1 | cut -d: -f1)
+  [ "$sub_line" -gt "$parent_line" ]
+  [ "$other_line" -lt "$parent_line" ]
+}
+
+@test "subagents don't count toward the menu-bar state" {
+  add_state s1 '{"state":"idle","subagents":{"a1":{"type":"Explore","since":1}}}'
+  run PLUGIN
+  [[ "${lines[0]}" == "1 | sfimage=checkmark.circle "* ]]
+}
+
+@test "subagent rows are hidden when show_subagents=0" {
+  printf 'show_subagents=0\n' > "$CLAUDE_AGENTS_CONFIG"
+  add_state s1 '{"state":"busy","subagents":{"a1":{"type":"Explore","since":1}}}'
+  run PLUGIN
+  [ -z "$(sub_rows)" ]
+}
+
 @test "focus ignores unsafe pane and bundle values" {
   add_state s1 '{"state":"idle","herdrPane":"w2:p1; rm -rf /"}'
   run PLUGIN focus s1
