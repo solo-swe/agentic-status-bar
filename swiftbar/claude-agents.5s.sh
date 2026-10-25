@@ -392,11 +392,28 @@ FOOTER_JQ='
   def toggle($text; $key):
     "\($text) | bash=\"\($plugin)\" param1=toggle param2=\($key) terminal=false refresh=true"
     + (if $f[$key | ltrimstr("show_")] then " checked=true" else "" end);
+  def run($args): " | bash=\"\($plugin)\" \($args) terminal=false refresh=true";
+  def check($on): if $on then " checked=true" else "" end;
+  def setting_toggle($text; $key):
+    "--\($text)" + run("param1=toggle param2=\($key)") + check($s[$key] == 1);
+  def stale_option($text; $minutes):
+    "----\($text)" + run("param1=set param2=stale_minutes param3=\($minutes)") + check($s.stale_minutes == $minutes);
+
   "Show | color=gray",
   toggle("Interactive"; "show_interactive"),
   toggle("Headless (claude -p)"; "show_headless"),
   toggle("Subagents"; "show_subagents"),
-  toggle("IDE / Desktop"; "show_ide")
+  toggle("IDE / Desktop"; "show_ide"),
+  "Settings…",
+  "--Mark busy sessions as uncertain after",
+  stale_option("10 minutes"; 10),
+  stale_option("30 minutes"; 30),
+  stale_option("60 minutes"; 60),
+  stale_option("Never"; 0),
+  setting_toggle("Refresh instantly on changes"; "instant_refresh"),
+  setting_toggle("Use Claude Code session registry"; "use_registry"),
+  setting_toggle("Store prompt previews"; "store_prompt_preview"),
+  "--Reveal config file" + run("param1=reveal-config")
 '
 
 # filters_json — the show_* config values as JSON booleans.
@@ -408,10 +425,16 @@ filters_json() {
     "$([ "$cfg_show_ide" = 1 ] && echo true || echo false)"
 }
 
+# settings_json — the settings the Settings submenu shows, as JSON.
+settings_json() {
+  printf '{"stale_minutes":%s,"instant_refresh":%s,"use_registry":%s,"store_prompt_preview":%s}' \
+    "$cfg_stale_minutes" "$cfg_instant_refresh" "$cfg_use_registry" "$cfg_store_prompt_preview"
+}
+
 render() {
   _filters="$(filters_json)"
   printf '%s' "$1" | "$JQ" -c --argjson f "$_filters" "$FILTERS_JQ" | "$JQ" -r \
-    --argjson f "$_filters" \
+    --argjson f "$_filters" --argjson s "$(settings_json)" \
     --arg icon "$cfg_icon" --argjson c "$COLORS" \
     --argjson now "$(now_ms)" --argjson width "$LABEL_WIDTH" \
     --arg plugin "$plugin_path" \
@@ -461,6 +484,22 @@ focus_session() {
   return 0
 }
 
+# write_default_config — a config file with every key at its current value.
+write_default_config() {
+  cat <<EOF
+# claude-agents settings (key=value). The SwiftBar menu edits this file too.
+show_interactive=$cfg_show_interactive
+show_headless=$cfg_show_headless
+show_subagents=$cfg_show_subagents
+show_ide=$cfg_show_ide
+stale_minutes=$cfg_stale_minutes
+use_registry=$cfg_use_registry
+instant_refresh=$cfg_instant_refresh
+icon=$cfg_icon
+store_prompt_preview=$cfg_store_prompt_preview
+EOF
+}
+
 # run_action ACTION SESSION_ID — a menu action.
 run_action() {
   case "$1" in
@@ -473,9 +512,28 @@ run_action() {
         show_headless) _value="$cfg_show_headless" ;;
         show_subagents) _value="$cfg_show_subagents" ;;
         show_ide) _value="$cfg_show_ide" ;;
+        instant_refresh) _value="$cfg_instant_refresh" ;;
+        use_registry) _value="$cfg_use_registry" ;;
+        store_prompt_preview) _value="$cfg_store_prompt_preview" ;;
         *) return 0 ;;
       esac
       if [ "$_value" = 1 ]; then set_config "$2" 0; else set_config "$2" 1; fi
+      ;;
+    set)
+      # Only the stale threshold is set to a value, and only to the menu's choices.
+      case "$2=$3" in
+        stale_minutes=0 | stale_minutes=10 | stale_minutes=30 | stale_minutes=60)
+          set_config "$2" "$3"
+          ;;
+      esac
+      ;;
+    reveal-config)
+      _config="$(ca_config_file)"
+      if [ ! -e "$_config" ]; then
+        mkdir -p "$(dirname "$_config")"
+        write_default_config > "$_config"
+      fi
+      open -R "$_config"
       ;;
     copy-id)
       session_field "$2" '.sessionId' | tr -d '\n' | pbcopy

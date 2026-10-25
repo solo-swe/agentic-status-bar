@@ -217,6 +217,59 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
   [ -z "$(row_of old)" ]
 }
 
+# --- Settings -------------------------------------------------------------
+
+@test "the Settings submenu shows the current values" {
+  run PLUGIN
+  [[ "$output" == *$'\nSettings…\n'* ]]
+  [[ "$output" == *"----30 minutes | bash=\""*"param1=set param2=stale_minutes param3=30 terminal=false refresh=true checked=true"* ]]
+  [[ "$output" == *"----10 minutes | bash=\""*"param3=10 terminal=false refresh=true"$'\n'* ]]
+  [[ "$output" == *"----Never | bash=\""*"param3=0 terminal=false refresh=true"$'\n'* ]]
+  [[ "$output" == *"--Refresh instantly on changes | bash=\""*"param2=instant_refresh terminal=false refresh=true checked=true"* ]]
+  [[ "$output" == *"--Use Claude Code session registry | bash=\""*"param2=use_registry terminal=false refresh=true checked=true"* ]]
+  [[ "$output" == *"--Store prompt previews | bash=\""*"param2=store_prompt_preview terminal=false refresh=true checked=true"* ]]
+  [[ "$output" == *"--Reveal config file | bash=\""*"param1=reveal-config terminal=false refresh=true"* ]]
+}
+
+@test "set changes the stale threshold to an offered value" {
+  run PLUGIN set stale_minutes 60
+  grep -q '^stale_minutes=60$' "$CLAUDE_AGENTS_CONFIG"
+  run PLUGIN
+  [[ "$output" == *"param3=60 terminal=false refresh=true checked=true"* ]]
+}
+
+@test "set rejects other keys and values" {
+  run PLUGIN set stale_minutes 7
+  run PLUGIN set icon bolt
+  run PLUGIN set stale_minutes '1;touch x'
+  [ ! -e "$CLAUDE_AGENTS_CONFIG" ]
+}
+
+@test "settings toggles flip their keys" {
+  run PLUGIN toggle instant_refresh
+  run PLUGIN toggle use_registry
+  run PLUGIN toggle store_prompt_preview
+  grep -q '^instant_refresh=0$' "$CLAUDE_AGENTS_CONFIG"
+  grep -q '^use_registry=0$' "$CLAUDE_AGENTS_CONFIG"
+  grep -q '^store_prompt_preview=0$' "$CLAUDE_AGENTS_CONFIG"
+  run PLUGIN
+  [[ "$output" == *"param2=use_registry terminal=false refresh=true"$'\n'* ]]
+}
+
+@test "reveal-config creates the config with defaults and reveals it" {
+  run PLUGIN reveal-config
+  [ "$status" -eq 0 ]
+  grep -q '^stale_minutes=30$' "$CLAUDE_AGENTS_CONFIG"
+  grep -q '^icon=sparkle$' "$CLAUDE_AGENTS_CONFIG"
+  [ "$(stub_calls open)" = "-R $CLAUDE_AGENTS_CONFIG" ]
+}
+
+@test "reveal-config keeps an existing config" {
+  printf 'icon=bolt\n' > "$CLAUDE_AGENTS_CONFIG"
+  run PLUGIN reveal-config
+  [ "$(cat "$CLAUDE_AGENTS_CONFIG")" = "icon=bolt" ]
+}
+
 @test "focus ignores unsafe pane and bundle values" {
   add_state s1 '{"state":"idle","herdrPane":"w2:p1; rm -rf /"}'
   run PLUGIN focus s1
