@@ -171,7 +171,7 @@
         "tests/common.bats"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:52:44Z",
+      "updated_at": "2026-10-25T06:52:45Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T06:52:20Z",
       "started_by": "claude:c631bc24",
@@ -184,7 +184,8 @@
           "text": "10 tests for lib/common.sh incl. injection attempts; suite 13/13 green",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "e64041f4d53213441a89a143fbdda584cb1909d4"
     },
     {
       "id": "T-006",
@@ -196,7 +197,7 @@
         "NFR-Testability"
       ],
       "use_cases": [],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-002"
       ],
@@ -204,7 +205,20 @@
         ".github/workflows/ci.yml"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T07:00:40Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T06:52:45Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T07:00:40Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T07:00:40Z",
+          "kind": "outcome",
+          "text": "GitHub Actions on macos-latest: shellcheck existing scripts + bats; steps verified locally (no remote yet)",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-007",

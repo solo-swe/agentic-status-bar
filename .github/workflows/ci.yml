@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install bats and shellcheck
+        run: brew install bats-core shellcheck
+
+      - name: Shellcheck
+        run: |
+          files=""
+          for f in hooks/*.sh swiftbar/*.sh lib/*.sh install.sh uninstall.sh tests/run.sh tests/bench.sh; do
+            [ -f "$f" ] && files="$files $f"
+          done
+          echo "Checking:$files"
+          # shellcheck disable=SC2086
+          shellcheck -s sh $files
+
+      - name: Tests
+        run: tests/run.sh
