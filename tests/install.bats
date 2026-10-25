@@ -79,6 +79,64 @@ ours_count() { jq "[.hooks[]?[]?.hooks[]? | select(.command | $OURS)] | length" 
   [ -L "$HOME/from-defaults/claude-agents.5s.sh" ]
 }
 
+# --- uninstall ------------------------------------------------------------
+
+@test "uninstall restores the settings to exactly what they were" {
+  run "$REPO_ROOT/install.sh"
+  run "$REPO_ROOT/uninstall.sh" < /dev/null
+  [ "$status" -eq 0 ]
+  [ "$(jq -S -c . "$CLAUDE_AGENTS_SETTINGS")" = "$(jq -S -c . "$REPO_ROOT/tests/fixtures/settings.json")" ]
+}
+
+@test "uninstall keeps a group that mixes our hook with others" {
+  run "$REPO_ROOT/install.sh"
+  # Someone added their own hook to the group install created.
+  jq '(.hooks.Stop[] | select(any(.hooks[]; .command | endswith("# claude-agents"))) | .hooks) += [{"type":"command","command":"say done"}]' \
+    "$CLAUDE_AGENTS_SETTINGS" > "$TEST_TMP/s.json" && mv "$TEST_TMP/s.json" "$CLAUDE_AGENTS_SETTINGS"
+  run "$REPO_ROOT/uninstall.sh" < /dev/null
+  [ "$(jq -c '.hooks.Stop' "$CLAUDE_AGENTS_SETTINGS")" = '[{"hooks":[{"type":"command","command":"say done"}]}]' ]
+  [ "$(ours_count)" -eq 0 ]
+}
+
+@test "uninstall removes the hooks key when only ours were there" {
+  printf '{"model":"opus"}\n' > "$CLAUDE_AGENTS_SETTINGS"
+  run "$REPO_ROOT/install.sh"
+  run "$REPO_ROOT/uninstall.sh" < /dev/null
+  [ "$(jq -c . "$CLAUDE_AGENTS_SETTINGS")" = '{"model":"opus"}' ]
+}
+
+@test "uninstall removes our SwiftBar link but not someone else's" {
+  run "$REPO_ROOT/install.sh"
+  run "$REPO_ROOT/uninstall.sh" < /dev/null
+  [ ! -e "$CLAUDE_AGENTS_SWIFTBAR_DIR/claude-agents.5s.sh" ]
+
+  ln -s /somewhere/else.sh "$CLAUDE_AGENTS_SWIFTBAR_DIR/claude-agents.5s.sh"
+  run "$REPO_ROOT/uninstall.sh" < /dev/null
+  [ -L "$CLAUDE_AGENTS_SWIFTBAR_DIR/claude-agents.5s.sh" ]
+}
+
+@test "uninstall keeps state and config unless asked to purge" {
+  run "$REPO_ROOT/install.sh"
+  printf 'icon=bolt\n' > "$CLAUDE_AGENTS_CONFIG"
+  printf '{}' > "$CLAUDE_AGENTS_STATE_DIR/s1.json"
+  run "$REPO_ROOT/uninstall.sh" < /dev/null
+  [ -e "$CLAUDE_AGENTS_CONFIG" ]
+  [ -e "$CLAUDE_AGENTS_STATE_DIR/s1.json" ]
+
+  run "$REPO_ROOT/uninstall.sh" --purge < /dev/null
+  [ ! -e "$CLAUDE_AGENTS_CONFIG" ]
+  [ ! -e "$CLAUDE_AGENTS_STATE_DIR" ]
+}
+
+@test "uninstall twice is harmless" {
+  run "$REPO_ROOT/install.sh"
+  run "$REPO_ROOT/uninstall.sh" < /dev/null
+  first="$(jq -S -c . "$CLAUDE_AGENTS_SETTINGS")"
+  run "$REPO_ROOT/uninstall.sh" < /dev/null
+  [ "$status" -eq 0 ]
+  [ "$(jq -S -c . "$CLAUDE_AGENTS_SETTINGS")" = "$first" ]
+}
+
 @test "install skips the link when no plugin folder is known" {
   unset CLAUDE_AGENTS_SWIFTBAR_DIR
   run "$REPO_ROOT/install.sh" < /dev/null
