@@ -170,9 +170,31 @@ on_session_start() {
     done
   fi
 }
-on_user_prompt_submit() { :; }
-on_pre_tool_use() { :; }
-on_post_tool_use() { :; }
+# Prompts that start with this are background-task results, not something the user typed.
+TASK_NOTIFICATION_PREFIX='<task-notification>'
+
+on_user_prompt_submit() {
+  write_state '
+    .state = "busy"
+    | del(.reason, .message)
+    | if $store == "1" and ($prompt | startswith($skip) | not) and ($prompt != "")
+      then .promptPreview = ($prompt | gsub("\\s+"; " ") | ltrimstr(" ") | .[0:80])
+      elif $store != "1" then del(.promptPreview)
+      else . end
+  ' \
+    --arg prompt "$(field '.prompt')" \
+    --arg skip "$TASK_NOTIFICATION_PREFIX" \
+    --arg store "$cfg_store_prompt_preview"
+}
+
+on_pre_tool_use() {
+  write_state '.state = "busy" | del(.reason, .message) | .lastTool = $tool' \
+    --arg tool "$(field '.tool_name')"
+}
+
+on_post_tool_use() {
+  write_state '.state = "busy" | del(.reason, .message)'
+}
 on_notification() { :; }
 on_stop() { :; }
 on_subagent_start() { :; }

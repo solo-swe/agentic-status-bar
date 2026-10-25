@@ -279,7 +279,7 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:08:13Z",
+      "updated_at": "2026-10-25T07:08:14Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:03:04Z",
       "started_by": "claude:c631bc24",
@@ -292,7 +292,8 @@
           "text": "SessionStart: PID walk (claude/node), procStart, kind, herdr/bundle, compact keeps state, same-PID cleanup; bats tests; added tests/lint.sh + project allowlist",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "264078bb15736fd18fd8021732d71b44beaf469b"
     },
     {
       "id": "T-009",
@@ -307,7 +308,7 @@
       "use_cases": [
         "U6"
       ],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-007"
       ],
@@ -315,8 +316,20 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:49:46Z",
-      "updated_by": "claude:c631bc24"
+      "updated_at": "2026-10-25T07:08:45Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T07:08:14Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T07:08:45Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T07:08:45Z",
+          "kind": "outcome",
+          "text": "Busy handlers with prompt preview (80 chars, whitespace collapsed, task-notification skipped, opt-out), lastTool; 7 tests",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-010",

@@ -99,6 +99,64 @@ teardown() { common_teardown; }
   [ -e "$(state_file)" ]
 }
 
+# --- Busy events ----------------------------------------------------------
+
+@test "UserPromptSubmit sets busy and stores the prompt preview" {
+  run_hook SessionStart
+  run_hook UserPromptSubmit
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+  [ "$(state_field .state)" = busy ]
+  [ "$(state_field .promptPreview)" = "Add rate limiting to the auth routes" ]
+}
+
+@test "UserPromptSubmit collapses whitespace and truncates the preview to 80 chars" {
+  long="$(printf 'line one\n\n  line two %.0s' $(seq 1 20))"
+  jq --arg p "$long" '.prompt = $p' "$REPO_ROOT/tests/fixtures/payloads/UserPromptSubmit.json" > "$TEST_TMP/long.json"
+  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/long.json"
+  preview="$(state_field .promptPreview)"
+  [ "${#preview}" -eq 80 ]
+  [[ "$preview" == "line one line two line one"* ]]
+}
+
+@test "a background task notification keeps the existing preview" {
+  run_hook UserPromptSubmit
+  run_hook UserPromptSubmit-task-notification
+  [ "$(state_field .state)" = busy ]
+  [ "$(state_field .promptPreview)" = "Add rate limiting to the auth routes" ]
+}
+
+@test "no prompt preview is stored when store_prompt_preview=0" {
+  printf 'store_prompt_preview=0\n' > "$CLAUDE_AGENTS_CONFIG"
+  run_hook UserPromptSubmit
+  [ "$(state_field .state)" = busy ]
+  [ "$(state_field '.promptPreview // "none"')" = none ]
+}
+
+@test "PreToolUse sets busy, records the tool and clears waiting details" {
+  printf '{"v":1,"sessionId":"%s","state":"waiting","reason":"permission","message":"m","updatedAt":0,"stateSince":0}\n' "$FIXTURE_SESSION" > "$(state_file)"
+  run_hook PreToolUse
+  [ "$(state_field .state)" = busy ]
+  [ "$(state_field .lastTool)" = Bash ]
+  [ "$(state_field '.reason // "none"')" = none ]
+  [ "$(state_field '.message // "none"')" = none ]
+}
+
+@test "PostToolUse sets busy and keeps lastTool" {
+  run_hook PreToolUse-AskUserQuestion
+  run_hook PostToolUse
+  [ "$(state_field .state)" = busy ]
+  [ "$(state_field .lastTool)" = AskUserQuestion ]
+}
+
+@test "stateSince only changes when the state changes" {
+  run_hook UserPromptSubmit
+  first="$(state_field .stateSince)"
+  run_hook PreToolUse
+  run_hook PostToolUse
+  [ "$(state_field .stateSince)" = "$first" ]
+}
+
 # --- Robustness -----------------------------------------------------------
 
 @test "hook is silent and exits 0 on bad input" {
