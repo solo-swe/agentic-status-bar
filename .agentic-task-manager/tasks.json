@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 42
+    "next_id": 45
   },
   "tasks": [
     {
@@ -1518,6 +1518,68 @@
       "started_by": "claude:c631bc24",
       "completed_at": "2026-10-25T20:43:30Z",
       "completed_by": "claude:c631bc24"
+    },
+    {
+      "id": "T-042",
+      "name": "Show state symbols in color in the menu bar and rows",
+      "phase": 5,
+      "type": "bugfix",
+      "description": "The zzz, exclamation, question-mark and bell.slash symbols render without their state color in the menu bar (and possibly in rows), although the plugin sends sfcolor. Find out how SwiftBar 2.x colors SF Symbols (sfcolor vs sfconfig with renderingMode Palette/Hierarchical, template images in the status item), make every state symbol show its light/dark color in both the menu bar and the dropdown rows, verify live in light and dark mode, and update tests and the README icon legend.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "swiftbar/swiftbar-claudecode-minimal.5s.sh",
+        "tests/plugin.bats",
+        "README.md"
+      ],
+      "created_at": "2026-10-25T21:22:51Z",
+      "updated_at": "2026-10-25T21:22:51Z",
+      "created_by": "claude:c631bc24",
+      "updated_by": "claude:c631bc24"
+    },
+    {
+      "id": "T-043",
+      "name": "Settings: start automatically, and themes for icons and colors",
+      "phase": 5,
+      "type": "feature",
+      "description": "Extend the dropdown's Settings submenu: (1) a 'Start automatically' toggle that makes the status bar launch at login (find out what is possible from a plugin: SwiftBar's own launch-at-login setting, a LaunchAgent, or opening System Settings > Login Items; fail safe and say which it controls); (2) a Theme submenu to pick the icon and color for each state (waiting, idle, uncertain, busy, muted, none), with a few built-in themes (e.g. default, monochrome, high contrast) plus per-state overrides stored in the config file (validated: SF Symbol names and #RRGGBB or light,dark pairs only). Menu bar and rows use the chosen theme. Tests, README config table and PRD.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-042"
+      ],
+      "files": [
+        "swiftbar/swiftbar-claudecode-minimal.5s.sh",
+        "lib/common.sh",
+        "tests/plugin.bats",
+        "README.md",
+        "doc/PRD.md"
+      ],
+      "created_at": "2026-10-25T21:22:52Z",
+      "updated_at": "2026-10-25T21:22:52Z",
+      "created_by": "claude:c631bc24",
+      "updated_by": "claude:c631bc24"
+    },
+    {
+      "id": "T-044",
+      "name": "Design: SwiftBar plugin vs standalone app vs atm integration",
+      "phase": 5,
+      "type": "docs",
+      "description": "Write doc/design/future-architecture.md comparing three directions for the product: (a) stay a SwiftBar plugin, (b) a standalone macOS menu-bar app (e.g. Swift/SwiftUI MenuBarExtra: native colors, notifications, launch at login, no SwiftBar dependency, signing and distribution cost), (c) integrating with atm (agentic-task-manager): showing tasks and loop progress next to sessions, or atm's dashboard consuming this project's state files. For each: what it enables, cost, risks, what of today's hooks and state files carries over, and migration path. End with a recommendation and the open questions for the user. Docs only; no code changes.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "doc/design/future-architecture.md"
+      ],
+      "created_at": "2026-10-25T21:22:52Z",
+      "updated_at": "2026-10-25T21:22:52Z",
+      "created_by": "claude:c631bc24",
+      "updated_by": "claude:c631bc24"
     }
   ]
 }
