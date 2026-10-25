@@ -89,6 +89,81 @@ header_is() {
   [ "$(cat "$CLAUDE_AGENTS_STATE_DIR/s1.json")" = "$before" ]
 }
 
+# --- C3 interrupt ---------------------------------------------------------
+
+# use_transcript NAME — copies tests/fixtures/transcripts/NAME.jsonl into place
+# and prints its path.
+use_transcript() {
+  cp "$REPO_ROOT/tests/fixtures/transcripts/$1.jsonl" "$TEST_TMP/transcript.jsonl"
+  printf '%s\n' "$TEST_TMP/transcript.jsonl"
+}
+
+@test "C3 shows a busy session as idle after a denied permission" {
+  t="$(use_transcript denied-permission)"
+  add_session "{\"state\":\"busy\",\"transcriptPath\":\"$t\"}"
+  run PLUGIN
+  header_is 1 checkmark.circle
+}
+
+@test "C3 shows a waiting session as idle after a denied permission" {
+  t="$(use_transcript denied-permission)"
+  add_session "{\"state\":\"waiting\",\"reason\":\"permission\",\"transcriptPath\":\"$t\"}"
+  run PLUGIN
+  header_is 1 checkmark.circle
+}
+
+@test "C3 shows a busy session as idle when the turn already ended" {
+  t="$(use_transcript completed-turn)"
+  add_session "{\"state\":\"busy\",\"transcriptPath\":\"$t\"}"
+  run PLUGIN
+  header_is 1 checkmark.circle
+}
+
+@test "C3 leaves a session busy when Esc came before any output" {
+  t="$(use_transcript esc-before-output)"
+  add_session "{\"state\":\"busy\",\"transcriptPath\":\"$t\"}"
+  run PLUGIN
+  header_is 1 sparkle
+}
+
+@test "C3 leaves a session busy while its turn is still running" {
+  t="$TEST_TMP/running.jsonl"
+  cat "$REPO_ROOT/tests/fixtures/transcripts/denied-permission.jsonl" > "$t"
+  printf '%s\n' '{"type":"user","message":{"role":"user","content":"Try again with npm ci"}}' \
+    '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","name":"Bash","input":{}}]}}' >> "$t"
+  add_session "{\"state\":\"busy\",\"transcriptPath\":\"$t\"}"
+  run PLUGIN
+  header_is 1 sparkle
+}
+
+@test "C3 only reads the last 8 KB of the transcript" {
+  t="$TEST_TMP/long.jsonl"
+  cat "$REPO_ROOT/tests/fixtures/transcripts/denied-permission.jsonl" > "$t"
+  # A long-running turn without its prompt in the tail: the old marker is out of reach.
+  filler="$(printf 'x%.0s' $(seq 1 500))"
+  for _ in $(seq 1 30); do
+    printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"%s"}]}}\n' "$filler" >> "$t"
+  done
+  add_session "{\"state\":\"busy\",\"transcriptPath\":\"$t\"}"
+  run PLUGIN
+  header_is 1 sparkle
+}
+
+@test "C3 ignores idle sessions and missing transcripts" {
+  add_session '{"state":"busy","transcriptPath":"/nonexistent/t.jsonl"}'
+  run PLUGIN
+  [ "$status" -eq 0 ]
+  header_is 1 sparkle
+}
+
+@test "C3 never modifies the state file" {
+  t="$(use_transcript denied-permission)"
+  add_session "{\"state\":\"busy\",\"transcriptPath\":\"$t\"}"
+  before="$(cat "$CLAUDE_AGENTS_STATE_DIR/s1.json")"
+  run PLUGIN
+  [ "$(cat "$CLAUDE_AGENTS_STATE_DIR/s1.json")" = "$before" ]
+}
+
 @test "a corrupt registry file is ignored" {
   add_session '{"state":"busy","updatedAt":1000}'
   printf 'garbage' > "$CLAUDE_AGENTS_REGISTRY_DIR/4242.json"

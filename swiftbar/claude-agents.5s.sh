@@ -115,9 +115,73 @@ CHECKS_JQ='
   | .registrySchemaIssue = any(.sessions[]; .registrySchema == false)
 '
 
+# Bytes of each transcript the interrupt check reads.
+TRANSCRIPT_TAIL_BYTES=8192
+# Text Claude Code writes to the transcript when a turn is interrupted or a
+# permission is denied (see tests/fixtures/README.md).
+INTERRUPT_MARKER='[Request interrupted by user'
+
+# Checks that need each session's transcript tail, run after C1 and C2.
+LATE_CHECKS_JQ='
+  # A prompt the user (or a background task) sent; not a tool result, meta
+  # entry or interrupt marker.
+  def prompt_text:
+    .message.content
+    | if type == "string" then .
+      elif type == "array" then (map(select(.type == "text") | .text) | join(" "))
+      else "" end;
+  def is_prompt:
+    .type == "user" and (.isMeta != true)
+    and ((.message.content | type) == "string"
+         or any(.message.content[]?; .type == "text"))
+    and (prompt_text | startswith($marker) | not);
+  def ends_turn:
+    (.type == "system" and .subtype == "turn_duration")
+    or (.type == "user" and (prompt_text | startswith($marker)));
+
+  # C3: busy or waiting, but the transcript shows the turn already ended.
+  def interrupted($entries):
+    ($entries | [to_entries[] | select(.value | is_prompt) | .key] | last) as $p
+    | ($entries | if $p == null then . else .[$p + 1:] end)
+    | any(.[]; ends_turn);
+
+  .sessions |= map(
+    if (.shown == "busy" or .shown == "waiting") and ($tails[.sessionId] != null)
+       and interrupted($tails[.sessionId])
+    then .shown = "idle" | .shownSince = .updatedAt
+    else . end)
+'
+
+# load_tails DATA — prints {sessionId: [transcript entries]} for sessions the
+# late checks look at, reading only the last TRANSCRIPT_TAIL_BYTES of each file.
+load_tails() {
+  printf '%s' "$1" | "$JQ" -r '
+    .sessions[] | select((.shown == "busy" or .shown == "waiting") and .transcriptPath)
+    | "\(.sessionId)\t\(.transcriptPath)"
+  ' | while IFS="$(printf '\t')" read -r _sid _path; do
+    [ -r "$_path" ] || continue
+    _size="$(wc -c < "$_path" | tr -d ' ')"
+    if [ "$_size" -gt "$TRANSCRIPT_TAIL_BYTES" ]; then
+      # The first line of the tail is usually cut off: drop it.
+      tail -c "$TRANSCRIPT_TAIL_BYTES" "$_path" | sed 1d
+    else
+      cat "$_path"
+    fi | while IFS= read -r _line || [ -n "$_line" ]; do
+      printf '%s\t%s\n' "$_sid" "$_line"
+    done
+  done | "$JQ" -c -R -n '
+    reduce (inputs | index("\t") as $i
+            | {sid: .[0:$i], e: (.[$i + 1:] | try fromjson catch null)}
+            | select(.e != null)) as $x
+      ({}; .[$x.sid] += [$x.e])
+  '
+}
+
 # apply_checks DATA PS_FILE — runs the checks and prints the updated data.
 apply_checks() {
-  printf '%s' "$1" | "$JQ" -c --rawfile ps "$2" --argjson reg "$(load_registry)" "$CHECKS_JQ"
+  _early="$(printf '%s' "$1" | "$JQ" -c --rawfile ps "$2" --argjson reg "$(load_registry)" "$CHECKS_JQ")"
+  printf '%s' "$_early" | "$JQ" -c --argjson tails "$(load_tails "$_early")" \
+    --arg marker "$INTERRUPT_MARKER" "$LATE_CHECKS_JQ"
 }
 
 # remove_dead DATA — deletes the state files of sessions found dead.
