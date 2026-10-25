@@ -1437,7 +1437,8 @@
           "text": "README finalized: RC status, real install options (install.sh, local marketplace), config incl. state_dir, troubleshooting, screenshot placeholders as comment (no images yet), made-up example names",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "a7be9a0f59d2acd482da65e22e29cdcb3e53fd16"
     }
   ]
 }
