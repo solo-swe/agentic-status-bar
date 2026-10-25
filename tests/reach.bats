@@ -18,7 +18,8 @@ add_state() {
     '{v: 1, sessionId: $id, updatedAt: $now, cwd: "/x/\($id)"} + .' > "$CLAUDE_STATUSBAR_STATE_DIR/$1.json"
 }
 
-row_of() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo' | grep "^$1 "; }
+# row_of NAME — the session row for project NAME, without its leading ":symbol: ".
+row_of() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo' | sed 's/^:[^: ]*: //' | grep "^$1 "; }
 
 # --- Focus ----------------------------------------------------------------
 
@@ -144,9 +145,9 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
   [[ "$(sub_rows | sed -n 1p)" == "  ↳ subagent: general-purpose "*"  working · 1m | font=Menlo size=12 color=gray" ]]
   [[ "$(sub_rows | sed -n 2p)" == "  ↳ subagent: Explore "*"  working · 1"[0-9]"s | font=Menlo size=12 color=gray" ]]
   # They come after the parent row, not after the other session.
-  parent_line=$(printf '%s\n' "${lines[@]}" | grep -n '^s1 ' | head -1 | cut -d: -f1)
+  parent_line=$(printf '%s\n' "${lines[@]}" | grep -n '^:[^: ]*: s1 ' | head -1 | cut -d: -f1)
   sub_line=$(printf '%s\n' "${lines[@]}" | grep -n '↳ subagent' | head -1 | cut -d: -f1)
-  other_line=$(printf '%s\n' "${lines[@]}" | grep -n '^s2 ' | head -1 | cut -d: -f1)
+  other_line=$(printf '%s\n' "${lines[@]}" | grep -n '^:[^: ]*: s2 ' | head -1 | cut -d: -f1)
   [ "$sub_line" -gt "$parent_line" ]
   [ "$other_line" -lt "$parent_line" ]
 }
@@ -154,7 +155,7 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
 @test "subagents don't count toward the menu-bar state" {
   add_state s1 '{"state":"idle","subagents":{"a1":{"type":"Explore","since":1}}}'
   run PLUGIN
-  [[ "${lines[0]}" == "1 | sfimage=zzz"* ]]
+  [[ "${lines[0]}" == ":zzz: 1 | "* ]]
 }
 
 @test "subagent rows are hidden when show_subagents=0" {
@@ -203,7 +204,7 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
   add_state vscode '{"state":"idle","kind":"ide"}'
   add_state app '{"state":"idle","kind":"desktop"}'
   run PLUGIN
-  [[ "${lines[0]}" == "1 | sfimage=sparkle "* ]]
+  [[ "${lines[0]}" == ":sparkle: 1 | "* ]]
   [ -n "$(row_of cli)" ]
   [ -z "$(row_of script)" ]
   [ -z "$(row_of vscode)" ]

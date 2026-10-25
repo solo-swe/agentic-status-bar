@@ -25,7 +25,7 @@ add_registry() {
 }
 
 header_is() {
-  [[ "${lines[0]}" == "$1 | sfimage=$2 "* ]] || { echo "header: ${lines[0]}"; false; }
+  [[ "${lines[0]}" == ":$2:${1:+ $1} | "* ]] || { echo "header: ${lines[0]}"; false; }
 }
 
 # --- C2 registry override -------------------------------------------------
@@ -214,7 +214,7 @@ enable_c5() { printf 'stale_minutes=30\n' > "$CLAUDE_STATUSBAR_CONFIG"; }
   add_session "{\"state\":\"busy\",\"updatedAt\":$(minutes_ago_ms 45),\"stateSince\":$(minutes_ago_ms 45)}"
   run PLUGIN
   header_is 1 questionmark.circle
-  [[ "$output" == *"proj "*"no activity · 45m"*"sfimage=questionmark.circle "* ]]
+  [[ "$output" == *":questionmark.circle: proj "*"no activity · 45m"* ]]
 }
 
 @test "C5 leaves a busy session alone within the threshold" {

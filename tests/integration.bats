@@ -23,7 +23,7 @@ PLUGIN() { "$REPO_ROOT/swiftbar/swiftbar-claudecode-minimal.5s.sh" "$@"; }
   run_hook Notification-permission_prompt
   run PLUGIN
   [ "$status" -eq 0 ]
-  [[ "${lines[0]}" == "1 | sfimage=exclamationmark.circle.fill "* ]]
+  [[ "${lines[0]}" == ":exclamationmark.circle.fill: 1 | "* ]]
   [[ "$output" == *"api-gateway — Add rate limiting to the auth"*"…  permission · "* ]]
 }
 
@@ -32,7 +32,7 @@ PLUGIN() { "$REPO_ROOT/swiftbar/swiftbar-claudecode-minimal.5s.sh" "$@"; }
   run_hook UserPromptSubmit
   run_hook Stop
   run PLUGIN
-  [[ "${lines[0]}" == "1 | sfimage=zzz"* ]]
+  [[ "${lines[0]}" == ":zzz: 1 | "* ]]
   [[ "$output" == *"idle · "* ]]
 }
 
@@ -41,7 +41,7 @@ PLUGIN() { "$REPO_ROOT/swiftbar/swiftbar-claudecode-minimal.5s.sh" "$@"; }
   run_hook UserPromptSubmit
   : > "$TEST_TMP/ps-table"
   run PLUGIN
-  [[ "${lines[0]}" == " | sfimage=sparkle "* ]]
+  [[ "${lines[0]}" == ":sparkle: | "* ]]
   [ ! -e "$(state_file)" ]
 }
 

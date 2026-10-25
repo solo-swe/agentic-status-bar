@@ -12,15 +12,15 @@ The menu-bar item shows one icon for the most urgent state across all sessions, 
 
 | Icon                              | Color      | Number          | Meaning                                                                   |
 | --------------------------------- | ---------- | --------------- | ------------------------------------------------------------------------- |
-| Warning triangle                  | Yellow     | All sessions    | Some state files couldn't be read (see Troubleshooting)                   |
+| Warning triangle                  | Orange (yellow in dark mode) | All sessions | Some state files couldn't be read (see Troubleshooting)                   |
 | Filled exclamation circle         | Red        | Waiting         | An agent is waiting on a permission prompt or a question                  |
-| `zzz`                             | Orange     | Idle            | An agent has finished and is waiting for your next prompt                 |
+| `zzz`                             | Orange (yellow in dark mode) | Idle | An agent has finished and is waiting for your next prompt                 |
 | Question mark in a circle         | Gray       | Stale           | A busy agent has shown no activity for longer than the stale threshold    |
 | Sparkle (the `icon` setting)      | Dim gray   | All sessions    | All agents are working; nothing needs you                                 |
 | Bell with a slash, no number      | Gray       | —               | Every session is in a muted project                                       |
 | Sparkle, no number                | Very faint | —               | No Claude Code sessions running                                           |
 
-Because only the most urgent state is shown, a red `1` can hide idle sessions behind it; the dropdown lists every session with its own state. The icons never animate.
+Because only the most urgent state is shown, a red `1` can hide idle sessions behind it; the dropdown lists every session with its own state. The icons never animate. Each icon and its number share the state's color, in the menu bar and on the session's row in the dropdown.
 
 The dropdown lists every session, most urgent first, then the filters and settings. Each row starts with the same icon and color as the menu bar uses for its state (drawn here as `!`, `z`, `?` and `✦`):
 

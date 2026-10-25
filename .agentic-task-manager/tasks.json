@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 45
+    "next_id": 46
   },
   "tasks": [
     {
@@ -1527,7 +1527,7 @@
       "description": "The zzz, exclamation, question-mark and bell.slash symbols render without their state color in the menu bar (and possibly in rows), although the plugin sends sfcolor. Find out how SwiftBar 2.x colors SF Symbols (sfcolor vs sfconfig with renderingMode Palette/Hierarchical, template images in the status item), make every state symbol show its light/dark color in both the menu bar and the dropdown rows, verify live in light and dark mode, and update tests and the README icon legend.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "swiftbar/swiftbar-claudecode-minimal.5s.sh",
@@ -1535,9 +1535,11 @@
         "README.md"
       ],
       "created_at": "2026-10-25T21:22:51Z",
-      "updated_at": "2026-10-25T21:22:51Z",
+      "updated_at": "2026-10-25T21:36:54Z",
       "created_by": "claude:c631bc24",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T21:36:54Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-043",
@@ -1580,6 +1582,33 @@
       "updated_at": "2026-10-25T21:22:52Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24"
+    },
+    {
+      "id": "T-045",
+      "name": "Don't show idle while subagents are still working",
+      "phase": 5,
+      "type": "bugfix",
+      "description": "When a session's subagents are still running and the parent agent is waiting for them, the row and the menu bar show idle (zzz), although work is going on. Show it as working, or a distinct 'waiting on subagents' state with its own symbol. DISCUSS WITH THE USER BEFORE IMPLEMENTING: which state or symbol to use, whether it counts in the menu bar like busy, and how to detect it reliably (subagents map from SubagentStart/SubagentStop vs Stop ordering, background agents vs foreground ones, stale subagent entries when SubagentStop is missed).",
+      "requirements": [],
+      "use_cases": [],
+      "status": "blocked",
+      "dependencies": [],
+      "files": [
+        "hooks/state-hook.sh",
+        "swiftbar/swiftbar-claudecode-minimal.5s.sh",
+        "tests/reach.bats",
+        "doc/PRD.md"
+      ],
+      "created_at": "2026-10-25T21:41:09Z",
+      "updated_at": "2026-10-25T21:41:14Z",
+      "created_by": "claude:c631bc24",
+      "updated_by": "claude:c631bc24",
+      "waiting_on": "user",
+      "questions": [
+        "When the parent is waiting on running subagents, should it show as working (sparkle, counted as busy) or as a new 'waiting on subagents' state with its own symbol?",
+        "Should a parent with background subagents still running count as busy in the menu bar, or stay idle since it is ready for your next prompt?"
+      ],
+      "blocked_at": "2026-10-25T21:41:14Z"
     }
   ]
 }

@@ -17,7 +17,7 @@ add_state() {
 
 # header_is TEXT SYMBOL — the menu-bar line shows TEXT with SF Symbol SYMBOL.
 header_is() {
-  [[ "${lines[0]}" == "$1 | sfimage=$2 "* ]] || { echo "header: ${lines[0]}"; false; }
+  [[ "${lines[0]}" == ":$2:${1:+ $1} | "* ]] || { echo "header: ${lines[0]}"; false; }
 }
 
 @test "plugin runs with no state files" {
@@ -97,8 +97,9 @@ header_is() {
 # now_minus SECONDS — epoch milliseconds SECONDS ago.
 now_minus() { echo $(( ($(date +%s) - $1) * 1000 )); }
 
-# rows — the session rows (lines after "---" that use the row font).
-rows() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo'; }
+# rows — the session rows (lines after "---" that use the row font), without
+# their leading ":symbol: ".
+rows() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo' | sed 's/^:[^: ]*: //'; }
 
 @test "no sessions shows a placeholder row" {
   run PLUGIN
@@ -129,9 +130,23 @@ rows() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo'; }
   add_state i '{"state":"idle","cwd":"/x/i"}'
   add_state b '{"state":"busy","cwd":"/x/b"}'
   run PLUGIN
-  [[ "$(rows | grep '^w ')" == *"sfimage=exclamationmark.circle.fill sfcolor=#D70015,#FF453A"* ]]
-  [[ "$(rows | grep '^i ')" == *"sfimage=zzz sfcolor=#B25000,#FFD60A"* ]]
-  [[ "$(rows | grep '^b ')" == *"sfimage=bolt sfcolor=#6E6E73,#AEAEB2"* ]]
+  all="$(printf '%s\n' "${lines[@]}" | grep 'font=Menlo')"
+  [[ "$(grep '^:exclamationmark.circle.fill: w ' <<< "$all")" == *"sfcolor=#D70015,#FF453A"* ]]
+  [[ "$(grep '^:zzz: i ' <<< "$all")" == *"sfcolor=#B25000,#FFD60A"* ]]
+  [[ "$(grep '^:bolt: b ' <<< "$all")" == *"sfcolor=#6E6E73,#AEAEB2"* ]]
+}
+
+@test "the menu bar writes its symbol inline so SwiftBar colors it" {
+  add_state a '{"state":"idle"}'
+  run PLUGIN
+  [ "${lines[0]}" = ":zzz: 1 | sfcolor=#B25000,#FFD60A color=#B25000,#FFD60A" ]
+  [[ "$output" != *"sfimage="* ]]
+}
+
+@test "a :name: in a title doesn't become a symbol" {
+  add_state a '{"state":"busy","cwd":"/x/p","promptPreview":"fix the :bug: now"}'
+  run PLUGIN
+  [[ "$(rows)" == *$'fix the :​bug: now'* ]]
 }
 
 @test "state words cover question, idle, working" {

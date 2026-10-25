@@ -255,11 +255,15 @@ MUTES_JQ='
 # and the number of sessions in it. Each state has its own symbol, so color is
 # never the only signal. Muted sessions don't count; when all are muted, a
 # muted icon shows instead.
+#
+# Symbols are written inline (":zzz:"), not as sfimage: SwiftBar applies
+# sfcolor, with its light,dark pair, only to inline symbols and draws an
+# sfimage in the plain menu-bar color.
 HEADER_JQ='
   [.sessions[] | select(.muted != true)] as $loud
   | def count($st): [$loud[] | select(.shown == $st)] | length;
   def title($text; $symbol; $color):
-    "\($text) | sfimage=\($symbol) sfcolor=\($color) color=\($color)";
+    ":\($symbol):\(if $text == "" then "" else " \($text)" end) | sfcolor=\($color) color=\($color)";
 
   if .invalid > 0 then title(.sessions | length; "exclamationmark.triangle"; $c.warning)
   elif count("waiting") > 0 then title(count("waiting"); "exclamationmark.circle.fill"; $c.waiting)
@@ -274,12 +278,11 @@ HEADER_JQ='
 # One row per session, most urgent first; within a state, longest in it first.
 ROWS_JQ='
   def rank: if .muted then 5 else {waiting: 0, idle: 1, uncertain: 2, busy: 3}[.shown] // 4 end;
-  # The same symbol and color the menu bar uses for this state.
+  # The same symbol and color the menu bar uses for this state: [symbol, color].
   def state_icon:
-    (if .muted then ["bell.slash", $c.muted] else
+    if .muted then ["bell.slash", $c.muted] else
       {waiting: ["exclamationmark.circle.fill", $c.waiting], idle: ["zzz", $c.idle],
-       uncertain: ["questionmark.circle", $c.uncertain]}[.shown] // [$icon, $c.busy] end)
-    | " sfimage=\(.[0]) sfcolor=\(.[1])";
+       uncertain: ["questionmark.circle", $c.uncertain]}[.shown] // [$icon, $c.busy] end;
   def word:
     if .shown == "waiting" then (if .reason == "question" then "question" else "permission" end)
     elif .shown == "idle" then "idle"
@@ -301,7 +304,9 @@ ROWS_JQ='
   def project: (.cwd // "") | split("/") | map(select(. != "")) | last // "unknown";
   def fit: gsub("\\|"; "│")
     | if length > $width then .[0:$width - 1] + "…" else . + (" " * ($width - length)) end;
-  def row_label: (project + (row_title as $t | if $t == "" then "" else " — " + $t end)) | fit;
+  # A zero-width space keeps ":name:" in a title from becoming an inline symbol.
+  def no_symbols: gsub(":(?<w>[A-Za-z0-9._-]+):"; ":​\(.w):");
+  def row_label: (project + (row_title as $t | if $t == "" then "" else " — " + $t end)) | fit | no_symbols;
 
   # Subagents: indented under their parent, informational only.
   def subagent_rows:
@@ -322,7 +327,8 @@ ROWS_JQ='
   .sessions
   | sort_by(rank, since)
   | .[]
-  | "\(row_label)  \(word) · \(if .muted then mute_text else duration end) | font=Menlo size=12\(state_icon)\(click)",
+  | state_icon as [$symbol, $color]
+  | ":\($symbol): \(row_label)  \(word) · \(if .muted then mute_text else duration end) | font=Menlo size=12 sfcolor=\($color)\(click)",
     (if can_focus then empty else "--Not in herdr: click to focus is unavailable | color=gray" end),
     (if .cwd == null then empty
      elif .muteUntil then action("Unmute project"; "unmute") + " refresh=true"

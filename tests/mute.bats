@@ -19,9 +19,9 @@ add_state() {
 }
 
 mutes() { cat "$CLAUDE_STATUSBAR_STATE_DIR/mutes"; }
-row_of() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo' | grep "^$1 "; }
+row_of() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo' | grep "^:[^: ]*: $1 "; }
 header_is() {
-  [[ "${lines[0]}" == "$1 | sfimage=$2 "* ]] || { echo "header: ${lines[0]}"; false; }
+  [[ "${lines[0]}" == ":$2:${1:+ $1} | "* ]] || { echo "header: ${lines[0]}"; false; }
 }
 
 @test "rows offer muting their project for an hour or for today" {
@@ -65,9 +65,9 @@ header_is() {
   run PLUGIN mute-hour a
   run PLUGIN
   header_is 1 zzz
-  [[ "$(row_of alpha)" == *"idle · muted until "[0-2][0-9]:[0-5][0-9]" | "*"sfimage=bell.slash sfcolor=#8E8E93,#98989D"* ]]
+  [[ "$(row_of alpha)" == ":bell.slash: alpha "*"idle · muted until "[0-2][0-9]:[0-5][0-9]" | "*"sfcolor=#8E8E93,#98989D"* ]]
   # Muted rows come last.
-  [[ "$(printf '%s\n' "${lines[@]}" | grep 'font=Menlo' | tail -1)" == "alpha "* ]]
+  [[ "$(printf '%s\n' "${lines[@]}" | grep 'font=Menlo' | tail -1)" == ":bell.slash: alpha "* ]]
 }
 
 @test "a project muted for today says so" {
@@ -82,7 +82,7 @@ header_is() {
   run PLUGIN mute-hour a
   add_state a2 '{"state":"busy","cwd":"/x/alpha"}'
   run PLUGIN
-  [[ "$(row_of alpha | grep -c 'sfimage=bell.slash')" -eq 2 ]]
+  [[ "$(row_of alpha | grep -c '^:bell.slash:')" -eq 2 ]]
 }
 
 @test "when every session is muted the menu bar shows the muted icon without a number" {
@@ -98,7 +98,7 @@ header_is() {
   run PLUGIN mute-hour a
   run PLUGIN
   header_is 1 exclamationmark.circle.fill
-  [[ "$(row_of alpha)" == *"sfimage=exclamationmark.circle.fill"* ]]
+  [[ "$(row_of alpha)" == ":exclamationmark.circle.fill: "* ]]
   [[ "$output" == *"--Unmute project"* ]]
 }
 
@@ -131,7 +131,7 @@ header_is() {
   add_state a "{\"state\":\"idle\",\"cwd\":\"/x/alpha\",\"promptAt\":$(( $(now_ms) + 1000 ))}"
   run PLUGIN
   header_is 1 zzz
-  [[ "$(row_of alpha)" == *"sfimage=zzz"* ]]
+  [[ "$(row_of alpha)" == ":zzz: "* ]]
 }
 
 @test "a prompt sent before the mute doesn't lift it" {
