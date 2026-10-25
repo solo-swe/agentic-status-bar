@@ -247,7 +247,7 @@ claude-agents/
 | --- | --- |
 | Performance | Plugin run under 150 ms for 10 sessions; one `ps` call per refresh, not one per session. Hook script under 20 ms, async. |
 | Reliability | Hooks never fail a Claude Code action: `set +e`, always exit 0, no stdout. Partial or corrupt state files are skipped, not fatal. Atomic writes only. |
-| Concurrency | Many sessions write at once; one file per session, so no locks are needed. Subagent entries are merged with a read-modify-`mv` on the parent's file. |
+| Concurrency | One file per session, so sessions never contend. Async hooks of one session can race (e.g. `PreToolUse` and the permission `Notification` fire milliseconds apart), so each write takes a short per-session `mkdir` lock and is skipped when the file already holds an update newer than the event's start time. |
 | Privacy | Everything stays local. The state file stores at most an 80-character prompt preview and the notification message; `store_prompt_preview=0` turns the preview off. No network calls. |
 | Portability | POSIX `sh` plus `jq` and stock macOS tools (`ps`, `pgrep`, `stat`, `open`). No Python, Node or Homebrew required on macOS 15+. |
 | Forward compatibility | State files carry `"v": 1`; the plugin ignores files with a newer version and shows the warning state. Unknown hook fields are ignored. |

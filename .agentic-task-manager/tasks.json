@@ -205,7 +205,7 @@
         ".github/workflows/ci.yml"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:00:40Z",
+      "updated_at": "2026-10-25T07:00:41Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T06:52:45Z",
       "started_by": "claude:c631bc24",
@@ -218,7 +218,8 @@
           "text": "GitHub Actions on macos-latest: shellcheck existing scripts + bats; steps verified locally (no remote yet)",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "5d86eb421a996d6043cde985447c534873e797ba"
     },
     {
       "id": "T-007",
@@ -231,7 +232,7 @@
         "NFR-Reliability"
       ],
       "use_cases": [],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-004"
       ],
@@ -239,7 +240,20 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T07:03:02Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T07:00:41Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T07:03:02Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T07:03:02Z",
+          "kind": "outcome",
+          "text": "Hook skeleton: silent, exit 0, safe session IDs, per-session lock, newest-event-wins write_state; CI shellcheck now -x -S warning",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-008",

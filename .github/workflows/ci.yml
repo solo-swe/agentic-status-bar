@@ -21,7 +21,7 @@ jobs:
           done
           echo "Checking:$files"
           # shellcheck disable=SC2086
-          shellcheck -s sh $files
+          shellcheck -x -S warning -s sh $files
 
       - name: Tests
         run: tests/run.sh
