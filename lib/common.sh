@@ -114,6 +114,38 @@ find_jq() {
   command -v jq 2>/dev/null
 }
 
+# find_herdr — prints the path of herdr, or nothing if it isn't installed.
+# CLAUDE_AGENTS_HERDR, when set, is the only candidate (used by tests).
+find_herdr() {
+  if [ -n "${CLAUDE_AGENTS_HERDR+set}" ]; then
+    [ -x "$CLAUDE_AGENTS_HERDR" ] && printf '%s\n' "$CLAUDE_AGENTS_HERDR"
+    return 0
+  fi
+  for _ca_herdr in /opt/homebrew/bin/herdr /usr/local/bin/herdr; do
+    if [ -x "$_ca_herdr" ]; then
+      printf '%s\n' "$_ca_herdr"
+      return 0
+    fi
+  done
+  command -v herdr 2>/dev/null
+}
+
+# run_with_timeout SECONDS COMMAND... — runs COMMAND, killing it after SECONDS.
+# Returns COMMAND's status (non-zero if it was killed).
+run_with_timeout() {
+  _ca_secs="$1"
+  shift
+  "$@" &
+  _ca_pid=$!
+  ( sleep "$_ca_secs"; kill "$_ca_pid" 2>/dev/null ) &
+  _ca_watcher=$!
+  wait "$_ca_pid"
+  _ca_status=$?
+  kill "$_ca_watcher" 2>/dev/null
+  wait "$_ca_watcher" 2>/dev/null
+  return "$_ca_status"
+}
+
 # log_once KEY MESSAGE — appends MESSAGE to plugin.log unless KEY was logged before.
 # Call load_config first.
 log_once() {

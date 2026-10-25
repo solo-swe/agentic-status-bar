@@ -936,7 +936,7 @@
         "tests/hook.bats"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:26:28Z",
+      "updated_at": "2026-10-25T07:26:29Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:25:59Z",
       "started_by": "claude:c631bc24",
@@ -949,7 +949,8 @@
           "text": "C2-C5 + poke coverage complete (30 check tests, 5 poke tests); added C4/C5 no-write test",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "9aed8a2dd04d92e66d2f4bf7dcc18440fe8a9e48"
     },
     {
       "id": "T-026",
@@ -964,7 +965,7 @@
       "use_cases": [
         "U4"
       ],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-018",
         "T-003"
@@ -973,7 +974,20 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T07:28:29Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T07:26:29Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T07:28:29Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T07:28:29Z",
+          "kind": "outcome",
+          "text": "Fail-safe herdr focus: click only with herdrPane + herdr installed, herdr agent focus then open -b, 2 s timeouts, input validation, 'Not in herdr' hint; 8 tests; tests never touch real herdr",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-027",

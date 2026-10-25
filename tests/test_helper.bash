@@ -16,6 +16,8 @@ common_setup() {
   export CLAUDE_AGENTS_CONFIG="$HOME/.config/claude-agents/config"
   export CLAUDE_AGENTS_REGISTRY_DIR="$HOME/.claude/sessions"
   mkdir -p "$CLAUDE_AGENTS_STATE_DIR" "$(dirname "$CLAUDE_AGENTS_CONFIG")" "$CLAUDE_AGENTS_REGISTRY_DIR"
+  # Never talk to a real herdr; tests that need one stub it.
+  export CLAUDE_AGENTS_HERDR="$TEST_TMP/no-herdr"
 
   # Fake commands go first on PATH.
   FAKE_BIN="$TEST_TMP/bin"

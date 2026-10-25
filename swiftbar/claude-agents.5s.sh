@@ -326,10 +326,16 @@ ROWS_JQ='
   def action($text; $name):
     "--\($text) | bash=\"\($plugin)\" param1=\($name) param2=\(.sessionId) terminal=false";
 
+  # Rows focus their session on click when it runs in a herdr pane (v1: herdr only).
+  def can_focus: $herdr and (.herdrPane // "") != "";
+  def click:
+    if can_focus then " bash=\"\($plugin)\" param1=focus param2=\(.sessionId) terminal=false" else "" end;
+
   .sessions
   | sort_by(rank, since)
   | .[]
-  | "\(glyph) \(row_label)  \(word) · \(duration) | font=Menlo size=12",
+  | "\(glyph) \(row_label)  \(word) · \(duration) | font=Menlo size=12\(click)",
+    (if can_focus then empty else "--Not in herdr: click to focus is unavailable | color=gray" end),
     action("Copy session ID"; "copy-id"),
     action("Copy working directory"; "copy-cwd"),
     (if .cwd then action("Open folder in Finder"; "open-folder") else empty end),
@@ -342,6 +348,7 @@ render() {
     --arg icon "$cfg_icon" --argjson c "$COLORS" \
     --argjson now "$(now_ms)" --argjson width "$LABEL_WIDTH" \
     --arg plugin "$plugin_path" \
+    --argjson herdr "$(if [ -n "$(find_herdr)" ]; then echo true; else echo false; fi)" \
     "$HEADER_JQ"'
     , "---"
     , (if .invalid > 0 then "\(.invalid) state file(s) could not be read | color=gray" else empty end)
@@ -360,9 +367,36 @@ session_field() {
   "$JQ" -r "$2 // empty" "$cfg_state_dir/$1.json" 2>/dev/null
 }
 
+# Seconds each focus step may take before it is abandoned.
+FOCUS_TIMEOUT=2
+
+# focus_session SESSION_ID — brings the session's herdr pane to front. The one
+# place to add other integrations later. Fails safe: on any error nothing else
+# happens; it never launches apps or opens windows.
+focus_session() {
+  _pane="$(session_field "$1" '.herdrPane')"
+  case "$_pane" in
+    '' | *[!A-Za-z0-9:_-]*) return 0 ;;
+  esac
+  _herdr="$(find_herdr)"
+  [ -n "$_herdr" ] || return 0
+  run_with_timeout "$FOCUS_TIMEOUT" "$_herdr" agent focus "$_pane" >/dev/null 2>&1 || return 0
+
+  # Raise the terminal hosting herdr.
+  _bundle="$(session_field "$1" '.termBundleId')"
+  case "$_bundle" in
+    '' | *[!A-Za-z0-9.-]*) return 0 ;;
+  esac
+  run_with_timeout "$FOCUS_TIMEOUT" open -b "$_bundle" >/dev/null 2>&1
+  return 0
+}
+
 # run_action ACTION SESSION_ID — a menu action.
 run_action() {
   case "$1" in
+    focus)
+      focus_session "$2"
+      ;;
     copy-id)
       session_field "$2" '.sessionId' | tr -d '\n' | pbcopy
       ;;
