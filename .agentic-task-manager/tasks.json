@@ -4,7 +4,10 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 49
+    "next_id": 49,
+    "workflow": {
+      "type": "direct"
+    }
   },
   "tasks": [
     {
@@ -1730,17 +1733,28 @@
       "description": "Add a section to doc/design/future-architecture.md answering: can Swift do everything for the macOS app or does any part need another language; alternatives (Objective-C, Rust/Tauri, Go, .NET/Avalonia, Electron, Kotlin Compose, Flutter) and reasons to prefer any of them; can Rust/Tauri give one implementation for macOS, Windows and Linux (tray differences, GNOME tray, WSL, process checks, terminal focus, notifications), and at what effort; and a phased path that solidifies on Swift first and moves to a cross-platform stack later, with what to do now to keep that cheap. Update the recommendation and open questions.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "doc/design/future-architecture.md"
       ],
       "created_at": "2026-10-25T23:42:09Z",
-      "updated_at": "2026-10-25T23:42:09Z",
+      "updated_at": "2026-10-25T23:43:17Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T23:42:09Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "d97205c34b0062a08f4d61f4b3943eba2ec931d9",
+      "completed_at": "2026-10-25T23:43:17Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T23:43:17Z",
+          "kind": "outcome",
+          "text": "New section: Swift covers everything on macOS; alternatives compared; Rust+Tauri cross-platform is reasonable for core and basic tray but costs 1.5-2x (tray gaps, GNOME, WSL, focus); phased Swift-first path with conformance suite and a checkpoint",
+          "by": "claude:c631bc24"
+        }
+      ]
     }
   ]
 }
