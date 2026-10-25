@@ -1,0 +1,45 @@
+# Contributing
+
+## Requirements
+
+- macOS 15 or later (or Homebrew `jq`)
+- `brew install bats-core shellcheck`
+
+## Checks
+
+```sh
+tests/lint.sh   # shellcheck on every script
+tests/run.sh    # all bats tests (or: tests/run.sh tests/hook.bats)
+```
+
+CI runs the same two commands. Tests run in a temporary `HOME`, so they never touch your real
+`~/.claude` or config.
+
+Verify behavior with a bats test rather than by hand. `tests/test_helper.bash` provides:
+
+- `stub_command NAME [BODY]`: a fake command on `PATH` that records its arguments.
+- `stub_ps` and `add_process`: a fake process table for the PID walk and liveness checks.
+- `run_hook FIXTURE`: feeds `tests/fixtures/payloads/FIXTURE.json` to the hook.
+
+Payload fixtures and what they showed are described in `tests/fixtures/README.md`.
+
+## Trying the hooks in Claude Code
+
+Load the repo as a plugin for one session:
+
+```sh
+claude --plugin-dir .
+```
+
+State files then appear in `~/.claude/swiftbar-agents/`, one per session. Your existing hooks keep
+running alongside.
+
+## Layout
+
+| Path | What |
+| --- | --- |
+| `hooks/state-hook.sh` | The hook: one state file per session |
+| `hooks/hooks.json` | Hook registrations for the Claude Code plugin |
+| `swiftbar/claude-agents.5s.sh` | The SwiftBar plugin |
+| `lib/common.sh` | Config, time and file helpers shared by both |
+| `doc/PRD.md` | Product requirements |

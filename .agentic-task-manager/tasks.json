@@ -447,7 +447,8 @@
           "text": "Hook test suite complete: per-event behavior, all fixtures silent, missing jq, held lock, unsafe IDs, stale events (30 hook tests, 44 total)",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "e97099812ad8f2534d310e50e29af661fb6205df"
     },
     {
       "id": "T-013",
@@ -462,7 +463,7 @@
       "use_cases": [
         "U10"
       ],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-007"
       ],
@@ -472,7 +473,20 @@
         "CONTRIBUTING.md"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T07:10:57Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T07:10:17Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T07:10:57Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T07:10:57Z",
+          "kind": "outcome",
+          "text": "plugin.json, hooks/hooks.json (9 async events), CONTRIBUTING.md, manifest tests. Live 'claude --plugin-dir .' check deferred to T-036 (needs interactive approval)",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-014",
