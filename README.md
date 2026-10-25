@@ -65,7 +65,7 @@ Everything stays on your machine. Hooks run async and always exit 0, so they can
 Clone the repo somewhere permanent; SwiftBar runs the plugin from it:
 
 ```sh
-git clone https://github.com/<github-user>/swiftbar-claudecode-minimal.git ~/code/swiftbar-claudecode-minimal
+git clone https://github.com/hakanserce/swiftbar-claudecode-minimal.git ~/code/swiftbar-claudecode-minimal
 cd ~/code/swiftbar-claudecode-minimal
 ```
 
