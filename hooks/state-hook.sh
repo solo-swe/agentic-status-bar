@@ -195,8 +195,39 @@ on_pre_tool_use() {
 on_post_tool_use() {
   write_state '.state = "busy" | del(.reason, .message)'
 }
-on_notification() { :; }
-on_stop() { :; }
+on_notification() {
+  _type="$(field '.notification_type')"
+  _message="$(field '.message')"
+  # Older payloads may lack notification_type: fall back to the message text.
+  if [ -z "$_type" ]; then
+    case "$_message" in
+      *"needs your permission"*) _type=permission_prompt ;;
+      *"waiting for your input"*) _type=idle_prompt ;;
+    esac
+  fi
+
+  case "$_type" in
+    permission_prompt)
+      # AskUserQuestion questions also arrive as permission prompts.
+      write_state '
+        .state = "waiting"
+        | .reason = (if .lastTool == "AskUserQuestion" then "question" else "permission" end)
+        | .message = $message
+      ' --arg message "$_message"
+      ;;
+    elicitation_dialog)
+      write_state '.state = "waiting" | .reason = "question" | .message = $message' \
+        --arg message "$_message"
+      ;;
+    idle_prompt)
+      write_state '.state = "idle" | del(.reason, .message)'
+      ;;
+  esac
+}
+
+on_stop() {
+  write_state '.state = "idle" | del(.reason, .message)'
+}
 on_subagent_start() { :; }
 on_subagent_stop() { :; }
 on_session_end() { :; }

@@ -157,6 +157,68 @@ teardown() { common_teardown; }
   [ "$(state_field .stateSince)" = "$first" ]
 }
 
+# --- Notification and Stop ------------------------------------------------
+
+@test "a permission prompt sets waiting with reason permission" {
+  run_hook PreToolUse
+  run_hook Notification-permission_prompt
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+  [ "$(state_field .state)" = waiting ]
+  [ "$(state_field .reason)" = permission ]
+  [ "$(state_field .message)" = "Claude needs your permission" ]
+}
+
+@test "a permission prompt after AskUserQuestion sets reason question" {
+  run_hook PreToolUse-AskUserQuestion
+  run_hook Notification-permission_prompt
+  [ "$(state_field .state)" = waiting ]
+  [ "$(state_field .reason)" = question ]
+}
+
+@test "an elicitation dialog sets waiting with reason question" {
+  jq '.notification_type = "elicitation_dialog" | .message = "Server needs input"' \
+    "$REPO_ROOT/tests/fixtures/payloads/Notification-permission_prompt.json" > "$TEST_TMP/elicit.json"
+  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/elicit.json"
+  [ "$(state_field .state)" = waiting ]
+  [ "$(state_field .reason)" = question ]
+  [ "$(state_field .message)" = "Server needs input" ]
+}
+
+@test "an idle prompt sets idle" {
+  run_hook Notification-permission_prompt
+  run_hook Notification-idle_prompt
+  [ "$(state_field .state)" = idle ]
+  [ "$(state_field '.reason // "none"')" = none ]
+}
+
+@test "without notification_type the message text decides" {
+  jq 'del(.notification_type)' "$REPO_ROOT/tests/fixtures/payloads/Notification-permission_prompt.json" > "$TEST_TMP/perm.json"
+  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/perm.json"
+  [ "$(state_field .state)" = waiting ]
+  [ "$(state_field .reason)" = permission ]
+
+  jq 'del(.notification_type)' "$REPO_ROOT/tests/fixtures/payloads/Notification-idle_prompt.json" > "$TEST_TMP/idle.json"
+  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/idle.json"
+  [ "$(state_field .state)" = idle ]
+}
+
+@test "an unknown notification type changes nothing" {
+  run_hook UserPromptSubmit
+  jq '.notification_type = "auth_success" | .message = "Signed in"' \
+    "$REPO_ROOT/tests/fixtures/payloads/Notification-idle_prompt.json" > "$TEST_TMP/other.json"
+  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/other.json"
+  [ "$(state_field .state)" = busy ]
+}
+
+@test "Stop sets idle and clears waiting details" {
+  run_hook Notification-permission_prompt
+  run_hook Stop
+  [ "$(state_field .state)" = idle ]
+  [ "$(state_field '.reason // "none"')" = none ]
+  [ "$(state_field '.message // "none"')" = none ]
+}
+
 # --- Robustness -----------------------------------------------------------
 
 @test "hook is silent and exits 0 on bad input" {
