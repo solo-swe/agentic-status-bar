@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 46
+    "next_id": 47
   },
   "tasks": [
     {
@@ -1628,7 +1628,7 @@
       "description": "When a session's subagents are still running and the parent agent is waiting for them, the row and the menu bar show idle (zzz), although work is going on. Show it as working, or a distinct 'waiting on subagents' state with its own symbol. DISCUSS WITH THE USER BEFORE IMPLEMENTING: which state or symbol to use, whether it counts in the menu bar like busy, and how to detect it reliably (subagents map from SubagentStart/SubagentStop vs Stop ordering, background agents vs foreground ones, stale subagent entries when SubagentStop is missed).",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "hooks/state-hook.sh",
@@ -1637,7 +1637,7 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-10-25T21:41:09Z",
-      "updated_at": "2026-10-25T22:01:55Z",
+      "updated_at": "2026-10-25T22:10:30Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -1646,9 +1646,38 @@
           "kind": "answer",
           "text": "When the parent is waiting on running subagents, should it show as working (sparkle, counted as busy) or as a new 'waiting on subagents' state with its own symbol? → Its own 'waiting on subagents' icon.; Should a parent with background subagents still running count as busy in the menu bar, or stay idle since it is ready for your next prompt? → Counted as busy in the menu bar.",
           "by": "claude:c631bc24"
+        },
+        {
+          "at": "2026-10-25T22:10:30Z",
+          "kind": "outcome",
+          "text": "New 'subagents' state: hourglass row 'waiting on N subagents', counted as busy in the menu bar; idle parent or parent in Task/Agent tool; interrupt and waiting win; C5 covers missed SubagentStop",
+          "by": "claude:c631bc24"
         }
       ],
       "started_at": "2026-10-25T22:01:55Z",
+      "started_by": "claude:c631bc24",
+      "commit": "1199c28048433d3d10a5cac11ce0d8850d58d021",
+      "completed_at": "2026-10-25T22:10:30Z",
+      "completed_by": "claude:c631bc24"
+    },
+    {
+      "id": "T-046",
+      "name": "Deepen the future architecture doc: tech options for B and C",
+      "phase": 5,
+      "type": "docs",
+      "description": "Extend doc/design/future-architecture.md with a detailed analysis of option B (standalone app) and C (atm integration): concrete tech options (Swift/SwiftUI MenuBarExtra vs AppKit NSStatusItem vs Tauri/Electron/Go), how the hooks and checks move (shell+jq vs a Swift core), whether shell is maintainable by humans, and an intermediate option that eases moving to B or C later (e.g. a Swift core CLI behind the SwiftBar plugin). Record the user's answers: no user base yet, not targeting SwiftBar users (standalone preferred), Apple Developer account is fine, calling atm from outside is fine, notifications are in scope. Update the recommendation and open questions.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "in_progress",
+      "dependencies": [],
+      "files": [
+        "doc/design/future-architecture.md"
+      ],
+      "created_at": "2026-10-25T22:17:03Z",
+      "updated_at": "2026-10-25T22:17:04Z",
+      "created_by": "claude:c631bc24",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T22:17:04Z",
       "started_by": "claude:c631bc24"
     }
   ]
