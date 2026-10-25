@@ -128,6 +128,18 @@ ours_count() { jq "[.hooks[]?[]?.hooks[]? | select(.command | $OURS)] | length" 
   [ ! -e "$CLAUDE_STATUSBAR_STATE_DIR" ]
 }
 
+@test "uninstall removes the start-at-login item" {
+  item="$HOME/Library/LaunchAgents/swiftbar-claudecode-minimal.start-swiftbar.plist"
+  other="$HOME/Library/LaunchAgents/com.example.other.plist"
+  mkdir -p "$HOME/Library/LaunchAgents"
+  printf 'x' > "$item"
+  printf 'x' > "$other"
+  run "$REPO_ROOT/uninstall.sh" < /dev/null
+  [ "$status" -eq 0 ]
+  [ ! -e "$item" ]
+  [ -e "$other" ]
+}
+
 @test "uninstall twice is harmless" {
   run "$REPO_ROOT/install.sh"
   run "$REPO_ROOT/uninstall.sh" < /dev/null

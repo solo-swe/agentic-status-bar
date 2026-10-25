@@ -117,9 +117,20 @@ Settings live in `~/.config/swiftbar-claudecode-minimal/config` (`key=value`). T
 | `stale_minutes`                                                   | `30`                                    | Minutes without activity before a busy session shows `?`; `0` = off      |
 | `use_registry`                                                    | `1`                                     | Use Claude Code's session registry when it is newer                      |
 | `instant_refresh`                                                 | `1`                                     | Hooks trigger an immediate SwiftBar refresh                              |
-| `icon`                                                            | `sparkle`                               | SF Symbol name for the busy and empty menu-bar icon                      |
+| `theme`                                                           | `default`                               | `default`, `monochrome` or `high_contrast`; also under **Settings… → Theme** |
+| `icon_<state>`, `color_<state>`                                   | from the theme                          | Override one state's SF Symbol name, and its `#RRGGBB` color or `light,dark` pair. States: `waiting`, `idle`, `uncertain`, `busy`, `muted`, `none`, `warning` |
+| `icon`                                                            | from the theme                          | Older shortcut: SF Symbol for both the busy and empty icon               |
 | `store_prompt_preview`                                            | `1`                                     | Keep an 80-character prompt preview for row titles                       |
 | `state_dir`                                                       | `~/.claude/swiftbar-claudecode-minimal` | Where hooks write state files                                            |
+
+For example, to show idle sessions as a blue moon:
+
+```
+icon_idle=moon.zzz
+color_idle=#0040DD,#64D2FF
+```
+
+**Settings… → Start SwiftBar at login** adds a login item (`~/Library/LaunchAgents/swiftbar-claudecode-minimal.start-swiftbar.plist`) that opens SwiftBar in the background when you log in; clicking it again removes it. It takes effect at your next login and doesn't touch SwiftBar's own "Launch at login" preference, so you don't need both. macOS may show a "Background item added" notice the first time.
 
 ## Troubleshooting
 

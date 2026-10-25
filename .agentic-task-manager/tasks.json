@@ -1527,7 +1527,7 @@
       "description": "The zzz, exclamation, question-mark and bell.slash symbols render without their state color in the menu bar (and possibly in rows), although the plugin sends sfcolor. Find out how SwiftBar 2.x colors SF Symbols (sfcolor vs sfconfig with renderingMode Palette/Hierarchical, template images in the status item), make every state symbol show its light/dark color in both the menu bar and the dropdown rows, verify live in light and dark mode, and update tests and the README icon legend.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "swiftbar/swiftbar-claudecode-minimal.5s.sh",
@@ -1535,11 +1535,22 @@
         "README.md"
       ],
       "created_at": "2026-10-25T21:22:51Z",
-      "updated_at": "2026-10-25T21:36:54Z",
+      "updated_at": "2026-10-25T21:42:59Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T21:36:54Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "2bbfa68a6a7246d8f3c4efad50152ed48e9336c7",
+      "completed_at": "2026-10-25T21:42:59Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T21:42:59Z",
+          "kind": "outcome",
+          "text": "SwiftBar colors only inline :symbol: text, not sfimage; menu bar and rows now use inline symbols with sfcolor; verified colored zzz in dark menu bar",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-043",
@@ -1549,7 +1560,7 @@
       "description": "Extend the dropdown's Settings submenu: (1) a 'Start automatically' toggle that makes the status bar launch at login (find out what is possible from a plugin: SwiftBar's own launch-at-login setting, a LaunchAgent, or opening System Settings > Login Items; fail safe and say which it controls); (2) a Theme submenu to pick the icon and color for each state (waiting, idle, uncertain, busy, muted, none), with a few built-in themes (e.g. default, monochrome, high contrast) plus per-state overrides stored in the config file (validated: SF Symbol names and #RRGGBB or light,dark pairs only). Menu bar and rows use the chosen theme. Tests, README config table and PRD.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-042"
       ],
@@ -1561,9 +1572,11 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-10-25T21:22:52Z",
-      "updated_at": "2026-10-25T21:22:52Z",
+      "updated_at": "2026-10-25T21:43:02Z",
       "created_by": "claude:c631bc24",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T21:43:02Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-044",

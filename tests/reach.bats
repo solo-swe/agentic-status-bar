@@ -261,8 +261,65 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
   run PLUGIN reveal-config
   [ "$status" -eq 0 ]
   grep -q '^stale_minutes=30$' "$CLAUDE_STATUSBAR_CONFIG"
-  grep -q '^icon=sparkle$' "$CLAUDE_STATUSBAR_CONFIG"
+  grep -q '^theme=default$' "$CLAUDE_STATUSBAR_CONFIG"
+  grep -q '^#   color_idle=#B25000,#FFD60A$' "$CLAUDE_STATUSBAR_CONFIG"
   [ "$(stub_calls open)" = "-R $CLAUDE_STATUSBAR_CONFIG" ]
+}
+
+# --- Themes ---------------------------------------------------------------
+
+@test "the Theme submenu lists the themes with the current one checked" {
+  run PLUGIN
+  [[ "$output" == *$'\n--Theme\n'* ]]
+  [[ "$output" == *"----Default | bash=\""*"param1=set param2=theme param3=default terminal=false refresh=true checked=true"* ]]
+  [[ "$output" == *"----Monochrome | bash=\""*"param3=monochrome terminal=false refresh=true"$'\n'* ]]
+  [[ "$output" == *"----High contrast | bash=\""*"param3=high_contrast terminal=false refresh=true"$'\n'* ]]
+  [[ "$output" == *"----Customize icons and colors in the config file… | bash=\""*"param1=reveal-config"* ]]
+}
+
+@test "set theme switches the menu-bar and row icons and colors" {
+  add_state s1 '{"state":"idle","cwd":"/x/p"}'
+  run PLUGIN set theme high_contrast
+  grep -q '^theme=high_contrast$' "$CLAUDE_STATUSBAR_CONFIG"
+  run PLUGIN
+  [ "${lines[0]}" = ":moon.zzz.fill: 1 | sfcolor=#C93400,#FFD60A color=#C93400,#FFD60A" ]
+  [[ "$output" == *":moon.zzz.fill: p "*"sfcolor=#C93400,#FFD60A"* ]]
+  [[ "$output" == *"param3=high_contrast terminal=false refresh=true checked=true"* ]]
+  run PLUGIN set theme fancy
+  grep -q '^theme=high_contrast$' "$CLAUDE_STATUSBAR_CONFIG"
+}
+
+@test "an unknown theme in the config falls back to the default" {
+  printf 'theme=nope\n' > "$CLAUDE_STATUSBAR_CONFIG"
+  add_state s1 '{"state":"idle"}'
+  run PLUGIN
+  [ "${lines[0]}" = ":zzz: 1 | sfcolor=#B25000,#FFD60A color=#B25000,#FFD60A" ]
+}
+
+@test "per-state icon and color overrides win over the theme" {
+  printf 'theme=monochrome\nicon_idle=moon.zzz\ncolor_idle=#112233,#445566\n' > "$CLAUDE_STATUSBAR_CONFIG"
+  add_state s1 '{"state":"idle","cwd":"/x/p"}'
+  run PLUGIN
+  [ "${lines[0]}" = ":moon.zzz: 1 | sfcolor=#112233,#445566 color=#112233,#445566" ]
+  [[ "$output" == *":moon.zzz: p "*"sfcolor=#112233,#445566"* ]]
+}
+
+# --- Start at login -------------------------------------------------------
+
+@test "Start SwiftBar at login adds and removes a login item" {
+  item="$HOME/Library/LaunchAgents/swiftbar-claudecode-minimal.start-swiftbar.plist"
+  run PLUGIN
+  [[ "$output" == *"--Start SwiftBar at login | bash=\""*"param1=login terminal=false refresh=true"$'\n'* ]]
+  run PLUGIN login
+  [ "$status" -eq 0 ]
+  plutil -lint "$item"
+  [ "$(plutil -extract ProgramArguments raw -o - "$item" | head -1)" != "" ]
+  [ "$(/usr/libexec/PlistBuddy -c 'Print :ProgramArguments:3' "$item")" = com.ameba.SwiftBar ]
+  [ "$(/usr/libexec/PlistBuddy -c 'Print :RunAtLoad' "$item")" = true ]
+  run PLUGIN
+  [[ "$output" == *"param1=login terminal=false refresh=true checked=true"* ]]
+  run PLUGIN login
+  [ ! -e "$item" ]
 }
 
 @test "reveal-config keeps an existing config" {

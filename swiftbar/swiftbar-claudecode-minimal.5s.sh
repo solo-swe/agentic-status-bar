@@ -75,16 +75,37 @@ read_transcripts() {
 # Seconds `herdr agent list` may take before titles are skipped for this refresh.
 HERDR_LIST_TIMEOUT=1
 
-# Menu-bar colors as light,dark pairs.
-COLORS='{
-  "waiting": "#D70015,#FF453A",
-  "idle": "#B25000,#FFD60A",
-  "uncertain": "#8E8E93,#98989D",
-  "busy": "#6E6E73,#AEAEB2",
-  "none": "#C7C7CC,#48484A",
-  "muted": "#8E8E93,#98989D",
-  "warning": "#B25000,#FFD60A"
+# Built-in themes: an SF Symbol and a light,dark color pair per menu-bar state.
+# The config's theme key picks one; icon_<state> and color_<state> override it.
+THEMES='{
+  "default": {
+    "icons": {"waiting": "exclamationmark.circle.fill", "idle": "zzz", "uncertain": "questionmark.circle",
+              "busy": "sparkle", "muted": "bell.slash", "none": "sparkle", "warning": "exclamationmark.triangle"},
+    "colors": {"waiting": "#D70015,#FF453A", "idle": "#B25000,#FFD60A", "uncertain": "#8E8E93,#98989D",
+               "busy": "#6E6E73,#AEAEB2", "muted": "#8E8E93,#98989D", "none": "#C7C7CC,#48484A",
+               "warning": "#B25000,#FFD60A"}
+  },
+  "monochrome": {
+    "icons": {"waiting": "exclamationmark.circle.fill", "idle": "zzz", "uncertain": "questionmark.circle",
+              "busy": "sparkle", "muted": "bell.slash", "none": "sparkle", "warning": "exclamationmark.triangle"},
+    "colors": {"waiting": "#1D1D1F,#F5F5F7", "idle": "#1D1D1F,#F5F5F7", "uncertain": "#6E6E73,#AEAEB2",
+               "busy": "#6E6E73,#AEAEB2", "muted": "#8E8E93,#98989D", "none": "#C7C7CC,#48484A",
+               "warning": "#1D1D1F,#F5F5F7"}
+  },
+  "high_contrast": {
+    "icons": {"waiting": "exclamationmark.octagon.fill", "idle": "moon.zzz.fill", "uncertain": "questionmark.circle.fill",
+              "busy": "bolt.fill", "muted": "bell.slash.fill", "none": "circle.dotted", "warning": "exclamationmark.triangle.fill"},
+    "colors": {"waiting": "#FF0000,#FF453A", "idle": "#C93400,#FFD60A", "uncertain": "#5856D6,#BF5AF2",
+               "busy": "#000000,#FFFFFF", "muted": "#636366,#AEAEB2", "none": "#8E8E93,#636366",
+               "warning": "#C93400,#FFD60A"}
+  }
 }'
+
+# Where "Start SwiftBar at login" puts its login item.
+LOGIN_ITEM_LABEL=swiftbar-claudecode-minimal.start-swiftbar
+login_item_file() {
+  printf '%s\n' "$HOME/Library/LaunchAgents/$LOGIN_ITEM_LABEL.plist"
+}
 
 # Muted projects, in the state dir: {cwd: {until, at, today}} with epoch ms.
 # Not a .json file, so it is never read as a session.
@@ -265,13 +286,13 @@ HEADER_JQ='
   def title($text; $symbol; $color):
     ":\($symbol):\(if $text == "" then "" else " \($text)" end) | sfcolor=\($color) color=\($color)";
 
-  if .invalid > 0 then title(.sessions | length; "exclamationmark.triangle"; $c.warning)
-  elif count("waiting") > 0 then title(count("waiting"); "exclamationmark.circle.fill"; $c.waiting)
-  elif count("idle") > 0 then title(count("idle"); "zzz"; $c.idle)
-  elif count("uncertain") > 0 then title(count("uncertain"); "questionmark.circle"; $c.uncertain)
-  elif ($loud | length) > 0 then title($loud | length; $icon; $c.busy)
-  elif (.sessions | length) > 0 then title(""; "bell.slash"; $c.muted)
-  else title(""; $icon; $c.none)
+  if .invalid > 0 then title(.sessions | length; $sym.warning; $c.warning)
+  elif count("waiting") > 0 then title(count("waiting"); $sym.waiting; $c.waiting)
+  elif count("idle") > 0 then title(count("idle"); $sym.idle; $c.idle)
+  elif count("uncertain") > 0 then title(count("uncertain"); $sym.uncertain; $c.uncertain)
+  elif ($loud | length) > 0 then title($loud | length; $sym.busy; $c.busy)
+  elif (.sessions | length) > 0 then title(""; $sym.muted; $c.muted)
+  else title(""; $sym.none; $c.none)
   end
 '
 
@@ -280,9 +301,9 @@ ROWS_JQ='
   def rank: if .muted then 5 else {waiting: 0, idle: 1, uncertain: 2, busy: 3}[.shown] // 4 end;
   # The same symbol and color the menu bar uses for this state: [symbol, color].
   def state_icon:
-    if .muted then ["bell.slash", $c.muted] else
-      {waiting: ["exclamationmark.circle.fill", $c.waiting], idle: ["zzz", $c.idle],
-       uncertain: ["questionmark.circle", $c.uncertain]}[.shown] // [$icon, $c.busy] end;
+    (if .muted then "muted" elif .shown == "waiting" or .shown == "idle" or .shown == "uncertain" then .shown
+     else "busy" end) as $st
+    | [$sym[$st], $c[$st]];
   def word:
     if .shown == "waiting" then (if .reason == "question" then "question" else "permission" end)
     elif .shown == "idle" then "idle"
@@ -352,6 +373,8 @@ FOOTER_JQ='
     "--\($text)" + run("param1=toggle param2=\($key)") + check($s[$key] == 1);
   def stale_option($text; $minutes):
     "----\($text)" + run("param1=set param2=stale_minutes param3=\($minutes)") + check($s.stale_minutes == $minutes);
+  def theme_option($text; $name):
+    "----\($text)" + run("param1=set param2=theme param3=\($name)") + check($s.theme == $name);
 
   (if .activeMutes > 0 then "Unmute all projects" + run("param1=unmute-all") else empty end),
   "Show | color=gray",
@@ -360,6 +383,13 @@ FOOTER_JQ='
   toggle("Subagents"; "show_subagents"),
   toggle("IDE / Desktop"; "show_ide"),
   "Settings…",
+  "--Start SwiftBar at login" + run("param1=login") + check($s.start_at_login),
+  "--Theme",
+  theme_option("Default"; "default"),
+  theme_option("Monochrome"; "monochrome"),
+  theme_option("High contrast"; "high_contrast"),
+  "-------",
+  "----Customize icons and colors in the config file…" + run("param1=reveal-config"),
   "--Mark busy sessions as uncertain after",
   stale_option("10 minutes"; 10),
   stale_option("30 minutes"; 30),
@@ -376,6 +406,11 @@ FOOTER_JQ='
 REFRESH_JQ='
   (now * 1000 | floor) as $now
   | ((now | floor) as $n | ($n | localtime | mktime) - $n) as $tzoffset
+  # The theme, then the legacy icon key (busy and empty states), then per-state overrides.
+  | ($themes[$theme] // $themes.default) as $t
+  | def set_only: with_entries(select(.value != ""));
+  ($t.icons + (if $icon != "" then {busy: $icon, none: $icon} else {} end) + ($over.icons | set_only)) as $sym
+  | ($t.colors + ($over.colors | set_only)) as $c
   | '"$PARSE_JQ"'
   ($ps | procs) as $P
   | ($registry | parse_registry) as $reg
@@ -410,6 +445,20 @@ render_jq_missing() {
 # bool VALUE — "true" for 1, else "false".
 bool() {
   if [ "$1" = 1 ]; then echo true; else echo false; fi
+}
+
+# theme_overrides — the icon_<state> and color_<state> config values as
+# {"icons": {...}, "colors": {...}}. load_config only lets through values
+# without quotes or backslashes, so they can be printed into JSON as is.
+theme_overrides() {
+  _icons=""
+  _colors=""
+  for _st in $CA_THEME_STATES; do
+    eval "_i=\$cfg_icon_$_st _c=\$cfg_color_$_st"
+    _icons="$_icons${_icons:+,}\"$_st\":\"$_i\""
+    _colors="$_colors${_colors:+,}\"$_st\":\"$_c\""
+  done
+  printf '{"icons":{%s},"colors":{%s}}' "$_icons" "$_colors"
 }
 
 refresh() {
@@ -464,9 +513,11 @@ refresh() {
     --argjson f "$(printf '{"interactive":%s,"headless":%s,"subagents":%s,"ide":%s}' \
       "$(bool "$cfg_show_interactive")" "$(bool "$cfg_show_headless")" \
       "$(bool "$cfg_show_subagents")" "$(bool "$cfg_show_ide")")" \
-    --argjson s "$(printf '{"stale_minutes":%s,"instant_refresh":%s,"use_registry":%s,"store_prompt_preview":%s}' \
-      "$cfg_stale_minutes" "$cfg_instant_refresh" "$cfg_use_registry" "$cfg_store_prompt_preview")" \
-    --arg icon "$cfg_icon" --argjson c "$COLORS" --argjson width "$LABEL_WIDTH" \
+    --argjson s "$(printf '{"stale_minutes":%s,"instant_refresh":%s,"use_registry":%s,"store_prompt_preview":%s,"theme":"%s","start_at_login":%s}' \
+      "$cfg_stale_minutes" "$cfg_instant_refresh" "$cfg_use_registry" "$cfg_store_prompt_preview" \
+      "$cfg_theme" "$([ -f "$(login_item_file)" ] && echo true || echo false)")" \
+    --arg icon "$cfg_icon" --argjson themes "$THEMES" --arg theme "$cfg_theme" \
+    --argjson over "$(theme_overrides)" --argjson width "$LABEL_WIDTH" \
     --arg plugin "$plugin_path" --argjson herdr "$([ -n "$_herdr" ] && echo true || echo false)" \
     "$REFRESH_JQ" |
     while IFS= read -r _line; do
@@ -547,6 +598,37 @@ mute_project() {
   update_mutes "$_filter" --arg cwd "$_cwd" "$@"
 }
 
+# toggle_login_item — adds or removes a login item that opens SwiftBar in the
+# background at login. It takes effect at the next login and never starts or
+# stops anything now; SwiftBar's own "Launch at login" setting is left alone.
+toggle_login_item() {
+  _item="$(login_item_file)"
+  if [ -f "$_item" ]; then
+    rm -f "$_item"
+    return 0
+  fi
+  mkdir -p "${_item%/*}" || return 0
+  atomic_write "$_item" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>$LOGIN_ITEM_LABEL</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/open</string>
+    <string>-g</string>
+    <string>-b</string>
+    <string>com.ameba.SwiftBar</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>
+EOF
+}
+
 # write_default_config — a config file with every key at its current value.
 write_default_config() {
   cat <<EOF
@@ -558,9 +640,22 @@ show_ide=$cfg_show_ide
 stale_minutes=$cfg_stale_minutes
 use_registry=$cfg_use_registry
 instant_refresh=$cfg_instant_refresh
-icon=$cfg_icon
 store_prompt_preview=$cfg_store_prompt_preview
+
+# Theme: default, monochrome or high_contrast.
+theme=$cfg_theme
+# Override the theme for one state (waiting, idle, uncertain, busy, muted, none,
+# warning) with an SF Symbol name and a #RRGGBB color or a light,dark pair, e.g.
+#   icon_idle=moon.zzz
+#   color_idle=#B25000,#FFD60A
 EOF
+  for _st in $CA_THEME_STATES; do
+    eval "_i=\$cfg_icon_$_st _c=\$cfg_color_$_st"
+    [ -n "$_i" ] && printf 'icon_%s=%s\n' "$_st" "$_i"
+    [ -n "$_c" ] && printf 'color_%s=%s\n' "$_st" "$_c"
+  done
+  [ -n "$cfg_icon" ] && printf 'icon=%s\n' "$cfg_icon"
+  return 0
 }
 
 # run_action ACTION SESSION_ID — a menu action.
@@ -583,12 +678,16 @@ run_action() {
       if [ "$_value" = 1 ]; then set_config "$2" 0; else set_config "$2" 1; fi
       ;;
     set)
-      # Only the stale threshold is set to a value, and only to the menu's choices.
+      # Only the stale threshold and the theme are set to a value, and only to the menu's choices.
       case "$2=$3" in
-        stale_minutes=0 | stale_minutes=10 | stale_minutes=30 | stale_minutes=60)
+        stale_minutes=0 | stale_minutes=10 | stale_minutes=30 | stale_minutes=60 | \
+          theme=default | theme=monochrome | theme=high_contrast)
           set_config "$2" "$3"
           ;;
       esac
+      ;;
+    login)
+      toggle_login_item
       ;;
     reveal-config)
       _config="$(ca_config_file)"

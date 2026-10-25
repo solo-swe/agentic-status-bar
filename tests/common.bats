@@ -18,9 +18,36 @@ teardown() { common_teardown; }
   [ "$cfg_stale_minutes" = 30 ]
   [ "$cfg_use_registry" = 1 ]
   [ "$cfg_instant_refresh" = 1 ]
-  [ "$cfg_icon" = sparkle ]
+  [ -z "$cfg_icon" ]
   [ "$cfg_store_prompt_preview" = 1 ]
   [ "$cfg_state_dir" = "$HOME/.claude/swiftbar-claudecode-minimal" ]
+  [ "$cfg_theme" = default ]
+  [ -z "$cfg_icon_idle" ]
+  [ -z "$cfg_color_idle" ]
+}
+
+@test "color keys take #RRGGBB or a light,dark pair, nothing else" {
+  cat > "$CLAUDE_STATUSBAR_CONFIG" <<'EOF'
+color_idle=#123abc,#FFFFFF
+color_busy=#00FF00
+color_waiting=red
+color_muted=#12345
+color_none=#123456;touch x
+icon_idle=moon.zzz
+theme=high_contrast
+EOF
+  load_config
+  [ "$cfg_color_idle" = "#123abc,#FFFFFF" ]
+  [ "$cfg_color_busy" = "#00FF00" ]
+  [ -z "$cfg_color_waiting" ]
+  [ -z "$cfg_color_muted" ]
+  [ -z "$cfg_color_none" ]
+  [ "$cfg_icon_idle" = moon.zzz ]
+  [ "$cfg_theme" = high_contrast ]
+  run set_config color_idle 'red'
+  [ "$status" -ne 0 ]
+  set_config color_idle '#000000,#FFFFFF'
+  grep -q '^color_idle=#000000,#FFFFFF$' "$CLAUDE_STATUSBAR_CONFIG"
 }
 
 @test "load_config reads overrides from the config file" {
@@ -50,7 +77,7 @@ EOF
   [ ! -e "$TEST_TMP/pwned" ]
   [ ! -e "$TEST_TMP/pwned2" ]
   [ ! -e "$TEST_TMP/pwned3" ]
-  [ "$cfg_icon" = sparkle ]
+  [ -z "$cfg_icon" ]
   [ "$cfg_stale_minutes" = 30 ]
   [ "$cfg_use_registry" = 1 ]
   [ -z "${cfg_evil:-}" ]

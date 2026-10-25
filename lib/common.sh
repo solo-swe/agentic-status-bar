@@ -4,7 +4,13 @@
 #
 # Config values are exposed as cfg_<key> variables after load_config.
 
-CA_CONFIG_KEYS="show_interactive show_headless show_subagents show_ide stale_minutes use_registry instant_refresh icon store_prompt_preview state_dir"
+# Menu-bar states that a theme gives an icon and a color; icon_<state> and
+# color_<state> override the theme for one state.
+CA_THEME_STATES="waiting idle uncertain busy muted none warning"
+
+CA_CONFIG_KEYS="show_interactive show_headless show_subagents show_ide stale_minutes use_registry instant_refresh icon store_prompt_preview state_dir theme"
+CA_CONFIG_KEYS="$CA_CONFIG_KEYS icon_waiting icon_idle icon_uncertain icon_busy icon_muted icon_none icon_warning"
+CA_CONFIG_KEYS="$CA_CONFIG_KEYS color_waiting color_idle color_uncertain color_busy color_muted color_none color_warning"
 
 ca_config_file() {
   printf '%s\n' "${CLAUDE_STATUSBAR_CONFIG:-$HOME/.config/swiftbar-claudecode-minimal/config}"
@@ -18,9 +24,20 @@ ca_is_key() {
   return 1
 }
 
-# ca_valid_value VALUE — values are plain words or paths; anything with shell
-# metacharacters is rejected.
+# ca_valid_value VALUE [KEY] — values are plain words or paths; anything with
+# shell metacharacters is rejected. Colors (color_*) are #RRGGBB, or a
+# light,dark pair of them.
 ca_valid_value() {
+  case "$2" in
+    color_*)
+      _ca_hex='#[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]'
+      # shellcheck disable=SC2254 # the pattern is meant to expand
+      case "$1" in
+        '' | $_ca_hex | $_ca_hex,$_ca_hex) return 0 ;;
+      esac
+      return 1
+      ;;
+  esac
   case "$1" in
     *[!A-Za-z0-9_./~-]*) return 1 ;;
   esac
@@ -45,9 +62,12 @@ load_config() {
   cfg_stale_minutes=30
   cfg_use_registry=1
   cfg_instant_refresh=1
-  cfg_icon=sparkle
+  cfg_icon=
   cfg_store_prompt_preview=1
   cfg_state_dir="$HOME/.claude/swiftbar-claudecode-minimal"
+  cfg_theme=default
+  cfg_icon_waiting='' cfg_icon_idle='' cfg_icon_uncertain='' cfg_icon_busy='' cfg_icon_muted='' cfg_icon_none='' cfg_icon_warning=''
+  cfg_color_waiting='' cfg_color_idle='' cfg_color_uncertain='' cfg_color_busy='' cfg_color_muted='' cfg_color_none='' cfg_color_warning=''
 
   _ca_file="$(ca_config_file)"
   if [ -r "$_ca_file" ]; then
@@ -56,7 +76,7 @@ load_config() {
         ''|'#'*) continue ;;
       esac
       ca_is_key "$_ca_key" || continue
-      ca_valid_value "$_ca_value" || continue
+      ca_valid_value "$_ca_value" "$_ca_key" || continue
       # The key is from the fixed list above, so this eval only assigns.
       eval "cfg_$_ca_key=\$_ca_value"
     done < "$_ca_file"
@@ -72,7 +92,7 @@ load_config() {
 # set_config KEY VALUE — sets one key in the config file, keeping the others.
 set_config() {
   ca_is_key "$1" || return 1
-  ca_valid_value "$2" || return 1
+  ca_valid_value "$2" "$1" || return 1
   _ca_file="$(ca_config_file)"
   mkdir -p "$(dirname "$_ca_file")" || return 1
   {

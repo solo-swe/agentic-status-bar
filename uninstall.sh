@@ -68,6 +68,13 @@ if [ -n "$plugin_dir" ] && [ -L "$link" ] && [ "$(readlink "$link")" = "$repo/sw
   echo "Removed $link"
 fi
 
+# The login item the menu's "Start SwiftBar at login" adds.
+login_item="$HOME/Library/LaunchAgents/swiftbar-claudecode-minimal.start-swiftbar.plist"
+if [ -f "$login_item" ]; then
+  rm -f "$login_item"
+  echo "Removed $login_item"
+fi
+
 # --- State and config -----------------------------------------------------
 
 load_config
