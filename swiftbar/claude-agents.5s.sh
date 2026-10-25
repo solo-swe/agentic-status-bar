@@ -3,7 +3,7 @@
 # (SC2016: jq programs use $variables inside single quotes on purpose.)
 #
 # <xbar.title>Claude Agents</xbar.title>
-# <xbar.version>v0.1.0</xbar.version>
+# <xbar.version>v1.0.0-rc.1</xbar.version>
 # <xbar.author>Hakan Serce</xbar.author>
 # <xbar.desc>Shows in one menu-bar item whether any running Claude Code agent needs you.</xbar.desc>
 # <xbar.dependencies>jq</xbar.dependencies>
@@ -14,70 +14,117 @@
 #
 # Reads the per-session state files written by hooks/state-hook.sh and renders
 # them for SwiftBar. Run with arguments, it performs a menu action instead.
+#
+# A refresh gathers raw inputs with a handful of processes (awk, stat, tail, ps)
+# and does all parsing, checks and rendering in one jq program.
 
 # Highest state file version this plugin understands.
 MAX_STATE_VERSION=1
 
-# Resolve our own directory, following symlinks (SwiftBar runs a symlink).
+# Resolve our own path, following symlinks (SwiftBar runs a symlink).
 self="$0"
 while [ -L "$self" ]; do
   link="$(readlink "$self")"
   case "$link" in
     /*) self="$link" ;;
-    *) self="$(dirname "$self")/$link" ;;
+    *) self="${self%/*}/$link" ;;
   esac
 done
-plugin_dir="$(cd "$(dirname "$self")" && pwd)" || exit 1
-plugin_path="$plugin_dir/$(basename "$self")"
+case "$self" in
+  /*) plugin_path="$self" ;;
+  *) plugin_path="$PWD/$self" ;;
+esac
+plugin_dir="${plugin_path%/*}"
 # shellcheck source=../lib/common.sh
 . "$plugin_dir/../lib/common.sh" || exit 1
 
-# load_sessions — prints {"sessions": [...], "invalid": N} for all state files.
-# Files that don't parse, aren't objects or have an unknown version count as invalid.
-load_sessions() {
-  set -- "$cfg_state_dir"/*.json
-  if [ ! -e "$1" ]; then
-    printf '{"sessions":[],"invalid":0}'
-    return
-  fi
-  # One "path<TAB>content" line per file, so a file without a trailing newline
-  # can't run into the next one.
-  for _f in "$@"; do
-    printf '%s\t' "$_f"
-    tr -d '\n' < "$_f"
-    printf '\n'
-  done | "$JQ" -c -R -n --argjson maxv "$MAX_STATE_VERSION" '
-    [inputs | index("\t") as $i
-      | {file: .[0:$i], s: (.[$i + 1:] | try fromjson catch null)}]
+# join_files FILE... — one "path<TAB>content" line per file (newlines in a file
+# are dropped), so a file without a trailing newline can't run into the next one.
+join_files() {
+  [ -e "$1" ] || return 0
+  awk 'FNR == 1 { if (NR > 1) print ""; printf "%s\t", FILENAME } { printf "%s", $0 } END { if (NR > 0) print "" }' "$@" 2>/dev/null
+}
+
+# Bytes of each transcript the interrupt check reads.
+TRANSCRIPT_TAIL_BYTES=8192
+# Text Claude Code writes to the transcript when a turn is interrupted or a
+# permission is denied (see tests/fixtures/README.md).
+INTERRUPT_MARKER='[Request interrupted by user'
+
+# read_transcripts PATH... — for each transcript: "M<TAB>path<TAB>mtime" and one
+# "T<TAB>path<TAB>entry" per line of its last TRANSCRIPT_TAIL_BYTES. The first line
+# of a cut tail is dropped. One stat and one tail for all files.
+read_transcripts() {
+  [ "$#" -gt 0 ] || return 0
+  {
+    stat -f 'S %m %z %N' -- "$@" 2>/dev/null
+    # /dev/null makes tail print a header for every file, even a single one.
+    tail -c "$TRANSCRIPT_TAIL_BYTES" -- "$@" /dev/null 2>/dev/null
+  } | awk -v max="$TRANSCRIPT_TAIL_BYTES" '
+    !inblocks && /^S [0-9]+ [0-9]+ / {
+      p = $0; sub(/^S [0-9]+ [0-9]+ /, "", p)
+      size[p] = $3; print "M\t" p "\t" $2; next
+    }
+    /^==> .* <==$/ { inblocks = 1; cur = substr($0, 5, length($0) - 8); drop = (size[cur] + 0 > max); next }
+    cur == "" || cur == "/dev/null" || length($0) == 0 { next }
+    drop { drop = 0; next }
+    { print "T\t" cur "\t" $0 }
+  '
+}
+
+# Seconds `herdr agent list` may take before titles are skipped for this refresh.
+HERDR_LIST_TIMEOUT=1
+
+# Menu-bar colors as light,dark pairs.
+COLORS='{
+  "waiting": "#D70015,#FF453A",
+  "idle": "#B25000,#FFD60A",
+  "uncertain": "#8E8E93,#98989D",
+  "busy": "#6E6E73,#AEAEB2",
+  "none": "#C7C7CC,#48484A",
+  "warning": "#B25000,#FFD60A"
+}'
+
+# Width of the row label (project — title) before the state column.
+LABEL_WIDTH=48
+
+# Parsing the raw inputs.
+PARSE_JQ='
+  def raw_lines: split("\n") | map(select(length > 0));
+
+  # {"sessions": [...], "invalid": N}. Files that do not parse, are not objects
+  # or have an unknown version count as invalid.
+  def parse_sessions:
+    raw_lines
+    | map(index("\t") as $i | {file: .[0:$i], s: (.[$i + 1:] | try fromjson catch null)})
     | map(.ok = ((.s | type) == "object" and ((.s.v // 0) | type) == "number"
                  and .s.v >= 1 and .s.v <= $maxv))
     | {sessions: [.[] | select(.ok) | .s + {file: .file}],
-       invalid: ([.[] | select(.ok | not)] | length)}
-  '
-}
+       invalid: ([.[] | select(.ok | not)] | length)};
 
-# load_registry — prints Claude Code's session registry as {pid: entry}, or {}.
-# The registry (~/.claude/sessions/<pid>.json) is undocumented, so it's optional.
-load_registry() {
-  [ "$cfg_use_registry" = 1 ] || { printf '{}'; return; }
-  set -- "${CLAUDE_AGENTS_REGISTRY_DIR:-$HOME/.claude/sessions}"/*.json
-  [ -e "$1" ] || { printf '{}'; return; }
-  for _f in "$@"; do
-    tr -d '\n' < "$_f"
-    printf '\n'
-  done | "$JQ" -c -R -n '
-    [inputs | try fromjson catch null | select(type == "object" and .pid != null)]
-    | map({key: (.pid | tostring), value: .}) | from_entries
-  '
-}
+  # Claude Code'"'"'s session registry as {pid: entry}.
+  def parse_registry:
+    raw_lines
+    | map(index("\t") as $i | .[$i + 1:] | try fromjson catch null | select(type == "object" and .pid != null))
+    | map({key: (.pid | tostring), value: .}) | from_entries;
 
-# take_snapshot FILE — one process table per run: pid, ppid, lstart (5 words), comm.
-take_snapshot() {
-  ps -axo pid=,ppid=,lstart=,comm= > "$1" 2>/dev/null
-}
+  # {tails: {path: [entries]}, mtimes: {path: ms}} from read_transcripts.
+  def parse_transcripts:
+    reduce (raw_lines[] | split("\t")) as $p ({tails: {}, mtimes: {}};
+      if $p[0] == "M" then .mtimes[$p[1]] = (($p[2] | tonumber) * 1000)
+      elif $p[0] == "T" then
+        ($p[2:] | join("\t") | try fromjson catch null) as $e
+        | if $e == null then . else .tails[$p[1]] += [$e] end
+      else . end);
 
-# Process-table helpers shared by both check passes.
-PROCS_JQ='
+  # {claude session ID: terminal title} from `herdr agent list`.
+  def parse_titles:
+    try (fromjson
+         | [.result.agents[]? | select(.agent == "claude" and (.agent_session.value // "") != "")
+            | {key: .agent_session.value, value: (.terminal_title_stripped // "")}]
+         | from_entries)
+    catch {};
+
   def norm: gsub("\\s+"; " ") | ltrimstr(" ") | rtrimstr(" ");
 
   # pid -> {ppid, lstart, comm} from `ps -axo pid=,ppid=,lstart=,comm=`
@@ -92,18 +139,18 @@ PROCS_JQ='
 '
 
 # The checks, in order. Each session gets a display state (`shown`); dead ones
-# are marked and dropped. Checks never write state files.
+# are listed and dropped. Checks never write state files.
 CHECKS_JQ='
   # C1: the claude process must still exist and have the same start time.
-  def alive($P):
+  def alive:
     if .pid == null then true
     else $P[.pid | tostring] as $p
       | $p != null and (.procStart == null or ($p.lstart | norm) == (.procStart | norm))
     end;
 
   # C2: Claude Code'"'"'s own registry wins when it is newer than our state file.
-  def registry($R):
-    (if .pid == null then null else $R[.pid | tostring] end) as $r
+  def registry:
+    (if .pid == null then null else $reg[.pid | tostring] end) as $r
     | if $r == null or $r.sessionId != .sessionId then .
       else
         # A name the user gave the session (not one Claude Code derived).
@@ -119,21 +166,6 @@ CHECKS_JQ='
         | .reason = (if ($r.waitingFor // "" | test("permission")) then "permission" else "question" end)
       else . end;
 
-  ($ps | procs) as $P
-  | .sessions |= map(.shown = .state | .alive = alive($P))
-  | .dead = [.sessions[] | select(.alive | not) | .file]
-  | .sessions |= map(select(.alive) | del(.alive) | registry($reg))
-  | .registrySchemaIssue = any(.sessions[]; .registrySchema == false)
-'
-
-# Bytes of each transcript the interrupt check reads.
-TRANSCRIPT_TAIL_BYTES=8192
-# Text Claude Code writes to the transcript when a turn is interrupted or a
-# permission is denied (see tests/fixtures/README.md).
-INTERRUPT_MARKER='[Request interrupted by user'
-
-# Checks that need each session's transcript tail, run after C1 and C2.
-LATE_CHECKS_JQ='
   # A prompt the user (or a background task) sent; not a tool result, meta
   # entry or interrupt marker.
   def prompt_text:
@@ -158,130 +190,46 @@ LATE_CHECKS_JQ='
 
   # C4: waiting, but a tool process started after the prompt: it was approved.
   # caffeinate is started by Claude Code at the beginning of every turn.
-  def approved_since($P):
+  def approved_since:
     (.pid | tostring) as $pid | (.shownSince // .stateSince // 0) as $since
     | [$P | to_entries[] | .value
        | select(.ppid == $pid and (.comm | split("/") | last) != "caffeinate")
        | (.lstart | lstart_ms) | select(. > $since)]
     | min;
 
-  ($ps | procs) as $P
-  | .sessions |= map(
-      if (.shown == "busy" or .shown == "waiting") and ($tails[.sessionId] != null)
-         and interrupted($tails[.sessionId])
-      then .shown = "idle" | .shownSince = .updatedAt
-      else . end
+  # C5: the latest sign of life: a hook write, a transcript write, a new child process.
+  def last_activity:
+    (.pid | tostring) as $pid
+    | [(.updatedAt // 0), (.shownSince // 0), ($mtimes[.transcriptPath // ""] // 0)]
+      + [$P | to_entries[] | .value | select(.ppid == $pid) | .lstart | lstart_ms]
+    | max;
+
+  .sessions |= map(.shown = .state | .alive = alive)
+  | .dead = [.sessions[] | select(.alive | not) | .file]
+  | .sessions |= map(select(.alive) | del(.alive) | registry
+      | ($tails[.transcriptPath // ""]) as $entries
+      | if (.shown == "busy" or .shown == "waiting") and $entries != null and interrupted($entries)
+        then .shown = "idle" | .shownSince = .updatedAt
+        else . end
       | if .shown == "waiting" and .pid != null then
-          approved_since($P) as $t
+          approved_since as $t
           | if $t != null then .shown = "busy" | .shownSince = $t else . end
         else . end
       | if .shown == "busy" and $stale > 0 then
-          last_activity($P) as $t
+          last_activity as $t
           | if ($now - $t) > ($stale * 60000) then .shown = "uncertain" | .shownSince = $t else . end
         else . end)
+  | .registrySchemaIssue = any(.sessions[]; .registrySchema == false)
 '
 
-# C5 helper, defined before the pipeline above uses it.
-LAST_ACTIVITY_JQ='
-  # C5: the latest sign of life: a hook write, a transcript write, a new child process.
-  def last_activity($P):
-    (.pid | tostring) as $pid
-    | [(.updatedAt // 0), (.shownSince // 0), ($mtimes[.sessionId] // 0)]
-      + [$P | to_entries[] | .value | select(.ppid == $pid) | .lstart | lstart_ms]
-    | max;
+# Hidden session kinds are left out of the rows and the menu-bar count.
+FILTERS_JQ='
+  # (Not `// true`: jq treats false as missing there.)
+  def shown_kind($kind):
+    {interactive: $f.interactive, headless: $f.headless, ide: $f.ide, desktop: $f.ide}[$kind]
+    | if . == null then true else . end;
+  .sessions |= map(select(shown_kind(.kind // "interactive")))
 '
-
-# tz_offset — seconds east of UTC right now (for converting ps start times).
-tz_offset() {
-  _z="$(date +%z)"
-  _sign="${_z%????}"
-  _hh="${_z#?}"
-  _hh="${_hh%??}"
-  _mm="${_z#???}"
-  _secs=$(( (${_hh#0} * 60 + ${_mm#0}) * 60 ))
-  if [ "$_sign" = "-" ]; then
-    echo "-$_secs"
-  else
-    echo "$_secs"
-  fi
-}
-
-# load_tails DATA — prints {sessionId: [transcript entries]} for sessions the
-# late checks look at, reading only the last TRANSCRIPT_TAIL_BYTES of each file.
-load_tails() {
-  printf '%s' "$1" | "$JQ" -r '
-    .sessions[] | select((.shown == "busy" or .shown == "waiting") and .transcriptPath)
-    | "\(.sessionId)\t\(.transcriptPath)"
-  ' | while IFS="$(printf '\t')" read -r _sid _path; do
-    [ -r "$_path" ] || continue
-    _size="$(wc -c < "$_path" | tr -d ' ')"
-    if [ "$_size" -gt "$TRANSCRIPT_TAIL_BYTES" ]; then
-      # The first line of the tail is usually cut off: drop it.
-      tail -c "$TRANSCRIPT_TAIL_BYTES" "$_path" | sed 1d
-    else
-      cat "$_path"
-    fi | while IFS= read -r _line || [ -n "$_line" ]; do
-      printf '%s\t%s\n' "$_sid" "$_line"
-    done
-  done | "$JQ" -c -R -n '
-    reduce (inputs | index("\t") as $i
-            | {sid: .[0:$i], e: (.[$i + 1:] | try fromjson catch null)}
-            | select(.e != null)) as $x
-      ({}; .[$x.sid] += [$x.e])
-  '
-}
-
-# load_mtimes DATA — prints {sessionId: transcript mtime in ms} for busy or
-# waiting sessions (C5 counts a transcript write as activity).
-load_mtimes() {
-  printf '%s' "$1" | "$JQ" -r '
-    .sessions[] | select((.shown == "busy" or .shown == "waiting") and .transcriptPath)
-    | "\(.sessionId)\t\(.transcriptPath)"
-  ' | while IFS="$(printf '\t')" read -r _sid _path; do
-    _m="$(stat -f %m "$_path" 2>/dev/null)" || continue
-    printf '%s\t%s\n' "$_sid" "$_m"
-  done | "$JQ" -c -R -n '
-    [inputs | split("\t") | {key: .[0], value: ((.[1] | tonumber) * 1000)}] | from_entries
-  '
-}
-
-# apply_checks DATA PS_FILE — runs the checks and prints the updated data.
-apply_checks() {
-  _tz="$(tz_offset)"
-  _early="$(printf '%s' "$1" | "$JQ" -c --rawfile ps "$2" --argjson tzoffset "$_tz" \
-    --argjson reg "$(load_registry)" "$PROCS_JQ$CHECKS_JQ")"
-  printf '%s' "$_early" | "$JQ" -c --rawfile ps "$2" --argjson tzoffset "$_tz" \
-    --argjson tails "$(load_tails "$_early")" --arg marker "$INTERRUPT_MARKER" \
-    --argjson mtimes "$(load_mtimes "$_early")" \
-    --argjson now "$(now_ms)" --argjson stale "$cfg_stale_minutes" \
-    "$PROCS_JQ$LAST_ACTIVITY_JQ$LATE_CHECKS_JQ"
-}
-
-# remove_dead DATA — deletes the state files of sessions found dead.
-remove_dead() {
-  printf '%s' "$1" | "$JQ" -r '.dead[]' | while IFS= read -r _f; do
-    case "$_f" in
-      "$cfg_state_dir"/*.json) rm -f "$_f" ;;
-    esac
-  done
-}
-
-render_jq_missing() {
-  echo "⚠︎ | sfimage=exclamationmark.triangle"
-  echo "---"
-  echo "claude-agents needs jq"
-  echo "Install it with: brew install jq | color=gray"
-}
-
-# Menu-bar colors as light,dark pairs.
-COLORS='{
-  "waiting": "#D70015,#FF453A",
-  "idle": "#B25000,#FFD60A",
-  "uncertain": "#8E8E93,#98989D",
-  "busy": "#6E6E73,#AEAEB2",
-  "none": "#C7C7CC,#48484A",
-  "warning": "#B25000,#FFD60A"
-}'
 
 # The menu-bar line: the most urgent state (waiting > idle > uncertain > busy)
 # and the number of sessions in it. Each state has its own symbol, so color is
@@ -299,9 +247,6 @@ HEADER_JQ='
   else title(""; $icon; $c.none)
   end
 '
-
-# Width of the row label (project — title) before the state column.
-LABEL_WIDTH=48
 
 # One row per session, most urgent first; within a state, longest in it first.
 ROWS_JQ='
@@ -355,39 +300,7 @@ ROWS_JQ='
     subagent_rows
 '
 
-# Seconds `herdr agent list` may take before titles are skipped for this refresh.
-HERDR_LIST_TIMEOUT=1
-
-# load_herdr_titles — prints {claude session ID: terminal title} from herdr, or {}.
-load_herdr_titles() {
-  _herdr="$(find_herdr)"
-  [ -n "$_herdr" ] || { printf '{}'; return; }
-  _out="$(mktemp "${TMPDIR:-/tmp}/claude-agents-herdr.XXXXXX")" || { printf '{}'; return; }
-  run_with_timeout "$HERDR_LIST_TIMEOUT" "$_herdr" agent list > "$_out" 2>/dev/null
-  _titles="$("$JQ" -c '
-    [.result.agents[]? | select(.agent == "claude" and (.agent_session.value // "") != "")
-     | {key: .agent_session.value, value: (.terminal_title_stripped // "")}]
-    | from_entries
-  ' "$_out" 2>/dev/null)"
-  rm -f "$_out"
-  # No output (herdr failed, timed out or printed nothing) means no titles.
-  case "$_titles" in
-    '{'*) printf '%s' "$_titles" ;;
-    *) printf '{}' ;;
-  esac
-}
-
-# render DATA — prints the SwiftBar menu for the loaded sessions.
-FILTERS_JQ='
-  # Hidden session kinds are left out of the rows and the menu-bar count.
-  # (Not `// true`: jq treats false as missing there.)
-  def shown_kind($kind):
-    {interactive: $f.interactive, headless: $f.headless, ide: $f.ide, desktop: $f.ide}[$kind]
-    | if . == null then true else . end;
-  .sessions |= map(select(shown_kind(.kind // "interactive")))
-'
-
-# The Show section: one checkmark item per filter key.
+# The Show section and the Settings submenu.
 FOOTER_JQ='
   def toggle($text; $key):
     "\($text) | bash=\"\($plugin)\" param1=toggle param2=\($key) terminal=false refresh=true"
@@ -416,40 +329,114 @@ FOOTER_JQ='
   "--Reveal config file" + run("param1=reveal-config")
 '
 
-# filters_json — the show_* config values as JSON booleans.
-filters_json() {
-  printf '{"interactive":%s,"headless":%s,"subagents":%s,"ide":%s}' \
-    "$([ "$cfg_show_interactive" = 1 ] && echo true || echo false)" \
-    "$([ "$cfg_show_headless" = 1 ] && echo true || echo false)" \
-    "$([ "$cfg_show_subagents" = 1 ] && echo true || echo false)" \
-    "$([ "$cfg_show_ide" = 1 ] && echo true || echo false)"
+# The whole refresh: parse, check, then print side-effect lines (##dead, ##schema)
+# for the shell, followed by the menu.
+REFRESH_JQ='
+  (now * 1000 | floor) as $now
+  | ((now | floor) as $n | ($n | localtime | mktime) - $n) as $tzoffset
+  | '"$PARSE_JQ"'
+  ($ps | procs) as $P
+  | ($registry | parse_registry) as $reg
+  | ($transcripts | parse_transcripts) as $T
+  | $T.tails as $tails
+  | $T.mtimes as $mtimes
+  | ($herdrList | parse_titles) as $titles
+  | ($sessions | parse_sessions)
+  | ('"$CHECKS_JQ"')
+  | ((.dead[] | "##dead\t\(.)"),
+     (if .registrySchemaIssue then "##schema" else empty end),
+     ('"$FILTERS_JQ"'
+      | ('"$HEADER_JQ"'),
+        "---",
+        (if .invalid > 0 then "\(.invalid) state file(s) could not be read | color=gray" else empty end),
+        (if (.sessions | length) == 0 then "No Claude Code sessions | color=gray" else empty end),
+        ('"$ROWS_JQ"'),
+        "---",
+        ('"$FOOTER_JQ"'),
+        "---",
+        "Refresh | refresh=true"))
+'
+
+render_jq_missing() {
+  echo "⚠︎ | sfimage=exclamationmark.triangle"
+  echo "---"
+  echo "claude-agents needs jq"
+  echo "Install it with: brew install jq | color=gray"
 }
 
-# settings_json — the settings the Settings submenu shows, as JSON.
-settings_json() {
-  printf '{"stale_minutes":%s,"instant_refresh":%s,"use_registry":%s,"store_prompt_preview":%s}' \
-    "$cfg_stale_minutes" "$cfg_instant_refresh" "$cfg_use_registry" "$cfg_store_prompt_preview"
+# bool VALUE — "true" for 1, else "false".
+bool() {
+  if [ "$1" = 1 ]; then echo true; else echo false; fi
 }
 
-render() {
-  _filters="$(filters_json)"
-  printf '%s' "$1" | "$JQ" -c --argjson f "$_filters" "$FILTERS_JQ" | "$JQ" -r \
-    --argjson f "$_filters" --argjson s "$(settings_json)" \
-    --arg icon "$cfg_icon" --argjson c "$COLORS" \
-    --argjson now "$(now_ms)" --argjson width "$LABEL_WIDTH" \
-    --arg plugin "$plugin_path" \
-    --argjson herdr "$(if [ -n "$(find_herdr)" ]; then echo true; else echo false; fi)" \
-    --argjson titles "$(load_herdr_titles)" \
-    "$HEADER_JQ"'
-    , "---"
-    , (if .invalid > 0 then "\(.invalid) state file(s) could not be read | color=gray" else empty end)
-    , (if (.sessions | length) == 0 then "No Claude Code sessions | color=gray" else empty end)
-    , ('"$ROWS_JQ"')
-    , "---"
-    , ('"$FOOTER_JQ"')
-    , "---"
-    , "Refresh | refresh=true"
-  '
+refresh() {
+  set -- "$cfg_state_dir"/*.json
+  _sessions="$(join_files "$@")"
+
+  # Transcripts of busy or waiting sessions (for C3 and C5).
+  _paths="$(printf '%s' "$_sessions" | "$JQ" -r -R '
+    index("\t") as $i | .[$i + 1:] | try fromjson catch null
+    | select(type == "object" and (.state == "busy" or .state == "waiting")
+             and (.transcriptPath | type) == "string" and .transcriptPath != "")
+    | .transcriptPath
+  ' 2>/dev/null)"
+  _transcripts=""
+  if [ -n "$_paths" ]; then
+    _ifs="$IFS"
+    IFS='
+'
+    set -f
+    # shellcheck disable=SC2086 # one path per line
+    set -- $_paths
+    set +f
+    IFS="$_ifs"
+    _transcripts="$(read_transcripts "$@")"
+  fi
+
+  _registry=""
+  if [ "$cfg_use_registry" = 1 ]; then
+    set -- "${CLAUDE_AGENTS_REGISTRY_DIR:-$HOME/.claude/sessions}"/*.json
+    _registry="$(join_files "$@")"
+  fi
+
+  _ps="$(ps -axo pid=,ppid=,lstart=,comm= 2>/dev/null)"
+
+  # herdr's output goes to a file: if herdr hangs and is killed, a child it left
+  # behind could keep a $(...) pipe open and stall the refresh.
+  _herdr="$(find_herdr)"
+  _herdr_file=/dev/null
+  if [ -n "$_herdr" ] && _herdr_file="$(mktemp "${TMPDIR:-/tmp}/claude-agents-herdr.XXXXXX")"; then
+    trap 'rm -f "$_herdr_file"' EXIT
+    run_with_timeout "$HERDR_LIST_TIMEOUT" "$_herdr" agent list > "$_herdr_file" 2>/dev/null
+  fi
+
+  "$JQ" -n -r \
+    --arg sessions "$_sessions" --arg transcripts "$_transcripts" \
+    --arg registry "$_registry" --arg ps "$_ps" --rawfile herdrList "$_herdr_file" \
+    --argjson maxv "$MAX_STATE_VERSION" --arg marker "$INTERRUPT_MARKER" \
+    --argjson stale "$cfg_stale_minutes" \
+    --argjson f "$(printf '{"interactive":%s,"headless":%s,"subagents":%s,"ide":%s}' \
+      "$(bool "$cfg_show_interactive")" "$(bool "$cfg_show_headless")" \
+      "$(bool "$cfg_show_subagents")" "$(bool "$cfg_show_ide")")" \
+    --argjson s "$(printf '{"stale_minutes":%s,"instant_refresh":%s,"use_registry":%s,"store_prompt_preview":%s}' \
+      "$cfg_stale_minutes" "$cfg_instant_refresh" "$cfg_use_registry" "$cfg_store_prompt_preview")" \
+    --arg icon "$cfg_icon" --argjson c "$COLORS" --argjson width "$LABEL_WIDTH" \
+    --arg plugin "$plugin_path" --argjson herdr "$([ -n "$_herdr" ] && echo true || echo false)" \
+    "$REFRESH_JQ" |
+    while IFS= read -r _line; do
+      case "$_line" in
+        "##dead	"*)
+          _f="${_line#*	}"
+          case "$_f" in
+            "$cfg_state_dir"/*.json) rm -f "$_f" ;;
+          esac
+          ;;
+        "##schema")
+          log_once registry-schema "Claude Code session registry has no 'status' field; registry override disabled for those sessions."
+          ;;
+        *) printf '%s\n' "$_line" ;;
+      esac
+    done
 }
 
 # session_field ID FILTER — prints a field from a session's state file.
@@ -566,16 +553,7 @@ main() {
     return 0
   fi
 
-  ps_file="$(mktemp "${TMPDIR:-/tmp}/claude-agents-ps.XXXXXX")" || return 1
-  trap 'rm -f "$ps_file"' EXIT
-  take_snapshot "$ps_file"
-
-  data="$(apply_checks "$(load_sessions)" "$ps_file")"
-  remove_dead "$data"
-  if [ "$(printf '%s' "$data" | "$JQ" -r '.registrySchemaIssue')" = true ]; then
-    log_once registry-schema "Claude Code session registry has no 'status' field; registry override disabled for those sessions."
-  fi
-  render "$data"
+  refresh
 }
 
 main "$@"

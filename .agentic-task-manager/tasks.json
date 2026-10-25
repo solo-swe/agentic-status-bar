@@ -1351,7 +1351,7 @@
         ".claude-plugin/plugin.json"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:39:01Z",
+      "updated_at": "2026-10-25T07:39:02Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:38:37Z",
       "started_by": "claude:c631bc24",
@@ -1364,7 +1364,8 @@
           "text": "marketplace.json (source ./), plugin.json 1.0.0-rc.1, manifest test. NOT verified live: /plugin marketplace add + install in a clean profile needs an interactive session — left for the user",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "5b0258eab2d1f28e7c8cc2e1772c00c0683fd0f6"
     },
     {
       "id": "T-037",
@@ -1377,7 +1378,7 @@
         "SuccessCriteria"
       ],
       "use_cases": [],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-025",
         "T-032"
@@ -1386,7 +1387,20 @@
         "tests/bench.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T07:47:54Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T07:39:02Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T07:47:54Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T07:47:54Z",
+          "kind": "outcome",
+          "text": "tests/bench.sh (via tests/run.sh --bench). Optimized: hook 52->19 ms (one jq parse + one jq write, jq now for ms), plugin 216->99 ms (awk joins, one stat+tail, single jq refresh). Bench excludes herdr calls",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-038",

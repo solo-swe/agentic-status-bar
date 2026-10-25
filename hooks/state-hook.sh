@@ -5,7 +5,8 @@
 # ($state_dir/<session_id>.json) for the SwiftBar plugin to read.
 #
 # It must never get in Claude Code's way: no `set -e`, all output discarded,
-# every error swallowed, always exit 0.
+# every error swallowed, always exit 0. It runs on every tool call, so it keeps
+# to two jq calls per event and no other helper processes on the common path.
 
 exec >/dev/null 2>&1
 
@@ -18,12 +19,12 @@ while [ -L "$self" ]; do
     *) self="$(dirname "$self")/$link" ;;
   esac
 done
-hook_dir="$(cd "$(dirname "$self")" && pwd)" || exit 0
+case "$self" in
+  */*) hook_dir="${self%/*}" ;;
+  *) hook_dir=. ;;
+esac
 # shellcheck source=../lib/common.sh
 . "$hook_dir/../lib/common.sh" || exit 0
-
-# Taken first, so events that start earlier win when async hooks race.
-started_ms="$(now_ms)"
 
 lock_dir=""
 changed=0
@@ -34,9 +35,27 @@ cleanup() {
 trap 'cleanup; exit 0' HUP INT TERM
 trap cleanup EXIT
 
-# field FILTER — runs a jq filter against the payload, printing raw output.
-field() {
-  printf '%s' "$payload" | "$JQ" -r "$1 // empty" 2>/dev/null
+# parse_payload — reads the hook JSON from stdin into shell variables (event,
+# session_id, p_* fields) and started_ms, the event's start in epoch ms. Events
+# that start earlier win when async hooks race.
+parse_payload() {
+  eval "$("$JQ" -r '
+    def s($k): (.[$k] // "") | if type == "string" then . else tostring end;
+    if type != "object" then empty else
+      @sh "event=\(s("hook_event_name"))",
+      @sh "session_id=\(s("session_id"))",
+      @sh "p_cwd=\(s("cwd"))",
+      @sh "p_transcript=\(s("transcript_path"))",
+      @sh "p_source=\(s("source"))",
+      @sh "p_prompt=\(s("prompt"))",
+      @sh "p_tool=\(s("tool_name"))",
+      @sh "p_ntype=\(s("notification_type"))",
+      @sh "p_message=\(s("message"))",
+      @sh "p_agent_id=\(s("agent_id"))",
+      @sh "p_agent_type=\(s("agent_type"))",
+      "started_ms=\(now * 1000 | floor)"
+    end
+  ' 2>/dev/null)"
 }
 
 # lock / unlock — a per-session mkdir lock, so read-modify-write is not interleaved.
@@ -54,41 +73,39 @@ unlock() {
   lock_dir=""
 }
 
-# read_state — prints the current state object, or {} if missing or corrupt.
-read_state() {
-  if [ -r "$state_file" ]; then
-    "$JQ" -c 'if type == "object" then . else {} end' "$state_file" 2>/dev/null || printf '{}'
-  else
-    printf '{}'
-  fi
-}
-
 # write_state FILTER [JQ ARGS...] — applies FILTER to the current state (as `.`,
-# with the previous state also in $old) and writes the result atomically. Sets v,
-# sessionId and updatedAt; sets stateSince when the state changes. Skipped if the
-# file already has an update newer than this event's start.
+# with the previous state also in $old and the time in $now) and writes the
+# result atomically. Sets v, sessionId and updatedAt; sets stateSince when the
+# state changes. Skipped if the file already has an update newer than this
+# event's start. A missing or corrupt file counts as {}.
 write_state() {
   _filter="$1"
   shift
-  mkdir -p "$cfg_state_dir" || return 1
+  [ -d "$cfg_state_dir" ] || mkdir -p "$cfg_state_dir" || return 1
   lock || return 1
-  _current="$(read_state)"
-  _newer="$(printf '%s' "$_current" | "$JQ" -r --argjson t "$started_ms" '(.updatedAt // 0) > $t')"
-  if [ "$_newer" = "true" ]; then
-    unlock
-    return 0
+  _program="
+    (if type == \"object\" then . else {} end)
+    | if (.updatedAt // 0) > \$started then empty
+      else (now * 1000 | floor) as \$now
+        | . as \$old
+        | ($_filter)
+        | .v = 1
+        | .sessionId = \$sid
+        | .updatedAt = \$now
+        | if (.state != \$old.state) or (.stateSince == null) then .stateSince = \$now else . end
+      end"
+  _out=""
+  if [ -r "$state_file" ]; then
+    _out="$("$JQ" -c --arg sid "$session_id" --argjson started "$started_ms" "$@" "$_program" "$state_file" 2>/dev/null)" \
+      || _out="$("$JQ" -n -c --arg sid "$session_id" --argjson started "$started_ms" "$@" "{} | $_program")"
+  else
+    _out="$("$JQ" -n -c --arg sid "$session_id" --argjson started "$started_ms" "$@" "{} | $_program")"
   fi
-  _now="$(now_ms)"
-  printf '%s' "$_current" | "$JQ" -c --arg sid "$session_id" --argjson now "$_now" "$@" "
-    . as \$old
-    | ($_filter)
-    | .v = 1
-    | .sessionId = \$sid
-    | .updatedAt = \$now
-    | if (.state != \$old.state) or (.stateSince == null) then .stateSince = \$now else . end
-  " | atomic_write "$state_file"
+  if [ -n "$_out" ] && printf '%s\n' "$_out" > "$state_file.tmp.$$" && mv -f "$state_file.tmp.$$" "$state_file"; then
+    changed=1
+  fi
+  rm -f "$state_file.tmp.$$"
   unlock
-  changed=1
 }
 
 # SwiftBar refreshes a plugin when this URL is opened.
@@ -99,13 +116,13 @@ POKE_INTERVAL_MS=500
 poke_swiftbar() {
   [ "$cfg_instant_refresh" = 1 ] || return 0
   _stamp="$cfg_state_dir/.last-poke"
-  _now="$(now_ms)"
-  _last="$(cat "$_stamp" 2>/dev/null)"
+  _last=0
+  [ -r "$_stamp" ] && read -r _last < "$_stamp"
   case "$_last" in
     '' | *[!0-9]*) _last=0 ;;
   esac
-  [ $((_now - _last)) -ge "$POKE_INTERVAL_MS" ] || return 0
-  printf '%s\n' "$_now" | atomic_write "$_stamp"
+  [ $((started_ms - _last)) -ge "$POKE_INTERVAL_MS" ] || return 0
+  printf '%s\n' "$started_ms" > "$_stamp.tmp.$$" && mv -f "$_stamp.tmp.$$" "$_stamp"
   open -g "$REFRESH_URL" &
 }
 
@@ -158,7 +175,6 @@ on_session_start() {
   if [ -n "$_cpid" ]; then
     _pstart="$(ps -o lstart= -p "$_cpid" 2>/dev/null | sed 's/^ *//;s/ *$//')"
   fi
-  _source="$(field '.source')"
 
   write_state '
     .cwd = $cwd
@@ -169,14 +185,14 @@ on_session_start() {
     | (if $bundle != "" then .termBundleId = $bundle else del(.termBundleId) end)
     | (if $source == "compact" and .state != null then . else .state = "idle" | del(.reason, .message, .subagents) end)
   ' \
-    --arg cwd "$(field '.cwd')" \
-    --arg transcript "$(field '.transcript_path')" \
+    --arg cwd "$p_cwd" \
+    --arg transcript "$p_transcript" \
     --arg kind "$(session_kind "$_cpid")" \
     --arg pid "$_cpid" \
     --arg pstart "$_pstart" \
     --arg pane "${HERDR_PANE_ID:-}" \
     --arg bundle "${__CFBundleIdentifier:-}" \
-    --arg source "$_source"
+    --arg source "$p_source"
 
   # A claude process runs one session at a time: drop older files for the same PID
   # (e.g. the session before a /clear).
@@ -190,6 +206,7 @@ on_session_start() {
     done
   fi
 }
+
 # Prompts that start with this are background-task results, not something the user typed.
 TASK_NOTIFICATION_PREFIX='<task-notification>'
 
@@ -202,25 +219,25 @@ on_user_prompt_submit() {
       elif $store != "1" then del(.promptPreview)
       else . end
   ' \
-    --arg prompt "$(field '.prompt')" \
+    --arg prompt "$p_prompt" \
     --arg skip "$TASK_NOTIFICATION_PREFIX" \
     --arg store "$cfg_store_prompt_preview"
 }
 
 on_pre_tool_use() {
   write_state '.state = "busy" | del(.reason, .message) | .lastTool = $tool' \
-    --arg tool "$(field '.tool_name')"
+    --arg tool "$p_tool"
 }
 
 on_post_tool_use() {
   write_state '.state = "busy" | del(.reason, .message)'
 }
+
 on_notification() {
-  _type="$(field '.notification_type')"
-  _message="$(field '.message')"
+  _type="$p_ntype"
   # Older payloads may lack notification_type: fall back to the message text.
   if [ -z "$_type" ]; then
-    case "$_message" in
+    case "$p_message" in
       *"needs your permission"*) _type=permission_prompt ;;
       *"waiting for your input"*) _type=idle_prompt ;;
     esac
@@ -233,11 +250,11 @@ on_notification() {
         .state = "waiting"
         | .reason = (if .lastTool == "AskUserQuestion" then "question" else "permission" end)
         | .message = $message
-      ' --arg message "$_message"
+      ' --arg message "$p_message"
       ;;
     elicitation_dialog)
       write_state '.state = "waiting" | .reason = "question" | .message = $message' \
-        --arg message "$_message"
+        --arg message "$p_message"
       ;;
     idle_prompt)
       write_state '.state = "idle" | del(.reason, .message)'
@@ -248,26 +265,26 @@ on_notification() {
 on_stop() {
   write_state '.state = "idle" | del(.reason, .message)'
 }
+
 # Subagents are tracked under the parent session; they never change its state.
 on_subagent_start() {
-  _id="$(field '.agent_id')"
-  [ -n "$_id" ] || return 0
+  [ -n "$p_agent_id" ] || return 0
   write_state '
     .state //= "busy"
     | .subagents[$id] = {type: (if $type == "" then "agent" else $type end), since: $now}
-  ' --arg id "$_id" --arg type "$(field '.agent_type')"
+  ' --arg id "$p_agent_id" --arg type "$p_agent_type"
 }
 
 on_subagent_stop() {
-  _id="$(field '.agent_id')"
   # An extra SubagentStop with an empty agent_type follows every Stop; it has
   # no matching start.
-  [ -n "$_id" ] && [ -n "$(field '.agent_type')" ] || return 0
+  [ -n "$p_agent_id" ] && [ -n "$p_agent_type" ] || return 0
   write_state '
     del(.subagents[$id])
     | if (.subagents // {}) == {} then del(.subagents) else . end
-  ' --arg id "$_id"
+  ' --arg id "$p_agent_id"
 }
+
 # A late async event can recreate the file after this; the plugin's liveness
 # check (C1) removes it once the claude process is gone.
 on_session_end() {
@@ -282,11 +299,15 @@ main() {
   [ -n "$JQ" ] || return 0
   load_config
 
-  payload="$(cat)"
-  [ -n "$payload" ] || return 0
-
-  event="$(field '.hook_event_name')"
-  session_id="$(field '.session_id')"
+  # Set by parse_payload; cleared first so nothing leaks in from the environment.
+  event="" session_id="" started_ms=""
+  p_cwd="" p_transcript="" p_source="" p_prompt="" p_tool=""
+  p_ntype="" p_message="" p_agent_id="" p_agent_type=""
+  parse_payload
+  [ -n "$event" ] || return 0
+  case "$started_ms" in
+    '' | *[!0-9]*) return 0 ;;
+  esac
   # Session IDs become file names: allow only safe characters.
   case "$session_id" in
     '' | *[!A-Za-z0-9_-]*) return 0 ;;

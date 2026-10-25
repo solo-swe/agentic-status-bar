@@ -8,9 +8,14 @@
 ## Checks
 
 ```sh
-tests/lint.sh   # shellcheck on every script
-tests/run.sh    # all bats tests (or: tests/run.sh tests/hook.bats)
+tests/lint.sh          # shellcheck on every script
+tests/run.sh           # all bats tests (or: tests/run.sh tests/hook.bats)
+tests/run.sh --bench   # timing against the PRD targets (plugin < 150 ms, hook < 20 ms)
 ```
+
+The hook runs on every tool call and the plugin every few seconds, so both keep process
+counts low: the hook makes two jq calls per event, and a plugin refresh does all parsing,
+checks and rendering in one jq program. Check `--bench` after changing either.
 
 CI runs the same two commands. Tests run in a temporary `HOME`, so they never touch your real
 `~/.claude` or config.
