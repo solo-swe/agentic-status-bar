@@ -76,9 +76,8 @@ take_snapshot() {
   ps -axo pid=,ppid=,lstart=,comm= > "$1" 2>/dev/null
 }
 
-# The checks, in order. Each session gets a display state (`shown`); dead ones
-# are marked and dropped. Checks never write state files.
-CHECKS_JQ='
+# Process-table helpers shared by both check passes.
+PROCS_JQ='
   def norm: gsub("\\s+"; " ") | ltrimstr(" ") | rtrimstr(" ");
 
   # pid -> {ppid, lstart, comm} from `ps -axo pid=,ppid=,lstart=,comm=`
@@ -88,6 +87,13 @@ CHECKS_JQ='
     | map({key: .[0], value: {ppid: .[1], lstart: (.[2:7] | join(" ")), comm: (.[7:] | join(" "))}})
     | from_entries;
 
+  # A local-time lstart ("Mon Oct 19 09:12:03 2026") as epoch milliseconds.
+  def lstart_ms: (norm | strptime("%a %b %d %H:%M:%S %Y") | mktime - $tzoffset) * 1000;
+'
+
+# The checks, in order. Each session gets a display state (`shown`); dead ones
+# are marked and dropped. Checks never write state files.
+CHECKS_JQ='
   # C1: the claude process must still exist and have the same start time.
   def alive($P):
     if .pid == null then true
@@ -145,12 +151,41 @@ LATE_CHECKS_JQ='
     | ($entries | if $p == null then . else .[$p + 1:] end)
     | any(.[]; ends_turn);
 
-  .sessions |= map(
-    if (.shown == "busy" or .shown == "waiting") and ($tails[.sessionId] != null)
-       and interrupted($tails[.sessionId])
-    then .shown = "idle" | .shownSince = .updatedAt
-    else . end)
+  # C4: waiting, but a tool process started after the prompt: it was approved.
+  # caffeinate is started by Claude Code at the beginning of every turn.
+  def approved_since($P):
+    (.pid | tostring) as $pid | (.shownSince // .stateSince // 0) as $since
+    | [$P | to_entries[] | .value
+       | select(.ppid == $pid and (.comm | split("/") | last) != "caffeinate")
+       | (.lstart | lstart_ms) | select(. > $since)]
+    | min;
+
+  ($ps | procs) as $P
+  | .sessions |= map(
+      if (.shown == "busy" or .shown == "waiting") and ($tails[.sessionId] != null)
+         and interrupted($tails[.sessionId])
+      then .shown = "idle" | .shownSince = .updatedAt
+      else . end
+      | if .shown == "waiting" and .pid != null then
+          approved_since($P) as $t
+          | if $t != null then .shown = "busy" | .shownSince = $t else . end
+        else . end)
 '
+
+# tz_offset — seconds east of UTC right now (for converting ps start times).
+tz_offset() {
+  _z="$(date +%z)"
+  _sign="${_z%????}"
+  _hh="${_z#?}"
+  _hh="${_hh%??}"
+  _mm="${_z#???}"
+  _secs=$(( (${_hh#0} * 60 + ${_mm#0}) * 60 ))
+  if [ "$_sign" = "-" ]; then
+    echo "-$_secs"
+  else
+    echo "$_secs"
+  fi
+}
 
 # load_tails DATA — prints {sessionId: [transcript entries]} for sessions the
 # late checks look at, reading only the last TRANSCRIPT_TAIL_BYTES of each file.
@@ -179,9 +214,12 @@ load_tails() {
 
 # apply_checks DATA PS_FILE — runs the checks and prints the updated data.
 apply_checks() {
-  _early="$(printf '%s' "$1" | "$JQ" -c --rawfile ps "$2" --argjson reg "$(load_registry)" "$CHECKS_JQ")"
-  printf '%s' "$_early" | "$JQ" -c --argjson tails "$(load_tails "$_early")" \
-    --arg marker "$INTERRUPT_MARKER" "$LATE_CHECKS_JQ"
+  _tz="$(tz_offset)"
+  _early="$(printf '%s' "$1" | "$JQ" -c --rawfile ps "$2" --argjson tzoffset "$_tz" \
+    --argjson reg "$(load_registry)" "$PROCS_JQ$CHECKS_JQ")"
+  printf '%s' "$_early" | "$JQ" -c --rawfile ps "$2" --argjson tzoffset "$_tz" \
+    --argjson tails "$(load_tails "$_early")" --arg marker "$INTERRUPT_MARKER" \
+    "$PROCS_JQ$LATE_CHECKS_JQ"
 }
 
 # remove_dead DATA — deletes the state files of sessions found dead.

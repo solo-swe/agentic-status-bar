@@ -164,6 +164,44 @@ use_transcript() {
   [ "$(cat "$CLAUDE_AGENTS_STATE_DIR/s1.json")" = "$before" ]
 }
 
+# --- C4 approved tool -----------------------------------------------------
+
+# lstart_at EPOCH_SECONDS — a ps-style local start time.
+lstart_at() { date -r "$1" '+%a %b %e %H:%M:%S %Y'; }
+
+@test "C4 shows a waiting session as busy when a tool started after the prompt" {
+  prompt=$(( $(date +%s) - 60 ))
+  add_session "{\"state\":\"waiting\",\"reason\":\"permission\",\"stateSince\":$(( prompt * 1000 ))}"
+  add_process 7001 4242 /bin/zsh "zsh -c npm test" "$(lstart_at $(( prompt + 5 )))"
+  run PLUGIN
+  header_is 1 sparkle
+  [[ "$output" == *"working · "* ]]
+}
+
+@test "C4 ignores children started before the prompt (MCP servers)" {
+  prompt=$(( $(date +%s) - 60 ))
+  add_session "{\"state\":\"waiting\",\"reason\":\"permission\",\"stateSince\":$(( prompt * 1000 ))}"
+  add_process 7002 4242 node "node mcp-server.js" "$(lstart_at $(( prompt - 3600 )))"
+  run PLUGIN
+  header_is 1 exclamationmark.circle.fill
+}
+
+@test "C4 ignores caffeinate" {
+  prompt=$(( $(date +%s) - 60 ))
+  add_session "{\"state\":\"waiting\",\"reason\":\"permission\",\"stateSince\":$(( prompt * 1000 ))}"
+  add_process 7003 4242 /usr/bin/caffeinate "caffeinate -i" "$(lstart_at $(( prompt + 5 )))"
+  run PLUGIN
+  header_is 1 exclamationmark.circle.fill
+}
+
+@test "C4 ignores children of other processes" {
+  prompt=$(( $(date +%s) - 60 ))
+  add_session "{\"state\":\"waiting\",\"reason\":\"permission\",\"stateSince\":$(( prompt * 1000 ))}"
+  add_process 7004 9999 /bin/zsh "zsh" "$(lstart_at $(( prompt + 5 )))"
+  run PLUGIN
+  header_is 1 exclamationmark.circle.fill
+}
+
 @test "a corrupt registry file is ignored" {
   add_session '{"state":"busy","updatedAt":1000}'
   printf 'garbage' > "$CLAUDE_AGENTS_REGISTRY_DIR/4242.json"
