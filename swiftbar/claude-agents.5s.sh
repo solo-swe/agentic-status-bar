@@ -56,6 +56,21 @@ load_sessions() {
   '
 }
 
+# load_registry — prints Claude Code's session registry as {pid: entry}, or {}.
+# The registry (~/.claude/sessions/<pid>.json) is undocumented, so it's optional.
+load_registry() {
+  [ "$cfg_use_registry" = 1 ] || { printf '{}'; return; }
+  set -- "${CLAUDE_AGENTS_REGISTRY_DIR:-$HOME/.claude/sessions}"/*.json
+  [ -e "$1" ] || { printf '{}'; return; }
+  for _f in "$@"; do
+    tr -d '\n' < "$_f"
+    printf '\n'
+  done | "$JQ" -c -R -n '
+    [inputs | try fromjson catch null | select(type == "object" and .pid != null)]
+    | map({key: (.pid | tostring), value: .}) | from_entries
+  '
+}
+
 # take_snapshot FILE — one process table per run: pid, ppid, lstart (5 words), comm.
 take_snapshot() {
   ps -axo pid=,ppid=,lstart=,comm= > "$1" 2>/dev/null
@@ -80,15 +95,29 @@ CHECKS_JQ='
       | $p != null and (.procStart == null or ($p.lstart | norm) == (.procStart | norm))
     end;
 
+  # C2: Claude Code'"'"'s own registry wins when it is newer than our state file.
+  def registry($R):
+    (if .pid == null then null else $R[.pid | tostring] end) as $r
+    | if $r == null or $r.sessionId != .sessionId then .
+      elif ($r.status | type) != "string" then .registrySchema = false
+      elif ($r.statusUpdatedAt // 0) <= (.updatedAt // 0) then .
+      elif $r.status == "busy" then .shown = "busy" | .shownSince = $r.statusUpdatedAt
+      elif $r.status == "idle" then .shown = "idle" | .shownSince = $r.statusUpdatedAt
+      elif $r.status == "waiting" then
+        .shown = "waiting" | .shownSince = $r.statusUpdatedAt
+        | .reason = (if ($r.waitingFor // "" | test("permission")) then "permission" else "question" end)
+      else . end;
+
   ($ps | procs) as $P
   | .sessions |= map(.shown = .state | .alive = alive($P))
   | .dead = [.sessions[] | select(.alive | not) | .file]
-  | .sessions |= map(select(.alive) | del(.alive))
+  | .sessions |= map(select(.alive) | del(.alive) | registry($reg))
+  | .registrySchemaIssue = any(.sessions[]; .registrySchema == false)
 '
 
 # apply_checks DATA PS_FILE — runs the checks and prints the updated data.
 apply_checks() {
-  printf '%s' "$1" | "$JQ" -c --rawfile ps "$2" "$CHECKS_JQ"
+  printf '%s' "$1" | "$JQ" -c --rawfile ps "$2" --argjson reg "$(load_registry)" "$CHECKS_JQ"
 }
 
 # remove_dead DATA — deletes the state files of sessions found dead.
@@ -239,6 +268,9 @@ main() {
 
   data="$(apply_checks "$(load_sessions)" "$ps_file")"
   remove_dead "$data"
+  if [ "$(printf '%s' "$data" | "$JQ" -r '.registrySchemaIssue')" = true ]; then
+    log_once registry-schema "Claude Code session registry has no 'status' field; registry override disabled for those sessions."
+  fi
   render "$data"
 }
 
