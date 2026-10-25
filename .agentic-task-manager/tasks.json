@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 40
+    "next_id": 41
   },
   "tasks": [
     {
@@ -1466,6 +1466,30 @@
       "started_at": "2026-10-25T20:29:39Z",
       "started_by": "claude:c631bc24",
       "completed_at": "2026-10-25T20:29:40Z",
+      "completed_by": "claude:c631bc24"
+    },
+    {
+      "id": "T-040",
+      "name": "Show the state icon on each dropdown row",
+      "phase": 4,
+      "type": "polish",
+      "description": "Replace the text glyph (● ○ ?) at the start of each session row with the same SF Symbol and color the menu bar uses for that state (waiting exclamationmark.circle.fill red, idle zzz orange, uncertain questionmark.circle gray, busy the configured icon dimmed), so rows can be matched to the menu-bar icon. Update tests and the README dropdown example.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "done",
+      "dependencies": [],
+      "files": [
+        "swiftbar/swiftbar-claudecode-minimal.5s.sh",
+        "tests/plugin.bats",
+        "README.md"
+      ],
+      "created_at": "2026-10-25T20:30:57Z",
+      "updated_at": "2026-10-25T20:34:36Z",
+      "created_by": "claude:c631bc24",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T20:30:58Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T20:34:36Z",
       "completed_by": "claude:c631bc24"
     }
   ]

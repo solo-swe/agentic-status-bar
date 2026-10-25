@@ -78,16 +78,17 @@ Each state has its own SF Symbol variant, so color is never the only signal (bas
 **Dropdown**
 
 ```
-● api-gateway — Add rate limiting to auth routes   permission · 2m
-● web-dashboard — Fix flaky login test             idle · 14m
-○ docs-site — Migrate to the new theme             working · 30s
-    ↳ subagent: Explore                            working · 12s
+! api-gateway — Add rate limiting to auth routes   permission · 2m
+z web-dashboard — Fix flaky login test             idle · 14m
 ? data-pipeline — Refactor CSV parser              no activity · 41m
+✦ docs-site — Migrate to the new theme             working · 30s
+    ↳ subagent: Explore                            working · 12s
 ---
 Show: ✓ Interactive  ✓ Headless  ✓ Subagents  ✓ IDE/Desktop
 Settings… · Refresh · About
 ```
 
+- **Icon:** each row starts with the menu-bar symbol and color of its state (drawn above as `!`, `z`, `?`, `✦`), so a row can be matched to the menu-bar icon.
 - **Order:** waiting, idle, uncertain, busy; within a state, longest in state first.
 - **Label:** project (cwd basename) + task title. Title source in order: herdr terminal title, Claude Code session name, first user prompt (truncated). Truncate to 48 characters.
 - **Right side:** state word (permission, question, idle, working, no activity) and time in state.

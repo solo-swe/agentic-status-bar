@@ -24,7 +24,7 @@ PLUGIN() { "$REPO_ROOT/swiftbar/swiftbar-claudecode-minimal.5s.sh" "$@"; }
   run PLUGIN
   [ "$status" -eq 0 ]
   [[ "${lines[0]}" == "1 | sfimage=exclamationmark.circle.fill "* ]]
-  [[ "$output" == *"● api-gateway — Add rate limiting to the auth"*"…  permission · "* ]]
+  [[ "$output" == *"api-gateway — Add rate limiting to the auth"*"…  permission · "* ]]
 }
 
 @test "after Stop the session shows as idle" {

@@ -251,7 +251,11 @@ HEADER_JQ='
 # One row per session, most urgent first; within a state, longest in it first.
 ROWS_JQ='
   def rank: {waiting: 0, idle: 1, uncertain: 2, busy: 3}[.shown] // 4;
-  def glyph: {waiting: "●", idle: "●", uncertain: "?", busy: "○"}[.shown] // "○";
+  # The same symbol and color the menu bar uses for this state.
+  def state_icon:
+    {waiting: ["exclamationmark.circle.fill", $c.waiting], idle: ["zzz", $c.idle],
+     uncertain: ["questionmark.circle", $c.uncertain]}[.shown] // [$icon, $c.busy]
+    | " sfimage=\(.[0]) sfcolor=\(.[1])";
   def word:
     if .shown == "waiting" then (if .reason == "question" then "question" else "permission" end)
     elif .shown == "idle" then "idle"
@@ -291,7 +295,7 @@ ROWS_JQ='
   .sessions
   | sort_by(rank, since)
   | .[]
-  | "\(glyph) \(row_label)  \(word) · \(duration) | font=Menlo size=12\(click)",
+  | "\(row_label)  \(word) · \(duration) | font=Menlo size=12\(state_icon)\(click)",
     (if can_focus then empty else "--Not in herdr: click to focus is unavailable | color=gray" end),
     action("Copy session ID"; "copy-id"),
     action("Copy working directory"; "copy-cwd"),

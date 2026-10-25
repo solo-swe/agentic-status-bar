@@ -21,12 +21,13 @@ The menu-bar item shows one icon for the most urgent state across all sessions, 
 
 Because only the most urgent state is shown, a red `1` can hide idle sessions behind it; the dropdown lists every session with its own state. The icons never animate.
 
-The dropdown lists every session, most urgent first, then the filters and settings:
+The dropdown lists every session, most urgent first, then the filters and settings. Each row starts with the same icon and color as the menu bar uses for its state (drawn here as `!`, `z`, `?` and `✦`):
 
 ```
-● api-gateway — Add rate limiting to auth routes   permission · 2m
-● web-dashboard — Fix flaky login test             idle · 14m
-○ docs-site — Migrate to the new theme             working · 30s
+! api-gateway — Add rate limiting to auth routes   permission · 2m
+z web-dashboard — Fix flaky login test             idle · 14m
+? data-pipeline — Refactor CSV parser              no activity · 41m
+✦ docs-site — Migrate to the new theme             working · 30s
   ↳ subagent: Explore                              working · 12s
 ---
 Show

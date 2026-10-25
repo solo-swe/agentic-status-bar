@@ -111,7 +111,7 @@ rows() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo'; }
   add_state idle2 "{\"state\":\"idle\",\"cwd\":\"/x/idle-old\",\"stateSince\":$(now_minus 900)}"
   add_state wait1 "{\"state\":\"waiting\",\"reason\":\"permission\",\"cwd\":\"/x/waiter\",\"stateSince\":$(now_minus 5)}"
   run PLUGIN
-  order="$(rows | awk '{print $2}' | tr '\n' ' ')"
+  order="$(rows | awk '{print $1}' | tr '\n' ' ')"
   [ "$order" = "waiter idle-old idle-new busy-old " ]
 }
 
@@ -119,8 +119,19 @@ rows() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo'; }
   add_state a "{\"state\":\"waiting\",\"reason\":\"permission\",\"cwd\":\"/Users/alex/code/api-gateway\",\"promptPreview\":\"Add rate limiting\",\"stateSince\":$(now_minus 125)}"
   run PLUGIN
   row="$(rows)"
-  [[ "$row" == "● api-gateway — Add rate limiting "* ]]
-  [[ "$row" == *"  permission · 2m | font=Menlo size=12" ]]
+  [[ "$row" == "api-gateway — Add rate limiting "* ]]
+  [[ "$row" == *"  permission · 2m | font=Menlo size=12 "* ]]
+}
+
+@test "each row shows the menu-bar icon and color of its state" {
+  printf 'icon=bolt\n' > "$CLAUDE_STATUSBAR_CONFIG"
+  add_state w '{"state":"waiting","reason":"permission","cwd":"/x/w"}'
+  add_state i '{"state":"idle","cwd":"/x/i"}'
+  add_state b '{"state":"busy","cwd":"/x/b"}'
+  run PLUGIN
+  [[ "$(rows | grep '^w ')" == *"sfimage=exclamationmark.circle.fill sfcolor=#D70015,#FF453A"* ]]
+  [[ "$(rows | grep '^i ')" == *"sfimage=zzz sfcolor=#B25000,#FFD60A"* ]]
+  [[ "$(rows | grep '^b ')" == *"sfimage=bolt sfcolor=#6E6E73,#AEAEB2"* ]]
 }
 
 @test "state words cover question, idle, working" {
@@ -128,10 +139,9 @@ rows() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo'; }
   add_state i "{\"state\":\"idle\",\"cwd\":\"/x/i\"}"
   add_state b "{\"state\":\"busy\",\"cwd\":\"/x/b\"}"
   run PLUGIN
-  [[ "$(rows | grep ' q ')" == *"question · "* ]]
-  [[ "$(rows | grep ' i ')" == *"idle · "* ]]
-  [[ "$(rows | grep ' b ')" == *"working · "* ]]
-  [[ "$(rows | grep ' b ')" == "○ "* ]]
+  [[ "$(rows | grep '^q ')" == *"question · "* ]]
+  [[ "$(rows | grep '^i ')" == *"idle · "* ]]
+  [[ "$(rows | grep '^b ')" == *"working · "* ]]
 }
 
 @test "durations use s, m, h and d" {
@@ -140,16 +150,16 @@ rows() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo'; }
   add_state h "{\"state\":\"busy\",\"cwd\":\"/x/h\",\"stateSince\":$(now_minus 7300)}"
   add_state d "{\"state\":\"busy\",\"cwd\":\"/x/d\",\"stateSince\":$(now_minus 180000)}"
   run PLUGIN
-  [[ "$(rows | grep ' s ')" =~ working\ ·\ 1[0-9]s ]]
-  [[ "$(rows | grep ' m ')" == *"working · 5m |"* ]]
-  [[ "$(rows | grep ' h ')" == *"working · 2h |"* ]]
-  [[ "$(rows | grep ' d ')" == *"working · 2d |"* ]]
+  [[ "$(rows | grep '^s ')" =~ working\ ·\ 1[0-9]s ]]
+  [[ "$(rows | grep '^m ')" == *"working · 5m |"* ]]
+  [[ "$(rows | grep '^h ')" == *"working · 2h |"* ]]
+  [[ "$(rows | grep '^d ')" == *"working · 2d |"* ]]
 }
 
 @test "long labels are truncated to the label width with an ellipsis" {
   add_state a '{"state":"busy","cwd":"/x/project","promptPreview":"A very long prompt preview that goes on and on past the limit"}'
   run PLUGIN
-  label="$(rows | sed 's/^○ //; s/  working.*//')"
+  label="$(rows | sed 's/  working.*//')"
   [ "${#label}" -eq 48 ]
   [[ "$label" == *"…" ]]
 }
@@ -177,7 +187,7 @@ rows() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo'; }
 @test "a session without cwd or title still renders" {
   add_state a '{"state":"idle"}'
   run PLUGIN
-  [[ "$(rows)" == "● unknown "* ]]
+  [[ "$(rows)" == "unknown "* ]]
 }
 
 # --- Submenus and actions -------------------------------------------------

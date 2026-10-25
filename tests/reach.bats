@@ -18,7 +18,7 @@ add_state() {
     '{v: 1, sessionId: $id, updatedAt: $now, cwd: "/x/\($id)"} + .' > "$CLAUDE_STATUSBAR_STATE_DIR/$1.json"
 }
 
-row_of() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo' | grep " $1 "; }
+row_of() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo' | grep "^$1 "; }
 
 # --- Focus ----------------------------------------------------------------
 
@@ -90,7 +90,7 @@ herdr_lists() {
   herdr_lists '[{"agent":"claude","agent_session":{"value":"s1"},"terminal_title_stripped":"Spec for the parser","pane_id":"w2:p1"}]'
   add_state s1 '{"state":"idle","promptPreview":"first prompt"}'
   run PLUGIN
-  [[ "$(row_of s1)" == "● s1 — Spec for the parser "* ]]
+  [[ "$(row_of s1)" == "s1 — Spec for the parser "* ]]
 }
 
 @test "a user-given session name is used when herdr has no title" {
@@ -99,7 +99,7 @@ herdr_lists() {
   add_state s1 '{"state":"idle","pid":4242,"procStart":"Mon Oct 19 09:12:03 2026","promptPreview":"first prompt"}'
   printf '{"pid":4242,"sessionId":"s1","name":"parser-rewrite","nameSource":"user"}' > "$CLAUDE_STATUSBAR_REGISTRY_DIR/4242.json"
   run PLUGIN
-  [[ "$(row_of s1)" == "● s1 — parser-rewrite "* ]]
+  [[ "$(row_of s1)" == "s1 — parser-rewrite "* ]]
 }
 
 @test "derived session names are skipped in favor of the prompt preview" {
@@ -108,27 +108,27 @@ herdr_lists() {
   add_state s1 '{"state":"idle","pid":4242,"procStart":"Mon Oct 19 09:12:03 2026","promptPreview":"first prompt"}'
   printf '{"pid":4242,"sessionId":"s1","name":"s1-a3","nameSource":"derived"}' > "$CLAUDE_STATUSBAR_REGISTRY_DIR/4242.json"
   run PLUGIN
-  [[ "$(row_of s1)" == "● s1 — first prompt "* ]]
+  [[ "$(row_of s1)" == "s1 — first prompt "* ]]
 }
 
 @test "a failing or slow herdr list falls back to the prompt preview" {
   stub_command herdr 'exit 1'
   add_state s1 '{"state":"idle","promptPreview":"first prompt"}'
   run PLUGIN
-  [[ "$(row_of s1)" == "● s1 — first prompt "* ]]
+  [[ "$(row_of s1)" == "s1 — first prompt "* ]]
 
   stub_command herdr 'sleep 10'
   start=$(date +%s)
   run PLUGIN
   [ $(( $(date +%s) - start )) -lt 4 ]
-  [[ "$(row_of s1)" == "● s1 — first prompt "* ]]
+  [[ "$(row_of s1)" == "s1 — first prompt "* ]]
 }
 
 @test "an empty herdr title falls back too" {
   herdr_lists '[{"agent":"claude","agent_session":{"value":"s1"},"terminal_title_stripped":""}]'
   add_state s1 '{"state":"idle","promptPreview":"first prompt"}'
   run PLUGIN
-  [[ "$(row_of s1)" == "● s1 — first prompt "* ]]
+  [[ "$(row_of s1)" == "s1 — first prompt "* ]]
 }
 
 # --- Subagents ------------------------------------------------------------
@@ -144,9 +144,9 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
   [[ "$(sub_rows | sed -n 1p)" == "  ↳ subagent: general-purpose "*"  working · 1m | font=Menlo size=12 color=gray" ]]
   [[ "$(sub_rows | sed -n 2p)" == "  ↳ subagent: Explore "*"  working · 1"[0-9]"s | font=Menlo size=12 color=gray" ]]
   # They come after the parent row, not after the other session.
-  parent_line=$(printf '%s\n' "${lines[@]}" | grep -n ' s1 ' | head -1 | cut -d: -f1)
+  parent_line=$(printf '%s\n' "${lines[@]}" | grep -n '^s1 ' | head -1 | cut -d: -f1)
   sub_line=$(printf '%s\n' "${lines[@]}" | grep -n '↳ subagent' | head -1 | cut -d: -f1)
-  other_line=$(printf '%s\n' "${lines[@]}" | grep -n ' s2 ' | head -1 | cut -d: -f1)
+  other_line=$(printf '%s\n' "${lines[@]}" | grep -n '^s2 ' | head -1 | cut -d: -f1)
   [ "$sub_line" -gt "$parent_line" ]
   [ "$other_line" -lt "$parent_line" ]
 }
