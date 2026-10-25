@@ -275,6 +275,25 @@ enable_c5() { printf 'stale_minutes=30\n' > "$CLAUDE_AGENTS_CONFIG"; }
   header_is 1 checkmark.circle
 }
 
+@test "C4 and C5 never modify the state file" {
+  enable_c5
+  prompt=$(( $(date +%s) - 60 ))
+  add_session "{\"state\":\"waiting\",\"reason\":\"permission\",\"stateSince\":$(( prompt * 1000 ))}"
+  add_process 7001 4242 /bin/zsh "zsh" "$(lstart_at $(( prompt + 5 )))"
+  before="$(cat "$CLAUDE_AGENTS_STATE_DIR/s1.json")"
+  run PLUGIN
+  [[ "$output" == *"working · "* ]]
+  [ "$(cat "$CLAUDE_AGENTS_STATE_DIR/s1.json")" = "$before" ]
+
+  add_session "{\"state\":\"busy\",\"updatedAt\":$(minutes_ago_ms 45)}"
+  : > "$TEST_TMP/ps-table"
+  add_process 4242 1 claude claude "Mon Oct 19 09:12:03 2026"
+  before="$(cat "$CLAUDE_AGENTS_STATE_DIR/s1.json")"
+  run PLUGIN
+  [[ "$output" == *"no activity · "* ]]
+  [ "$(cat "$CLAUDE_AGENTS_STATE_DIR/s1.json")" = "$before" ]
+}
+
 @test "a corrupt registry file is ignored" {
   add_session '{"state":"busy","updatedAt":1000}'
   printf 'garbage' > "$CLAUDE_AGENTS_REGISTRY_DIR/4242.json"
