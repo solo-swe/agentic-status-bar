@@ -486,7 +486,8 @@
           "text": "plugin.json, hooks/hooks.json (9 async events), CONTRIBUTING.md, manifest tests. Live 'claude --plugin-dir .' check deferred to T-036 (needs interactive approval)",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "225c8e76c0b4024e64ae3bbbf390e76bea36a47f"
     },
     {
       "id": "T-014",
@@ -499,7 +500,7 @@
         "NFR-ForwardCompat"
       ],
       "use_cases": [],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-004"
       ],
@@ -507,7 +508,20 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T07:12:02Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T07:10:58Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T07:12:02Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T07:12:02Z",
+          "kind": "outcome",
+          "text": "Plugin skeleton: SwiftBar headers, symlink-safe, single-jq load with per-file validation (corrupt/v>1 -> warning), jq-missing hint; 6 tests",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-015",
