@@ -179,6 +179,61 @@ rows() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo'; }
   [[ "$(rows)" == "● unknown "* ]]
 }
 
+# --- Submenus and actions -------------------------------------------------
+
+@test "each row has a submenu with session actions" {
+  add_state abc123 '{"state":"busy","cwd":"/x/p","transcriptPath":"/x/t.jsonl"}'
+  run PLUGIN
+  plugin="$REPO_ROOT/swiftbar/claude-agents.5s.sh"
+  [[ "$output" == *"--Copy session ID | bash=\"$plugin\" param1=copy-id param2=abc123 terminal=false"* ]]
+  [[ "$output" == *"--Copy working directory | bash=\"$plugin\" param1=copy-cwd param2=abc123 terminal=false"* ]]
+  [[ "$output" == *"--Open folder in Finder | bash=\"$plugin\" param1=open-folder param2=abc123"* ]]
+  [[ "$output" == *"--Reveal transcript | bash=\"$plugin\" param1=reveal-transcript param2=abc123"* ]]
+}
+
+@test "folder and transcript actions are omitted when unknown" {
+  add_state abc123 '{"state":"busy"}'
+  run PLUGIN
+  [[ "$output" != *"Open folder"* ]]
+  [[ "$output" != *"Reveal transcript"* ]]
+}
+
+@test "the menu ends with a Refresh item" {
+  run PLUGIN
+  [ "${lines[${#lines[@]}-1]}" = "Refresh | refresh=true" ]
+}
+
+@test "copy-id and copy-cwd put the value on the clipboard" {
+  stub_command pbcopy 'cat > "$STUB_CALLS/pbcopy-input"'
+  add_state abc123 '{"state":"busy","cwd":"/Users/alex/code/api-gateway"}'
+  run PLUGIN copy-id abc123
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+  [ "$(cat "$STUB_CALLS/pbcopy-input")" = abc123 ]
+  run PLUGIN copy-cwd abc123
+  [ "$(cat "$STUB_CALLS/pbcopy-input")" = /Users/alex/code/api-gateway ]
+}
+
+@test "open-folder and reveal-transcript call open" {
+  stub_command open
+  mkdir -p "$TEST_TMP/proj"
+  : > "$TEST_TMP/t.jsonl"
+  add_state abc123 "{\"state\":\"busy\",\"cwd\":\"$TEST_TMP/proj\",\"transcriptPath\":\"$TEST_TMP/t.jsonl\"}"
+  run PLUGIN open-folder abc123
+  run PLUGIN reveal-transcript abc123
+  [ "$(stub_calls open)" = "$(printf '%s\n-R %s' "$TEST_TMP/proj" "$TEST_TMP/t.jsonl")" ]
+}
+
+@test "actions ignore unsafe or unknown session IDs" {
+  stub_command open
+  stub_command pbcopy
+  run PLUGIN open-folder ../../etc
+  [ "$status" -eq 0 ]
+  run PLUGIN copy-id missing
+  [ "$status" -eq 0 ]
+  [ -z "$(stub_calls open)" ]
+}
+
 # --- C1 liveness ----------------------------------------------------------
 
 @test "C1 keeps a session whose claude process is running" {

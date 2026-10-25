@@ -28,6 +28,7 @@ while [ -L "$self" ]; do
   esac
 done
 plugin_dir="$(cd "$(dirname "$self")" && pwd)" || exit 1
+plugin_path="$plugin_dir/$(basename "$self")"
 # shellcheck source=../lib/common.sh
 . "$plugin_dir/../lib/common.sh" || exit 1
 
@@ -160,10 +161,18 @@ ROWS_JQ='
     | gsub("\\|"; "│")
     | if length > $width then .[0:$width - 1] + "…" else . + (" " * ($width - length)) end;
 
+  # A submenu item that runs this plugin with an action and the session ID.
+  def action($text; $name):
+    "--\($text) | bash=\"\($plugin)\" param1=\($name) param2=\(.sessionId) terminal=false";
+
   .sessions
   | sort_by(rank, since)
   | .[]
-  | "\(glyph) \(row_label)  \(word) · \(duration) | font=Menlo size=12"
+  | "\(glyph) \(row_label)  \(word) · \(duration) | font=Menlo size=12",
+    action("Copy session ID"; "copy-id"),
+    action("Copy working directory"; "copy-cwd"),
+    (if .cwd then action("Open folder in Finder"; "open-folder") else empty end),
+    (if .transcriptPath then action("Reveal transcript"; "reveal-transcript") else empty end)
 '
 
 # render DATA — prints the SwiftBar menu for the loaded sessions.
@@ -171,12 +180,44 @@ render() {
   printf '%s' "$1" | "$JQ" -r \
     --arg icon "$cfg_icon" --argjson c "$COLORS" \
     --argjson now "$(now_ms)" --argjson width "$LABEL_WIDTH" \
+    --arg plugin "$plugin_path" \
     "$HEADER_JQ"'
     , "---"
     , (if .invalid > 0 then "\(.invalid) state file(s) could not be read | color=gray" else empty end)
     , (if (.sessions | length) == 0 then "No Claude Code sessions | color=gray" else empty end)
     , ('"$ROWS_JQ"')
+    , "---"
+    , "Refresh | refresh=true"
   '
+}
+
+# session_field ID FILTER — prints a field from a session's state file.
+session_field() {
+  case "$1" in
+    '' | *[!A-Za-z0-9_-]*) return 1 ;;
+  esac
+  "$JQ" -r "$2 // empty" "$cfg_state_dir/$1.json" 2>/dev/null
+}
+
+# run_action ACTION SESSION_ID — a menu action.
+run_action() {
+  case "$1" in
+    copy-id)
+      session_field "$2" '.sessionId' | tr -d '\n' | pbcopy
+      ;;
+    copy-cwd)
+      session_field "$2" '.cwd' | tr -d '\n' | pbcopy
+      ;;
+    open-folder)
+      _dir="$(session_field "$2" '.cwd')"
+      [ -d "$_dir" ] && open "$_dir"
+      ;;
+    reveal-transcript)
+      _transcript="$(session_field "$2" '.transcriptPath')"
+      [ -e "$_transcript" ] && open -R "$_transcript"
+      ;;
+  esac
+  return 0
 }
 
 main() {
@@ -184,6 +225,11 @@ main() {
   JQ="$(find_jq)"
   if [ -z "$JQ" ]; then
     render_jq_missing
+    return 0
+  fi
+
+  if [ "$#" -gt 0 ]; then
+    run_action "$@"
     return 0
   fi
 
