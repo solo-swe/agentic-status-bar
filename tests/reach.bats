@@ -164,6 +164,59 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
   [ -z "$(sub_rows)" ]
 }
 
+# --- Filters --------------------------------------------------------------
+
+@test "the Show section lists every filter, checked by default" {
+  run PLUGIN
+  plugin="$REPO_ROOT/swiftbar/claude-agents.5s.sh"
+  [[ "$output" == *"Interactive | bash=\"$plugin\" param1=toggle param2=show_interactive terminal=false refresh=true checked=true"* ]]
+  [[ "$output" == *"Headless (claude -p) | bash=\"$plugin\" param1=toggle param2=show_headless terminal=false refresh=true checked=true"* ]]
+  [[ "$output" == *"param2=show_subagents terminal=false refresh=true checked=true"* ]]
+  [[ "$output" == *"param2=show_ide terminal=false refresh=true checked=true"* ]]
+}
+
+@test "toggle flips a filter in the config file" {
+  run PLUGIN toggle show_headless
+  [ "$status" -eq 0 ]
+  grep -q '^show_headless=0$' "$CLAUDE_AGENTS_CONFIG"
+  run PLUGIN toggle show_headless
+  grep -q '^show_headless=1$' "$CLAUDE_AGENTS_CONFIG"
+}
+
+@test "toggle ignores unknown keys" {
+  run PLUGIN toggle stale_minutes
+  [ "$status" -eq 0 ]
+  [ ! -e "$CLAUDE_AGENTS_CONFIG" ]
+}
+
+@test "an unchecked filter is shown without a checkmark" {
+  printf 'show_ide=0\n' > "$CLAUDE_AGENTS_CONFIG"
+  run PLUGIN
+  [[ "$output" == *"param2=show_ide terminal=false refresh=true"$'\n'* || "$output" == *"param2=show_ide terminal=false refresh=true" ]]
+  [[ "$output" != *"param2=show_ide terminal=false refresh=true checked=true"* ]]
+}
+
+@test "hidden kinds are left out of rows and the menu-bar count" {
+  printf 'show_headless=0\nshow_ide=0\n' > "$CLAUDE_AGENTS_CONFIG"
+  add_state cli '{"state":"busy","kind":"interactive"}'
+  add_state script '{"state":"waiting","reason":"permission","kind":"headless"}'
+  add_state vscode '{"state":"idle","kind":"ide"}'
+  add_state app '{"state":"idle","kind":"desktop"}'
+  run PLUGIN
+  [[ "${lines[0]}" == "1 | sfimage=sparkle "* ]]
+  [ -n "$(row_of cli)" ]
+  [ -z "$(row_of script)" ]
+  [ -z "$(row_of vscode)" ]
+  [ -z "$(row_of app)" ]
+}
+
+@test "sessions without a kind count as interactive" {
+  printf 'show_interactive=0\n' > "$CLAUDE_AGENTS_CONFIG"
+  add_state old '{"state":"busy"}'
+  run PLUGIN
+  [ -z "$(row_of old)" ]
+}
+
 @test "focus ignores unsafe pane and bundle values" {
   add_state s1 '{"state":"idle","herdrPane":"w2:p1; rm -rf /"}'
   run PLUGIN focus s1

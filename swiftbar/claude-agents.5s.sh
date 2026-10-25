@@ -329,7 +329,7 @@ ROWS_JQ='
 
   # Subagents: indented under their parent, informational only.
   def subagent_rows:
-    if $showSubagents then
+    if $f.subagents then
       (.subagents // {}) | to_entries | sort_by(.value.since) | .[]
       | "  \("↳ subagent: \(.value.type)" | fit)  working · \(ago(.value.since // $now)) | font=Menlo size=12 color=gray"
     else empty end;
@@ -378,19 +378,52 @@ load_herdr_titles() {
 }
 
 # render DATA — prints the SwiftBar menu for the loaded sessions.
+FILTERS_JQ='
+  # Hidden session kinds are left out of the rows and the menu-bar count.
+  # (Not `// true`: jq treats false as missing there.)
+  def shown_kind($kind):
+    {interactive: $f.interactive, headless: $f.headless, ide: $f.ide, desktop: $f.ide}[$kind]
+    | if . == null then true else . end;
+  .sessions |= map(select(shown_kind(.kind // "interactive")))
+'
+
+# The Show section: one checkmark item per filter key.
+FOOTER_JQ='
+  def toggle($text; $key):
+    "\($text) | bash=\"\($plugin)\" param1=toggle param2=\($key) terminal=false refresh=true"
+    + (if $f[$key | ltrimstr("show_")] then " checked=true" else "" end);
+  "Show | color=gray",
+  toggle("Interactive"; "show_interactive"),
+  toggle("Headless (claude -p)"; "show_headless"),
+  toggle("Subagents"; "show_subagents"),
+  toggle("IDE / Desktop"; "show_ide")
+'
+
+# filters_json — the show_* config values as JSON booleans.
+filters_json() {
+  printf '{"interactive":%s,"headless":%s,"subagents":%s,"ide":%s}' \
+    "$([ "$cfg_show_interactive" = 1 ] && echo true || echo false)" \
+    "$([ "$cfg_show_headless" = 1 ] && echo true || echo false)" \
+    "$([ "$cfg_show_subagents" = 1 ] && echo true || echo false)" \
+    "$([ "$cfg_show_ide" = 1 ] && echo true || echo false)"
+}
+
 render() {
-  printf '%s' "$1" | "$JQ" -r \
+  _filters="$(filters_json)"
+  printf '%s' "$1" | "$JQ" -c --argjson f "$_filters" "$FILTERS_JQ" | "$JQ" -r \
+    --argjson f "$_filters" \
     --arg icon "$cfg_icon" --argjson c "$COLORS" \
     --argjson now "$(now_ms)" --argjson width "$LABEL_WIDTH" \
     --arg plugin "$plugin_path" \
     --argjson herdr "$(if [ -n "$(find_herdr)" ]; then echo true; else echo false; fi)" \
     --argjson titles "$(load_herdr_titles)" \
-    --argjson showSubagents "$([ "$cfg_show_subagents" = 1 ] && echo true || echo false)" \
     "$HEADER_JQ"'
     , "---"
     , (if .invalid > 0 then "\(.invalid) state file(s) could not be read | color=gray" else empty end)
     , (if (.sessions | length) == 0 then "No Claude Code sessions | color=gray" else empty end)
     , ('"$ROWS_JQ"')
+    , "---"
+    , ('"$FOOTER_JQ"')
     , "---"
     , "Refresh | refresh=true"
   '
@@ -433,6 +466,16 @@ run_action() {
   case "$1" in
     focus)
       focus_session "$2"
+      ;;
+    toggle)
+      case "$2" in
+        show_interactive) _value="$cfg_show_interactive" ;;
+        show_headless) _value="$cfg_show_headless" ;;
+        show_subagents) _value="$cfg_show_subagents" ;;
+        show_ide) _value="$cfg_show_ide" ;;
+        *) return 0 ;;
+      esac
+      if [ "$_value" = 1 ]; then set_config "$2" 0; else set_config "$2" 1; fi
       ;;
     copy-id)
       session_field "$2" '.sessionId' | tr -d '\n' | pbcopy

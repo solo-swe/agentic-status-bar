@@ -1096,7 +1096,8 @@
           "text": "Subagent rows indented under the parent (gray, oldest first), excluded from menu-bar counts, hidden with show_subagents=0; 3 tests",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "6362981a945727357332331fe4b83878766f7653"
     },
     {
       "id": "T-030",
@@ -1111,7 +1112,7 @@
       "use_cases": [
         "U9"
       ],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-017",
         "T-008"
@@ -1120,7 +1121,20 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T07:35:15Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T07:32:39Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T07:35:15Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T07:35:15Z",
+          "kind": "outcome",
+          "text": "Show section with checkmark toggles (config via toggle action), hidden kinds excluded from rows and counts (desktop follows show_ide, missing kind = interactive); fixed jq '// true' false-as-missing bug; 6 tests",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-031",
