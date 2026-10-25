@@ -94,6 +94,13 @@ EOF
   [ -x "$output" ]
 }
 
+@test "CLAUDE_AGENTS_JQ overrides the jq lookup" {
+  CLAUDE_AGENTS_JQ=/nonexistent/jq run find_jq
+  [ -z "$output" ]
+  CLAUDE_AGENTS_JQ=/usr/bin/jq run find_jq
+  [ "$output" = /usr/bin/jq ]
+}
+
 @test "log_once writes each key only once" {
   load_config
   log_once registry-schema "first message"

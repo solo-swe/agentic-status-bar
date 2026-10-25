@@ -99,7 +99,12 @@ atomic_write() {
 }
 
 # find_jq — prints the path of jq, or nothing if it isn't installed.
+# CLAUDE_AGENTS_JQ, when set, is the only candidate (used by tests).
 find_jq() {
+  if [ -n "${CLAUDE_AGENTS_JQ+set}" ]; then
+    [ -x "$CLAUDE_AGENTS_JQ" ] && printf '%s\n' "$CLAUDE_AGENTS_JQ"
+    return 0
+  fi
   for _ca_jq in /usr/bin/jq /opt/homebrew/bin/jq /usr/local/bin/jq; do
     if [ -x "$_ca_jq" ]; then
       printf '%s\n' "$_ca_jq"

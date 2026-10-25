@@ -404,7 +404,8 @@
           "text": "SessionEnd removes the state file under the session lock; 2 tests",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "9c421ab6cb63b294cbe25a2338e29013047a9f1b"
     },
     {
       "id": "T-012",
@@ -421,7 +422,7 @@
         "U2",
         "U5"
       ],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-002",
         "T-008",
@@ -433,7 +434,20 @@
         "tests/hook.bats"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T07:10:16Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T07:09:41Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T07:10:16Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T07:10:16Z",
+          "kind": "outcome",
+          "text": "Hook test suite complete: per-event behavior, all fixtures silent, missing jq, held lock, unsafe IDs, stale events (30 hook tests, 44 total)",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-013",

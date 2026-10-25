@@ -249,6 +249,30 @@ teardown() { common_teardown; }
   [ -z "$output" ]
 }
 
+@test "every captured payload runs silently with exit 0" {
+  for f in "$REPO_ROOT"/tests/fixtures/payloads/*.json; do
+    run "$REPO_ROOT/hooks/state-hook.sh" < "$f"
+    [ "$status" -eq 0 ] || { echo "failed: $f"; false; }
+    [ -z "$output" ] || { echo "output from $f: $output"; false; }
+  done
+}
+
+@test "hook does nothing and exits 0 when jq is missing" {
+  CLAUDE_AGENTS_JQ=/nonexistent/jq run_hook SessionStart
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+  [ ! -e "$(state_file)" ]
+}
+
+@test "hook gives up quietly when the session lock is held" {
+  mkdir "$(state_file).lock"
+  run_hook SessionStart
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+  [ ! -e "$(state_file)" ]
+  [ -d "$(state_file).lock" ]
+}
+
 @test "hook ignores unsafe session IDs" {
   run "$REPO_ROOT/hooks/state-hook.sh" <<< '{"hook_event_name":"SessionStart","session_id":"../../escape"}'
   [ "$status" -eq 0 ]
