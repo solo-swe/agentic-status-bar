@@ -250,6 +250,8 @@ on_user_prompt_submit() {
       then .promptPreview = ($prompt | gsub("\\s+"; " ") | ltrimstr(" ") | .[0:80])
       elif $store != "1" then del(.promptPreview)
       else . end
+    # When the user last sent a prompt: it lifts a mute on the project.
+    | if $prompt | startswith($skip) then . else .promptAt = $now end
   ' \
     --arg prompt "$p_prompt" \
     --arg skip "$TASK_NOTIFICATION_PREFIX" \

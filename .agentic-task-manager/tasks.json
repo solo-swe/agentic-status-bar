@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 41
+    "next_id": 42
   },
   "tasks": [
     {
@@ -1490,6 +1490,33 @@
       "started_at": "2026-10-25T20:30:58Z",
       "started_by": "claude:c631bc24",
       "completed_at": "2026-10-25T20:34:36Z",
+      "completed_by": "claude:c631bc24"
+    },
+    {
+      "id": "T-041",
+      "name": "Mute a project for an hour or for today from its row",
+      "phase": 4,
+      "type": "feature",
+      "description": "Each session row's submenu gets 'Mute project for 1 hour' and 'Mute project for today' (until local midnight), or 'Unmute project' when muted. Mutes are per project (cwd), stored in the state dir outside the session files, and expire on their own. A muted session that is idle, stale or busy shows a gray bell.slash icon, sorts to the bottom with 'muted until HH:MM', and doesn't count in the menu bar; a waiting session still breaks through. When every shown session is muted the menu bar shows a gray bell.slash with no number. Sending a prompt in a muted project unmutes it (hook records promptAt; the plugin drops mutes older than a newer prompt). 'Unmute all' appears in the footer while anything is muted. Tests, README and PRD.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "done",
+      "dependencies": [],
+      "files": [
+        "swiftbar/swiftbar-claudecode-minimal.5s.sh",
+        "hooks/state-hook.sh",
+        "tests/mute.bats",
+        "tests/hook.bats",
+        "README.md",
+        "doc/PRD.md"
+      ],
+      "created_at": "2026-10-25T20:38:47Z",
+      "updated_at": "2026-10-25T20:43:30Z",
+      "created_by": "claude:c631bc24",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T20:38:47Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T20:43:30Z",
       "completed_by": "claude:c631bc24"
     }
   ]

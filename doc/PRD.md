@@ -57,6 +57,7 @@ The one job: a glance at the menu bar answers "does any agent need me, and which
 | U8 | see when the plugin is unsure | A session with no activity for longer than the stale threshold shows "?" |
 | U9 | hide session types I don't care about | Dropdown toggles for interactive, headless, subagents, IDE and desktop; all on by default |
 | U10 | install and remove it easily | One install command; uninstall removes hooks and files cleanly |
+| U11 | mute a project I'm not working on today | Mute a project for 1 hour or until midnight from its row; its idle sessions stop counting, but waiting ones still alert me |
 
 ## UX
 
@@ -70,8 +71,11 @@ One menu-bar item shows the single most urgent state plus the number of sessions
 | 2 | Any session idle | Yellow icon + count of idle sessions |
 | 3 | Any session uncertain ("?") | Gray icon + "?" + count |
 | 4 | All sessions busy | Dimmed icon + count of sessions |
-| 5 | No tracked sessions | Faint icon, no count |
+| 5 | Every session is muted | Gray `bell.slash`, no count |
+| 6 | No tracked sessions | Faint icon, no count |
 | — | State files unreadable or schema mismatch | Warning icon; dropdown explains |
+
+Muted sessions are left out of priorities 2 to 4; a muted session that is waiting still counts for priority 1.
 
 Each state has its own SF Symbol variant, so color is never the only signal (base symbol default `sparkle`, configurable), tinted with SwiftBar's `sfcolor`, with light and dark colors.
 
@@ -89,11 +93,12 @@ Settings… · Refresh · About
 ```
 
 - **Icon:** each row starts with the menu-bar symbol and color of its state (drawn above as `!`, `z`, `?`, `✦`), so a row can be matched to the menu-bar icon.
-- **Order:** waiting, idle, uncertain, busy; within a state, longest in state first.
+- **Order:** waiting, idle, uncertain, busy, then muted; within a state, longest in state first.
 - **Label:** project (cwd basename) + task title. Title source in order: herdr terminal title, Claude Code session name, first user prompt (truncated). Truncate to 48 characters.
 - **Right side:** state word (permission, question, idle, working, no activity) and time in state.
 - **Subagents** appear indented under their parent, never as separate rows, and never raise the menu-bar state on their own.
 - **Click a row:** focus the session's herdr pane (see Architecture: focus). Rows without a herdr pane are not clickable and show "not in herdr" in their submenu. **Option-click or submenu:** copy session ID, copy cwd, open folder in Finder, reveal transcript.
+- **Mute:** each row's submenu has "Mute project for 1 hour" and "Mute project for today" (until local midnight), or "Unmute project" while muted; "Unmute all projects" sits above the filters while any mute is active. A mute is keyed by the project's cwd, so it covers every session there, including later ones. Muted sessions (unless waiting) show a gray `bell.slash`, sort last and read "muted until HH:MM" or "muted today". A prompt sent in the project after the mute lifts it (the hook records `promptAt` on UserPromptSubmit). Mutes live in `mutes` in the state dir, `{cwd: {until, at, today}}` with epoch ms; expired ones are ignored and dropped on the next change.
 - **Filter toggles** are checkmark items; clicking one updates the config file and refreshes. Hidden types are excluded from the menu-bar count too.
 - **Settings submenu:** stale threshold (10m, 30m, 60m, off), icon, refresh hook on or off, reveal config file.
 
@@ -178,6 +183,7 @@ Every write is atomic (write to a temp file, then `mv`) and stamps `updatedAt` i
   "transcriptPath": "~/.claude/projects/.../3f9c2a7e.jsonl",
   "lastTool": "Bash",
   "promptPreview": "Add rate limiting to…",
+  "promptAt": 1792891060000,
   "subagents": { "<agent_id>": { "type": "Explore", "since": 1792891070000 } }
 }
 ```

@@ -137,6 +137,14 @@ teardown() { common_teardown; }
   [ "$(state_field .promptPreview)" = "Add rate limiting to the auth routes" ]
 }
 
+@test "a user prompt records promptAt, a background task notification doesn't" {
+  run_hook UserPromptSubmit
+  first="$(state_field .promptAt)"
+  [ "$first" -gt 1700000000000 ]
+  run_hook UserPromptSubmit-task-notification
+  [ "$(state_field .promptAt)" = "$first" ]
+}
+
 @test "no prompt preview is stored when store_prompt_preview=0" {
   printf 'store_prompt_preview=0\n' > "$CLAUDE_STATUSBAR_CONFIG"
   run_hook UserPromptSubmit

@@ -82,8 +82,13 @@ COLORS='{
   "uncertain": "#8E8E93,#98989D",
   "busy": "#6E6E73,#AEAEB2",
   "none": "#C7C7CC,#48484A",
+  "muted": "#8E8E93,#98989D",
   "warning": "#B25000,#FFD60A"
 }'
+
+# Muted projects, in the state dir: {cwd: {until, at, today}} with epoch ms.
+# Not a .json file, so it is never read as a session.
+MUTES_FILE=mutes
 
 # Width of the row label (project — title) before the state column.
 LABEL_WIDTH=48
@@ -231,11 +236,28 @@ FILTERS_JQ='
   .sessions |= map(select(shown_kind(.kind // "interactive")))
 '
 
+# Muted projects: a session whose project (cwd) has a mute that hasn't expired,
+# and hasn't been lifted by a prompt sent after it, gets `muteUntil`. Unless it
+# is waiting on the user, it is `muted`: out of the menu-bar count, last in the list.
+MUTES_JQ='
+  ([.sessions[] | select(.cwd != null and .promptAt != null) | {key: .cwd, value: .promptAt}]
+   | group_by(.key) | map({key: .[0].key, value: (map(.value) | max)}) | from_entries) as $prompted
+  | ($mutes | with_entries(select((.value.until // 0) > $now
+      and ((.value.at // 0) >= ($prompted[.key] // 0))))) as $active
+  | .activeMutes = ($active | length)
+  | .sessions |= map(
+      $active[.cwd // ""] as $m
+      | if $m == null then .
+        else .muteUntil = $m.until | .muteToday = ($m.today == true) | .muted = (.shown != "waiting") end)
+'
+
 # The menu-bar line: the most urgent state (waiting > idle > uncertain > busy)
 # and the number of sessions in it. Each state has its own symbol, so color is
-# never the only signal.
+# never the only signal. Muted sessions don't count; when all are muted, a
+# muted icon shows instead.
 HEADER_JQ='
-  def count($st): [.sessions[] | select(.shown == $st)] | length;
+  [.sessions[] | select(.muted != true)] as $loud
+  | def count($st): [$loud[] | select(.shown == $st)] | length;
   def title($text; $symbol; $color):
     "\($text) | sfimage=\($symbol) sfcolor=\($color) color=\($color)";
 
@@ -243,18 +265,20 @@ HEADER_JQ='
   elif count("waiting") > 0 then title(count("waiting"); "exclamationmark.circle.fill"; $c.waiting)
   elif count("idle") > 0 then title(count("idle"); "zzz"; $c.idle)
   elif count("uncertain") > 0 then title(count("uncertain"); "questionmark.circle"; $c.uncertain)
-  elif (.sessions | length) > 0 then title(.sessions | length; $icon; $c.busy)
+  elif ($loud | length) > 0 then title($loud | length; $icon; $c.busy)
+  elif (.sessions | length) > 0 then title(""; "bell.slash"; $c.muted)
   else title(""; $icon; $c.none)
   end
 '
 
 # One row per session, most urgent first; within a state, longest in it first.
 ROWS_JQ='
-  def rank: {waiting: 0, idle: 1, uncertain: 2, busy: 3}[.shown] // 4;
+  def rank: if .muted then 5 else {waiting: 0, idle: 1, uncertain: 2, busy: 3}[.shown] // 4 end;
   # The same symbol and color the menu bar uses for this state.
   def state_icon:
-    {waiting: ["exclamationmark.circle.fill", $c.waiting], idle: ["zzz", $c.idle],
-     uncertain: ["questionmark.circle", $c.uncertain]}[.shown] // [$icon, $c.busy]
+    (if .muted then ["bell.slash", $c.muted] else
+      {waiting: ["exclamationmark.circle.fill", $c.waiting], idle: ["zzz", $c.idle],
+       uncertain: ["questionmark.circle", $c.uncertain]}[.shown] // [$icon, $c.busy] end)
     | " sfimage=\(.[0]) sfcolor=\(.[1])";
   def word:
     if .shown == "waiting" then (if .reason == "question" then "question" else "permission" end)
@@ -262,6 +286,9 @@ ROWS_JQ='
     elif .shown == "uncertain" then "no activity"
     else "working" end;
   def since: .shownSince // .stateSince // $now;
+  def mute_text:
+    if .muteToday then "muted today"
+    else "muted until \(.muteUntil / 1000 | floor | localtime | strftime("%H:%M"))" end;
   # Time since $t (epoch ms) as 12s, 4m, 2h or 3d.
   def ago($t): (($now - $t) / 1000 | floor | if . < 0 then 0 else . end) as $s
     | if $s < 60 then "\($s)s" elif $s < 3600 then "\($s / 60 | floor)m"
@@ -295,8 +322,12 @@ ROWS_JQ='
   .sessions
   | sort_by(rank, since)
   | .[]
-  | "\(row_label)  \(word) · \(duration) | font=Menlo size=12\(state_icon)\(click)",
+  | "\(row_label)  \(word) · \(if .muted then mute_text else duration end) | font=Menlo size=12\(state_icon)\(click)",
     (if can_focus then empty else "--Not in herdr: click to focus is unavailable | color=gray" end),
+    (if .cwd == null then empty
+     elif .muteUntil then action("Unmute project"; "unmute") + " refresh=true"
+     else action("Mute project for 1 hour"; "mute-hour") + " refresh=true",
+          action("Mute project for today"; "mute-today") + " refresh=true" end),
     action("Copy session ID"; "copy-id"),
     action("Copy working directory"; "copy-cwd"),
     (if .cwd then action("Open folder in Finder"; "open-folder") else empty end),
@@ -316,6 +347,7 @@ FOOTER_JQ='
   def stale_option($text; $minutes):
     "----\($text)" + run("param1=set param2=stale_minutes param3=\($minutes)") + check($s.stale_minutes == $minutes);
 
+  (if .activeMutes > 0 then "Unmute all projects" + run("param1=unmute-all") else empty end),
   "Show | color=gray",
   toggle("Interactive"; "show_interactive"),
   toggle("Headless (claude -p)"; "show_headless"),
@@ -345,11 +377,12 @@ REFRESH_JQ='
   | $T.tails as $tails
   | $T.mtimes as $mtimes
   | ($herdrList | parse_titles) as $titles
+  | ($mutesRaw | try fromjson catch {} | if type == "object" then . else {} end) as $mutes
   | ($sessions | parse_sessions)
   | ('"$CHECKS_JQ"')
   | ((.dead[] | "##dead\t\(.)"),
      (if .registrySchemaIssue then "##schema" else empty end),
-     ('"$FILTERS_JQ"'
+     ('"$FILTERS_JQ"' | '"$MUTES_JQ"'
       | ('"$HEADER_JQ"'),
         "---",
         (if .invalid > 0 then "\(.invalid) state file(s) could not be read | color=gray" else empty end),
@@ -414,8 +447,11 @@ refresh() {
     run_with_timeout "$HERDR_LIST_TIMEOUT" "$_herdr" agent list > "$_herdr_file" 2>/dev/null
   fi
 
+  _mutes_file="$cfg_state_dir/$MUTES_FILE"
+  [ -f "$_mutes_file" ] || _mutes_file=/dev/null
+
   "$JQ" -n -r \
-    --arg sessions "$_sessions" --arg transcripts "$_transcripts" \
+    --arg sessions "$_sessions" --arg transcripts "$_transcripts" --rawfile mutesRaw "$_mutes_file" \
     --arg registry "$_registry" --arg ps "$_ps" --rawfile herdrList "$_herdr_file" \
     --argjson maxv "$MAX_STATE_VERSION" --arg marker "$INTERRUPT_MARKER" \
     --argjson stale "$cfg_stale_minutes" \
@@ -475,6 +511,36 @@ focus_session() {
   return 0
 }
 
+# update_mutes FILTER [JQ ARGS] — rewrites the mutes file through FILTER, which
+# can use $now and $midnight (next local midnight), both epoch ms. Expired
+# mutes and an unreadable file are dropped.
+update_mutes() {
+  _filter="$1"
+  shift
+  _mutes="$cfg_state_dir/$MUTES_FILE"
+  _old=/dev/null
+  [ -f "$_mutes" ] && _old="$_mutes"
+  mkdir -p "$cfg_state_dir" || return 0
+  "$JQ" -c -R -s "$@" '
+    (now * 1000 | floor) as $now
+    | ((now | floor) as $n | ($n | localtime | mktime) - $n) as $tzoffset
+    | (now | floor | localtime | .[2] += 1 | .[3] = 0 | .[4] = 0 | .[5] = 0
+       | (mktime - $tzoffset) * 1000) as $midnight
+    | (try fromjson catch {}) | (if type == "object" then . else {} end)
+    | '"$_filter"'
+    | with_entries(select((.value.until // 0) > $now))
+  ' "$_old" 2>/dev/null | atomic_write "$_mutes"
+}
+
+# mute_project SESSION_ID FILTER [JQ ARGS] — update_mutes for the session's cwd as $cwd.
+mute_project() {
+  _cwd="$(session_field "$1" '.cwd')"
+  [ -n "$_cwd" ] || return 0
+  _filter="$2"
+  shift 2
+  update_mutes "$_filter" --arg cwd "$_cwd" "$@"
+}
+
 # write_default_config — a config file with every key at its current value.
 write_default_config() {
   cat <<EOF
@@ -525,6 +591,18 @@ run_action() {
         write_default_config > "$_config"
       fi
       open -R "$_config"
+      ;;
+    mute-hour)
+      mute_project "$2" '.[$cwd] = {until: ($now + 3600000), at: $now, today: false}'
+      ;;
+    mute-today)
+      mute_project "$2" '.[$cwd] = {until: $midnight, at: $now, today: true}'
+      ;;
+    unmute)
+      mute_project "$2" 'del(.[$cwd])'
+      ;;
+    unmute-all)
+      update_mutes '{}'
       ;;
     copy-id)
       session_field "$2" '.sessionId' | tr -d '\n' | pbcopy

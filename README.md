@@ -17,6 +17,7 @@ The menu-bar item shows one icon for the most urgent state across all sessions, 
 | `zzz`                             | Orange     | Idle            | An agent has finished and is waiting for your next prompt                 |
 | Question mark in a circle         | Gray       | Stale           | A busy agent has shown no activity for longer than the stale threshold    |
 | Sparkle (the `icon` setting)      | Dim gray   | All sessions    | All agents are working; nothing needs you                                 |
+| Bell with a slash, no number      | Gray       | —               | Every session is in a muted project                                       |
 | Sparkle, no number                | Very faint | —               | No Claude Code sessions running                                           |
 
 Because only the most urgent state is shown, a red `1` can hide idle sessions behind it; the dropdown lists every session with its own state. The icons never animate.
@@ -43,6 +44,15 @@ Refresh
 Row titles come from the herdr terminal title, a session name you gave the session, or the first prompt, in that order.
 
 If a session runs in a [herdr](https://herdr.dev) pane, clicking its row jumps to that pane. Without herdr, clicking does nothing, and each row's submenu still lets you copy the session ID or working directory, open the folder or reveal the transcript. Support for other tools (VS Code, other terminals) is planned.
+
+### Muting a project
+
+Not working on a project today? Its idle `zzz` doesn't have to sit in the menu bar. Each row's submenu has **Mute project for 1 hour** and **Mute project for today** (until midnight). A mute covers every session in that project folder, including ones you start later:
+
+- muted sessions don't count in the menu bar and move to the bottom of the dropdown with a gray bell-with-slash icon and `muted until 18:40` or `muted today`;
+- a muted session that is waiting on a permission prompt or a question still turns the menu bar red;
+- sending a prompt in a muted project unmutes it;
+- **Unmute project** in the submenu, or **Unmute all projects** above the filters, ends a mute early.
 
 ## How it works
 
