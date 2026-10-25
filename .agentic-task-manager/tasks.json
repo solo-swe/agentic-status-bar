@@ -1597,17 +1597,28 @@
       "description": "Write doc/design/future-architecture.md comparing three directions for the product: (a) stay a SwiftBar plugin, (b) a standalone macOS menu-bar app (e.g. Swift/SwiftUI MenuBarExtra: native colors, notifications, launch at login, no SwiftBar dependency, signing and distribution cost), (c) integrating with atm (agentic-task-manager): showing tasks and loop progress next to sessions, or atm's dashboard consuming this project's state files. For each: what it enables, cost, risks, what of today's hooks and state files carries over, and migration path. End with a recommendation and the open questions for the user. Docs only; no code changes.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "doc/design/future-architecture.md"
       ],
       "created_at": "2026-10-25T21:22:52Z",
-      "updated_at": "2026-10-25T21:56:01Z",
+      "updated_at": "2026-10-25T21:57:03Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T21:56:01Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "fef381e931358cca5b41b086d70071bffc3aac2a",
+      "completed_at": "2026-10-25T21:57:03Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T21:57:03Z",
+          "kind": "outcome",
+          "text": "doc/design/future-architecture.md: stay on SwiftBar, prototype atm tasks in rows (C-menu), revisit a native app when SwiftBar blocks a feature; 5 open questions",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-045",
@@ -1617,7 +1628,7 @@
       "description": "When a session's subagents are still running and the parent agent is waiting for them, the row and the menu bar show idle (zzz), although work is going on. Show it as working, or a distinct 'waiting on subagents' state with its own symbol. DISCUSS WITH THE USER BEFORE IMPLEMENTING: which state or symbol to use, whether it counts in the menu bar like busy, and how to detect it reliably (subagents map from SubagentStart/SubagentStop vs Stop ordering, background agents vs foreground ones, stale subagent entries when SubagentStop is missed).",
       "requirements": [],
       "use_cases": [],
-      "status": "blocked",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "hooks/state-hook.sh",
@@ -1626,15 +1637,19 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-10-25T21:41:09Z",
-      "updated_at": "2026-10-25T21:41:14Z",
+      "updated_at": "2026-10-25T22:01:55Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
-      "waiting_on": "user",
-      "questions": [
-        "When the parent is waiting on running subagents, should it show as working (sparkle, counted as busy) or as a new 'waiting on subagents' state with its own symbol?",
-        "Should a parent with background subagents still running count as busy in the menu bar, or stay idle since it is ready for your next prompt?"
+      "notes": [
+        {
+          "at": "2026-10-25T22:01:45Z",
+          "kind": "answer",
+          "text": "When the parent is waiting on running subagents, should it show as working (sparkle, counted as busy) or as a new 'waiting on subagents' state with its own symbol? → Its own 'waiting on subagents' icon.; Should a parent with background subagents still running count as busy in the menu bar, or stay idle since it is ready for your next prompt? → Counted as busy in the menu bar.",
+          "by": "claude:c631bc24"
+        }
       ],
-      "blocked_at": "2026-10-25T21:41:14Z"
+      "started_at": "2026-10-25T22:01:55Z",
+      "started_by": "claude:c631bc24"
     }
   ]
 }

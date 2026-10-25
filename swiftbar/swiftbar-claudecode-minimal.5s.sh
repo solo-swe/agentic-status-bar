@@ -80,24 +80,27 @@ HERDR_LIST_TIMEOUT=1
 THEMES='{
   "default": {
     "icons": {"waiting": "exclamationmark.circle.fill", "idle": "zzz", "uncertain": "questionmark.circle",
-              "busy": "sparkle", "muted": "bell.slash", "none": "sparkle", "warning": "exclamationmark.triangle"},
+              "busy": "sparkle", "subagents": "hourglass", "muted": "bell.slash", "none": "sparkle",
+              "warning": "exclamationmark.triangle"},
     "colors": {"waiting": "#D70015,#FF453A", "idle": "#B25000,#FFD60A", "uncertain": "#8E8E93,#98989D",
-               "busy": "#6E6E73,#AEAEB2", "muted": "#8E8E93,#98989D", "none": "#C7C7CC,#48484A",
-               "warning": "#B25000,#FFD60A"}
+               "busy": "#6E6E73,#AEAEB2", "subagents": "#6E6E73,#AEAEB2", "muted": "#8E8E93,#98989D",
+               "none": "#C7C7CC,#48484A", "warning": "#B25000,#FFD60A"}
   },
   "monochrome": {
     "icons": {"waiting": "exclamationmark.circle.fill", "idle": "zzz", "uncertain": "questionmark.circle",
-              "busy": "sparkle", "muted": "bell.slash", "none": "sparkle", "warning": "exclamationmark.triangle"},
+              "busy": "sparkle", "subagents": "hourglass", "muted": "bell.slash", "none": "sparkle",
+              "warning": "exclamationmark.triangle"},
     "colors": {"waiting": "#1D1D1F,#F5F5F7", "idle": "#1D1D1F,#F5F5F7", "uncertain": "#6E6E73,#AEAEB2",
-               "busy": "#6E6E73,#AEAEB2", "muted": "#8E8E93,#98989D", "none": "#C7C7CC,#48484A",
-               "warning": "#1D1D1F,#F5F5F7"}
+               "busy": "#6E6E73,#AEAEB2", "subagents": "#6E6E73,#AEAEB2", "muted": "#8E8E93,#98989D",
+               "none": "#C7C7CC,#48484A", "warning": "#1D1D1F,#F5F5F7"}
   },
   "high_contrast": {
     "icons": {"waiting": "exclamationmark.octagon.fill", "idle": "moon.zzz.fill", "uncertain": "questionmark.circle.fill",
-              "busy": "bolt.fill", "muted": "bell.slash.fill", "none": "circle.dotted", "warning": "exclamationmark.triangle.fill"},
+              "busy": "bolt.fill", "subagents": "hourglass.circle.fill", "muted": "bell.slash.fill",
+              "none": "circle.dotted", "warning": "exclamationmark.triangle.fill"},
     "colors": {"waiting": "#FF0000,#FF453A", "idle": "#C93400,#FFD60A", "uncertain": "#5856D6,#BF5AF2",
-               "busy": "#000000,#FFFFFF", "muted": "#636366,#AEAEB2", "none": "#8E8E93,#636366",
-               "warning": "#C93400,#FFD60A"}
+               "busy": "#000000,#FFFFFF", "subagents": "#000000,#FFFFFF", "muted": "#636366,#AEAEB2",
+               "none": "#8E8E93,#636366", "warning": "#C93400,#FFD60A"}
   }
 }'
 
@@ -235,13 +238,20 @@ CHECKS_JQ='
   | .sessions |= map(select(.alive) | del(.alive) | registry
       | ($tails[.transcriptPath // ""]) as $entries
       | if (.shown == "busy" or .shown == "waiting") and $entries != null and interrupted($entries)
-        then .shown = "idle" | .shownSince = .updatedAt
+        then .shown = "idle" | .shownSince = .updatedAt | .interrupted = true
         else . end
       | if .shown == "waiting" and .pid != null then
           approved_since as $t
           | if $t != null then .shown = "busy" | .shownSince = $t else . end
         else . end
-      | if .shown == "busy" and $stale > 0 then
+      # Subagents still running: the turn ended with background agents left
+      # (idle), or the parent is blocked in its Task/Agent tool (busy). An
+      # interrupt (C3) may have killed them without a SubagentStop, so it wins.
+      | if (.subagents // {}) != {} and (.interrupted | not)
+           and (.shown == "idle" or (.shown == "busy" and (.lastTool == "Task" or .lastTool == "Agent")))
+        then .shown = "subagents" | .shownSince = ([.subagents[].since // $now] | min)
+        else . end
+      | if (.shown == "busy" or .shown == "subagents") and $stale > 0 then
           last_activity as $t
           | if ($now - $t) > ($stale * 60000) then .shown = "uncertain" | .shownSince = $t else . end
         else . end)
@@ -298,16 +308,19 @@ HEADER_JQ='
 
 # One row per session, most urgent first; within a state, longest in it first.
 ROWS_JQ='
-  def rank: if .muted then 5 else {waiting: 0, idle: 1, uncertain: 2, busy: 3}[.shown] // 4 end;
+  def rank: if .muted then 5 else {waiting: 0, idle: 1, uncertain: 2, busy: 3, subagents: 3}[.shown] // 4 end;
   # The same symbol and color the menu bar uses for this state: [symbol, color].
   def state_icon:
-    (if .muted then "muted" elif .shown == "waiting" or .shown == "idle" or .shown == "uncertain" then .shown
+    (if .muted then "muted"
+     elif .shown == "waiting" or .shown == "idle" or .shown == "uncertain" or .shown == "subagents" then .shown
      else "busy" end) as $st
     | [$sym[$st], $c[$st]];
   def word:
     if .shown == "waiting" then (if .reason == "question" then "question" else "permission" end)
     elif .shown == "idle" then "idle"
     elif .shown == "uncertain" then "no activity"
+    elif .shown == "subagents" then
+      (.subagents | length) as $n | "waiting on \($n) subagent\(if $n == 1 then "" else "s" end)"
     else "working" end;
   def since: .shownSince // .stateSince // $now;
   def mute_text:
@@ -644,8 +657,8 @@ store_prompt_preview=$cfg_store_prompt_preview
 
 # Theme: default, monochrome or high_contrast.
 theme=$cfg_theme
-# Override the theme for one state (waiting, idle, uncertain, busy, muted, none,
-# warning) with an SF Symbol name and a #RRGGBB color or a light,dark pair, e.g.
+# Override the theme for one state (waiting, idle, uncertain, busy, subagents,
+# muted, none, warning) with an SF Symbol name and a #RRGGBB color or a light,dark pair, e.g.
 #   icon_idle=moon.zzz
 #   color_idle=#B25000,#FFD60A
 EOF

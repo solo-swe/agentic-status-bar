@@ -16,20 +16,22 @@ The menu-bar item shows one icon for the most urgent state across all sessions, 
 | Filled exclamation circle         | Red        | Waiting         | An agent is waiting on a permission prompt or a question                  |
 | `zzz`                             | Orange (yellow in dark mode) | Idle | An agent has finished and is waiting for your next prompt                 |
 | Question mark in a circle         | Gray       | Stale           | A busy agent has shown no activity for longer than the stale threshold    |
-| Sparkle (the `icon` setting)      | Dim gray   | All sessions    | All agents are working; nothing needs you                                 |
+| Sparkle (the `icon` setting)      | Dim gray   | All sessions    | All agents are working, or waiting on their own subagents; nothing needs you |
 | Bell with a slash, no number      | Gray       | —               | Every session is in a muted project                                       |
 | Sparkle, no number                | Very faint | —               | No Claude Code sessions running                                           |
 
 Because only the most urgent state is shown, a red `1` can hide idle sessions behind it; the dropdown lists every session with its own state. The icons never animate. Each icon and its number share the state's color, in the menu bar and on the session's row in the dropdown.
 
-The dropdown lists every session, most urgent first, then the filters and settings. Each row starts with the same icon and color as the menu bar uses for its state (drawn here as `!`, `z`, `?` and `✦`):
+The dropdown lists every session, most urgent first, then the filters and settings. Each row starts with the same icon and color as the menu bar uses for its state (drawn here as `!`, `z`, `?`, `✦` and `⌛`):
 
 ```
 ! api-gateway — Add rate limiting to auth routes   permission · 2m
 z web-dashboard — Fix flaky login test             idle · 14m
 ? data-pipeline — Refactor CSV parser              no activity · 41m
 ✦ docs-site — Migrate to the new theme             working · 30s
-  ↳ subagent: Explore                              working · 12s
+⌛ search-index — Rebuild the ranking              waiting on 2 subagents · 3m
+  ↳ subagent: Explore                              working · 3m
+  ↳ subagent: Plan                                 working · 1m
 ---
 Show
   ✓ Interactive
@@ -40,6 +42,8 @@ Settings…
 ---
 Refresh
 ```
+
+A session whose subagents are still running, after its own turn ended or while it waits in its Task tool, shows an hourglass and `waiting on N subagents`. In the menu bar it counts as working, not idle.
 
 Row titles come from the herdr terminal title, a session name you gave the session, or the first prompt, in that order.
 
@@ -118,7 +122,7 @@ Settings live in `~/.config/swiftbar-claudecode-minimal/config` (`key=value`). T
 | `use_registry`                                                    | `1`                                     | Use Claude Code's session registry when it is newer                      |
 | `instant_refresh`                                                 | `1`                                     | Hooks trigger an immediate SwiftBar refresh                              |
 | `theme`                                                           | `default`                               | `default`, `monochrome` or `high_contrast`; also under **Settings… → Theme** |
-| `icon_<state>`, `color_<state>`                                   | from the theme                          | Override one state's SF Symbol name, and its `#RRGGBB` color or `light,dark` pair. States: `waiting`, `idle`, `uncertain`, `busy`, `muted`, `none`, `warning` |
+| `icon_<state>`, `color_<state>`                                   | from the theme                          | Override one state's SF Symbol name, and its `#RRGGBB` color or `light,dark` pair. States: `waiting`, `idle`, `uncertain`, `busy`, `subagents`, `muted`, `none`, `warning` |
 | `icon`                                                            | from the theme                          | Older shortcut: SF Symbol for both the busy and empty icon               |
 | `store_prompt_preview`                                            | `1`                                     | Keep an 80-character prompt preview for row titles                       |
 | `state_dir`                                                       | `~/.claude/swiftbar-claudecode-minimal` | Where hooks write state files                                            |

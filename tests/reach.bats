@@ -152,10 +152,55 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
   [ "$other_line" -lt "$parent_line" ]
 }
 
-@test "subagents don't count toward the menu-bar state" {
-  add_state s1 '{"state":"idle","subagents":{"a1":{"type":"Explore","since":1}}}'
+@test "an idle parent with running subagents waits on them and counts as busy" {
+  now=$(( $(date +%s) * 1000 ))
+  add_state s1 "{\"state\":\"idle\",\"subagents\":{\"a1\":{\"type\":\"Explore\",\"since\":$(( now - 90000 ))},\"a2\":{\"type\":\"Plan\",\"since\":$(( now - 30000 ))}}}"
+  run PLUGIN
+  [ "${lines[0]}" = ":sparkle: 1 | sfcolor=#6E6E73,#AEAEB2 color=#6E6E73,#AEAEB2" ]
+  row="$(printf '%s\n' "${lines[@]}" | grep '^:hourglass: s1 ')"
+  [[ "$row" == *"  waiting on 2 subagents · 1m | font=Menlo size=12 sfcolor=#6E6E73,#AEAEB2"* ]]
+}
+
+@test "a parent blocked in its Task or Agent tool waits on its subagent" {
+  add_state s1 '{"state":"busy","lastTool":"Agent","subagents":{"a1":{"type":"Explore","since":1}}}'
+  add_state s2 '{"state":"busy","lastTool":"Task","subagents":{"a1":{"type":"Explore","since":1}}}'
+  run PLUGIN
+  [[ "$(printf '%s\n' "${lines[@]}" | grep '^:hourglass: s1 ')" == *"waiting on 1 subagent · "* ]]
+  [[ "$(printf '%s\n' "${lines[@]}" | grep -c '^:hourglass: ')" -eq 2 ]]
+}
+
+@test "a parent working with its own tools while subagents run stays working" {
+  add_state s1 '{"state":"busy","lastTool":"Bash","subagents":{"a1":{"type":"Explore","since":1}}}'
+  run PLUGIN
+  [[ "$(row_of s1)" == *"working · "* ]]
+}
+
+@test "a parent waiting on the user stays waiting while subagents run" {
+  add_state s1 '{"state":"waiting","reason":"permission","subagents":{"a1":{"type":"Explore","since":1}}}'
+  run PLUGIN
+  [[ "${lines[0]}" == ":exclamationmark.circle.fill: 1 | "* ]]
+}
+
+@test "an interrupt wins over leftover subagents" {
+  cp "$REPO_ROOT/tests/fixtures/transcripts/denied-permission.jsonl" "$TEST_TMP/t.jsonl"
+  add_state s1 "{\"state\":\"busy\",\"lastTool\":\"Agent\",\"transcriptPath\":\"$TEST_TMP/t.jsonl\",\"subagents\":{\"a1\":{\"type\":\"Explore\",\"since\":1}}}"
   run PLUGIN
   [[ "${lines[0]}" == ":zzz: 1 | "* ]]
+}
+
+@test "a parent waiting on subagents with no activity past the threshold shows ?" {
+  old=$(( ($(date +%s) - 45 * 60) * 1000 ))
+  printf '{"v":1,"sessionId":"s1","state":"idle","updatedAt":%s,"subagents":{"a1":{"type":"Explore","since":%s}}}' "$old" "$old" \
+    > "$CLAUDE_STATUSBAR_STATE_DIR/s1.json"
+  run PLUGIN
+  [[ "${lines[0]}" == ":questionmark.circle: 1 | "* ]]
+}
+
+@test "the subagents icon and color follow the theme and overrides" {
+  printf 'theme=high_contrast\ncolor_subagents=#112233\n' > "$CLAUDE_STATUSBAR_CONFIG"
+  add_state s1 '{"state":"idle","subagents":{"a1":{"type":"Explore","since":1}}}'
+  run PLUGIN
+  [[ "$(printf '%s\n' "${lines[@]}" | grep '^:hourglass.circle.fill: s1 ')" == *"sfcolor=#112233"* ]]
 }
 
 @test "subagent rows are hidden when show_subagents=0" {

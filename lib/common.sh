@@ -6,11 +6,11 @@
 
 # Menu-bar states that a theme gives an icon and a color; icon_<state> and
 # color_<state> override the theme for one state.
-CA_THEME_STATES="waiting idle uncertain busy muted none warning"
+CA_THEME_STATES="waiting idle uncertain busy subagents muted none warning"
 
 CA_CONFIG_KEYS="show_interactive show_headless show_subagents show_ide stale_minutes use_registry instant_refresh icon store_prompt_preview state_dir theme"
-CA_CONFIG_KEYS="$CA_CONFIG_KEYS icon_waiting icon_idle icon_uncertain icon_busy icon_muted icon_none icon_warning"
-CA_CONFIG_KEYS="$CA_CONFIG_KEYS color_waiting color_idle color_uncertain color_busy color_muted color_none color_warning"
+CA_CONFIG_KEYS="$CA_CONFIG_KEYS icon_waiting icon_idle icon_uncertain icon_busy icon_subagents icon_muted icon_none icon_warning"
+CA_CONFIG_KEYS="$CA_CONFIG_KEYS color_waiting color_idle color_uncertain color_busy color_subagents color_muted color_none color_warning"
 
 ca_config_file() {
   printf '%s\n' "${CLAUDE_STATUSBAR_CONFIG:-$HOME/.config/swiftbar-claudecode-minimal/config}"
@@ -66,8 +66,8 @@ load_config() {
   cfg_store_prompt_preview=1
   cfg_state_dir="$HOME/.claude/swiftbar-claudecode-minimal"
   cfg_theme=default
-  cfg_icon_waiting='' cfg_icon_idle='' cfg_icon_uncertain='' cfg_icon_busy='' cfg_icon_muted='' cfg_icon_none='' cfg_icon_warning=''
-  cfg_color_waiting='' cfg_color_idle='' cfg_color_uncertain='' cfg_color_busy='' cfg_color_muted='' cfg_color_none='' cfg_color_warning=''
+  cfg_icon_waiting='' cfg_icon_idle='' cfg_icon_uncertain='' cfg_icon_busy='' cfg_icon_subagents='' cfg_icon_muted='' cfg_icon_none='' cfg_icon_warning=''
+  cfg_color_waiting='' cfg_color_idle='' cfg_color_uncertain='' cfg_color_busy='' cfg_color_subagents='' cfg_color_muted='' cfg_color_none='' cfg_color_warning=''
 
   _ca_file="$(ca_config_file)"
   if [ -r "$_ca_file" ]; then
