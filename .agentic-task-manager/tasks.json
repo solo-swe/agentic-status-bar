@@ -136,7 +136,7 @@
         "lib/common.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:52:19Z",
+      "updated_at": "2026-10-25T06:52:20Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T06:51:03Z",
       "started_by": "claude:c631bc24",
@@ -149,7 +149,8 @@
           "text": "lib/common.sh: load_config/set_config with key+value whitelist, now_ms, atomic_write, find_jq, log_once; shellcheck clean",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "e00838395e1fdc2f802c119b3fedccc74cee3c78"
     },
     {
       "id": "T-005",
@@ -161,7 +162,7 @@
         "NFR-Testability"
       ],
       "use_cases": [],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-002",
         "T-004"
@@ -170,7 +171,20 @@
         "tests/common.bats"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T06:52:44Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T06:52:20Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T06:52:44Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T06:52:44Z",
+          "kind": "outcome",
+          "text": "10 tests for lib/common.sh incl. injection attempts; suite 13/13 green",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-006",
