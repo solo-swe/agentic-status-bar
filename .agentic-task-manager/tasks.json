@@ -12,13 +12,36 @@
       "phase": 0,
       "type": "infra",
       "description": "Create the repo layout from doc/PRD.md 'Repo layout': directories .claude-plugin/, hooks/, swiftbar/, lib/, tests/, tests/fixtures/. Add an MIT LICENSE (copyright holder: the repo owner, year 2026) and a .gitignore that ignores .DS_Store, tests/tmp/ and *.log. Add a placeholder .gitkeep where a directory would otherwise be empty. Do not create any scripts yet.",
-      "requirements": ["M1"],
+      "requirements": [
+        "M1"
+      ],
       "use_cases": [],
-      "status": "todo",
+      "status": "done",
       "dependencies": [],
-      "files": ["LICENSE", ".gitignore", ".claude-plugin/.gitkeep", "hooks/.gitkeep", "swiftbar/.gitkeep", "lib/.gitkeep", "tests/fixtures/.gitkeep"],
+      "files": [
+        "LICENSE",
+        ".gitignore",
+        ".claude-plugin/.gitkeep",
+        "hooks/.gitkeep",
+        "swiftbar/.gitkeep",
+        "lib/.gitkeep",
+        "tests/fixtures/.gitkeep"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T06:29:20Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T06:28:07Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T06:29:20Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T06:29:20Z",
+          "kind": "outcome",
+          "text": "Layout dirs, MIT LICENSE, .gitignore",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-002",
@@ -26,11 +49,19 @@
       "phase": 0,
       "type": "infra",
       "description": "Add tests/run.sh that runs all tests/*.bats with bats-core (print an install hint and exit 1 if `bats` is not on PATH). Add tests/test_helper.bash that, per test, creates a temp dir under tests/tmp/ and exports HOME, CLAUDE_AGENTS_STATE_DIR (state files), CLAUDE_AGENTS_CONFIG (config file path) and CLAUDE_AGENTS_REGISTRY_DIR (stand-in for ~/.claude/sessions) into it, and removes it in teardown. Include a helper to put a fake-command dir first on PATH so tests can stub `ps`, `herdr` and `open`. Add one smoke test (tests/smoke.bats) proving the helper works.",
-      "requirements": ["NFR-Testability"],
+      "requirements": [
+        "NFR-Testability"
+      ],
       "use_cases": [],
       "status": "todo",
-      "dependencies": ["T-001"],
-      "files": ["tests/run.sh", "tests/test_helper.bash", "tests/smoke.bats"],
+      "dependencies": [
+        "T-001"
+      ],
+      "files": [
+        "tests/run.sh",
+        "tests/test_helper.bash",
+        "tests/smoke.bats"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -40,11 +71,19 @@
       "phase": 0,
       "type": "infra",
       "description": "Register a temporary capture hook (project-local .claude/settings.local.json, not committed) that appends stdin plus selected env vars (CLAUDE_CODE_ENTRYPOINT, HERDR_PANE_ID, __CFBundleIdentifier, TERM_PROGRAM, PPID) to a scratch file for SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Notification, Stop, SubagentStart, SubagentStop and SessionEnd. Trigger each: a permission prompt, an AskUserQuestion/elicitation, a 60 s idle notification, an Esc interrupt, a subagent run. Save one sanitized payload per event/notification type to tests/fixtures/payloads/<event>[-<type>].json (replace real paths, project names and IDs with made-up values). Record the exact user-interrupt marker text found in the transcript. Check whether `herdr agent focus` takes a pane ID or agent ID and whether it raises the host terminal. Update the 'Open questions' checklist in doc/PRD.md with the answers, then remove the capture hook.",
-      "requirements": ["PRD-OpenQuestions", "C3"],
+      "requirements": [
+        "PRD-OpenQuestions",
+        "C3"
+      ],
       "use_cases": [],
       "status": "todo",
-      "dependencies": ["T-001"],
-      "files": ["tests/fixtures/payloads/", "doc/PRD.md"],
+      "dependencies": [
+        "T-001"
+      ],
+      "files": [
+        "tests/fixtures/payloads/",
+        "doc/PRD.md"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -54,11 +93,19 @@
       "phase": 0,
       "type": "feature",
       "description": "Create lib/common.sh (POSIX sh, sourced by hook and plugin). Provide: (1) load_config — reads ${CLAUDE_AGENTS_CONFIG:-~/.config/claude-agents/config} as key=value lines (ignore comments/unknown keys, never eval arbitrary content) with defaults show_interactive=1 show_headless=1 show_subagents=1 show_ide=1 stale_minutes=30 use_registry=1 instant_refresh=1 icon=sparkle store_prompt_preview=1 state_dir=${CLAUDE_AGENTS_STATE_DIR:-~/.claude/swiftbar-agents}; (2) set_config KEY VALUE — rewrites one key atomically; (3) now_ms — epoch milliseconds using stock macOS tools (e.g. perl -MTime::HiRes); (4) atomic_write FILE — reads stdin, writes FILE.tmp.$$ in the same dir, then mv; (5) find_jq — /usr/bin/jq, then /opt/homebrew/bin/jq, /usr/local/bin/jq, else empty; (6) log_once KEY MSG — appends to $state_dir/plugin.log only if KEY not logged before.",
-      "requirements": ["NFR-Portability", "NFR-Reliability", "Config"],
+      "requirements": [
+        "NFR-Portability",
+        "NFR-Reliability",
+        "Config"
+      ],
       "use_cases": [],
       "status": "todo",
-      "dependencies": ["T-001"],
-      "files": ["lib/common.sh"],
+      "dependencies": [
+        "T-001"
+      ],
+      "files": [
+        "lib/common.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -68,11 +115,18 @@
       "phase": 0,
       "type": "test",
       "description": "Add tests/common.bats covering: defaults when no config file; overrides from a config file; unknown keys and malicious lines (e.g. `x=$(touch pwned)`) are ignored and not executed; set_config changes one key and keeps others; now_ms returns a 13-digit number; atomic_write leaves no .tmp file and produces exact content; find_jq returns a path when jq exists; log_once writes a key only once.",
-      "requirements": ["NFR-Testability"],
+      "requirements": [
+        "NFR-Testability"
+      ],
       "use_cases": [],
       "status": "todo",
-      "dependencies": ["T-002", "T-004"],
-      "files": ["tests/common.bats"],
+      "dependencies": [
+        "T-002",
+        "T-004"
+      ],
+      "files": [
+        "tests/common.bats"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -82,11 +136,17 @@
       "phase": 0,
       "type": "infra",
       "description": "Add .github/workflows/ci.yml running on push and pull_request on macos-latest: install bats-core and shellcheck via Homebrew, run `shellcheck -s sh` on hooks/*.sh, swiftbar/*.sh, lib/*.sh, install.sh, uninstall.sh (skip files that don't exist yet), then run tests/run.sh.",
-      "requirements": ["NFR-Testability"],
+      "requirements": [
+        "NFR-Testability"
+      ],
       "use_cases": [],
       "status": "todo",
-      "dependencies": ["T-002"],
-      "files": [".github/workflows/ci.yml"],
+      "dependencies": [
+        "T-002"
+      ],
+      "files": [
+        ".github/workflows/ci.yml"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -96,11 +156,18 @@
       "phase": 1,
       "type": "feature",
       "description": "Create hooks/state-hook.sh (POSIX sh, executable). It resolves its own directory (following symlinks) to source ../lib/common.sh, reads the full hook JSON from stdin, extracts hook_event_name and session_id with jq, and dispatches to one function per event (stubs for now). Hard rules from the PRD: never `set -e`; trap and swallow all errors; always exit 0; print nothing to stdout or stderr; exit early if jq is missing or session_id is empty. Provide write_state helper that merges a jq object into $state_dir/<session_id>.json (creating it with \"v\":1 if absent), sets updatedAt=now_ms, sets stateSince=now_ms only when `state` actually changes, and writes atomically.",
-      "requirements": ["Architecture-Components", "NFR-Reliability"],
+      "requirements": [
+        "Architecture-Components",
+        "NFR-Reliability"
+      ],
       "use_cases": [],
       "status": "todo",
-      "dependencies": ["T-004"],
-      "files": ["hooks/state-hook.sh"],
+      "dependencies": [
+        "T-004"
+      ],
+      "files": [
+        "hooks/state-hook.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -110,11 +177,22 @@
       "phase": 1,
       "type": "feature",
       "description": "Implement the SessionStart handler in hooks/state-hook.sh. Walk up parent processes from $PPID (ps -o ppid=,comm=) to the first ancestor whose command basename is `claude` (or a known IDE/desktop host binary per T-003 findings); record its pid and `ps -o lstart= -p <pid>` as procStart. If none found, omit pid/procStart. Also record cwd and transcript_path from the payload, herdrPane from $HERDR_PANE_ID, termBundleId from $__CFBundleIdentifier, and kind from $CLAUDE_CODE_ENTRYPOINT (cli→interactive, sdk-* or a -p/--print flag in the parent's args→headless, IDE values→ide, desktop→desktop; unknown→interactive). Write state=idle.",
-      "requirements": ["StateModel-SessionStart", "C1", "U9"],
-      "use_cases": ["U5"],
+      "requirements": [
+        "StateModel-SessionStart",
+        "C1",
+        "U9"
+      ],
+      "use_cases": [
+        "U5"
+      ],
       "status": "todo",
-      "dependencies": ["T-007", "T-003"],
-      "files": ["hooks/state-hook.sh"],
+      "dependencies": [
+        "T-007",
+        "T-003"
+      ],
+      "files": [
+        "hooks/state-hook.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -124,11 +202,20 @@
       "phase": 1,
       "type": "feature",
       "description": "Implement in hooks/state-hook.sh: UserPromptSubmit → state=busy and, if store_prompt_preview=1, promptPreview = first 80 characters of the prompt with newlines collapsed (omit the field otherwise); PreToolUse → state=busy, lastTool=tool_name; PostToolUse → state=busy. Clear `reason` and `message` on every busy write.",
-      "requirements": ["StateModel-Busy", "NFR-Privacy"],
-      "use_cases": ["U6"],
+      "requirements": [
+        "StateModel-Busy",
+        "NFR-Privacy"
+      ],
+      "use_cases": [
+        "U6"
+      ],
       "status": "todo",
-      "dependencies": ["T-007"],
-      "files": ["hooks/state-hook.sh"],
+      "dependencies": [
+        "T-007"
+      ],
+      "files": [
+        "hooks/state-hook.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -138,11 +225,22 @@
       "phase": 1,
       "type": "feature",
       "description": "Implement in hooks/state-hook.sh using the payload shapes captured in T-003: Notification of permission-prompt type → state=waiting, reason=permission, message=<notification message>; elicitation/question type → state=waiting, reason=question; idle-prompt type → state=idle. If the type field is missing, fall back to matching the message text (e.g. 'needs your permission' → permission, 'waiting for your input' → idle). Stop → state=idle, clear reason/message.",
-      "requirements": ["StateModel-Notification", "StateModel-Stop"],
-      "use_cases": ["U1", "U2"],
+      "requirements": [
+        "StateModel-Notification",
+        "StateModel-Stop"
+      ],
+      "use_cases": [
+        "U1",
+        "U2"
+      ],
       "status": "todo",
-      "dependencies": ["T-007", "T-003"],
-      "files": ["hooks/state-hook.sh"],
+      "dependencies": [
+        "T-007",
+        "T-003"
+      ],
+      "files": [
+        "hooks/state-hook.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -152,11 +250,19 @@
       "phase": 1,
       "type": "feature",
       "description": "Implement SessionEnd in hooks/state-hook.sh: remove $state_dir/<session_id>.json if present. Must succeed silently if the file is already gone.",
-      "requirements": ["StateModel-SessionEnd"],
-      "use_cases": ["U5"],
+      "requirements": [
+        "StateModel-SessionEnd"
+      ],
+      "use_cases": [
+        "U5"
+      ],
       "status": "todo",
-      "dependencies": ["T-007"],
-      "files": ["hooks/state-hook.sh"],
+      "dependencies": [
+        "T-007"
+      ],
+      "files": [
+        "hooks/state-hook.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -166,11 +272,26 @@
       "phase": 1,
       "type": "test",
       "description": "Add tests/hook.bats feeding the fixture payloads from tests/fixtures/payloads/ into hooks/state-hook.sh and asserting the resulting state file: SessionStart writes idle with v=1, cwd, kind, herdrPane/termBundleId from env; busy events set busy and lastTool/promptPreview (and no preview when store_prompt_preview=0); permission and question notifications set waiting with the right reason; idle notification and Stop set idle; stateSince changes only on state change; SessionEnd deletes the file. Also assert: exit code 0 and empty stdout/stderr for every event, including malformed JSON, empty stdin and missing jq (PATH without jq).",
-      "requirements": ["NFR-Testability", "NFR-Reliability"],
-      "use_cases": ["U1", "U2", "U5"],
+      "requirements": [
+        "NFR-Testability",
+        "NFR-Reliability"
+      ],
+      "use_cases": [
+        "U1",
+        "U2",
+        "U5"
+      ],
       "status": "todo",
-      "dependencies": ["T-002", "T-008", "T-009", "T-010", "T-011"],
-      "files": ["tests/hook.bats"],
+      "dependencies": [
+        "T-002",
+        "T-008",
+        "T-009",
+        "T-010",
+        "T-011"
+      ],
+      "files": [
+        "tests/hook.bats"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -180,11 +301,22 @@
       "phase": 1,
       "type": "infra",
       "description": "Add .claude-plugin/plugin.json (name claude-agents, version 0.1.0, description, MIT license, repository placeholder) and hooks/hooks.json registering ${CLAUDE_PLUGIN_ROOT}/hooks/state-hook.sh for SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Notification, Stop, SubagentStart, SubagentStop and SessionEnd, all with \"async\": true and a short timeout. Verify locally with `claude --plugin-dir .` that state files appear in ~/.claude/swiftbar-agents/ and that existing user hooks still run. Document this local dev workflow in CONTRIBUTING.md.",
-      "requirements": ["Install-Plugin", "Coexistence"],
-      "use_cases": ["U10"],
+      "requirements": [
+        "Install-Plugin",
+        "Coexistence"
+      ],
+      "use_cases": [
+        "U10"
+      ],
       "status": "todo",
-      "dependencies": ["T-007"],
-      "files": [".claude-plugin/plugin.json", "hooks/hooks.json", "CONTRIBUTING.md"],
+      "dependencies": [
+        "T-007"
+      ],
+      "files": [
+        ".claude-plugin/plugin.json",
+        "hooks/hooks.json",
+        "CONTRIBUTING.md"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -194,11 +326,18 @@
       "phase": 2,
       "type": "feature",
       "description": "Create swiftbar/claude-agents.5s.sh (POSIX sh, executable) with SwiftBar metadata headers (<xbar.title>, <xbar.version>, <xbar.author>, <xbar.desc>, <swiftbar.hideRunInTerminal>true, <swiftbar.hideLastUpdated>true, <swiftbar.hideDisappearPlugin>true). Resolve its real path (it will be symlinked) to source ../lib/common.sh. If find_jq returns nothing, print a warning menu-bar item and a dropdown line explaining how to install jq, then exit 0. Load every $state_dir/*.json in one jq invocation, skipping unparseable files and files with v>1 (count them; if any, show the warning state per PRD 'Menu-bar item' table). Output for now: a placeholder line with the session count.",
-      "requirements": ["Architecture-Components", "NFR-ForwardCompat"],
+      "requirements": [
+        "Architecture-Components",
+        "NFR-ForwardCompat"
+      ],
       "use_cases": [],
       "status": "todo",
-      "dependencies": ["T-004"],
-      "files": ["swiftbar/claude-agents.5s.sh"],
+      "dependencies": [
+        "T-004"
+      ],
+      "files": [
+        "swiftbar/claude-agents.5s.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -208,11 +347,20 @@
       "phase": 2,
       "type": "feature",
       "description": "In swiftbar/claude-agents.5s.sh take exactly one process snapshot per run: `ps -axo pid=,ppid=,lstart=,comm=` (keep it in a variable/temp file for later checks C4/C5). For each session with a pid: if the pid is not in the snapshot, or its lstart differs from procStart, delete the state file and drop the session. Sessions without pid are kept (rely on SessionEnd and C5). Structure the code so checks run in order C1..C5 per session and the first one that changes or removes a session wins.",
-      "requirements": ["C1", "NFR-Performance"],
-      "use_cases": ["U5"],
+      "requirements": [
+        "C1",
+        "NFR-Performance"
+      ],
+      "use_cases": [
+        "U5"
+      ],
       "status": "todo",
-      "dependencies": ["T-014"],
-      "files": ["swiftbar/claude-agents.5s.sh"],
+      "dependencies": [
+        "T-014"
+      ],
+      "files": [
+        "swiftbar/claude-agents.5s.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -222,11 +370,22 @@
       "phase": 2,
       "type": "feature",
       "description": "Render the first output line per the PRD 'Menu-bar item' table: priority waiting > idle > uncertain > busy > none. Show the count of sessions in the winning state (for busy: total sessions; for none: no count; for uncertain: '?' + count). Use SwiftBar `sfimage=` with a distinct SF Symbol variant per state derived from the configured `icon` (e.g. sparkle, exclamationmark-badged variant for waiting) and `sfcolor=` with light,dark color pairs: red for waiting, yellow for idle, gray for uncertain, dimmed secondary for busy, faint for none. Color must never be the only signal.",
-      "requirements": ["UX-MenuBar", "NFR-Accessibility"],
-      "use_cases": ["U1", "U2", "U3"],
+      "requirements": [
+        "UX-MenuBar",
+        "NFR-Accessibility"
+      ],
+      "use_cases": [
+        "U1",
+        "U2",
+        "U3"
+      ],
       "status": "todo",
-      "dependencies": ["T-014"],
-      "files": ["swiftbar/claude-agents.5s.sh"],
+      "dependencies": [
+        "T-014"
+      ],
+      "files": [
+        "swiftbar/claude-agents.5s.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -236,11 +395,20 @@
       "phase": 2,
       "type": "feature",
       "description": "After `---`, render one row per session sorted waiting, idle, uncertain, busy; within a state, longest time in state (oldest stateSince) first. Label = cwd basename + ' — ' + title, where title is promptPreview for now (a title-source function so T-027 can add herdr titles), truncated to 48 characters with '…'. Right side = state word (permission, question, idle, working, no activity) + ' · ' + duration since stateSince formatted as 12s / 4m / 2h / 3d. Use a leading glyph per state (●, ○, ?) and SwiftBar params font=Menlo or `ansi`/tab alignment so the right side lines up. Escape '|' in titles so SwiftBar params aren't broken.",
-      "requirements": ["UX-Dropdown"],
-      "use_cases": ["U1", "U2"],
+      "requirements": [
+        "UX-Dropdown"
+      ],
+      "use_cases": [
+        "U1",
+        "U2"
+      ],
       "status": "todo",
-      "dependencies": ["T-016"],
-      "files": ["swiftbar/claude-agents.5s.sh"],
+      "dependencies": [
+        "T-016"
+      ],
+      "files": [
+        "swiftbar/claude-agents.5s.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -250,11 +418,19 @@
       "phase": 2,
       "type": "feature",
       "description": "Under each row add a SwiftBar submenu (`--` prefix): Copy session ID, Copy cwd (pbcopy via bash= running the plugin itself with an action argument, terminal=false), Open folder in Finder (open <cwd>), Reveal transcript (open -R <transcriptPath>, only if set). Make the plugin dispatch action arguments ($1 = copy|open|reveal) before rendering. Footer after `---`: Refresh (refresh=true). Leave placeholders for the Show and Settings items added in phase 4.",
-      "requirements": ["UX-Dropdown"],
-      "use_cases": ["U4"],
+      "requirements": [
+        "UX-Dropdown"
+      ],
+      "use_cases": [
+        "U4"
+      ],
       "status": "todo",
-      "dependencies": ["T-017"],
-      "files": ["swiftbar/claude-agents.5s.sh"],
+      "dependencies": [
+        "T-017"
+      ],
+      "files": [
+        "swiftbar/claude-agents.5s.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -264,11 +440,30 @@
       "phase": 2,
       "type": "test",
       "description": "Add tests/plugin.bats with fixture state files and a stubbed `ps`: menu bar shows waiting with red and correct count when one session waits; idle wins over busy; all-busy shows dimmed with total count; no files shows faint icon with no count; corrupt and v=2 files trigger the warning state; missing jq shows the jq hint; rows sort correctly by state then age; truncation at 48 chars; duration formatting; '|' in a title is escaped; C1 removes a session whose pid is absent or whose lstart differs and deletes its file; submenu action arguments call pbcopy/open stubs with the right values.",
-      "requirements": ["NFR-Testability", "C1", "UX-MenuBar", "UX-Dropdown"],
-      "use_cases": ["U1", "U2", "U3", "U5"],
+      "requirements": [
+        "NFR-Testability",
+        "C1",
+        "UX-MenuBar",
+        "UX-Dropdown"
+      ],
+      "use_cases": [
+        "U1",
+        "U2",
+        "U3",
+        "U5"
+      ],
       "status": "todo",
-      "dependencies": ["T-002", "T-015", "T-016", "T-017", "T-018"],
-      "files": ["tests/plugin.bats", "tests/fixtures/states/"],
+      "dependencies": [
+        "T-002",
+        "T-015",
+        "T-016",
+        "T-017",
+        "T-018"
+      ],
+      "files": [
+        "tests/plugin.bats",
+        "tests/fixtures/states/"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -278,11 +473,21 @@
       "phase": 3,
       "type": "feature",
       "description": "At the end of every state write in hooks/state-hook.sh, if instant_refresh=1, run `open -g 'swiftbar://refreshplugin?name=claude-agents'` in the background, but only if $state_dir/.last-poke is older than 500 ms (compare stored now_ms); update .last-poke atomically. Must not add measurable latency: background the open call and never wait on it.",
-      "requirements": ["Architecture-Refresh", "Risk-RefreshChurn"],
-      "use_cases": ["U1"],
+      "requirements": [
+        "Architecture-Refresh",
+        "Risk-RefreshChurn"
+      ],
+      "use_cases": [
+        "U1"
+      ],
       "status": "todo",
-      "dependencies": ["T-007", "T-014"],
-      "files": ["hooks/state-hook.sh"],
+      "dependencies": [
+        "T-007",
+        "T-014"
+      ],
+      "files": [
+        "hooks/state-hook.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -292,11 +497,20 @@
       "phase": 3,
       "type": "feature",
       "description": "In the plugin, when use_registry=1 and ${CLAUDE_AGENTS_REGISTRY_DIR:-~/.claude/sessions}/<pid>.json exists with matching sessionId and a `status` field: if its statusUpdatedAt > the hook file's updatedAt, render using its status (map busy→busy, waiting→waiting with reason from waitingFor, idle→idle; unknown values ignored). Never write the hook state file. If the registry file lacks `status`, ignore it and log_once 'registry-schema'.",
-      "requirements": ["C2"],
-      "use_cases": ["U6", "U7"],
+      "requirements": [
+        "C2"
+      ],
+      "use_cases": [
+        "U6",
+        "U7"
+      ],
       "status": "todo",
-      "dependencies": ["T-015"],
-      "files": ["swiftbar/claude-agents.5s.sh"],
+      "dependencies": [
+        "T-015"
+      ],
+      "files": [
+        "swiftbar/claude-agents.5s.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -306,11 +520,20 @@
       "phase": 3,
       "type": "feature",
       "description": "In the plugin, for sessions still busy after C1/C2 with a readable transcriptPath: read only the last 8192 bytes (`tail -c 8192`) and, if the last user-role entry contains the interrupt marker recorded in T-003 (kept in one constant, e.g. INTERRUPT_MARKER), render the session as idle. Do not write the state file.",
-      "requirements": ["C3"],
-      "use_cases": ["U7"],
+      "requirements": [
+        "C3"
+      ],
+      "use_cases": [
+        "U7"
+      ],
       "status": "todo",
-      "dependencies": ["T-015", "T-003"],
-      "files": ["swiftbar/claude-agents.5s.sh"],
+      "dependencies": [
+        "T-015",
+        "T-003"
+      ],
+      "files": [
+        "swiftbar/claude-agents.5s.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -320,11 +543,19 @@
       "phase": 3,
       "type": "feature",
       "description": "In the plugin, for sessions waiting with a pid: using the single ps snapshot from T-015, find child processes of the pid (ppid match) whose lstart is later than stateSince. If any exist, render the session as busy (the permission was approved and a tool is running). Long-lived children started before stateSince (MCP servers) must not trigger it. Convert lstart to epoch once per process with a single `date -j -f` format or perl, not per comparison loop if avoidable.",
-      "requirements": ["C4"],
-      "use_cases": ["U6"],
+      "requirements": [
+        "C4"
+      ],
+      "use_cases": [
+        "U6"
+      ],
       "status": "todo",
-      "dependencies": ["T-015"],
-      "files": ["swiftbar/claude-agents.5s.sh"],
+      "dependencies": [
+        "T-015"
+      ],
+      "files": [
+        "swiftbar/claude-agents.5s.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -334,11 +565,19 @@
       "phase": 3,
       "type": "feature",
       "description": "In the plugin, when stale_minutes>0 and a session is still busy after C1–C4: if now − max(updatedAt, transcript mtime via `stat -f %m`, newest child lstart) exceeds stale_minutes, render it as uncertain ('?', state word 'no activity', duration since that latest activity). Waiting and idle sessions are never marked stale.",
-      "requirements": ["C5"],
-      "use_cases": ["U8"],
+      "requirements": [
+        "C5"
+      ],
+      "use_cases": [
+        "U8"
+      ],
       "status": "todo",
-      "dependencies": ["T-015"],
-      "files": ["swiftbar/claude-agents.5s.sh"],
+      "dependencies": [
+        "T-015"
+      ],
+      "files": [
+        "swiftbar/claude-agents.5s.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -348,11 +587,31 @@
       "phase": 3,
       "type": "test",
       "description": "Extend tests (tests/checks.bats, tests/hook.bats): C2 overrides only when registry is newer, ignores mismatched sessionId and missing status, and respects use_registry=0; C3 flips busy→idle when the marker is in the tail and not when it's earlier than 8 KB; C4 flips waiting→busy for a child started after stateSince but not for an older child; C5 marks busy as uncertain past the threshold, never marks waiting/idle, and is off at stale_minutes=0; checks never modify state files; poke calls the stubbed `open` once for two writes within 500 ms and not at all when instant_refresh=0.",
-      "requirements": ["NFR-Testability", "C2", "C3", "C4", "C5"],
-      "use_cases": ["U6", "U7", "U8"],
+      "requirements": [
+        "NFR-Testability",
+        "C2",
+        "C3",
+        "C4",
+        "C5"
+      ],
+      "use_cases": [
+        "U6",
+        "U7",
+        "U8"
+      ],
       "status": "todo",
-      "dependencies": ["T-019", "T-020", "T-021", "T-022", "T-023", "T-024"],
-      "files": ["tests/checks.bats", "tests/hook.bats"],
+      "dependencies": [
+        "T-019",
+        "T-020",
+        "T-021",
+        "T-022",
+        "T-023",
+        "T-024"
+      ],
+      "files": [
+        "tests/checks.bats",
+        "tests/hook.bats"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -362,11 +621,21 @@
       "phase": 4,
       "type": "feature",
       "description": "Implement a single focus_session function in the plugin (the extension point for future integrations). A row gets `bash=<plugin> focus <session_id> terminal=false refresh=true` only if herdrPane is set and a herdr binary is found (PATH, then /opt/homebrew/bin, /usr/local/bin). Rows without it get no click action and a disabled 'not in herdr' submenu line. Focus runs `herdr agent focus <pane>` (use the target form confirmed in T-003), then `open -b <termBundleId>` if set. Each step is time-limited (~2 s, via a background process plus kill since macOS has no `timeout`) and errors are swallowed; never launch herdr, open new windows, or activate any other app.",
-      "requirements": ["Architecture-Focus", "Goal-3"],
-      "use_cases": ["U4"],
+      "requirements": [
+        "Architecture-Focus",
+        "Goal-3"
+      ],
+      "use_cases": [
+        "U4"
+      ],
       "status": "todo",
-      "dependencies": ["T-018", "T-003"],
-      "files": ["swiftbar/claude-agents.5s.sh"],
+      "dependencies": [
+        "T-018",
+        "T-003"
+      ],
+      "files": [
+        "swiftbar/claude-agents.5s.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -376,11 +645,17 @@
       "phase": 4,
       "type": "feature",
       "description": "Extend the title-source function: if herdr is available, call `herdr agent list` once per refresh (time-limited ~1 s, errors swallowed), build a map of agent_session.value (Claude session ID) → terminal_title_stripped, and use it as the first title source. Fallback order per PRD: herdr title, Claude Code session name (from the registry file's `name` if present), promptPreview.",
-      "requirements": ["UX-Dropdown-Label"],
+      "requirements": [
+        "UX-Dropdown-Label"
+      ],
       "use_cases": [],
       "status": "todo",
-      "dependencies": ["T-017"],
-      "files": ["swiftbar/claude-agents.5s.sh"],
+      "dependencies": [
+        "T-017"
+      ],
+      "files": [
+        "swiftbar/claude-agents.5s.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -390,11 +665,21 @@
       "phase": 4,
       "type": "feature",
       "description": "Implement SubagentStart and SubagentStop in hooks/state-hook.sh using the payload fields captured in T-003: on start, add subagents[<agent_id>] = {type, since: now_ms} to the parent session's file; on stop, delete that key. Use read-modify-write with atomic mv. If the payload has no stable agent ID, key by agent type plus start time and remove the oldest matching entry on stop. Subagent events must not change the parent's `state`.",
-      "requirements": ["StateModel-Subagent", "NFR-Concurrency"],
-      "use_cases": ["U9"],
+      "requirements": [
+        "StateModel-Subagent",
+        "NFR-Concurrency"
+      ],
+      "use_cases": [
+        "U9"
+      ],
       "status": "todo",
-      "dependencies": ["T-009", "T-003"],
-      "files": ["hooks/state-hook.sh"],
+      "dependencies": [
+        "T-009",
+        "T-003"
+      ],
+      "files": [
+        "hooks/state-hook.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -404,11 +689,20 @@
       "phase": 4,
       "type": "feature",
       "description": "In the dropdown, after each session row, render its subagents indented ('    ↳ subagent: <type>   working · <duration>') when show_subagents=1. Subagents never count toward the menu-bar state or counts and are not clickable.",
-      "requirements": ["UX-Dropdown-Subagents"],
-      "use_cases": ["U9"],
+      "requirements": [
+        "UX-Dropdown-Subagents"
+      ],
+      "use_cases": [
+        "U9"
+      ],
       "status": "todo",
-      "dependencies": ["T-028", "T-017"],
-      "files": ["swiftbar/claude-agents.5s.sh"],
+      "dependencies": [
+        "T-028",
+        "T-017"
+      ],
+      "files": [
+        "swiftbar/claude-agents.5s.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -418,11 +712,21 @@
       "phase": 4,
       "type": "feature",
       "description": "Add a 'Show' section to the footer with four checkmark items (Interactive, Headless, Subagents, IDE/Desktop) reflecting show_interactive/show_headless/show_subagents/show_ide (checked=true). Clicking runs `<plugin> toggle <key>` which flips the value via set_config, with refresh=true. Sessions whose kind is hidden are excluded from rows and from menu-bar counts. Defaults: all on.",
-      "requirements": ["UX-Filters", "Config"],
-      "use_cases": ["U9"],
+      "requirements": [
+        "UX-Filters",
+        "Config"
+      ],
+      "use_cases": [
+        "U9"
+      ],
       "status": "todo",
-      "dependencies": ["T-017", "T-008"],
-      "files": ["swiftbar/claude-agents.5s.sh"],
+      "dependencies": [
+        "T-017",
+        "T-008"
+      ],
+      "files": [
+        "swiftbar/claude-agents.5s.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -432,11 +736,18 @@
       "phase": 4,
       "type": "feature",
       "description": "Add a 'Settings…' submenu: Stale threshold (10m, 30m, 60m, Off — checkmark on current; sets stale_minutes 10/30/60/0), Instant refresh (toggle instant_refresh), Use Claude Code registry (toggle use_registry), Store prompt preview (toggle store_prompt_preview), Reveal config file (open -R, creating the file with defaults first if missing). All via `<plugin> set <key> <value>` / `toggle <key>` with refresh=true. Validate values; ignore anything not on the allowed list.",
-      "requirements": ["UX-Settings", "Config"],
+      "requirements": [
+        "UX-Settings",
+        "Config"
+      ],
       "use_cases": [],
       "status": "todo",
-      "dependencies": ["T-018"],
-      "files": ["swiftbar/claude-agents.5s.sh"],
+      "dependencies": [
+        "T-018"
+      ],
+      "files": [
+        "swiftbar/claude-agents.5s.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -446,11 +757,27 @@
       "phase": 4,
       "type": "test",
       "description": "Add tests/reach.bats: rows with herdrPane and a stub herdr get a focus action, rows without get none and show 'not in herdr'; focus calls herdr then open -b with the right args; a failing or hanging herdr stub doesn't hang the plugin (>2 s) and calls nothing else; herdr titles are preferred over promptPreview, and a failing `herdr agent list` falls back cleanly; SubagentStart/Stop add and remove entries without touching state; subagent rows render and don't affect counts; toggles flip config and hide kinds from rows and counts; settings accept only allowed values.",
-      "requirements": ["NFR-Testability", "Architecture-Focus"],
-      "use_cases": ["U4", "U9"],
+      "requirements": [
+        "NFR-Testability",
+        "Architecture-Focus"
+      ],
+      "use_cases": [
+        "U4",
+        "U9"
+      ],
       "status": "todo",
-      "dependencies": ["T-019", "T-026", "T-027", "T-028", "T-029", "T-030", "T-031"],
-      "files": ["tests/reach.bats"],
+      "dependencies": [
+        "T-019",
+        "T-026",
+        "T-027",
+        "T-028",
+        "T-029",
+        "T-030",
+        "T-031"
+      ],
+      "files": [
+        "tests/reach.bats"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -460,11 +787,21 @@
       "phase": 5,
       "type": "infra",
       "description": "Create install.sh: require jq (find_jq); back up ~/.claude/settings.json to settings.json.bak-claude-agents-<timestamp>; for each event in hooks/hooks.json, append a hook entry pointing at the absolute path of hooks/state-hook.sh with async=true and a marker field or command suffix (e.g. `# claude-agents`) so uninstall can find it; never replace or reorder existing entries; skip if already installed (idempotent). Then symlink swiftbar/claude-agents.5s.sh into `defaults read com.ameba.SwiftBar PluginDirectory`, or prompt for a folder if unset. Print what was done.",
-      "requirements": ["Install-Script", "Coexistence"],
-      "use_cases": ["U10"],
+      "requirements": [
+        "Install-Script",
+        "Coexistence"
+      ],
+      "use_cases": [
+        "U10"
+      ],
       "status": "todo",
-      "dependencies": ["T-013", "T-014"],
-      "files": ["install.sh"],
+      "dependencies": [
+        "T-013",
+        "T-014"
+      ],
+      "files": [
+        "install.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -474,11 +811,19 @@
       "phase": 5,
       "type": "infra",
       "description": "Create uninstall.sh: back up settings.json, remove only hook entries carrying the claude-agents marker (dropping event arrays/matcher groups left empty by the removal, but nothing else), remove the SwiftBar symlink if it points at this repo, and offer (y/N) to delete ~/.claude/swiftbar-agents and ~/.config/claude-agents. Idempotent.",
-      "requirements": ["Install-Script"],
-      "use_cases": ["U10"],
+      "requirements": [
+        "Install-Script"
+      ],
+      "use_cases": [
+        "U10"
+      ],
       "status": "todo",
-      "dependencies": ["T-033"],
-      "files": ["uninstall.sh"],
+      "dependencies": [
+        "T-033"
+      ],
+      "files": [
+        "uninstall.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -488,11 +833,23 @@
       "phase": 5,
       "type": "test",
       "description": "Add tests/install.bats using a temp HOME with a fixture settings.json that already has unrelated hooks (a SessionStart hook with a matcher and an async PostToolUse audit hook) and a stubbed `defaults`: install adds our entries, keeps existing ones byte-identical and in order, creates a backup, links the plugin; running install twice adds nothing; uninstall removes exactly our entries and the symlink and leaves the rest identical to the original.",
-      "requirements": ["NFR-Testability", "Coexistence"],
-      "use_cases": ["U10"],
+      "requirements": [
+        "NFR-Testability",
+        "Coexistence"
+      ],
+      "use_cases": [
+        "U10"
+      ],
       "status": "todo",
-      "dependencies": ["T-002", "T-033", "T-034"],
-      "files": ["tests/install.bats", "tests/fixtures/settings.json"],
+      "dependencies": [
+        "T-002",
+        "T-033",
+        "T-034"
+      ],
+      "files": [
+        "tests/install.bats",
+        "tests/fixtures/settings.json"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -502,11 +859,20 @@
       "phase": 5,
       "type": "infra",
       "description": "Add .claude-plugin/marketplace.json listing the claude-agents plugin from this repo so users can `/plugin marketplace add <owner>/<repo>` then `/plugin install claude-agents`. Bump plugin.json version to 1.0.0-rc.1. Verify the install flow end to end in a clean Claude Code profile and note the exact commands for the README.",
-      "requirements": ["Install-Plugin"],
-      "use_cases": ["U10"],
+      "requirements": [
+        "Install-Plugin"
+      ],
+      "use_cases": [
+        "U10"
+      ],
       "status": "todo",
-      "dependencies": ["T-013"],
-      "files": [".claude-plugin/marketplace.json", ".claude-plugin/plugin.json"],
+      "dependencies": [
+        "T-013"
+      ],
+      "files": [
+        ".claude-plugin/marketplace.json",
+        ".claude-plugin/plugin.json"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -516,11 +882,19 @@
       "phase": 5,
       "type": "test",
       "description": "Add tests/bench.sh that generates 10 realistic state files (mixed states, transcripts, registry files) in a temp dir, runs the plugin 20 times and the hook 50 times, and reports median/p95 wall time. Fail (exit 1) if plugin median > 150 ms or hook median > 20 ms, per PRD success criteria. Fix any hot spots found (e.g. per-session jq calls).",
-      "requirements": ["NFR-Performance", "SuccessCriteria"],
+      "requirements": [
+        "NFR-Performance",
+        "SuccessCriteria"
+      ],
       "use_cases": [],
       "status": "todo",
-      "dependencies": ["T-025", "T-032"],
-      "files": ["tests/bench.sh"],
+      "dependencies": [
+        "T-025",
+        "T-032"
+      ],
+      "files": [
+        "tests/bench.sh"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     },
@@ -530,11 +904,20 @@
       "phase": 5,
       "type": "docs",
       "description": "Update README.md: remove the 'design phase' notice, replace planned install steps with the verified commands from T-033 and T-036, add the state_dir key to the config table, add a troubleshooting section (jq missing, SwiftBar folder unset, warning icon meaning, where plugin.log lives), and add screenshot placeholders (doc/screenshots/*.png) for each menu-bar state. Keep all examples using made-up project names.",
-      "requirements": ["M4"],
-      "use_cases": ["U10"],
+      "requirements": [
+        "M4"
+      ],
+      "use_cases": [
+        "U10"
+      ],
       "status": "todo",
-      "dependencies": ["T-033", "T-036"],
-      "files": ["README.md"],
+      "dependencies": [
+        "T-033",
+        "T-036"
+      ],
+      "files": [
+        "README.md"
+      ],
       "created_at": "2026-10-25T06:21:40Z",
       "updated_at": "2026-10-25T06:21:40Z"
     }
