@@ -1400,7 +1400,8 @@
           "text": "tests/bench.sh (via tests/run.sh --bench). Optimized: hook 52->19 ms (one jq parse + one jq write, jq now for ms), plugin 216->99 ms (awk joins, one stat+tail, single jq refresh). Bench excludes herdr calls",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "3155782b47e75b81144fe58c59d6d89c8b747645"
     },
     {
       "id": "T-038",
@@ -1414,7 +1415,7 @@
       "use_cases": [
         "U10"
       ],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-033",
         "T-036"
@@ -1423,7 +1424,20 @@
         "README.md"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T07:48:43Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T07:47:55Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T07:48:43Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T07:48:43Z",
+          "kind": "outcome",
+          "text": "README finalized: RC status, real install options (install.sh, local marketplace), config incl. state_dir, troubleshooting, screenshot placeholders as comment (no images yet), made-up example names",
+          "by": "claude:c631bc24"
+        }
+      ]
     }
   ]
 }
