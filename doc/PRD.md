@@ -145,14 +145,14 @@ Three stored states — `busy`, `waiting` and `idle` — plus `uncertain`, which
 | Hook event | Writes | Also records |
 | --- | --- | --- |
 | `SessionStart` | idle | PID and start time of the `claude` process, cwd, entrypoint, terminal app bundle ID, herdr pane ID, transcript path |
-| `UserPromptSubmit` | busy | prompt preview (first 80 chars, for the title fallback) |
+| `UserPromptSubmit` | busy | prompt preview (first 80 chars, for the title fallback); prompts starting `<task-notification>` are background-task results and don't replace the preview |
 | `PreToolUse` | busy | tool name |
 | `PostToolUse` | busy | — |
-| `Notification` (permission prompt) | waiting | reason = permission, message |
-| `Notification` (question / elicitation) | waiting | reason = question, message |
-| `Notification` (idle prompt) | idle | — (confirms an idle already set by Stop) |
+| `Notification` (`permission_prompt`) | waiting | reason = permission, message; reason = question instead when `lastTool` is `AskUserQuestion` |
+| `Notification` (`elicitation_dialog`, MCP) | waiting | reason = question, message |
+| `Notification` (`idle_prompt`) | idle | — (confirms an idle already set by Stop) |
 | `Stop` | idle | — |
-| `SubagentStart` / `SubagentStop` | subagent entry busy / removed | agent type |
+| `SubagentStart` / `SubagentStop` | subagent entry busy / removed (keyed by `agent_id`) | agent type; a `SubagentStop` with empty `agent_type` fires after every `Stop` and is ignored |
 | `SessionEnd` | deletes the file | — |
 
 Every write is atomic (write to a temp file, then `mv`) and stamps `updatedAt` in milliseconds.
@@ -191,7 +191,7 @@ On every refresh the plugin corrects each hook state with five checks, in this o
 | --- | --- | --- | --- | --- | --- |
 | C1 | Liveness | Crash, killed terminal, missed `SessionEnd` | `kill -0 pid` and `ps -o lstart=` equals `procStart` | Dead → delete file, drop row | Exact |
 | C2 | Registry override | Any hook gap, when available | `~/.claude/sessions/<pid>.json` with matching `sessionId` and `statusUpdatedAt` newer than the hook file's `updatedAt` | Use its `status` and `waitingFor` | Exact when present; undocumented format |
-| C3 | Interrupt | Esc during a turn (no `Stop` fires) | State busy, and the last transcript entries contain the user-interrupt marker | busy → idle | Heuristic: marker text is undocumented |
+| C3 | Interrupt | Esc during a turn, or a denied permission (no `Stop` fires) | State busy or waiting, and after the latest user prompt the transcript tail has the marker `[Request interrupted by user` or a `system`/`turn_duration` entry | busy/waiting → idle | Heuristic: transcript format is undocumented. Misses Esc before any output (C2/C5 cover it) |
 | C4 | Approved tool running | Permission approved, tool still running (no event until `PostToolUse`) | State waiting, and the `claude` PID has a child process started after `stateSince` | waiting → busy | Heuristic: works for Bash and process-spawning tools only |
 | C5 | Staleness | Anything else the hooks missed | State busy, no hook write, transcript unchanged and no new child process for longer than the threshold (default 30 min) | busy → uncertain ("?") | Never wrong; only admits doubt |
 
@@ -200,7 +200,7 @@ On every refresh the plugin corrects each hook state with five checks, in this o
 - **C1 PID capture:** at `SessionStart` the hook walks up its parent processes to the first one whose command is `claude` (or the IDE or desktop host binary) and stores its PID and start time. Comparing start times prevents a reused PID from keeping a dead session alive.
 - **C2 newest wins:** the registry overrides only when it is newer. In testing, one session's registry still said busy 47 minutes after herdr showed it idle, so it is not trusted unconditionally. If the registry file exists but lacks `status`, the plugin ignores it and logs once.
 - **C3 scope:** read only the last 8 KB of the transcript (`tail -c`), never the whole file.
-- **C4 noise:** MCP servers and other long-lived children started before `stateSince`, so they never trigger the check.
+- **C4 noise:** MCP servers and other long-lived children started before `stateSince`, so they never trigger the check. Claude Code also starts a `caffeinate` child at the start of each turn; C4 ignores it by name.
 - **C5 threshold** is configurable (10, 30, 60 min or off) in Settings or the config file. Waiting and idle states are never marked stale; a long wait is real.
 - Checks C2 to C5 never write the state file; corrections live only in the render, so the next real hook event always takes over.
 
@@ -269,9 +269,12 @@ claude-agents/
 
 **Open questions**
 
-- [ ] Exact `CLAUDE_CODE_ENTRYPOINT` values for VS Code, JetBrains and the desktop app.
-- [ ] Do `SubagentStart` hook events carry a stable agent ID that `SubagentStop` repeats?
-- [ ] Does `herdr agent focus` take the pane ID or the agent ID, and does it raise the host terminal window or only the pane?
+Answers from the payload spike (2026-10-25) are recorded in `tests/fixtures/README.md`.
+
+- [x] `CLAUDE_CODE_ENTRYPOINT`: `cli` for the interactive CLI, `sdk-cli` for `claude -p`. VS Code, JetBrains and desktop values are still unverified; unknown values are treated as interactive.
+- [x] Subagent IDs: `SubagentStart` and `SubagentStop` carry the same `agent_id`.
+- [x] `herdr agent focus` accepts a pane ID (as `herdr agent get` and `wait` do). Whether it raises the host terminal window is untested, so the plugin keeps the `open -b` step.
+- [x] Stop gaps: denying a permission and pressing Esc before any output fire no hook. Denials leave an interrupt marker (C3); early Esc is caught only by the registry (C2) or staleness (C5).
 - [ ] Should headless sessions ever raise the menu-bar state? (Proposed: they can only be busy or idle, never waiting.)
 - [ ] Project name and license (proposed: MIT).
 

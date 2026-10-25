@@ -1,0 +1,8 @@
+{
+  "session_id": "3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90",
+  "transcript_path": "/Users/alex/.claude/projects/-Users-alex-code-api-gateway/3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90.jsonl",
+  "cwd": "/Users/alex/code/api-gateway",
+  "hook_event_name": "SessionStart",
+  "source": "startup",
+  "model": "claude-haiku-5-5"
+}

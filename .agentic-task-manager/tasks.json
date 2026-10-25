@@ -1,6 +1,6 @@
 {
   "meta": {
-    "project": "claude-agents",
+    "project": "swiftbar-claudecode-minimal",
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md"
@@ -77,7 +77,8 @@
           "text": "bats runner, isolated env helper with command stubs, smoke tests pass",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "20234e3588be37c6a18d3d673102f679418010fd"
     },
     {
       "id": "T-003",
@@ -90,7 +91,7 @@
         "C3"
       ],
       "use_cases": [],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-001"
       ],
@@ -99,7 +100,20 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T06:49:47Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T06:32:43Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T06:49:47Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T06:49:47Z",
+          "kind": "outcome",
+          "text": "Captured payloads (headless + interactive via herdr pane), sanitized fixtures, transcript tails, findings in tests/fixtures/README.md and PRD; updated T-009/T-010/T-022/T-023/T-028",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-004",
@@ -215,7 +229,7 @@
       "name": "Busy handlers: UserPromptSubmit, PreToolUse, PostToolUse",
       "phase": 1,
       "type": "feature",
-      "description": "Implement in hooks/state-hook.sh: UserPromptSubmit → state=busy and, if store_prompt_preview=1, promptPreview = first 80 characters of the prompt with newlines collapsed (omit the field otherwise); PreToolUse → state=busy, lastTool=tool_name; PostToolUse → state=busy. Clear `reason` and `message` on every busy write.",
+      "description": "Implement in hooks/state-hook.sh: UserPromptSubmit → state=busy and, if store_prompt_preview=1, promptPreview = first 80 characters of the prompt with newlines collapsed (omit the field otherwise). Prompts starting with '<task-notification>' are background-task results (see tests/fixtures/payloads/UserPromptSubmit-task-notification.json): set busy but keep the existing promptPreview. PreToolUse → state=busy, lastTool=tool_name; PostToolUse → state=busy. Clear reason and message on every busy write.",
       "requirements": [
         "StateModel-Busy",
         "NFR-Privacy"
@@ -231,14 +245,15 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T06:49:46Z",
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-010",
       "name": "Notification and Stop handlers",
       "phase": 1,
       "type": "feature",
-      "description": "Implement in hooks/state-hook.sh using the payload shapes captured in T-003: Notification of permission-prompt type → state=waiting, reason=permission, message=<notification message>; elicitation/question type → state=waiting, reason=question; idle-prompt type → state=idle. If the type field is missing, fall back to matching the message text (e.g. 'needs your permission' → permission, 'waiting for your input' → idle). Stop → state=idle, clear reason/message.",
+      "description": "Implement in hooks/state-hook.sh using tests/fixtures/payloads/: Notification with notification_type=permission_prompt → state=waiting, message=<message>, reason=question if the session's lastTool is AskUserQuestion, else reason=permission; notification_type=elicitation_dialog → state=waiting, reason=question; notification_type=idle_prompt → state=idle. If notification_type is missing, fall back to the message text ('needs your permission' → permission, 'waiting for your input' → idle). Stop → state=idle, clear reason/message. PermissionRequest needs no handling (the Notification follows it).",
       "requirements": [
         "StateModel-Notification",
         "StateModel-Stop"
@@ -256,7 +271,8 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T06:49:46Z",
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-011",
@@ -533,7 +549,7 @@
       "name": "C3 interrupt detection from transcript tail",
       "phase": 3,
       "type": "feature",
-      "description": "In the plugin, for sessions still busy after C1/C2 with a readable transcriptPath: read only the last 8192 bytes (`tail -c 8192`) and, if the last user-role entry contains the interrupt marker recorded in T-003 (kept in one constant, e.g. INTERRUPT_MARKER), render the session as idle. Do not write the state file.",
+      "description": "In the plugin, for sessions busy or waiting after C1/C2 with a readable transcriptPath: read only the last 8192 bytes (tail -c 8192, dropping the first partial line). Find the latest entry that is a real user prompt (type=user with string content or a text block that is not a tool_result). If after it there is a user text entry containing '[Request interrupted by user' (constant INTERRUPT_MARKER) or a type=system entry with subtype=turn_duration, render the session as idle. See tests/fixtures/transcripts/ (denied-permission → idle, completed-turn → idle, esc-before-output → no change). Do not write the state file.",
       "requirements": [
         "C3"
       ],
@@ -549,14 +565,15 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T06:49:46Z",
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-023",
       "name": "C4 approved-tool detection via child processes",
       "phase": 3,
       "type": "feature",
-      "description": "In the plugin, for sessions waiting with a pid: using the single ps snapshot from T-015, find child processes of the pid (ppid match) whose lstart is later than stateSince. If any exist, render the session as busy (the permission was approved and a tool is running). Long-lived children started before stateSince (MCP servers) must not trigger it. Convert lstart to epoch once per process with a single `date -j -f` format or perl, not per comparison loop if avoidable.",
+      "description": "In the plugin, for sessions waiting with a pid: using the single ps snapshot from T-015, find child processes of the pid (ppid match) whose lstart is later than stateSince, ignoring comm 'caffeinate' (Claude Code starts one per turn). If any remain, render the session as busy (the permission was approved and a tool is running; the spike saw a /bin/zsh child). Long-lived children started before stateSince (MCP servers) must not trigger it. Convert lstart to epoch with date -j -f or perl, once per process.",
       "requirements": [
         "C4"
       ],
@@ -571,7 +588,8 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T06:49:46Z",
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-024",
@@ -678,7 +696,7 @@
       "name": "Subagent tracking in the hook",
       "phase": 4,
       "type": "feature",
-      "description": "Implement SubagentStart and SubagentStop in hooks/state-hook.sh using the payload fields captured in T-003: on start, add subagents[<agent_id>] = {type, since: now_ms} to the parent session's file; on stop, delete that key. Use read-modify-write with atomic mv. If the payload has no stable agent ID, key by agent type plus start time and remove the oldest matching entry on stop. Subagent events must not change the parent's `state`.",
+      "description": "Implement SubagentStart and SubagentStop in hooks/state-hook.sh (payloads in tests/fixtures/payloads/): on SubagentStart add subagents[agent_id] = {type: agent_type, since: now_ms} to the parent session's file; on SubagentStop delete subagents[agent_id]. Ignore SubagentStop events with an empty agent_type (one fires after every Stop with no matching start). Read-modify-write with atomic mv. Subagent events must not change the parent's state.",
       "requirements": [
         "StateModel-Subagent",
         "NFR-Concurrency"
@@ -695,7 +713,8 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T06:49:47Z",
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-029",

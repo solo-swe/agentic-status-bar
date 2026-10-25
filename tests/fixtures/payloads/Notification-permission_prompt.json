@@ -1,0 +1,9 @@
+{
+  "session_id": "3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90",
+  "transcript_path": "/Users/alex/.claude/projects/-Users-alex-code-api-gateway/3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90.jsonl",
+  "cwd": "/Users/alex/code/api-gateway",
+  "prompt_id": "0b6e2f4a-9c1d-4e7b-8a3f-5d2c1e0f9a8b",
+  "hook_event_name": "Notification",
+  "message": "Claude needs your permission",
+  "notification_type": "permission_prompt"
+}

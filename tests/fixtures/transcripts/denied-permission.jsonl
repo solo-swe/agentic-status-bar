@@ -1,0 +1,6 @@
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01AbCdEfGhIjKlMnOpQrStUv","name":"Bash","input":{"command":"npm test"}}]},"timestamp":"2026-10-25T06:36:01.000Z"}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01AbCdEfGhIjKlMnOpQrStUv","content":"The user doesn't want to proceed with this tool use. The tool use was rejected.","is_error":true}]},"timestamp":"2026-10-25T06:36:05.000Z"}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"[Request interrupted by user for tool use]"}]},"timestamp":"2026-10-25T06:36:05.100Z"}
+{"type":"system","subtype":"turn_duration","timestamp":"2026-10-25T06:36:05.200Z"}
+{"type":"last-prompt"}
+{"type":"permission-mode"}
