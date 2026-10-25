@@ -169,7 +169,21 @@ LATE_CHECKS_JQ='
       | if .shown == "waiting" and .pid != null then
           approved_since($P) as $t
           | if $t != null then .shown = "busy" | .shownSince = $t else . end
+        else . end
+      | if .shown == "busy" and $stale > 0 then
+          last_activity($P) as $t
+          | if ($now - $t) > ($stale * 60000) then .shown = "uncertain" | .shownSince = $t else . end
         else . end)
+'
+
+# C5 helper, defined before the pipeline above uses it.
+LAST_ACTIVITY_JQ='
+  # C5: the latest sign of life: a hook write, a transcript write, a new child process.
+  def last_activity($P):
+    (.pid | tostring) as $pid
+    | [(.updatedAt // 0), (.shownSince // 0), ($mtimes[.sessionId] // 0)]
+      + [$P | to_entries[] | .value | select(.ppid == $pid) | .lstart | lstart_ms]
+    | max;
 '
 
 # tz_offset — seconds east of UTC right now (for converting ps start times).
@@ -212,6 +226,20 @@ load_tails() {
   '
 }
 
+# load_mtimes DATA — prints {sessionId: transcript mtime in ms} for busy or
+# waiting sessions (C5 counts a transcript write as activity).
+load_mtimes() {
+  printf '%s' "$1" | "$JQ" -r '
+    .sessions[] | select((.shown == "busy" or .shown == "waiting") and .transcriptPath)
+    | "\(.sessionId)\t\(.transcriptPath)"
+  ' | while IFS="$(printf '\t')" read -r _sid _path; do
+    _m="$(stat -f %m "$_path" 2>/dev/null)" || continue
+    printf '%s\t%s\n' "$_sid" "$_m"
+  done | "$JQ" -c -R -n '
+    [inputs | split("\t") | {key: .[0], value: ((.[1] | tonumber) * 1000)}] | from_entries
+  '
+}
+
 # apply_checks DATA PS_FILE — runs the checks and prints the updated data.
 apply_checks() {
   _tz="$(tz_offset)"
@@ -219,7 +247,9 @@ apply_checks() {
     --argjson reg "$(load_registry)" "$PROCS_JQ$CHECKS_JQ")"
   printf '%s' "$_early" | "$JQ" -c --rawfile ps "$2" --argjson tzoffset "$_tz" \
     --argjson tails "$(load_tails "$_early")" --arg marker "$INTERRUPT_MARKER" \
-    "$PROCS_JQ$LATE_CHECKS_JQ"
+    --argjson mtimes "$(load_mtimes "$_early")" \
+    --argjson now "$(now_ms)" --argjson stale "$cfg_stale_minutes" \
+    "$PROCS_JQ$LAST_ACTIVITY_JQ$LATE_CHECKS_JQ"
 }
 
 # remove_dead DATA — deletes the state files of sessions found dead.

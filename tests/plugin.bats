@@ -9,9 +9,10 @@ teardown() { common_teardown; }
 
 PLUGIN() { "$REPO_ROOT/swiftbar/claude-agents.5s.sh" "$@"; }
 
-# add_state ID JSON — writes a state file (compact, like the hook does).
+# add_state ID JSON — writes a state file (compact, like the hook does), updated just now.
 add_state() {
-  printf '%s' "$2" | jq -c --arg id "$1" '{v: 1, sessionId: $id} + .' > "$CLAUDE_AGENTS_STATE_DIR/$1.json"
+  printf '%s' "$2" | jq -c --arg id "$1" --argjson now "$(( $(date +%s) * 1000 ))" \
+    '{v: 1, sessionId: $id, updatedAt: $now} + .' > "$CLAUDE_AGENTS_STATE_DIR/$1.json"
 }
 
 # header_is TEXT SYMBOL — the menu-bar line shows TEXT with SF Symbol SYMBOL.

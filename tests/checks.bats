@@ -6,6 +6,8 @@ setup() {
   common_setup
   stub_ps
   add_process 4242 1 claude claude "Mon Oct 19 09:12:03 2026"
+  # Fixtures use small timestamps; C5 is switched on only by its own tests.
+  printf 'stale_minutes=0\n' > "$CLAUDE_AGENTS_CONFIG"
 }
 teardown() { common_teardown; }
 
@@ -74,7 +76,7 @@ header_is() {
 }
 
 @test "C2 is off when use_registry=0" {
-  printf 'use_registry=0\n' > "$CLAUDE_AGENTS_CONFIG"
+  printf 'use_registry=0\nstale_minutes=0\n' > "$CLAUDE_AGENTS_CONFIG"
   add_session '{"state":"busy","updatedAt":1000}'
   add_registry '{"status":"idle","statusUpdatedAt":2000}'
   run PLUGIN
@@ -200,6 +202,77 @@ lstart_at() { date -r "$1" '+%a %b %e %H:%M:%S %Y'; }
   add_process 7004 9999 /bin/zsh "zsh" "$(lstart_at $(( prompt + 5 )))"
   run PLUGIN
   header_is 1 exclamationmark.circle.fill
+}
+
+# --- C5 staleness ---------------------------------------------------------
+
+minutes_ago_ms() { echo $(( ($(date +%s) - $1 * 60) * 1000 )); }
+enable_c5() { printf 'stale_minutes=30\n' > "$CLAUDE_AGENTS_CONFIG"; }
+
+@test "C5 marks a busy session with no activity past the threshold as uncertain" {
+  enable_c5
+  add_session "{\"state\":\"busy\",\"updatedAt\":$(minutes_ago_ms 45),\"stateSince\":$(minutes_ago_ms 45)}"
+  run PLUGIN
+  header_is 1 questionmark.circle
+  [[ "$output" == *"? proj "*"no activity · 45m"* ]]
+}
+
+@test "C5 leaves a busy session alone within the threshold" {
+  enable_c5
+  add_session "{\"state\":\"busy\",\"updatedAt\":$(minutes_ago_ms 10),\"stateSince\":$(minutes_ago_ms 10)}"
+  run PLUGIN
+  header_is 1 sparkle
+}
+
+@test "C5 counts a recent transcript write as activity" {
+  enable_c5
+  printf '{"type":"assistant"}\n' > "$TEST_TMP/active.jsonl"
+  add_session "{\"state\":\"busy\",\"updatedAt\":$(minutes_ago_ms 45),\"transcriptPath\":\"$TEST_TMP/active.jsonl\"}"
+  run PLUGIN
+  header_is 1 sparkle
+}
+
+@test "C5 counts a recently started child process as activity" {
+  enable_c5
+  add_session "{\"state\":\"busy\",\"updatedAt\":$(minutes_ago_ms 45)}"
+  add_process 7005 4242 /bin/zsh "zsh -c make" "$(lstart_at $(( $(date +%s) - 120 )))"
+  run PLUGIN
+  header_is 1 sparkle
+}
+
+@test "C5 uses the configured threshold" {
+  printf 'stale_minutes=60\n' > "$CLAUDE_AGENTS_CONFIG"
+  add_session "{\"state\":\"busy\",\"updatedAt\":$(minutes_ago_ms 45)}"
+  run PLUGIN
+  header_is 1 sparkle
+}
+
+@test "C5 is off when stale_minutes=0" {
+  printf 'stale_minutes=0\n' > "$CLAUDE_AGENTS_CONFIG"
+  add_session "{\"state\":\"busy\",\"updatedAt\":$(minutes_ago_ms 600)}"
+  run PLUGIN
+  header_is 1 sparkle
+}
+
+@test "C5 never marks waiting or idle sessions as stale" {
+  enable_c5
+  add_session "{\"state\":\"waiting\",\"reason\":\"permission\",\"updatedAt\":$(minutes_ago_ms 300),\"stateSince\":$(minutes_ago_ms 300)}"
+  run PLUGIN
+  header_is 1 exclamationmark.circle.fill
+  add_session "{\"state\":\"idle\",\"updatedAt\":$(minutes_ago_ms 300)}"
+  run PLUGIN
+  header_is 1 checkmark.circle
+}
+
+@test "uncertain ranks below idle and above busy" {
+  enable_c5
+  add_session "{\"state\":\"busy\",\"updatedAt\":$(minutes_ago_ms 45)}"
+  printf '{"v":1,"sessionId":"s2","state":"busy","cwd":"/x/fresh","updatedAt":%s}' "$(minutes_ago_ms 1)" > "$CLAUDE_AGENTS_STATE_DIR/s2.json"
+  run PLUGIN
+  header_is 1 questionmark.circle
+  printf '{"v":1,"sessionId":"s3","state":"idle","cwd":"/x/done"}' > "$CLAUDE_AGENTS_STATE_DIR/s3.json"
+  run PLUGIN
+  header_is 1 checkmark.circle
 }
 
 @test "a corrupt registry file is ignored" {
