@@ -8,16 +8,18 @@ A minimal [SwiftBar](https://github.com/swiftbar/SwiftBar) plugin that shows, in
 
 ## What it shows
 
-The menu-bar item shows the most urgent state and how many sessions are in it:
+The menu-bar item shows one icon for the most urgent state across all sessions, with the number of sessions in that state. States are checked top to bottom, and the first that applies wins:
 
-| Menu bar                     | Meaning                                                                |
-| ---------------------------- | ---------------------------------------------------------------------- |
-| Red exclamation mark + count | An agent is waiting on a permission prompt or a question               |
-| Amber check mark + count     | An agent has finished and is waiting for your next prompt              |
-| Gray question mark + count   | A busy agent has shown no activity for longer than the stale threshold |
-| Dimmed icon + count          | All agents are working; nothing needs you                              |
-| Faint icon                   | No Claude Code sessions running                                        |
-| Warning triangle             | Some state files couldn't be read (see Troubleshooting)                |
+| Icon                              | Color      | Number          | Meaning                                                                   |
+| --------------------------------- | ---------- | --------------- | ------------------------------------------------------------------------- |
+| Warning triangle                  | Yellow     | All sessions    | Some state files couldn't be read (see Troubleshooting)                   |
+| Filled exclamation circle         | Red        | Waiting         | An agent is waiting on a permission prompt or a question                  |
+| `zzz`                             | Orange     | Idle            | An agent has finished and is waiting for your next prompt                 |
+| Question mark in a circle         | Gray       | Stale           | A busy agent has shown no activity for longer than the stale threshold    |
+| Sparkle (the `icon` setting)      | Dim gray   | All sessions    | All agents are working; nothing needs you                                 |
+| Sparkle, no number                | Very faint | —               | No Claude Code sessions running                                           |
+
+Because only the most urgent state is shown, a red `1` can hide idle sessions behind it; the dropdown lists every session with its own state. The icons never animate.
 
 The dropdown lists every session, most urgent first, then the filters and settings:
 

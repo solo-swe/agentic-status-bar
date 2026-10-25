@@ -32,7 +32,7 @@ PLUGIN() { "$REPO_ROOT/swiftbar/swiftbar-claudecode-minimal.5s.sh" "$@"; }
   run_hook UserPromptSubmit
   run_hook Stop
   run PLUGIN
-  [[ "${lines[0]}" == "1 | sfimage=checkmark.circle "* ]]
+  [[ "${lines[0]}" == "1 | sfimage=zzz"* ]]
   [[ "$output" == *"idle · "* ]]
 }
 

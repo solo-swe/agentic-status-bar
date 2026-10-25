@@ -3,7 +3,8 @@
     "project": "swiftbar-claudecode-minimal",
     "id": "fbc92785",
     "created": "2026-10-25",
-    "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md"
+    "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
+    "next_id": 40
   },
   "tasks": [
     {
@@ -1439,6 +1440,33 @@
         }
       ],
       "commit": "a7be9a0f59d2acd482da65e22e29cdcb3e53fd16"
+    },
+    {
+      "id": "T-039",
+      "name": "Use a zzz icon for idle and add an icon legend to the README",
+      "phase": 4,
+      "type": "polish",
+      "description": "Replace the idle menu-bar symbol checkmark.circle with the SF Symbol zzz (same idle color) and update the tests that check it. Expand the README 'What it shows' table into an icon legend: icon, color, what the number counts and meaning, in priority order; note that only the most urgent state is shown and icons never animate.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "done",
+      "dependencies": [],
+      "files": [
+        "swiftbar/swiftbar-claudecode-minimal.5s.sh",
+        "tests/checks.bats",
+        "tests/integration.bats",
+        "tests/plugin.bats",
+        "tests/reach.bats",
+        "README.md"
+      ],
+      "created_at": "2026-10-25T20:29:36Z",
+      "updated_at": "2026-10-25T20:29:40Z",
+      "created_by": "claude:c631bc24",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T20:29:39Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T20:29:40Z",
+      "completed_by": "claude:c631bc24"
     }
   ]
 }

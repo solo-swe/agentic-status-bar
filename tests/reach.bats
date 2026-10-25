@@ -154,7 +154,7 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
 @test "subagents don't count toward the menu-bar state" {
   add_state s1 '{"state":"idle","subagents":{"a1":{"type":"Explore","since":1}}}'
   run PLUGIN
-  [[ "${lines[0]}" == "1 | sfimage=checkmark.circle "* ]]
+  [[ "${lines[0]}" == "1 | sfimage=zzz"* ]]
 }
 
 @test "subagent rows are hidden when show_subagents=0" {

@@ -34,7 +34,7 @@ header_is() {
   add_session '{"state":"busy","updatedAt":1000}'
   add_registry '{"status":"idle","statusUpdatedAt":2000}'
   run PLUGIN
-  header_is 1 checkmark.circle
+  header_is 1 zzz
 }
 
 @test "C2 maps a newer registry waiting status with its reason" {
@@ -104,21 +104,21 @@ use_transcript() {
   t="$(use_transcript denied-permission)"
   add_session "{\"state\":\"busy\",\"transcriptPath\":\"$t\"}"
   run PLUGIN
-  header_is 1 checkmark.circle
+  header_is 1 zzz
 }
 
 @test "C3 shows a waiting session as idle after a denied permission" {
   t="$(use_transcript denied-permission)"
   add_session "{\"state\":\"waiting\",\"reason\":\"permission\",\"transcriptPath\":\"$t\"}"
   run PLUGIN
-  header_is 1 checkmark.circle
+  header_is 1 zzz
 }
 
 @test "C3 shows a busy session as idle when the turn already ended" {
   t="$(use_transcript completed-turn)"
   add_session "{\"state\":\"busy\",\"transcriptPath\":\"$t\"}"
   run PLUGIN
-  header_is 1 checkmark.circle
+  header_is 1 zzz
 }
 
 @test "C3 leaves a session busy when Esc came before any output" {
@@ -261,7 +261,7 @@ enable_c5() { printf 'stale_minutes=30\n' > "$CLAUDE_STATUSBAR_CONFIG"; }
   header_is 1 exclamationmark.circle.fill
   add_session "{\"state\":\"idle\",\"updatedAt\":$(minutes_ago_ms 300)}"
   run PLUGIN
-  header_is 1 checkmark.circle
+  header_is 1 zzz
 }
 
 @test "uncertain ranks below idle and above busy" {
@@ -272,7 +272,7 @@ enable_c5() { printf 'stale_minutes=30\n' > "$CLAUDE_STATUSBAR_CONFIG"; }
   header_is 1 questionmark.circle
   printf '{"v":1,"sessionId":"s3","state":"idle","cwd":"/x/done"}' > "$CLAUDE_STATUSBAR_STATE_DIR/s3.json"
   run PLUGIN
-  header_is 1 checkmark.circle
+  header_is 1 zzz
 }
 
 @test "C4 and C5 never modify the state file" {

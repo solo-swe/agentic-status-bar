@@ -241,7 +241,7 @@ HEADER_JQ='
 
   if .invalid > 0 then title(.sessions | length; "exclamationmark.triangle"; $c.warning)
   elif count("waiting") > 0 then title(count("waiting"); "exclamationmark.circle.fill"; $c.waiting)
-  elif count("idle") > 0 then title(count("idle"); "checkmark.circle"; $c.idle)
+  elif count("idle") > 0 then title(count("idle"); "zzz"; $c.idle)
   elif count("uncertain") > 0 then title(count("uncertain"); "questionmark.circle"; $c.uncertain)
   elif (.sessions | length) > 0 then title(.sessions | length; $icon; $c.busy)
   else title(""; $icon; $c.none)

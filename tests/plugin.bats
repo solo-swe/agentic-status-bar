@@ -72,7 +72,7 @@ header_is() {
   add_state b '{"state":"busy"}'
   add_state c '{"state":"busy"}'
   run PLUGIN
-  header_is 1 checkmark.circle
+  header_is 1 zzz
   [[ "${lines[0]}" == *"sfcolor=#B25000,#FFD60A"* ]]
 }
 
