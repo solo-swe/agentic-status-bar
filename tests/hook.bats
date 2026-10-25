@@ -249,6 +249,49 @@ teardown() { common_teardown; }
   [ -z "$(find "$CLAUDE_STATUSBAR_STATE_DIR" -name '*.json')" ]
 }
 
+# --- Sessions started before the hooks were installed ----------------------
+
+@test "the first event of an already-running session backfills its details" {
+  run_hook PreToolUse
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+  [ "$(state_field .state)" = busy ]
+  [ "$(state_field .lastTool)" = Bash ]
+  [ "$(state_field .cwd)" = /Users/alex/code/api-gateway ]
+  [ "$(state_field .pid)" = 4242 ]
+  [ "$(state_field .procStart)" = "Mon Oct 19 09:12:03 2026" ]
+  [ "$(state_field .herdrPane)" = w2:p1 ]
+  [ "$(state_field .kind)" = interactive ]
+}
+
+@test "backfill keeps the event's state and doesn't reset stateSince" {
+  run_hook Notification-permission_prompt
+  [ "$(state_field .state)" = waiting ]
+  [ "$(state_field .reason)" = permission ]
+  [ "$(state_field .pid)" = 4242 ]
+}
+
+@test "backfill runs only once per session" {
+  run_hook PreToolUse
+  # Make the ps stub fail loudly if it is called again.
+  stub_command ps 'echo called >> "$STUB_CALLS/ps-again"; exit 1'
+  run_hook PostToolUse
+  run_hook Stop
+  [ ! -e "$STUB_CALLS/ps-again" ]
+  [ "$(state_field .pid)" = 4242 ]
+}
+
+@test "backfill without a claude ancestor records pid null and doesn't retry" {
+  : > "$TEST_TMP/ps-table"
+  add_process 5000 1 /bin/sh "sh" "x"
+  run_hook PreToolUse
+  [ "$(state_field .pid)" = null ]
+  [ "$(state_field .cwd)" = /Users/alex/code/api-gateway ]
+  stub_command ps 'echo called >> "$STUB_CALLS/ps-again"; exit 1'
+  run_hook PostToolUse
+  [ ! -e "$STUB_CALLS/ps-again" ]
+}
+
 # --- Subagents ------------------------------------------------------------
 
 @test "SubagentStart adds the subagent without changing the state" {

@@ -169,22 +169,29 @@ session_kind() {
   echo interactive
 }
 
-on_session_start() {
+# Session details recorded at SessionStart, or backfilled for sessions that were
+# already running when the hooks were installed. pid is null when no claude
+# process is found, so the lookup isn't repeated on every event.
+METADATA_FILTER='
+  .cwd = $cwd
+  | .transcriptPath = $transcript
+  | .kind = $kind
+  | (if $pid != "" then .pid = ($pid | tonumber) | .procStart = $pstart else .pid = null | del(.procStart) end)
+  | (if $pane != "" then .herdrPane = $pane else del(.herdrPane) end)
+  | (if $bundle != "" then .termBundleId = $bundle else del(.termBundleId) end)
+'
+
+# write_metadata [EXTRA_FILTER [JQ ARGS...]] — records the session details, then
+# applies EXTRA_FILTER.
+write_metadata() {
   _cpid="$(find_claude_pid)"
   _pstart=""
   if [ -n "$_cpid" ]; then
     _pstart="$(ps -o lstart= -p "$_cpid" 2>/dev/null | sed 's/^ *//;s/ *$//')"
   fi
-
-  write_state '
-    .cwd = $cwd
-    | .transcriptPath = $transcript
-    | .kind = $kind
-    | (if $pid != "" then .pid = ($pid | tonumber) | .procStart = $pstart else del(.pid, .procStart) end)
-    | (if $pane != "" then .herdrPane = $pane else del(.herdrPane) end)
-    | (if $bundle != "" then .termBundleId = $bundle else del(.termBundleId) end)
-    | (if $source == "compact" and .state != null then . else .state = "idle" | del(.reason, .message, .subagents) end)
-  ' \
+  _extra="${1:-.}"
+  [ "$#" -gt 0 ] && shift
+  write_state "$METADATA_FILTER | $_extra" \
     --arg cwd "$p_cwd" \
     --arg transcript "$p_transcript" \
     --arg kind "$(session_kind "$_cpid")" \
@@ -192,7 +199,32 @@ on_session_start() {
     --arg pstart "$_pstart" \
     --arg pane "${HERDR_PANE_ID:-}" \
     --arg bundle "${__CFBundleIdentifier:-}" \
-    --arg source "$p_source"
+    "$@"
+}
+
+# backfill_metadata — for a session whose state file lacks pid or cwd (it was
+# running before the hooks were installed), records the session details once.
+# Reads the one-line state file with the shell, so it costs nothing otherwise.
+backfill_metadata() {
+  [ -r "$state_file" ] || return 0
+  _line=""
+  IFS= read -r _line < "$state_file"
+  case "$_line" in
+    *'"pid":'*'"cwd":'* | *'"cwd":'*'"pid":'*) return 0 ;;
+  esac
+  [ -n "$p_cwd" ] || return 0
+  # The event's own write just landed; this follow-up write must not be skipped
+  # as older than it.
+  _saved_started="$started_ms"
+  started_ms=99999999999999
+  write_metadata
+  started_ms="$_saved_started"
+}
+
+on_session_start() {
+  write_metadata '
+    if $source == "compact" and .state != null then . else .state = "idle" | del(.reason, .message, .subagents) end
+  ' --arg source "$p_source"
 
   # A claude process runs one session at a time: drop older files for the same PID
   # (e.g. the session before a /clear).
@@ -324,6 +356,11 @@ main() {
     SubagentStart) on_subagent_start ;;
     SubagentStop) on_subagent_stop ;;
     SessionEnd) on_session_end ;;
+  esac
+
+  case "$event" in
+    SessionStart | SessionEnd) ;;
+    *) [ "$changed" = 1 ] && backfill_metadata ;;
   esac
 
   [ "$changed" = 1 ] && poke_swiftbar
