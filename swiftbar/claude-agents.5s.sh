@@ -133,12 +133,49 @@ HEADER_JQ='
   end
 '
 
+# Width of the row label (project — title) before the state column.
+LABEL_WIDTH=48
+
+# One row per session, most urgent first; within a state, longest in it first.
+ROWS_JQ='
+  def rank: {waiting: 0, idle: 1, uncertain: 2, busy: 3}[.shown] // 4;
+  def glyph: {waiting: "●", idle: "●", uncertain: "?", busy: "○"}[.shown] // "○";
+  def word:
+    if .shown == "waiting" then (if .reason == "question" then "question" else "permission" end)
+    elif .shown == "idle" then "idle"
+    elif .shown == "uncertain" then "no activity"
+    else "working" end;
+  def since: .shownSince // .stateSince // $now;
+  def duration:
+    (($now - since) / 1000 | floor | if . < 0 then 0 else . end) as $s
+    | if $s < 60 then "\($s)s"
+      elif $s < 3600 then "\($s / 60 | floor)m"
+      elif $s < 86400 then "\($s / 3600 | floor)h"
+      else "\($s / 86400 | floor)d" end;
+  # Title source, best first (herdr titles are added by a later step).
+  def row_title: .title // .promptPreview // "";
+  def project: (.cwd // "") | split("/") | map(select(. != "")) | last // "unknown";
+  def row_label:
+    (project + (row_title as $t | if $t == "" then "" else " — " + $t end))
+    | gsub("\\|"; "│")
+    | if length > $width then .[0:$width - 1] + "…" else . + (" " * ($width - length)) end;
+
+  .sessions
+  | sort_by(rank, since)
+  | .[]
+  | "\(glyph) \(row_label)  \(word) · \(duration) | font=Menlo size=12"
+'
+
 # render DATA — prints the SwiftBar menu for the loaded sessions.
 render() {
-  printf '%s' "$1" | "$JQ" -r --arg icon "$cfg_icon" --argjson c "$COLORS" "$HEADER_JQ"'
+  printf '%s' "$1" | "$JQ" -r \
+    --arg icon "$cfg_icon" --argjson c "$COLORS" \
+    --argjson now "$(now_ms)" --argjson width "$LABEL_WIDTH" \
+    "$HEADER_JQ"'
     , "---"
     , (if .invalid > 0 then "\(.invalid) state file(s) could not be read | color=gray" else empty end)
-    , "\(.sessions | length) session(s)"
+    , (if (.sessions | length) == 0 then "No Claude Code sessions | color=gray" else empty end)
+    , ('"$ROWS_JQ"')
   '
 }
 

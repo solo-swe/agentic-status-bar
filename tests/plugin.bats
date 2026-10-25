@@ -91,6 +91,94 @@ header_is() {
   header_is 1 bolt
 }
 
+# --- Dropdown rows --------------------------------------------------------
+
+# now_minus SECONDS — epoch milliseconds SECONDS ago.
+now_minus() { echo $(( ($(date +%s) - $1) * 1000 )); }
+
+# rows — the session rows (lines after "---" that use the row font).
+rows() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo'; }
+
+@test "no sessions shows a placeholder row" {
+  run PLUGIN
+  [[ "$output" == *"No Claude Code sessions"* ]]
+}
+
+@test "rows are sorted by state, then longest in that state first" {
+  add_state busy1 "{\"state\":\"busy\",\"cwd\":\"/x/busy-old\",\"stateSince\":$(now_minus 600)}"
+  add_state idle1 "{\"state\":\"idle\",\"cwd\":\"/x/idle-new\",\"stateSince\":$(now_minus 30)}"
+  add_state idle2 "{\"state\":\"idle\",\"cwd\":\"/x/idle-old\",\"stateSince\":$(now_minus 900)}"
+  add_state wait1 "{\"state\":\"waiting\",\"reason\":\"permission\",\"cwd\":\"/x/waiter\",\"stateSince\":$(now_minus 5)}"
+  run PLUGIN
+  order="$(rows | awk '{print $2}' | tr '\n' ' ')"
+  [ "$order" = "waiter idle-old idle-new busy-old " ]
+}
+
+@test "a row shows project, title, state word and duration" {
+  add_state a "{\"state\":\"waiting\",\"reason\":\"permission\",\"cwd\":\"/Users/alex/code/api-gateway\",\"promptPreview\":\"Add rate limiting\",\"stateSince\":$(now_minus 125)}"
+  run PLUGIN
+  row="$(rows)"
+  [[ "$row" == "● api-gateway — Add rate limiting "* ]]
+  [[ "$row" == *"  permission · 2m | font=Menlo size=12" ]]
+}
+
+@test "state words cover question, idle, working" {
+  add_state q "{\"state\":\"waiting\",\"reason\":\"question\",\"cwd\":\"/x/q\"}"
+  add_state i "{\"state\":\"idle\",\"cwd\":\"/x/i\"}"
+  add_state b "{\"state\":\"busy\",\"cwd\":\"/x/b\"}"
+  run PLUGIN
+  [[ "$(rows | grep ' q ')" == *"question · "* ]]
+  [[ "$(rows | grep ' i ')" == *"idle · "* ]]
+  [[ "$(rows | grep ' b ')" == *"working · "* ]]
+  [[ "$(rows | grep ' b ')" == "○ "* ]]
+}
+
+@test "durations use s, m, h and d" {
+  add_state s "{\"state\":\"busy\",\"cwd\":\"/x/s\",\"stateSince\":$(now_minus 12)}"
+  add_state m "{\"state\":\"busy\",\"cwd\":\"/x/m\",\"stateSince\":$(now_minus 300)}"
+  add_state h "{\"state\":\"busy\",\"cwd\":\"/x/h\",\"stateSince\":$(now_minus 7300)}"
+  add_state d "{\"state\":\"busy\",\"cwd\":\"/x/d\",\"stateSince\":$(now_minus 180000)}"
+  run PLUGIN
+  [[ "$(rows | grep ' s ')" =~ working\ ·\ 1[0-9]s ]]
+  [[ "$(rows | grep ' m ')" == *"working · 5m |"* ]]
+  [[ "$(rows | grep ' h ')" == *"working · 2h |"* ]]
+  [[ "$(rows | grep ' d ')" == *"working · 2d |"* ]]
+}
+
+@test "long labels are truncated to the label width with an ellipsis" {
+  add_state a '{"state":"busy","cwd":"/x/project","promptPreview":"A very long prompt preview that goes on and on past the limit"}'
+  run PLUGIN
+  label="$(rows | sed 's/^○ //; s/  working.*//')"
+  [ "${#label}" -eq 48 ]
+  [[ "$label" == *"…" ]]
+}
+
+@test "short labels are padded so the state column lines up" {
+  add_state a '{"state":"busy","cwd":"/x/ab"}'
+  add_state b '{"state":"busy","cwd":"/x/abcdef","promptPreview":"x"}'
+  run PLUGIN
+  export LC_ALL=en_US.UTF-8
+  first="$(rows | sed -n 1p)"
+  second="$(rows | sed -n 2p)"
+  first="${first%%working*}"
+  second="${second%%working*}"
+  [ "${#first}" -eq "${#second}" ]
+}
+
+@test "a pipe in the title does not break SwiftBar parameters" {
+  add_state a '{"state":"busy","cwd":"/x/p","promptPreview":"a | color=red"}'
+  run PLUGIN
+  row="$(rows)"
+  [[ "$row" == *"a │ color=red"* ]]
+  [ "$(printf '%s' "$row" | tr -cd '|' | wc -c | tr -d ' ')" -eq 1 ]
+}
+
+@test "a session without cwd or title still renders" {
+  add_state a '{"state":"idle"}'
+  run PLUGIN
+  [[ "$(rows)" == "● unknown "* ]]
+}
+
 # --- C1 liveness ----------------------------------------------------------
 
 @test "C1 keeps a session whose claude process is running" {
