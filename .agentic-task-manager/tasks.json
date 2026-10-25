@@ -1021,7 +1021,8 @@
           "text": "Titles: herdr agent list once per refresh (1 s timeout, empty/failing -> {}), then user-given registry name (derived skipped), then prompt preview; 5 tests",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "f125d3fde189e8bdc0a9c442d38db095b4eebc1e"
     },
     {
       "id": "T-028",
@@ -1036,7 +1037,7 @@
       "use_cases": [
         "U9"
       ],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-009",
         "T-003"
@@ -1045,8 +1046,20 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:49:47Z",
-      "updated_by": "claude:c631bc24"
+      "updated_at": "2026-10-25T07:31:09Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T07:30:09Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T07:31:09Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T07:31:09Z",
+          "kind": "outcome",
+          "text": "SubagentStart/Stop keyed by agent_id under the parent, state untouched, empty-type stop ignored, cleared on fresh start; 5 tests",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-029",

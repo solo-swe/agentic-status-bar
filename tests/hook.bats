@@ -249,6 +249,54 @@ teardown() { common_teardown; }
   [ -z "$(find "$CLAUDE_AGENTS_STATE_DIR" -name '*.json')" ]
 }
 
+# --- Subagents ------------------------------------------------------------
+
+@test "SubagentStart adds the subagent without changing the state" {
+  run_hook UserPromptSubmit
+  since="$(state_field .stateSince)"
+  run_hook SubagentStart
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+  [ "$(state_field .state)" = busy ]
+  [ "$(state_field .stateSince)" = "$since" ]
+  [ "$(state_field '.subagents.ac2ed88ebf4ec5d02.type')" = general-purpose ]
+  [[ "$(state_field '.subagents.ac2ed88ebf4ec5d02.since')" =~ ^[0-9]{13}$ ]]
+}
+
+@test "SubagentStop removes the subagent" {
+  run_hook UserPromptSubmit
+  run_hook SubagentStart
+  run_hook SubagentStop
+  [ "$(state_field '.subagents // "none"')" = none ]
+  [ "$(state_field .state)" = busy ]
+}
+
+@test "SubagentStop keeps other running subagents" {
+  run_hook UserPromptSubmit
+  run_hook SubagentStart
+  jq '.agent_id = "b2" | .agent_type = "Explore"' "$REPO_ROOT/tests/fixtures/payloads/SubagentStart.json" > "$TEST_TMP/start2.json"
+  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/start2.json"
+  run_hook SubagentStop
+  [ "$(state_field '.subagents | keys | join(",")')" = b2 ]
+  [ "$(state_field '.subagents.b2.type')" = Explore ]
+}
+
+@test "the empty SubagentStop after Stop is ignored" {
+  run_hook UserPromptSubmit
+  run_hook SubagentStart
+  run_hook Stop
+  before="$(cat "$(state_file)")"
+  run_hook SubagentStop-empty
+  [ "$(cat "$(state_file)")" = "$before" ]
+}
+
+@test "SubagentStart without an agent_id is ignored" {
+  jq 'del(.agent_id)' "$REPO_ROOT/tests/fixtures/payloads/SubagentStart.json" > "$TEST_TMP/noid.json"
+  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/noid.json"
+  [ "$status" -eq 0 ]
+  [ ! -e "$(state_file)" ]
+}
+
 # --- Instant refresh ------------------------------------------------------
 
 @test "a state change asks SwiftBar to refresh" {

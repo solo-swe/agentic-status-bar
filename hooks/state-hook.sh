@@ -167,7 +167,7 @@ on_session_start() {
     | (if $pid != "" then .pid = ($pid | tonumber) | .procStart = $pstart else del(.pid, .procStart) end)
     | (if $pane != "" then .herdrPane = $pane else del(.herdrPane) end)
     | (if $bundle != "" then .termBundleId = $bundle else del(.termBundleId) end)
-    | (if $source == "compact" and .state != null then . else .state = "idle" | del(.reason, .message) end)
+    | (if $source == "compact" and .state != null then . else .state = "idle" | del(.reason, .message, .subagents) end)
   ' \
     --arg cwd "$(field '.cwd')" \
     --arg transcript "$(field '.transcript_path')" \
@@ -248,8 +248,26 @@ on_notification() {
 on_stop() {
   write_state '.state = "idle" | del(.reason, .message)'
 }
-on_subagent_start() { :; }
-on_subagent_stop() { :; }
+# Subagents are tracked under the parent session; they never change its state.
+on_subagent_start() {
+  _id="$(field '.agent_id')"
+  [ -n "$_id" ] || return 0
+  write_state '
+    .state //= "busy"
+    | .subagents[$id] = {type: (if $type == "" then "agent" else $type end), since: $now}
+  ' --arg id "$_id" --arg type "$(field '.agent_type')"
+}
+
+on_subagent_stop() {
+  _id="$(field '.agent_id')"
+  # An extra SubagentStop with an empty agent_type follows every Stop; it has
+  # no matching start.
+  [ -n "$_id" ] && [ -n "$(field '.agent_type')" ] || return 0
+  write_state '
+    del(.subagents[$id])
+    | if (.subagents // {}) == {} then del(.subagents) else . end
+  ' --arg id "$_id"
+}
 # A late async event can recreate the file after this; the plugin's liveness
 # check (C1) removes it once the claude process is gone.
 on_session_end() {
