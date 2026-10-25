@@ -78,6 +78,59 @@ row_of() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo' | grep " $1 "; }
   [ -z "$(stub_calls open)" ]
 }
 
+# --- Titles ---------------------------------------------------------------
+
+# herdr_lists JSON_AGENTS — makes the herdr stub answer `agent list` with these agents.
+herdr_lists() {
+  printf '{"id":"cli:agent:list","result":{"agents":%s,"type":"agent_list"}}' "$1" > "$TEST_TMP/herdr-list.json"
+  stub_command herdr '[ "$1 $2" = "agent list" ] && cat "'"$TEST_TMP"'/herdr-list.json"; exit 0'
+}
+
+@test "herdr terminal titles are preferred over the prompt preview" {
+  herdr_lists '[{"agent":"claude","agent_session":{"value":"s1"},"terminal_title_stripped":"Spec for the parser","pane_id":"w2:p1"}]'
+  add_state s1 '{"state":"idle","promptPreview":"first prompt"}'
+  run PLUGIN
+  [[ "$(row_of s1)" == "● s1 — Spec for the parser "* ]]
+}
+
+@test "a user-given session name is used when herdr has no title" {
+  herdr_lists '[]'
+  add_process 4242 1 claude claude "Mon Oct 19 09:12:03 2026"
+  add_state s1 '{"state":"idle","pid":4242,"procStart":"Mon Oct 19 09:12:03 2026","promptPreview":"first prompt"}'
+  printf '{"pid":4242,"sessionId":"s1","name":"parser-rewrite","nameSource":"user"}' > "$CLAUDE_AGENTS_REGISTRY_DIR/4242.json"
+  run PLUGIN
+  [[ "$(row_of s1)" == "● s1 — parser-rewrite "* ]]
+}
+
+@test "derived session names are skipped in favor of the prompt preview" {
+  herdr_lists '[]'
+  add_process 4242 1 claude claude "Mon Oct 19 09:12:03 2026"
+  add_state s1 '{"state":"idle","pid":4242,"procStart":"Mon Oct 19 09:12:03 2026","promptPreview":"first prompt"}'
+  printf '{"pid":4242,"sessionId":"s1","name":"s1-a3","nameSource":"derived"}' > "$CLAUDE_AGENTS_REGISTRY_DIR/4242.json"
+  run PLUGIN
+  [[ "$(row_of s1)" == "● s1 — first prompt "* ]]
+}
+
+@test "a failing or slow herdr list falls back to the prompt preview" {
+  stub_command herdr 'exit 1'
+  add_state s1 '{"state":"idle","promptPreview":"first prompt"}'
+  run PLUGIN
+  [[ "$(row_of s1)" == "● s1 — first prompt "* ]]
+
+  stub_command herdr 'sleep 10'
+  start=$(date +%s)
+  run PLUGIN
+  [ $(( $(date +%s) - start )) -lt 4 ]
+  [[ "$(row_of s1)" == "● s1 — first prompt "* ]]
+}
+
+@test "an empty herdr title falls back too" {
+  herdr_lists '[{"agent":"claude","agent_session":{"value":"s1"},"terminal_title_stripped":""}]'
+  add_state s1 '{"state":"idle","promptPreview":"first prompt"}'
+  run PLUGIN
+  [[ "$(row_of s1)" == "● s1 — first prompt "* ]]
+}
+
 @test "focus ignores unsafe pane and bundle values" {
   add_state s1 '{"state":"idle","herdrPane":"w2:p1; rm -rf /"}'
   run PLUGIN focus s1

@@ -105,6 +105,11 @@ CHECKS_JQ='
   def registry($R):
     (if .pid == null then null else $R[.pid | tostring] end) as $r
     | if $r == null or $r.sessionId != .sessionId then .
+      else
+        # A name the user gave the session (not one Claude Code derived).
+        (if ($r.name // "") != "" and $r.nameSource != "derived" then .sessionName = $r.name else . end)
+      end
+    | if $r == null or $r.sessionId != .sessionId then .
       elif ($r.status | type) != "string" then .registrySchema = false
       elif ($r.statusUpdatedAt // 0) <= (.updatedAt // 0) then .
       elif $r.status == "busy" then .shown = "busy" | .shownSince = $r.statusUpdatedAt
@@ -314,8 +319,10 @@ ROWS_JQ='
       elif $s < 3600 then "\($s / 60 | floor)m"
       elif $s < 86400 then "\($s / 3600 | floor)h"
       else "\($s / 86400 | floor)d" end;
-  # Title source, best first (herdr titles are added by a later step).
-  def row_title: .title // .promptPreview // "";
+  # Title source, best first: herdr terminal title, a user-given session name,
+  # the first prompt.
+  def nonempty: select(. != null and . != "");
+  def row_title: [($titles[.sessionId] | nonempty), (.sessionName | nonempty), (.promptPreview | nonempty), ""] | first;
   def project: (.cwd // "") | split("/") | map(select(. != "")) | last // "unknown";
   def row_label:
     (project + (row_title as $t | if $t == "" then "" else " — " + $t end))
@@ -342,6 +349,28 @@ ROWS_JQ='
     (if .transcriptPath then action("Reveal transcript"; "reveal-transcript") else empty end)
 '
 
+# Seconds `herdr agent list` may take before titles are skipped for this refresh.
+HERDR_LIST_TIMEOUT=1
+
+# load_herdr_titles — prints {claude session ID: terminal title} from herdr, or {}.
+load_herdr_titles() {
+  _herdr="$(find_herdr)"
+  [ -n "$_herdr" ] || { printf '{}'; return; }
+  _out="$(mktemp "${TMPDIR:-/tmp}/claude-agents-herdr.XXXXXX")" || { printf '{}'; return; }
+  run_with_timeout "$HERDR_LIST_TIMEOUT" "$_herdr" agent list > "$_out" 2>/dev/null
+  _titles="$("$JQ" -c '
+    [.result.agents[]? | select(.agent == "claude" and (.agent_session.value // "") != "")
+     | {key: .agent_session.value, value: (.terminal_title_stripped // "")}]
+    | from_entries
+  ' "$_out" 2>/dev/null)"
+  rm -f "$_out"
+  # No output (herdr failed, timed out or printed nothing) means no titles.
+  case "$_titles" in
+    '{'*) printf '%s' "$_titles" ;;
+    *) printf '{}' ;;
+  esac
+}
+
 # render DATA — prints the SwiftBar menu for the loaded sessions.
 render() {
   printf '%s' "$1" | "$JQ" -r \
@@ -349,6 +378,7 @@ render() {
     --argjson now "$(now_ms)" --argjson width "$LABEL_WIDTH" \
     --arg plugin "$plugin_path" \
     --argjson herdr "$(if [ -n "$(find_herdr)" ]; then echo true; else echo false; fi)" \
+    --argjson titles "$(load_herdr_titles)" \
     "$HEADER_JQ"'
     , "---"
     , (if .invalid > 0 then "\(.invalid) state file(s) could not be read | color=gray" else empty end)
