@@ -4,10 +4,56 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 49,
+    "next_id": 94,
     "workflow": {
       "type": "direct"
-    }
+    },
+    "phases": [
+      {
+        "id": 0,
+        "name": "Foundations"
+      },
+      {
+        "id": 1,
+        "name": "Core"
+      },
+      {
+        "id": 2,
+        "name": "Accuracy"
+      },
+      {
+        "id": 3,
+        "name": "Reach"
+      },
+      {
+        "id": 4,
+        "name": "Release"
+      },
+      {
+        "id": 5,
+        "name": "Polish and design"
+      },
+      {
+        "id": 6,
+        "name": "Swift foundations"
+      },
+      {
+        "id": 7,
+        "name": "Core port"
+      },
+      {
+        "id": 8,
+        "name": "asb CLI and hook"
+      },
+      {
+        "id": 9,
+        "name": "macOS app"
+      },
+      {
+        "id": 10,
+        "name": "Release and cleanup"
+      }
+    ]
   },
   "tasks": [
     {
@@ -1755,6 +1801,1216 @@
           "by": "claude:c631bc24"
         }
       ]
+    },
+    {
+      "id": "T-049",
+      "name": "Swift package skeleton: ASBCore, asb and tests",
+      "phase": 6,
+      "type": "infra",
+      "priority": "P0",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Create Package.swift at the repo root (swift-tools-version 6.0, platforms macOS 14) with a library target ASBCore (Sources/ASBCore, Foundation only: no AppKit or SwiftUI, see doc/design/future-architecture.md 'What to do now to keep the cross-platform door open'), an executable target asb (Sources/asb) and a test target ASBCoreTests (Tests/ASBCoreTests, Swift Testing). asb uses swift-argument-parser and for now has only `asb --version` (prints the version from a single constant in ASBCore, e.g. 0.1.0). Add .build/ and .swiftpm/ to .gitignore. Verify with `swift build` and `swift test`. Don't touch the shell code.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "Package.swift",
+        "Sources/ASBCore/Version.swift",
+        "Sources/asb/main.swift",
+        "Tests/ASBCoreTests/VersionTests.swift",
+        ".gitignore"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-050",
+      "name": "CI: build and test the Swift package",
+      "phase": 6,
+      "type": "infra",
+      "priority": "P0",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Add a `swift` job to .github/workflows/ci.yml on macos-latest that runs `swift build` and `swift test` (select the newest Xcode available on the runner if needed). Keep the existing lint and bats job unchanged. Add a tests/swift.sh wrapper (`swift build && swift test`) mirroring tests/run.sh, and mention both in CONTRIBUTING.md.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-049"
+      ],
+      "files": [
+        ".github/workflows/ci.yml",
+        "tests/swift.sh",
+        "CONTRIBUTING.md"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-051",
+      "name": "Freeze the state file schema v1 as a public contract",
+      "phase": 6,
+      "type": "docs",
+      "priority": "P0",
+      "labels": [
+        "migration"
+      ],
+      "description": "Write doc/state-file-schema.md: the per-session state file (schema v: 1) field by field (types, optional or not, who writes it, meaning), taken from doc/PRD.md and hooks/state-hook.sh: v, sessionId, state, reason, message, updatedAt, stateSince, pid, procStart, cwd, kind, termBundleId, herdrPane, transcriptPath, lastTool, promptPreview, promptAt, subagents{agent_id:{type,since}}. Also the writer rules (newer event wins via updatedAt, atomic temp+rename, per-session lock, SessionEnd deletes), the mutes file ({cwd:{until,at,today}}), and the config file keys with validation rules (from lib/common.sh). State that readers must ignore unknown fields and reject v > 1. Link it from the PRD.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "doc/state-file-schema.md",
+        "doc/PRD.md"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-052",
+      "name": "Snapshot schema v1 and its Codable types",
+      "phase": 6,
+      "type": "feature",
+      "priority": "P0",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Define what every front end reads: write doc/snapshot-schema.md and Sources/ASBCore/Snapshot.swift (Codable, sorted keys when encoded). Snapshot v1: version, generatedAt (ms), invalidFiles (count), activeMutes (count), header {state: waiting|idle|uncertain|busy|muted|none|warning, symbol, color (light,dark), count (number or null)}, sessions [ {sessionId, project, title, cwd, kind, shown (waiting|idle|uncertain|busy|subagents), reason, since (ms), label (fitted row label), word (state word), muted, muteUntil, muteToday, herdrPane, termBundleId, transcriptPath, symbol, color, subagents [{id, type, since}]} ] in display order. Mirror the shell plugin's behavior (swiftbar/swiftbar-claudecode-minimal.5s.sh HEADER_JQ and ROWS_JQ). Unit test: encoding round-trips and key order is stable.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-049",
+        "T-051"
+      ],
+      "files": [
+        "doc/snapshot-schema.md",
+        "Sources/ASBCore/Snapshot.swift",
+        "Tests/ASBCoreTests/SnapshotTests.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-053",
+      "name": "Conformance suite: data-driven case format and runner",
+      "phase": 6,
+      "type": "test",
+      "priority": "P0",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Create tests/conformance/README.md defining a language-neutral case: a directory with input/ (state/*.json, registry/*.json, transcripts/*.jsonl, processes.json [{pid, ppid, start (epoch s), comm}], herdr.json (agent list output, optional), config (optional), mutes (optional), clock.json {now_ms, tz}) and expected.json (the snapshot). Add a Swift test (Tests/ASBCoreTests/ConformanceTests.swift) that loads every case, runs the core with a fake clock, fake process inspector and fake herdr, and compares JSON semantically (key order ignored), printing a readable diff on failure. Add one case: no-sessions. The runner should skip core pieces not yet implemented only via an explicit 'pending' marker file, never silently.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-052"
+      ],
+      "files": [
+        "tests/conformance/README.md",
+        "tests/conformance/no-sessions/input/clock.json",
+        "tests/conformance/no-sessions/expected.json",
+        "Tests/ASBCoreTests/ConformanceTests.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-054",
+      "name": "ASBCore: config loading, validation and set_config",
+      "phase": 7,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Port lib/common.sh config handling to Sources/ASBCore/Config.swift: the key whitelist (show_*, stale_minutes, use_registry, instant_refresh, icon, store_prompt_preview, state_dir, theme, icon_<state>, color_<state> for waiting idle uncertain busy subagents muted none warning), defaults, value validation (plain words/paths; colors #RRGGBB or a light,dark pair), comments and unknown keys ignored, ~ expansion, and setConfig(key, value) that keeps other lines and writes atomically. Paths come from a Paths struct with environment overrides (for now CLAUDE_STATUSBAR_CONFIG and CLAUDE_STATUSBAR_STATE_DIR, renamed later). Port tests/common.bats cases to Tests/ASBCoreTests/ConfigTests.swift.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-049"
+      ],
+      "files": [
+        "Sources/ASBCore/Config.swift",
+        "Sources/ASBCore/Paths.swift",
+        "Tests/ASBCoreTests/ConfigTests.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-055",
+      "name": "ASBCore: load state files leniently",
+      "phase": 7,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Sources/ASBCore/StateFile.swift: a Codable StateFile matching doc/state-file-schema.md (unknown fields ignored, all but v and sessionId optional) and a loader that reads *.json in the state dir (skipping *.tmp.* and *.lock), counting files that don't parse, aren't objects or have v outside 1...1 as invalid. Return [StateFile with its path] plus invalidCount. Tests port the plugin.bats cases 'plugin loads valid state files', 'corrupt and future-version files', 'temp and lock files are ignored'.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-049",
+        "T-051"
+      ],
+      "files": [
+        "Sources/ASBCore/StateFile.swift",
+        "Tests/ASBCoreTests/StateFileTests.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-056",
+      "name": "ASBCore: ProcessInspector with a libproc implementation",
+      "phase": 7,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Sources/ASBCore/Processes.swift: protocol ProcessInspector { func snapshot() -> [Int32: ProcessInfo] } with ProcessInfo {pid, ppid, start (epoch seconds), comm, args (optional)}; a FakeProcessInspector for tests; and a macOS implementation using libproc (proc_listallpids, proc_pidinfo PROC_PIDTBSDINFO for ppid, start time and comm) in a file compiled only on macOS (#if os(macOS)) so ASBCore stays portable. Also a helper converting the shell era's procStart strings ('Mon Oct 19 09:12:03 2026', local time, extra spaces allowed) to epoch seconds. Tests: the fake; the real inspector finds the test process itself with a plausible start time and its parent.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-049"
+      ],
+      "files": [
+        "Sources/ASBCore/Processes.swift",
+        "Sources/ASBCore/ProcessesDarwin.swift",
+        "Tests/ASBCoreTests/ProcessesTests.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-057",
+      "name": "ASBCore: check C1 liveness and dead files",
+      "phase": 7,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Sources/ASBCore/Checks.swift, start of the reconciler: each session gets `shown = state`; sessions whose pid is gone, or whose process start time differs from procStart, are dropped and their file paths returned as dead (the caller deletes them); sessions without pid are kept. Port the C1 tests from tests/plugin.bats and add conformance cases c1-alive, c1-dead, c1-reused-pid.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-055",
+        "T-056"
+      ],
+      "files": [
+        "Sources/ASBCore/Checks.swift",
+        "Tests/ASBCoreTests/ChecksTests.swift",
+        "tests/conformance/c1-alive/",
+        "tests/conformance/c1-dead/",
+        "tests/conformance/c1-reused-pid/"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-058",
+      "name": "ASBCore: check C2 registry override and session names",
+      "phase": 7,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Read Claude Code's registry (~/.claude/sessions/<pid>.json, dir overridable via CLAUDE_STATUSBAR_REGISTRY_DIR for now), match by pid and sessionId, take a user-given name (nameSource != derived) as sessionName, and when statusUpdatedAt is newer than updatedAt map status busy/idle/waiting (waitingFor containing 'permission' → reason permission, else question). An entry without a string status sets a registrySchemaIssue flag (logged once by the caller to plugin.log); unknown statuses are ignored; use_registry=0 turns it off. Port tests/checks.bats C2 cases plus the name tests from reach.bats; conformance cases c2-*.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-057"
+      ],
+      "files": [
+        "Sources/ASBCore/Registry.swift",
+        "Sources/ASBCore/Checks.swift",
+        "Tests/ASBCoreTests/RegistryTests.swift",
+        "tests/conformance/"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-059",
+      "name": "ASBCore: transcript tail and check C3 interrupt",
+      "phase": 7,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Sources/ASBCore/Transcript.swift: read the last 8192 bytes of a transcript (drop the first, cut line when the file is larger), parse JSONL entries leniently, and expose mtime. C3: a busy or waiting session whose transcript, after the latest real user prompt (type user, not isMeta, text content, not starting with '[Request interrupted by user'), has the interrupt marker or a system/turn_duration entry becomes idle with shownSince = updatedAt and an interrupted flag. Use the fixtures in tests/fixtures/transcripts. Port the C3 cases from tests/checks.bats; conformance cases c3-*.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-057"
+      ],
+      "files": [
+        "Sources/ASBCore/Transcript.swift",
+        "Sources/ASBCore/Checks.swift",
+        "Tests/ASBCoreTests/TranscriptTests.swift",
+        "tests/conformance/"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-060",
+      "name": "ASBCore: checks C4 approved tool and C5 staleness",
+      "phase": 7,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "C4: a waiting session whose claude pid has a child process (not caffeinate) started after shownSince/stateSince becomes busy with shownSince = that start. C5: a busy (or subagents) session whose latest activity (updatedAt, shownSince, transcript mtime, start of any child process) is older than stale_minutes (0 = off) becomes uncertain with shownSince = that activity. Port the C4 and C5 cases from tests/checks.bats; conformance cases c4-*, c5-*.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-059",
+        "T-054"
+      ],
+      "files": [
+        "Sources/ASBCore/Checks.swift",
+        "Tests/ASBCoreTests/ChecksTests.swift",
+        "tests/conformance/"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-061",
+      "name": "ASBCore: subagents state and session-type filters",
+      "phase": 7,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Port the 'subagents' state (see doc/PRD.md 'Waiting on subagents'): with entries in subagents, not interrupted, and shown idle, or busy with lastTool Task or Agent, shown becomes subagents with shownSince = earliest subagent since; it runs before C5 and C5 applies to it. Then the filters: show_interactive/headless/ide (ide covers desktop), sessions without kind count as interactive; show_subagents only hides subagent rows. Port the subagent and filter tests from tests/reach.bats; conformance cases.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-060"
+      ],
+      "files": [
+        "Sources/ASBCore/Checks.swift",
+        "Sources/ASBCore/Filters.swift",
+        "Tests/ASBCoreTests/SubagentsTests.swift",
+        "tests/conformance/"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-062",
+      "name": "ASBCore: project mutes",
+      "phase": 7,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Sources/ASBCore/Mutes.swift: read the mutes file ({cwd:{until,at,today}}; corrupt → empty), compute active mutes (until > now and at >= the latest promptAt of any session in that cwd), mark sessions muteUntil/muteToday and muted (unless shown is waiting), and the mutation functions muteHour(cwd), muteToday(cwd) (until next local midnight), unmute(cwd), unmuteAll(), each dropping expired entries and writing atomically. Port tests/mute.bats logic to Tests/ASBCoreTests/MutesTests.swift with a fake clock and time zone; conformance cases mute-*.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-054",
+        "T-055"
+      ],
+      "files": [
+        "Sources/ASBCore/Mutes.swift",
+        "Tests/ASBCoreTests/MutesTests.swift",
+        "tests/conformance/"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-063",
+      "name": "ASBCore: themes and per-state overrides",
+      "phase": 7,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Sources/ASBCore/Themes.swift: the built-in themes default, monochrome and high_contrast with symbol and light,dark color for waiting, idle, uncertain, busy, subagents, muted, none, warning (copy the THEMES JSON from swiftbar/swiftbar-claudecode-minimal.5s.sh), unknown theme → default, the legacy icon key for busy and none, and icon_<state>/color_<state> overrides on top. Tests port the theme cases from tests/reach.bats.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-054"
+      ],
+      "files": [
+        "Sources/ASBCore/Themes.swift",
+        "Tests/ASBCoreTests/ThemesTests.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-064",
+      "name": "ASBCore: menu model (header, rows, labels)",
+      "phase": 7,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Sources/ASBCore/MenuModel.swift builds the Snapshot from reconciled sessions: header priority (warning if invalid files, then waiting, idle, uncertain, busy count over unmuted sessions; all muted → muted symbol without count; none → none symbol), rows sorted by rank (waiting 0, idle 1, uncertain 2, busy/subagents 3, muted 5) then since, label = project (cwd basename or 'unknown') + ' — ' + title (herdr terminal title, then sessionName, then promptPreview), '|' replaced by '│', fitted to 48 characters with '…' or padded, ':name:' broken with a zero-width space; word (permission, question, idle, no activity, waiting on N subagent(s), working); durations (s, m, h, d); mute text ('muted today' or 'muted until HH:MM'); subagent rows sorted by since. Port the row tests from tests/plugin.bats; conformance cases rows-*.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-061",
+        "T-062",
+        "T-063",
+        "T-052"
+      ],
+      "files": [
+        "Sources/ASBCore/MenuModel.swift",
+        "Tests/ASBCoreTests/MenuModelTests.swift",
+        "tests/conformance/"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-065",
+      "name": "asb snapshot --json on real inputs",
+      "phase": 7,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "swift-core",
+        "cli"
+      ],
+      "description": "Add `asb snapshot --json`: gather real inputs (state dir, registry dir, transcripts of busy/waiting sessions, libproc processes, `herdr agent list` with a 1 s timeout into a temp file, config, mutes), run the reconciler and menu model, delete dead state files, log the registry schema issue once to plugin.log, print the snapshot. Must finish under 30 ms for 10 sessions (add a small benchmark in tests/bench.sh or a Swift test). Compare by hand with the shell plugin's output on your live sessions and note any difference in the task.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-064",
+        "T-058"
+      ],
+      "files": [
+        "Sources/asb/Snapshot.swift",
+        "Sources/ASBCore/Inputs.swift",
+        "tests/bench.sh"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-066",
+      "name": "Conformance cases: checks and rows from the bats suite",
+      "phase": 7,
+      "type": "test",
+      "priority": "P1",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Turn every scenario in tests/checks.bats and tests/plugin.bats that isn't already a conformance case into one under tests/conformance/ (input files plus expected.json). Name cases after the bats test. All must pass `swift test`; any behavior difference from the shell plugin is a bug in the Swift core unless the bats test itself is wrong (then say so in a task note).",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-065",
+        "T-053"
+      ],
+      "files": [
+        "tests/conformance/"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-067",
+      "name": "Conformance cases: mutes, filters, subagents and titles",
+      "phase": 7,
+      "type": "test",
+      "priority": "P1",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Same as the previous task for tests/mute.bats and tests/reach.bats (filters, subagents, herdr titles, themes): each scenario becomes a conformance case and passes `swift test`.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-065",
+        "T-053"
+      ],
+      "files": [
+        "tests/conformance/"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-068",
+      "name": "asb swiftbar: render SwiftBar's menu format",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "cli",
+        "migration"
+      ],
+      "description": "Add `asb swiftbar`, printing exactly what swiftbar/swiftbar-claudecode-minimal.5s.sh prints today, from the menu model: header with inline :symbol: and sfcolor/color, '---', invalid-files line, placeholder, rows with font=Menlo size=12 sfcolor and herdr click action, row submenus (not-in-herdr note, mute/unmute, copy id/cwd, open folder, reveal transcript), subagent rows, Unmute all, Show toggles, Settings (Start SwiftBar at login, Theme submenu, stale options, toggles, Reveal config file), Refresh. Actions call `asb action ...` via bash=<path of asb>. Golden tests: capture the shell plugin's output for a few fixture setups into Tests/ASBCoreTests/Golden/ and compare.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-065"
+      ],
+      "files": [
+        "Sources/ASBCore/SwiftBarRenderer.swift",
+        "Sources/asb/SwiftBar.swift",
+        "Tests/ASBCoreTests/SwiftBarRendererTests.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-069",
+      "name": "asb action: every menu action",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "cli"
+      ],
+      "description": "Add `asb action <name> [args]` for: focus ID (herdr agent focus <pane> then open -b <bundle>, 2 s timeouts, pane and bundle validated as in the shell), toggle KEY (whitelisted keys), set KEY VALUE (stale_minutes 0/10/30/60, theme default/monochrome/high_contrast only), reveal-config (writes the default config with the theme comments if missing, then open -R), copy-id, copy-cwd (pbcopy), open-folder, reveal-transcript, mute-hour, mute-today, unmute, unmute-all, login (toggle the LaunchAgent plist that opens SwiftBar at login). Session IDs must match [A-Za-z0-9_-]+. External commands go through an injectable runner so tests can record calls. Port the action tests from tests/plugin.bats, reach.bats and mute.bats.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-068",
+        "T-062"
+      ],
+      "files": [
+        "Sources/asb/Action.swift",
+        "Sources/ASBCore/Actions.swift",
+        "Tests/ASBCoreTests/ActionsTests.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-070",
+      "name": "Point the SwiftBar plugin at asb",
+      "phase": 8,
+      "type": "refactor",
+      "priority": "P1",
+      "labels": [
+        "migration"
+      ],
+      "description": "Replace the body of swiftbar/swiftbar-claudecode-minimal.5s.sh with a few lines that exec `asb swiftbar` (and `asb action \"$@\"` when called with arguments), finding asb via CLAUDE_STATUSBAR_ASB, else the stable install path ~/Library/Application Support/agentic-status-bar/bin/asb, else .build/release/asb next to the repo; if none exists print a one-line 'run asb install' menu. Update tests/test_helper.bash so the plugin tests build and use the package's asb. All plugin, checks, mute, reach and integration bats tests must pass unchanged in behavior; fix the Swift side, not the tests, unless a test relied on jq internals.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-068",
+        "T-069"
+      ],
+      "files": [
+        "swiftbar/swiftbar-claudecode-minimal.5s.sh",
+        "tests/test_helper.bash"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-071",
+      "name": "asb hook: event handling",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "hook"
+      ],
+      "description": "Add `asb hook`: read the hook payload JSON from stdin and update the session's state file exactly like hooks/state-hook.sh does for SessionStart (idle, except a compact restart keeps state), UserPromptSubmit (busy, promptPreview of 80 chars with whitespace collapsed unless it starts with <task-notification> or store_prompt_preview=0, promptAt unless task notification), PreToolUse (busy, lastTool, clear reason/message), PostToolUse (busy), Notification (permission_prompt → waiting/permission or question when lastTool is AskUserQuestion, elicitation_dialog → question, idle_prompt → idle, else decide by message text, unknown types ignored), Stop (idle, clear reason/message), SubagentStart/SubagentStop (subagents map; the empty-type stop after Stop ignored), SessionEnd (delete the file). stateSince changes only when the state changes. Never print anything and always exit 0, also on bad input or unsafe session IDs. Use the payloads in tests/fixtures/payloads in Swift tests.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-055",
+        "T-054"
+      ],
+      "files": [
+        "Sources/asb/Hook.swift",
+        "Sources/ASBCore/HookEvents.swift",
+        "Tests/ASBCoreTests/HookEventsTests.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-072",
+      "name": "asb hook: session metadata and backfill",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "hook"
+      ],
+      "description": "Port the metadata part of hooks/state-hook.sh: find the claude process by walking parents from CLAUDE_STATUSBAR_PARENT_PID or the parent pid (comm claude, or node with claude in its args) and record pid and procStart (in the same string format as today so old and new files compare), cwd, transcriptPath, kind (CLAUDE_CODE_ENTRYPOINT cli → interactive, sdk-* or a -p/--print flag → headless, IDE values → ide, desktop → desktop), herdrPane from HERDR_PANE_ID, termBundleId from __CFBundleIdentifier. On SessionStart also delete other state files with the same pid. Backfill once: the first non-start event of a session whose file lacks pid or cwd fills them without resetting state or stateSince; pid null when no claude ancestor. Port the corresponding tests from tests/hook.bats.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-071",
+        "T-056"
+      ],
+      "files": [
+        "Sources/ASBCore/HookMetadata.swift",
+        "Sources/asb/Hook.swift",
+        "Tests/ASBCoreTests/HookMetadataTests.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-073",
+      "name": "asb hook: locking, ordering and refresh poke",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "hook"
+      ],
+      "description": "Port the concurrency rules: a per-session lock (mkdir <file>.lock, 50 tries of 10 ms, give up quietly), skip an event older than the file's updatedAt (the event's start time is taken when the hook starts), write via temp file + rename. When the state changed and instant_refresh=1, open swiftbar://refreshplugin?name=swiftbar-claudecode-minimal in the background, debounced to once per 500 ms via a .last-poke file. Port the lock, ordering and refresh tests from tests/hook.bats.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-071"
+      ],
+      "files": [
+        "Sources/ASBCore/StateWriter.swift",
+        "Sources/asb/Hook.swift",
+        "Tests/ASBCoreTests/StateWriterTests.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-074",
+      "name": "Run the hook bats suite against asb hook, and measure it",
+      "phase": 8,
+      "type": "test",
+      "priority": "P1",
+      "labels": [
+        "hook",
+        "migration"
+      ],
+      "description": "Switch run_hook in tests/test_helper.bash to call `asb hook` (built from the package) instead of hooks/state-hook.sh, and make tests/hook.bats and tests/integration.bats pass. Update tests/bench.sh to time `asb hook`: median must be at most 10 ms (today's sh hook: 19–20 ms). Record the numbers in the task note.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-072",
+        "T-073"
+      ],
+      "files": [
+        "tests/test_helper.bash",
+        "tests/bench.sh"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-075",
+      "name": "asb install and asb uninstall",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "cli",
+        "hook"
+      ],
+      "description": "Port install.sh and uninstall.sh to `asb install` / `asb uninstall [--purge]`: copy the running asb to ~/Library/Application Support/agentic-status-bar/bin/asb; back up ~/.claude/settings.json (CLAUDE_STATUSBAR_SETTINGS overrides) and add one async hook per event (SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Notification, Stop, SubagentStart, SubagentStop, SessionEnd) running \"'<stable path>' hook # agentic-status-bar\", keeping all other hooks and key order; remove entries carrying the old '# swiftbar-claudecode-minimal' marker; refuse an invalid settings file; link the SwiftBar plugin while it exists (CLAUDE_STATUSBAR_SWIFTBAR_DIR or SwiftBar's PluginDirectory). Uninstall removes our hooks (and empty groups), the stable copy, the SwiftBar link and the login item; --purge also state and config, otherwise ask on a TTY. Idempotent. Port tests/install.bats to Swift tests on temp homes.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-074"
+      ],
+      "files": [
+        "Sources/asb/Install.swift",
+        "Sources/ASBCore/Settings.swift",
+        "Tests/ASBCoreTests/InstallTests.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-076",
+      "name": "Rename paths and names to agentic-status-bar",
+      "phase": 8,
+      "type": "refactor",
+      "priority": "P1",
+      "labels": [
+        "migration"
+      ],
+      "description": "Apply the renames from doc/design/future-architecture.md 'Renames': state dir ~/.claude/agentic-status-bar/, config ~/.config/agentic-status-bar/config, environment overrides ASB_STATE_DIR, ASB_CONFIG, ASB_REGISTRY_DIR, ASB_HERDR, ASB_SETTINGS, ASB_SWIFTBAR_DIR, ASB_PARENT_PID, ASB_BIN (replacing CLAUDE_STATUSBAR_*), login item label agentic-status-bar.start-swiftbar, refresh URL name of the renamed plugin file (agentic-status-bar.5s.sh), display name 'Agentic Status Bar'. `asb install` moves an existing old state dir's mutes and config to the new paths, removes the old login item and old SwiftBar link. Update tests and helpers to the new names.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-075"
+      ],
+      "files": [
+        "Sources/ASBCore/Paths.swift",
+        "Sources/asb/Install.swift",
+        "swiftbar/",
+        "tests/test_helper.bash"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-077",
+      "name": "Remove the shell hook, jq code and install scripts",
+      "phase": 8,
+      "type": "refactor",
+      "priority": "P1",
+      "labels": [
+        "migration"
+      ],
+      "description": "Delete hooks/state-hook.sh, lib/common.sh, install.sh, uninstall.sh and the bats tests that only exercised shell internals (tests/common.bats); keep the bats tests that check the CLI end to end. Update .claude-plugin/plugin.json and hooks/hooks.json so the Claude Code plugin route runs the stable `asb hook` path (or drop that route and say so in the README). Update tests/lint.sh for the files left (the one-line SwiftBar plugin). README install becomes: build with `swift build -c release`, then `.build/release/asb install`. CI green.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-076",
+        "T-070",
+        "T-066",
+        "T-067"
+      ],
+      "files": [
+        "hooks/state-hook.sh",
+        "lib/common.sh",
+        "install.sh",
+        "uninstall.sh",
+        "tests/common.bats",
+        "hooks/hooks.json",
+        ".claude-plugin/plugin.json",
+        "tests/lint.sh",
+        "README.md"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-078",
+      "name": "Rename the GitHub repo to agentic-status-bar and update docs",
+      "phase": 8,
+      "type": "docs",
+      "priority": "P2",
+      "labels": [
+        "migration"
+      ],
+      "description": "Rename hakanserce/swiftbar-claudecode-minimal to hakanserce/agentic-status-bar with `gh repo rename agentic-status-bar` (decided by the user; GitHub keeps redirects), update the local remote URL, and update names, clone URLs and paths in README.md, CONTRIBUTING.md, doc/PRD.md, .claude-plugin/marketplace.json and plugin.json. Don't use real project names in examples.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-076"
+      ],
+      "files": [
+        "README.md",
+        "CONTRIBUTING.md",
+        "doc/PRD.md",
+        ".claude-plugin/marketplace.json",
+        ".claude-plugin/plugin.json"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-079",
+      "name": "macOS app project: AgenticStatusBar target",
+      "phase": 9,
+      "type": "infra",
+      "priority": "P1",
+      "labels": [
+        "app"
+      ],
+      "description": "Create the app with XcodeGen (App/project.yml generating App/AgenticStatusBar.xcodeproj, which is git-ignored): bundle ID com.hakanserce.agentic-status-bar, macOS 14, LSUIElement (no Dock icon), hardened runtime, linking ASBCore from the local package and copying the asb executable into Contents/Helpers. An AppDelegate that starts and shows a placeholder status item. Add `xcodegen generate && xcodebuild build` to CI (unsigned). Document in CONTRIBUTING.md.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-065"
+      ],
+      "files": [
+        "App/project.yml",
+        "App/Sources/AgenticStatusBarApp.swift",
+        "App/Sources/AppDelegate.swift",
+        ".gitignore",
+        ".github/workflows/ci.yml",
+        "CONTRIBUTING.md"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-080",
+      "name": "App: session store with file watching",
+      "phase": 9,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "app"
+      ],
+      "description": "App/Sources/SessionStore.swift: an @Observable store that computes the ASBCore snapshot off the main thread when the state dir, registry dir, mutes file or config change (FSEvents or DispatchSource, coalesced to at most every 200 ms) and every 5 s (for process liveness and staleness), deletes dead files as the CLI does, and publishes the snapshot on the main actor. Unit test the coalescing with a fake trigger.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-079"
+      ],
+      "files": [
+        "App/Sources/SessionStore.swift",
+        "App/Tests/SessionStoreTests.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-081",
+      "name": "App: colored status item with count",
+      "phase": 9,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "app"
+      ],
+      "description": "App/Sources/StatusItemController.swift: an NSStatusItem whose button shows the header's SF Symbol (non-template, tinted with the theme color for the current menu-bar appearance, light or dark) and the count as an attributed title in the same color; updates on every snapshot. Check by hand in light and dark menu bars with each header state (use fixture state dirs via ASB_STATE_DIR) and note the result.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-080"
+      ],
+      "files": [
+        "App/Sources/StatusItemController.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-082",
+      "name": "App: session rows popover",
+      "phase": 9,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "app"
+      ],
+      "description": "Clicking the status item opens an NSPopover hosting a SwiftUI list: one row per session in snapshot order (state symbol in its color, project — title, state word, duration or mute text), subagent rows indented, muted rows last, a 'No Claude Code sessions' placeholder and an invalid-files note. Clicking a row focuses it (herdr) when it has a pane; the popover closes on outside click. Keep rows compact (menu-like height).",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-081"
+      ],
+      "files": [
+        "App/Sources/PopoverView.swift",
+        "App/Sources/SessionRow.swift",
+        "App/Sources/StatusItemController.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-083",
+      "name": "App: row actions and Unmute all",
+      "phase": 9,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "app"
+      ],
+      "description": "Each row gets a context menu (and a hover '…' button): Mute project for 1 hour / for today, or Unmute project; Copy session ID; Copy working directory; Open folder in Finder; Reveal transcript; Focus (when in herdr). An 'Unmute all projects' button shows while mutes are active. Use the ASBCore action functions directly (not the CLI).",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-082",
+        "T-069"
+      ],
+      "files": [
+        "App/Sources/SessionRow.swift",
+        "App/Sources/PopoverView.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-084",
+      "name": "App: Settings window",
+      "phase": 9,
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "app"
+      ],
+      "description": "A SwiftUI Settings scene (opened from the popover's gear button): session types to show, subagent rows, stale threshold (10/30/60 min, never), theme picker plus per-state symbol (text field with SF Symbol preview) and color (ColorPicker for light and dark) overrides, use registry, instant refresh, store prompt previews, and 'Reveal config file'. Settings read and write the same config file as the CLI (the open question about a separate store stays open; the file keeps CLI and app in sync).",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-082"
+      ],
+      "files": [
+        "App/Sources/SettingsView.swift",
+        "App/Sources/AgenticStatusBarApp.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-085",
+      "name": "App: start at login with SMAppService",
+      "phase": 9,
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "app"
+      ],
+      "description": "A 'Start at login' toggle in Settings using SMAppService.mainApp (register/unregister, status shown, a hint to System Settings › Login Items when approval is required). On first enable, remove the SwiftBar-era LaunchAgent (agentic-status-bar.start-swiftbar) if present.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-084"
+      ],
+      "files": [
+        "App/Sources/LoginItem.swift",
+        "App/Sources/SettingsView.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-086",
+      "name": "App: first-run hook install and the stable asb copy",
+      "phase": 9,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "app",
+        "hook"
+      ],
+      "description": "On launch, if the hooks aren't installed, show a short first-run window explaining what will change (hooks added to ~/.claude/settings.json, backed up) and run the bundled asb install on confirmation. On every launch, if the stable copy at ~/Library/Application Support/agentic-status-bar/bin/asb differs in version from the bundled one, replace it. Settings gets 'Remove hooks…' (asb uninstall) with a confirmation. Remind the user that running sessions pick up hooks on restart.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-079",
+        "T-075"
+      ],
+      "files": [
+        "App/Sources/HookInstaller.swift",
+        "App/Sources/FirstRunView.swift",
+        "App/Sources/SettingsView.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-087",
+      "name": "App: notifications when a session waits on you",
+      "phase": 9,
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "app",
+        "notifications"
+      ],
+      "description": "Use UNUserNotificationCenter (ask permission on first need). Notify once when a session has been waiting (permission or question) for 10 seconds (decided default), including in muted projects since waiting breaks through mutes; not again until it leaves waiting. Idle notifications exist but are off by default. A category with actions 'Focus' (herdr focus) and 'Mute project for 1 hour'; clicking the notification focuses too. Put the rule logic (transitions, debounce, mute handling) in a testable NotificationRules type with unit tests.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-080"
+      ],
+      "files": [
+        "App/Sources/Notifier.swift",
+        "App/Sources/NotificationRules.swift",
+        "App/Tests/NotificationRulesTests.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-088",
+      "name": "App: notification settings",
+      "phase": 9,
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "app",
+        "notifications"
+      ],
+      "description": "Settings section: notify when waiting (on), when idle (off), delay (5, 10, 30, 60 s; default 10), sound on/off, and a 'Send test notification' button. Store as new config keys (notify_waiting, notify_idle, notify_delay_seconds, notify_sound) validated in ASBCore Config; update doc/state-file-schema.md's config section.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-087",
+        "T-084"
+      ],
+      "files": [
+        "App/Sources/SettingsView.swift",
+        "Sources/ASBCore/Config.swift",
+        "doc/state-file-schema.md"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-089",
+      "name": "App: view model and row tests",
+      "phase": 9,
+      "type": "test",
+      "priority": "P2",
+      "labels": [
+        "app"
+      ],
+      "description": "Add App tests: the status item's title and color per header state, row view models (labels, words, muted rows last), action wiring with a fake action runner, and NotificationRules edge cases (quick approval within the delay, muted waiting, session ending while waiting). Run them in CI with xcodebuild test.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-083",
+        "T-087"
+      ],
+      "files": [
+        "App/Tests/",
+        ".github/workflows/ci.yml"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-090",
+      "name": "Release: Developer ID signing and notarization in CI",
+      "phase": 10,
+      "type": "infra",
+      "priority": "P2",
+      "labels": [
+        "release"
+      ],
+      "description": "A tag-triggered workflow (.github/workflows/release.yml): import the Developer ID Application certificate from secrets, archive the app with hardened runtime, sign the embedded asb too, notarize with notarytool (App Store Connect API key from secrets), staple, and produce agentic-status-bar-<version>.zip (only the .app) and a DMG with versioned names. Needs the user to create the certificate and API key and add the secrets: if they're missing, block this task on the user with the exact secret names needed.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-079"
+      ],
+      "files": [
+        ".github/workflows/release.yml",
+        "scripts/notarize.md"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-091",
+      "name": "Release: Sparkle updates and GitHub Releases",
+      "phase": 10,
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "release"
+      ],
+      "description": "Add Sparkle 2 via Swift Package Manager, an EdDSA key pair (public key in Info.plist, private key as a secret provided by the user), a 'Check for Updates…' item, and release.yml steps that upload the zip and DMG to the GitHub Release at .../releases/download/v<version>/agentic-status-bar-<version>.zip and publish an updated appcast.xml. App, CLI and tag versions must match (one source of truth). Document the release steps in CONTRIBUTING.md.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-090"
+      ],
+      "files": [
+        "App/project.yml",
+        "App/Sources/Updater.swift",
+        ".github/workflows/release.yml",
+        "CONTRIBUTING.md"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-092",
+      "name": "Remove the SwiftBar plugin, the remaining shell and bats",
+      "phase": 10,
+      "type": "refactor",
+      "priority": "P2",
+      "labels": [
+        "migration"
+      ],
+      "description": "Once the app covers everything the SwiftBar plugin does (check the README feature list one by one and note it in the task), delete swiftbar/, `asb swiftbar` and its renderer, the `login` LaunchAgent action, the remaining bats tests, tests/test_helper.bash, tests/run.sh and tests/lint.sh, and the bats/shellcheck CI job. `asb install` and `asb uninstall` stop linking the SwiftBar plugin but still remove an old link. The Swift tests and the conformance suite are the only suites left.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-083",
+        "T-084",
+        "T-085",
+        "T-086",
+        "T-087",
+        "T-077"
+      ],
+      "files": [
+        "swiftbar/",
+        "Sources/ASBCore/SwiftBarRenderer.swift",
+        "Sources/asb/SwiftBar.swift",
+        "tests/",
+        ".github/workflows/ci.yml",
+        "Sources/asb/Install.swift"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-093",
+      "name": "Docs: README, PRD and CONTRIBUTING for the app",
+      "phase": 10,
+      "type": "docs",
+      "priority": "P2",
+      "labels": [
+        "migration"
+      ],
+      "description": "Rewrite README.md for Agentic Status Bar: what it shows (icon legend for the app), install from the DMG, first run and hooks, the popover and row actions, muting, settings and themes, notifications, start at login, updates, `asb` CLI (hook, install, uninstall, snapshot), uninstall, troubleshooting. Update doc/PRD.md from SwiftBar to the app (UX, architecture, distribution) and CONTRIBUTING.md (swift build/test, xcodegen, release). Mark the migration done in doc/design/future-architecture.md. No real project names in examples.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-092",
+        "T-091"
+      ],
+      "files": [
+        "README.md",
+        "doc/PRD.md",
+        "CONTRIBUTING.md",
+        "doc/design/future-architecture.md"
+      ],
+      "created_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:56:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
     }
   ]
 }

@@ -16,6 +16,9 @@ Status: the direction and the decisions below are agreed: a standalone Swift app
 | The SwiftBar plugin | Removed once the Swift migration is complete |
 | Homebrew | Later, not from the start (see Distribution › Homebrew) |
 | atm's JSON | atm will make `claims --json` and `status --json` a stable contract at some point; until then we live with possible drift |
+| Bundle ID | `com.hakanserce.agentic-status-bar` |
+| Repository | Rename this repo to `agentic-status-bar` during the CLI phase (GitHub keeps redirects) |
+| Notification defaults | Waiting only (permission or question), after 10 seconds; idle notifications available but off |
 
 ## Where we are
 
@@ -366,9 +369,6 @@ At about 250 ms per call, they can't run on every refresh. Cache per project roo
 
 ## Open questions
 
-1. **Notification defaults:** waiting only, or idle too? Default delay before notifying (proposed: 10 seconds)?
-2. **Bundle ID and owner:** a personal reverse-DNS ID (`com.<name>.agentic-status-bar`) or an organization one, since it can't change after release without losing Sparkle updates and preferences.
-3. **Repo:** rename `swiftbar-claudecode-minimal` to `agentic-status-bar` at step 2 (GitHub keeps redirects), or start a new repository and archive this one?
-4. **Config after the app:** keep a plain `key=value` config file next to the app's Settings (handy for dotfiles), or Settings only?
-5. **Cross-platform weight:** is Windows or Linux likely enough to start with a Rust core now (no core rewrite later, but two languages from day one), or Swift first with the checkpoint (recommended)?
-6. **WSL:** if Windows ever comes, must sessions inside WSL be supported? It is the largest single cost of a Windows version.
+1. **Config after the app:** keep a plain `key=value` config file next to the app's Settings (handy for dotfiles), or Settings only?
+2. **Cross-platform weight:** is Windows or Linux likely enough to start with a Rust core now (no core rewrite later, but two languages from day one), or Swift first with the checkpoint (recommended)?
+3. **WSL:** if Windows ever comes, must sessions inside WSL be supported? It is the largest single cost of a Windows version.
