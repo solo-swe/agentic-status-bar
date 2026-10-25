@@ -35,23 +35,7 @@
       },
       {
         "id": 6,
-        "name": "Swift foundations"
-      },
-      {
-        "id": 7,
-        "name": "Core port"
-      },
-      {
-        "id": 8,
-        "name": "asb CLI and hook"
-      },
-      {
-        "id": 9,
-        "name": "macOS app"
-      },
-      {
-        "id": 10,
-        "name": "Release and cleanup"
+        "name": "Swift migration"
       }
     ]
   },
@@ -1934,7 +1918,7 @@
     {
       "id": "T-054",
       "name": "ASBCore: config loading, validation and set_config",
-      "phase": 7,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -1953,14 +1937,14 @@
         "Tests/ASBCoreTests/ConfigTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:15Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-055",
       "name": "ASBCore: load state files leniently",
-      "phase": 7,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -1979,14 +1963,14 @@
         "Tests/ASBCoreTests/StateFileTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:15Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-056",
       "name": "ASBCore: ProcessInspector with a libproc implementation",
-      "phase": 7,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2005,14 +1989,14 @@
         "Tests/ASBCoreTests/ProcessesTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:15Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-057",
       "name": "ASBCore: check C1 liveness and dead files",
-      "phase": 7,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2034,14 +2018,14 @@
         "tests/conformance/c1-reused-pid/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:16Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-058",
       "name": "ASBCore: check C2 registry override and session names",
-      "phase": 7,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2061,14 +2045,14 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:16Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-059",
       "name": "ASBCore: transcript tail and check C3 interrupt",
-      "phase": 7,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2088,14 +2072,14 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:17Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-060",
       "name": "ASBCore: checks C4 approved tool and C5 staleness",
-      "phase": 7,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2115,14 +2099,14 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:17Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-061",
       "name": "ASBCore: subagents state and session-type filters",
-      "phase": 7,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2142,14 +2126,14 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:17Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-062",
       "name": "ASBCore: project mutes",
-      "phase": 7,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2169,14 +2153,14 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:18Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-063",
       "name": "ASBCore: themes and per-state overrides",
-      "phase": 7,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2194,14 +2178,14 @@
         "Tests/ASBCoreTests/ThemesTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:18Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-064",
       "name": "ASBCore: menu model (header, rows, labels)",
-      "phase": 7,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2223,14 +2207,14 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:19Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-065",
       "name": "asb snapshot --json on real inputs",
-      "phase": 7,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2251,14 +2235,14 @@
         "tests/bench.sh"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:19Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-066",
       "name": "Conformance cases: checks and rows from the bats suite",
-      "phase": 7,
+      "phase": 6,
       "type": "test",
       "priority": "P1",
       "labels": [
@@ -2276,14 +2260,14 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:19Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-067",
       "name": "Conformance cases: mutes, filters, subagents and titles",
-      "phase": 7,
+      "phase": 6,
       "type": "test",
       "priority": "P1",
       "labels": [
@@ -2301,14 +2285,14 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:20Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-068",
       "name": "asb swiftbar: render SwiftBar's menu format",
-      "phase": 8,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2328,14 +2312,14 @@
         "Tests/ASBCoreTests/SwiftBarRendererTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:21Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-069",
       "name": "asb action: every menu action",
-      "phase": 8,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2355,14 +2339,14 @@
         "Tests/ASBCoreTests/ActionsTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:21Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-070",
       "name": "Point the SwiftBar plugin at asb",
-      "phase": 8,
+      "phase": 6,
       "type": "refactor",
       "priority": "P1",
       "labels": [
@@ -2381,14 +2365,14 @@
         "tests/test_helper.bash"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:21Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-071",
       "name": "asb hook: event handling",
-      "phase": 8,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2408,14 +2392,14 @@
         "Tests/ASBCoreTests/HookEventsTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:21Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-072",
       "name": "asb hook: session metadata and backfill",
-      "phase": 8,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2435,14 +2419,14 @@
         "Tests/ASBCoreTests/HookMetadataTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:22Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-073",
       "name": "asb hook: locking, ordering and refresh poke",
-      "phase": 8,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2461,14 +2445,14 @@
         "Tests/ASBCoreTests/StateWriterTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:22Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-074",
       "name": "Run the hook bats suite against asb hook, and measure it",
-      "phase": 8,
+      "phase": 6,
       "type": "test",
       "priority": "P1",
       "labels": [
@@ -2488,14 +2472,14 @@
         "tests/bench.sh"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:22Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-075",
       "name": "asb install and asb uninstall",
-      "phase": 8,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2515,14 +2499,14 @@
         "Tests/ASBCoreTests/InstallTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:23Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-076",
       "name": "Rename paths and names to agentic-status-bar",
-      "phase": 8,
+      "phase": 6,
       "type": "refactor",
       "priority": "P1",
       "labels": [
@@ -2542,14 +2526,14 @@
         "tests/test_helper.bash"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:23Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-077",
       "name": "Remove the shell hook, jq code and install scripts",
-      "phase": 8,
+      "phase": 6,
       "type": "refactor",
       "priority": "P1",
       "labels": [
@@ -2577,14 +2561,14 @@
         "README.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:23Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-078",
       "name": "Rename the GitHub repo to agentic-status-bar and update docs",
-      "phase": 8,
+      "phase": 6,
       "type": "docs",
       "priority": "P2",
       "labels": [
@@ -2605,14 +2589,14 @@
         ".claude-plugin/plugin.json"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:23Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-079",
       "name": "macOS app project: AgenticStatusBar target",
-      "phase": 9,
+      "phase": 6,
       "type": "infra",
       "priority": "P1",
       "labels": [
@@ -2634,14 +2618,14 @@
         "CONTRIBUTING.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:24Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-080",
       "name": "App: session store with file watching",
-      "phase": 9,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2659,14 +2643,14 @@
         "App/Tests/SessionStoreTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:24Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-081",
       "name": "App: colored status item with count",
-      "phase": 9,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2683,14 +2667,14 @@
         "App/Sources/StatusItemController.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:24Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-082",
       "name": "App: session rows popover",
-      "phase": 9,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2709,14 +2693,14 @@
         "App/Sources/StatusItemController.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:25Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-083",
       "name": "App: row actions and Unmute all",
-      "phase": 9,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2735,14 +2719,14 @@
         "App/Sources/PopoverView.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:25Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-084",
       "name": "App: Settings window",
-      "phase": 9,
+      "phase": 6,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -2760,14 +2744,14 @@
         "App/Sources/AgenticStatusBarApp.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:25Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-085",
       "name": "App: start at login with SMAppService",
-      "phase": 9,
+      "phase": 6,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -2785,14 +2769,14 @@
         "App/Sources/SettingsView.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:25Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-086",
       "name": "App: first-run hook install and the stable asb copy",
-      "phase": 9,
+      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2813,14 +2797,14 @@
         "App/Sources/SettingsView.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:25Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-087",
       "name": "App: notifications when a session waits on you",
-      "phase": 9,
+      "phase": 6,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -2840,14 +2824,14 @@
         "App/Tests/NotificationRulesTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:26Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-088",
       "name": "App: notification settings",
-      "phase": 9,
+      "phase": 6,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -2868,14 +2852,14 @@
         "doc/state-file-schema.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:26Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-089",
       "name": "App: view model and row tests",
-      "phase": 9,
+      "phase": 6,
       "type": "test",
       "priority": "P2",
       "labels": [
@@ -2894,14 +2878,14 @@
         ".github/workflows/ci.yml"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:26Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-090",
       "name": "Release: Developer ID signing and notarization in CI",
-      "phase": 10,
+      "phase": 6,
       "type": "infra",
       "priority": "P2",
       "labels": [
@@ -2919,14 +2903,14 @@
         "scripts/notarize.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:27Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-091",
       "name": "Release: Sparkle updates and GitHub Releases",
-      "phase": 10,
+      "phase": 6,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -2946,14 +2930,14 @@
         "CONTRIBUTING.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:27Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-092",
       "name": "Remove the SwiftBar plugin, the remaining shell and bats",
-      "phase": 10,
+      "phase": 6,
       "type": "refactor",
       "priority": "P2",
       "labels": [
@@ -2980,14 +2964,14 @@
         "Sources/asb/Install.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:27Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     },
     {
       "id": "T-093",
       "name": "Docs: README, PRD and CONTRIBUTING for the app",
-      "phase": 10,
+      "phase": 6,
       "type": "docs",
       "priority": "P2",
       "labels": [
@@ -3008,9 +2992,9 @@
         "doc/design/future-architecture.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-25T23:58:27Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24"
     }
   ]
 }
