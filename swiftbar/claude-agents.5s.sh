@@ -106,18 +106,39 @@ render_jq_missing() {
   echo "Install it with: brew install jq | color=gray"
 }
 
+# Menu-bar colors as light,dark pairs.
+COLORS='{
+  "waiting": "#D70015,#FF453A",
+  "idle": "#B25000,#FFD60A",
+  "uncertain": "#8E8E93,#98989D",
+  "busy": "#6E6E73,#AEAEB2",
+  "none": "#C7C7CC,#48484A",
+  "warning": "#B25000,#FFD60A"
+}'
+
+# The menu-bar line: the most urgent state (waiting > idle > uncertain > busy)
+# and the number of sessions in it. Each state has its own symbol, so color is
+# never the only signal.
+HEADER_JQ='
+  def count($st): [.sessions[] | select(.shown == $st)] | length;
+  def title($text; $symbol; $color):
+    "\($text) | sfimage=\($symbol) sfcolor=\($color) color=\($color)";
+
+  if .invalid > 0 then title(.sessions | length; "exclamationmark.triangle"; $c.warning)
+  elif count("waiting") > 0 then title(count("waiting"); "exclamationmark.circle.fill"; $c.waiting)
+  elif count("idle") > 0 then title(count("idle"); "checkmark.circle"; $c.idle)
+  elif count("uncertain") > 0 then title(count("uncertain"); "questionmark.circle"; $c.uncertain)
+  elif (.sessions | length) > 0 then title(.sessions | length; $icon; $c.busy)
+  else title(""; $icon; $c.none)
+  end
+'
+
 # render DATA — prints the SwiftBar menu for the loaded sessions.
 render() {
-  printf '%s' "$1" | "$JQ" -r '
-    if .invalid > 0 then
-      "⚠︎ \(.sessions | length) | sfimage=exclamationmark.triangle",
-      "---",
-      "\(.invalid) state file(s) could not be read | color=gray"
-    else
-      "✳ \(.sessions | length)",
-      "---"
-    end,
-    "\(.sessions | length) session(s)"
+  printf '%s' "$1" | "$JQ" -r --arg icon "$cfg_icon" --argjson c "$COLORS" "$HEADER_JQ"'
+    , "---"
+    , (if .invalid > 0 then "\(.invalid) state file(s) could not be read | color=gray" else empty end)
+    , "\(.sessions | length) session(s)"
   '
 }
 
