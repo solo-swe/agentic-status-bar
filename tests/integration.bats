@@ -9,6 +9,8 @@ setup() {
   add_process 4242 1 claude "claude" "Mon Oct 19 09:12:03 2026"
   export CLAUDE_AGENTS_PARENT_PID=5000
   export CLAUDE_CODE_ENTRYPOINT=cli
+  # Never open real URLs from tests.
+  stub_command open
 }
 teardown() { common_teardown; }
 

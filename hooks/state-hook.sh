@@ -26,6 +26,7 @@ hook_dir="$(cd "$(dirname "$self")" && pwd)" || exit 0
 started_ms="$(now_ms)"
 
 lock_dir=""
+changed=0
 # shellcheck disable=SC2329 # called from traps
 cleanup() {
   [ -n "$lock_dir" ] && rmdir "$lock_dir" 2>/dev/null
@@ -87,6 +88,25 @@ write_state() {
     | if (.state != \$old.state) or (.stateSince == null) then .stateSince = \$now else . end
   " | atomic_write "$state_file"
   unlock
+  changed=1
+}
+
+# SwiftBar refreshes a plugin when this URL is opened.
+REFRESH_URL='swiftbar://refreshplugin?name=claude-agents'
+POKE_INTERVAL_MS=500
+
+# poke_swiftbar — asks SwiftBar to refresh now, at most once per POKE_INTERVAL_MS.
+poke_swiftbar() {
+  [ "$cfg_instant_refresh" = 1 ] || return 0
+  _stamp="$cfg_state_dir/.last-poke"
+  _now="$(now_ms)"
+  _last="$(cat "$_stamp" 2>/dev/null)"
+  case "$_last" in
+    '' | *[!0-9]*) _last=0 ;;
+  esac
+  [ $((_now - _last)) -ge "$POKE_INTERVAL_MS" ] || return 0
+  printf '%s\n' "$_now" | atomic_write "$_stamp"
+  open -g "$REFRESH_URL" &
 }
 
 # find_claude_pid — walks up from our parent to the first claude process and
@@ -236,6 +256,7 @@ on_session_end() {
   lock
   rm -f "$state_file"
   unlock
+  changed=1
 }
 
 main() {
@@ -265,6 +286,8 @@ main() {
     SubagentStop) on_subagent_stop ;;
     SessionEnd) on_session_end ;;
   esac
+
+  [ "$changed" = 1 ] && poke_swiftbar
 }
 
 main

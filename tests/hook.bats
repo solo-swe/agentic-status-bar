@@ -11,6 +11,17 @@ setup() {
   export CLAUDE_CODE_ENTRYPOINT=cli
   export HERDR_PANE_ID=w2:p1
   export __CFBundleIdentifier=com.example.terminal
+  # Never open real URLs from tests.
+  stub_command open
+}
+
+# wait_for_file FILE — waits up to 2 s for a background write.
+wait_for_file() {
+  for _ in $(seq 1 40); do
+    [ -s "$1" ] && return 0
+    sleep 0.05
+  done
+  return 1
 }
 teardown() { common_teardown; }
 
@@ -235,7 +246,50 @@ teardown() { common_teardown; }
   run_hook SessionEnd
   [ "$status" -eq 0 ]
   [ -z "$output" ]
-  [ -z "$(ls -A "$CLAUDE_AGENTS_STATE_DIR")" ]
+  [ -z "$(find "$CLAUDE_AGENTS_STATE_DIR" -name '*.json')" ]
+}
+
+# --- Instant refresh ------------------------------------------------------
+
+@test "a state change asks SwiftBar to refresh" {
+  run_hook UserPromptSubmit
+  wait_for_file "$STUB_CALLS/open"
+  [ "$(stub_calls open)" = "-g swiftbar://refreshplugin?name=claude-agents" ]
+}
+
+@test "refresh requests are debounced to one per 500 ms" {
+  run_hook UserPromptSubmit
+  run_hook PreToolUse
+  run_hook PostToolUse
+  wait_for_file "$STUB_CALLS/open"
+  sleep 0.2
+  [ "$(stub_calls open | wc -l | tr -d ' ')" -eq 1 ]
+}
+
+@test "a refresh is requested again after the interval" {
+  run_hook UserPromptSubmit
+  wait_for_file "$STUB_CALLS/open"
+  printf '1\n' > "$CLAUDE_AGENTS_STATE_DIR/.last-poke"
+  run_hook Stop
+  for _ in $(seq 1 40); do
+    [ "$(stub_calls open | wc -l | tr -d ' ')" -ge 2 ] && break
+    sleep 0.05
+  done
+  [ "$(stub_calls open | wc -l | tr -d ' ')" -eq 2 ]
+}
+
+@test "no refresh is requested when instant_refresh=0" {
+  printf 'instant_refresh=0\n' > "$CLAUDE_AGENTS_CONFIG"
+  run_hook UserPromptSubmit
+  sleep 0.3
+  [ -z "$(stub_calls open)" ]
+}
+
+@test "no refresh is requested when nothing changed" {
+  jq '.notification_type = "auth_success"' "$REPO_ROOT/tests/fixtures/payloads/Notification-idle_prompt.json" > "$TEST_TMP/other.json"
+  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/other.json"
+  sleep 0.3
+  [ -z "$(stub_calls open)" ]
 }
 
 # --- Robustness -----------------------------------------------------------
