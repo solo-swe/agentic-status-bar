@@ -368,7 +368,8 @@
           "text": "Notification (permission/question via AskUserQuestion, elicitation, idle, text fallback) and Stop; 7 tests",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "eaf3eb3f89ad6c143abb5de374a8614b2c4cb690"
     },
     {
       "id": "T-011",
@@ -382,7 +383,7 @@
       "use_cases": [
         "U5"
       ],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-007"
       ],
@@ -390,7 +391,20 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T07:09:40Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T07:09:17Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T07:09:40Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T07:09:40Z",
+          "kind": "outcome",
+          "text": "SessionEnd removes the state file under the session lock; 2 tests",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-012",

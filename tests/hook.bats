@@ -219,6 +219,25 @@ teardown() { common_teardown; }
   [ "$(state_field '.message // "none"')" = none ]
 }
 
+# --- SessionEnd -----------------------------------------------------------
+
+@test "SessionEnd deletes the state file" {
+  run_hook SessionStart
+  [ -e "$(state_file)" ]
+  run_hook SessionEnd
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+  [ ! -e "$(state_file)" ]
+  [ ! -e "$(state_file).lock" ]
+}
+
+@test "SessionEnd succeeds when the state file is already gone" {
+  run_hook SessionEnd
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+  [ -z "$(ls -A "$CLAUDE_AGENTS_STATE_DIR")" ]
+}
+
 # --- Robustness -----------------------------------------------------------
 
 @test "hook is silent and exits 0 on bad input" {

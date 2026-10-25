@@ -230,7 +230,13 @@ on_stop() {
 }
 on_subagent_start() { :; }
 on_subagent_stop() { :; }
-on_session_end() { :; }
+# A late async event can recreate the file after this; the plugin's liveness
+# check (C1) removes it once the claude process is gone.
+on_session_end() {
+  lock
+  rm -f "$state_file"
+  unlock
+}
 
 main() {
   JQ="$(find_jq)"
