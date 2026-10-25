@@ -43,6 +43,47 @@ STUB
   chmod +x "$FAKE_BIN/$name"
 }
 
+# stub_ps — replaces ps with a fake that answers `ps -o FIELD= -p PID` from
+# $TEST_TMP/ps-table, one process per line: pid|ppid|comm|args|lstart
+stub_ps() {
+  : > "$TEST_TMP/ps-table"
+  stub_command ps '
+field=""; pid=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -o) field="$2"; shift 2 ;;
+    -p) pid="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+line="$(grep "^$pid|" "'"$TEST_TMP"'/ps-table")" || exit 1
+case "$field" in
+  ppid=) echo "$line" | cut -d"|" -f2 ;;
+  comm=) echo "$line" | cut -d"|" -f3 ;;
+  args=) echo "$line" | cut -d"|" -f4 ;;
+  lstart=) echo "$line" | cut -d"|" -f5 ;;
+esac'
+}
+
+# add_process PID PPID COMM ARGS LSTART — adds a row to the fake process table.
+add_process() {
+  printf '%s|%s|%s|%s|%s\n' "$1" "$2" "$3" "$4" "$5" >> "$TEST_TMP/ps-table"
+}
+
+# run_hook FIXTURE — feeds tests/fixtures/payloads/FIXTURE.json to the hook.
+run_hook() {
+  run "$REPO_ROOT/hooks/state-hook.sh" < "$REPO_ROOT/tests/fixtures/payloads/$1.json"
+}
+
+# state_field FILTER — reads a field from the fixture session's state file.
+FIXTURE_SESSION=3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90
+state_file() {
+  printf '%s\n' "$CLAUDE_AGENTS_STATE_DIR/$FIXTURE_SESSION.json"
+}
+state_field() {
+  jq -r "$1" "$(state_file)"
+}
+
 # stub_calls NAME — prints the recorded calls of a stub (empty if never called).
 stub_calls() {
   cat "$STUB_CALLS/$1" 2>/dev/null || true

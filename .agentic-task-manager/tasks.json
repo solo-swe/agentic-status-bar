@@ -240,7 +240,7 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:03:02Z",
+      "updated_at": "2026-10-25T07:03:03Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:00:41Z",
       "started_by": "claude:c631bc24",
@@ -253,7 +253,8 @@
           "text": "Hook skeleton: silent, exit 0, safe session IDs, per-session lock, newest-event-wins write_state; CI shellcheck now -x -S warning",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "e44bc9d9d6d0ef74d8429b4629a58e5ddba73c0f"
     },
     {
       "id": "T-008",
@@ -269,7 +270,7 @@
       "use_cases": [
         "U5"
       ],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-007",
         "T-003"
@@ -278,7 +279,20 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T07:08:13Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T07:03:04Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T07:08:13Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T07:08:13Z",
+          "kind": "outcome",
+          "text": "SessionStart: PID walk (claude/node), procStart, kind, herdr/bundle, compact keeps state, same-PID cleanup; bats tests; added tests/lint.sh + project allowlist",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-009",

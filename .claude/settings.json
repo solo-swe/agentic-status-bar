@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tests/run.sh)",
+      "Bash(tests/run.sh *)",
+      "Bash(tests/lint.sh)",
+      "Bash(tests/lint.sh *)",
+      "Bash(atm *)"
+    ]
+  }
+}

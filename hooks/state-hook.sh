@@ -89,7 +89,87 @@ write_state() {
   unlock
 }
 
-on_session_start() { :; }
+# find_claude_pid — walks up from our parent to the first claude process and
+# prints its PID. Prints nothing if none is found within a few levels.
+# CLAUDE_AGENTS_PARENT_PID overrides the starting point (used by tests).
+find_claude_pid() {
+  _pid="${CLAUDE_AGENTS_PARENT_PID:-$PPID}"
+  _depth=0
+  while [ -n "$_pid" ] && [ "$_pid" -gt 1 ] && [ "$_depth" -lt 6 ]; do
+    _comm="$(ps -o comm= -p "$_pid" 2>/dev/null)"
+    case "$(basename "$_comm")" in
+      claude)
+        printf '%s\n' "$_pid"
+        return 0
+        ;;
+      node)
+        # npm installs run Claude Code under node.
+        case "$(ps -o args= -p "$_pid" 2>/dev/null)" in
+          *claude*)
+            printf '%s\n' "$_pid"
+            return 0
+            ;;
+        esac
+        ;;
+    esac
+    _pid="$(ps -o ppid= -p "$_pid" 2>/dev/null | tr -d ' ')"
+    _depth=$((_depth + 1))
+  done
+}
+
+# session_kind PID — interactive, headless, ide or desktop.
+session_kind() {
+  case "${CLAUDE_CODE_ENTRYPOINT:-}" in
+    sdk-*) echo headless; return ;;
+    *vscode* | *jetbrains* | *ide*) echo ide; return ;;
+    *desktop*) echo desktop; return ;;
+  esac
+  if [ -n "$1" ]; then
+    case " $(ps -o args= -p "$1" 2>/dev/null) " in
+      *" -p "* | *" --print "*) echo headless; return ;;
+    esac
+  fi
+  echo interactive
+}
+
+on_session_start() {
+  _cpid="$(find_claude_pid)"
+  _pstart=""
+  if [ -n "$_cpid" ]; then
+    _pstart="$(ps -o lstart= -p "$_cpid" 2>/dev/null | sed 's/^ *//;s/ *$//')"
+  fi
+  _source="$(field '.source')"
+
+  write_state '
+    .cwd = $cwd
+    | .transcriptPath = $transcript
+    | .kind = $kind
+    | (if $pid != "" then .pid = ($pid | tonumber) | .procStart = $pstart else del(.pid, .procStart) end)
+    | (if $pane != "" then .herdrPane = $pane else del(.herdrPane) end)
+    | (if $bundle != "" then .termBundleId = $bundle else del(.termBundleId) end)
+    | (if $source == "compact" and .state != null then . else .state = "idle" | del(.reason, .message) end)
+  ' \
+    --arg cwd "$(field '.cwd')" \
+    --arg transcript "$(field '.transcript_path')" \
+    --arg kind "$(session_kind "$_cpid")" \
+    --arg pid "$_cpid" \
+    --arg pstart "$_pstart" \
+    --arg pane "${HERDR_PANE_ID:-}" \
+    --arg bundle "${__CFBundleIdentifier:-}" \
+    --arg source "$_source"
+
+  # A claude process runs one session at a time: drop older files for the same PID
+  # (e.g. the session before a /clear).
+  if [ -n "$_cpid" ]; then
+    for _f in "$cfg_state_dir"/*.json; do
+      [ -f "$_f" ] || continue
+      [ "$_f" = "$state_file" ] && continue
+      if [ "$("$JQ" -r '.pid // empty' "$_f" 2>/dev/null)" = "$_cpid" ]; then
+        rm -f "$_f"
+      fi
+    done
+  fi
+}
 on_user_prompt_submit() { :; }
 on_pre_tool_use() { :; }
 on_post_tool_use() { :; }
