@@ -48,6 +48,14 @@ STUB
 stub_ps() {
   : > "$TEST_TMP/ps-table"
   stub_command ps '
+case " $* " in
+  *" -axo "*)
+    # Full listing: pid ppid lstart comm
+    while IFS="|" read -r p pp comm args lstart; do
+      printf "%6s %6s %s %s\n" "$p" "$pp" "$lstart" "$comm"
+    done < "'"$TEST_TMP"'/ps-table"
+    exit 0 ;;
+esac
 field=""; pid=""
 while [ $# -gt 0 ]; do
   case "$1" in

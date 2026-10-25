@@ -521,7 +521,8 @@
           "text": "Plugin skeleton: SwiftBar headers, symlink-safe, single-jq load with per-file validation (corrupt/v>1 -> warning), jq-missing hint; 6 tests",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "d376e362bada6a9d904dfff92e0f38e8aaf7c117"
     },
     {
       "id": "T-015",
@@ -536,7 +537,7 @@
       "use_cases": [
         "U5"
       ],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-014"
       ],
@@ -544,7 +545,20 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T07:13:03Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T07:12:03Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T07:13:03Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T07:13:03Z",
+          "kind": "outcome",
+          "text": "One ps snapshot per run; C1 liveness (pid + normalized lstart) in a CHECKS_JQ pipeline; dead files deleted by shell; 5 tests",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-016",

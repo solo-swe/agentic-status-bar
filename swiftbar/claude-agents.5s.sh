@@ -55,6 +55,50 @@ load_sessions() {
   '
 }
 
+# take_snapshot FILE — one process table per run: pid, ppid, lstart (5 words), comm.
+take_snapshot() {
+  ps -axo pid=,ppid=,lstart=,comm= > "$1" 2>/dev/null
+}
+
+# The checks, in order. Each session gets a display state (`shown`); dead ones
+# are marked and dropped. Checks never write state files.
+CHECKS_JQ='
+  def norm: gsub("\\s+"; " ") | ltrimstr(" ") | rtrimstr(" ");
+
+  # pid -> {ppid, lstart, comm} from `ps -axo pid=,ppid=,lstart=,comm=`
+  def procs:
+    split("\n")
+    | map(select(test("\\S")) | sub("^\\s+"; "") | [splits("\\s+")])
+    | map({key: .[0], value: {ppid: .[1], lstart: (.[2:7] | join(" ")), comm: (.[7:] | join(" "))}})
+    | from_entries;
+
+  # C1: the claude process must still exist and have the same start time.
+  def alive($P):
+    if .pid == null then true
+    else $P[.pid | tostring] as $p
+      | $p != null and (.procStart == null or ($p.lstart | norm) == (.procStart | norm))
+    end;
+
+  ($ps | procs) as $P
+  | .sessions |= map(.shown = .state | .alive = alive($P))
+  | .dead = [.sessions[] | select(.alive | not) | .file]
+  | .sessions |= map(select(.alive) | del(.alive))
+'
+
+# apply_checks DATA PS_FILE — runs the checks and prints the updated data.
+apply_checks() {
+  printf '%s' "$1" | "$JQ" -c --rawfile ps "$2" "$CHECKS_JQ"
+}
+
+# remove_dead DATA — deletes the state files of sessions found dead.
+remove_dead() {
+  printf '%s' "$1" | "$JQ" -r '.dead[]' | while IFS= read -r _f; do
+    case "$_f" in
+      "$cfg_state_dir"/*.json) rm -f "$_f" ;;
+    esac
+  done
+}
+
 render_jq_missing() {
   echo "⚠︎ | sfimage=exclamationmark.triangle"
   echo "---"
@@ -84,7 +128,14 @@ main() {
     render_jq_missing
     return 0
   fi
-  render "$(load_sessions)"
+
+  ps_file="$(mktemp "${TMPDIR:-/tmp}/claude-agents-ps.XXXXXX")" || return 1
+  trap 'rm -f "$ps_file"' EXIT
+  take_snapshot "$ps_file"
+
+  data="$(apply_checks "$(load_sessions)" "$ps_file")"
+  remove_dead "$data"
+  render "$data"
 }
 
 main "$@"

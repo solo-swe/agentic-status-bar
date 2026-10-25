@@ -3,6 +3,7 @@
 setup() {
   load test_helper
   common_setup
+  stub_ps
 }
 teardown() { common_teardown; }
 
@@ -45,6 +46,48 @@ add_state() {
   mkdir "$CLAUDE_AGENTS_STATE_DIR/a.json.lock"
   run PLUGIN
   [ "${lines[0]}" = "✳ 1" ]
+}
+
+# --- C1 liveness ----------------------------------------------------------
+
+@test "C1 keeps a session whose claude process is running" {
+  add_process 4242 1 claude claude "Mon Oct 19 09:12:03 2026"
+  add_state a '{"state":"busy","pid":4242,"procStart":"Mon Oct 19 09:12:03 2026"}'
+  run PLUGIN
+  [ "${lines[0]}" = "✳ 1" ]
+  [ -e "$CLAUDE_AGENTS_STATE_DIR/a.json" ]
+}
+
+@test "C1 drops and deletes a session whose process is gone" {
+  add_process 4242 1 claude claude "Mon Oct 19 09:12:03 2026"
+  add_state alive '{"state":"busy","pid":4242,"procStart":"Mon Oct 19 09:12:03 2026"}'
+  add_state gone '{"state":"waiting","pid":5555,"procStart":"Mon Oct 19 09:00:00 2026"}'
+  run PLUGIN
+  [ "${lines[0]}" = "✳ 1" ]
+  [ -e "$CLAUDE_AGENTS_STATE_DIR/alive.json" ]
+  [ ! -e "$CLAUDE_AGENTS_STATE_DIR/gone.json" ]
+}
+
+@test "C1 treats a reused PID with a different start time as dead" {
+  add_process 4242 1 zsh zsh "Tue Oct 20 10:00:00 2026"
+  add_state reused '{"state":"busy","pid":4242,"procStart":"Mon Oct 19 09:12:03 2026"}'
+  run PLUGIN
+  [ "${lines[0]}" = "✳ 0" ]
+  [ ! -e "$CLAUDE_AGENTS_STATE_DIR/reused.json" ]
+}
+
+@test "C1 ignores extra spaces in start times" {
+  add_process 4242 1 claude claude "Mon Oct  5 09:12:03 2026"
+  add_state a '{"state":"busy","pid":4242,"procStart":"Mon Oct 5 09:12:03 2026"}'
+  run PLUGIN
+  [ "${lines[0]}" = "✳ 1" ]
+}
+
+@test "C1 keeps sessions without a recorded pid" {
+  add_state nopid '{"state":"busy"}'
+  run PLUGIN
+  [ "${lines[0]}" = "✳ 1" ]
+  [ -e "$CLAUDE_AGENTS_STATE_DIR/nopid.json" ]
 }
 
 @test "missing jq shows an install hint" {
