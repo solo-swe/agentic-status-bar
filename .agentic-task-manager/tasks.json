@@ -100,7 +100,7 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:49:47Z",
+      "updated_at": "2026-10-25T06:50:54Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T06:32:43Z",
       "started_by": "claude:c631bc24",
@@ -113,7 +113,8 @@
           "text": "Captured payloads (headless + interactive via herdr pane), sanitized fixtures, transcript tails, findings in tests/fixtures/README.md and PRD; updated T-009/T-010/T-022/T-023/T-028",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "bf29e6795fc4a2f90f1e2ba94cbdbf14a9a0d473"
     },
     {
       "id": "T-004",
@@ -127,7 +128,7 @@
         "Config"
       ],
       "use_cases": [],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-001"
       ],
@@ -135,7 +136,20 @@
         "lib/common.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T06:52:19Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T06:51:03Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T06:52:19Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T06:52:19Z",
+          "kind": "outcome",
+          "text": "lib/common.sh: load_config/set_config with key+value whitelist, now_ms, atomic_write, find_jq, log_once; shellcheck clean",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-005",
