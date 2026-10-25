@@ -1,0 +1,14 @@
+{
+  "name": "claude-agents",
+  "owner": {
+    "name": "Hakan Serce"
+  },
+  "plugins": [
+    {
+      "name": "claude-agents",
+      "source": "./",
+      "description": "Track every Claude Code session's state (working, waiting for you, idle) for the claude-agents SwiftBar menu-bar plugin.",
+      "version": "1.0.0-rc.1"
+    }
+  ]
+}

@@ -26,6 +26,16 @@ EVENTS="SessionStart UserPromptSubmit PreToolUse PostToolUse Notification Stop S
   [ "$output" -eq 9 ]
 }
 
+@test "marketplace.json lists the plugin from this repo with the same version" {
+  run jq -r '.plugins[0].name' "$REPO_ROOT/.claude-plugin/marketplace.json"
+  [ "$output" = claude-agents ]
+  run jq -r '.plugins[0].source' "$REPO_ROOT/.claude-plugin/marketplace.json"
+  [ "$output" = ./ ]
+  [ "$(jq -r '.plugins[0].version' "$REPO_ROOT/.claude-plugin/marketplace.json")" = "$(jq -r '.version' "$REPO_ROOT/.claude-plugin/plugin.json")" ]
+  run jq -r '.owner.name' "$REPO_ROOT/.claude-plugin/marketplace.json"
+  [ -n "$output" ]
+}
+
 @test "the hook script is executable" {
   [ -x "$REPO_ROOT/hooks/state-hook.sh" ]
 }
