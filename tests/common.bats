@@ -9,7 +9,7 @@ setup() {
 teardown() { common_teardown; }
 
 @test "load_config uses defaults when there is no config file" {
-  unset CLAUDE_AGENTS_STATE_DIR
+  unset CLAUDE_STATUSBAR_STATE_DIR
   load_config
   [ "$cfg_show_interactive" = 1 ]
   [ "$cfg_show_headless" = 1 ]
@@ -20,12 +20,12 @@ teardown() { common_teardown; }
   [ "$cfg_instant_refresh" = 1 ]
   [ "$cfg_icon" = sparkle ]
   [ "$cfg_store_prompt_preview" = 1 ]
-  [ "$cfg_state_dir" = "$HOME/.claude/swiftbar-agents" ]
+  [ "$cfg_state_dir" = "$HOME/.claude/swiftbar-claudecode-minimal" ]
 }
 
 @test "load_config reads overrides from the config file" {
-  unset CLAUDE_AGENTS_STATE_DIR
-  printf 'stale_minutes=10\n# a comment\nicon=bolt\nstate_dir=~/agents\n' > "$CLAUDE_AGENTS_CONFIG"
+  unset CLAUDE_STATUSBAR_STATE_DIR
+  printf 'stale_minutes=10\n# a comment\nicon=bolt\nstate_dir=~/agents\n' > "$CLAUDE_STATUSBAR_CONFIG"
   load_config
   [ "$cfg_stale_minutes" = 10 ]
   [ "$cfg_icon" = bolt ]
@@ -33,14 +33,14 @@ teardown() { common_teardown; }
   [ "$cfg_use_registry" = 1 ]
 }
 
-@test "CLAUDE_AGENTS_STATE_DIR wins over the config file" {
-  printf 'state_dir=/elsewhere\n' > "$CLAUDE_AGENTS_CONFIG"
+@test "CLAUDE_STATUSBAR_STATE_DIR wins over the config file" {
+  printf 'state_dir=/elsewhere\n' > "$CLAUDE_STATUSBAR_CONFIG"
   load_config
-  [ "$cfg_state_dir" = "$CLAUDE_AGENTS_STATE_DIR" ]
+  [ "$cfg_state_dir" = "$CLAUDE_STATUSBAR_STATE_DIR" ]
 }
 
 @test "load_config ignores unknown keys and never executes values" {
-  cat > "$CLAUDE_AGENTS_CONFIG" <<EOF
+  cat > "$CLAUDE_STATUSBAR_CONFIG" <<EOF
 evil=1
 icon=\$(touch $TEST_TMP/pwned)
 stale_minutes=\`touch $TEST_TMP/pwned2\`
@@ -57,23 +57,23 @@ EOF
 }
 
 @test "set_config changes one key and keeps the others" {
-  printf 'icon=bolt\nstale_minutes=10\n' > "$CLAUDE_AGENTS_CONFIG"
+  printf 'icon=bolt\nstale_minutes=10\n' > "$CLAUDE_STATUSBAR_CONFIG"
   set_config stale_minutes 60
   load_config
   [ "$cfg_stale_minutes" = 60 ]
   [ "$cfg_icon" = bolt ]
-  [ "$(grep -c '^stale_minutes=' "$CLAUDE_AGENTS_CONFIG")" -eq 1 ]
+  [ "$(grep -c '^stale_minutes=' "$CLAUDE_STATUSBAR_CONFIG")" -eq 1 ]
 }
 
 @test "set_config creates the config file and rejects unknown keys or bad values" {
-  rm -f "$CLAUDE_AGENTS_CONFIG"
+  rm -f "$CLAUDE_STATUSBAR_CONFIG"
   set_config show_headless 0
-  [ "$(cat "$CLAUDE_AGENTS_CONFIG")" = "show_headless=0" ]
+  [ "$(cat "$CLAUDE_STATUSBAR_CONFIG")" = "show_headless=0" ]
   run set_config evil 1
   [ "$status" -ne 0 ]
   run set_config icon 'a;b'
   [ "$status" -ne 0 ]
-  [ "$(cat "$CLAUDE_AGENTS_CONFIG")" = "show_headless=0" ]
+  [ "$(cat "$CLAUDE_STATUSBAR_CONFIG")" = "show_headless=0" ]
 }
 
 @test "now_ms returns epoch milliseconds" {
@@ -94,10 +94,10 @@ EOF
   [ -x "$output" ]
 }
 
-@test "CLAUDE_AGENTS_JQ overrides the jq lookup" {
-  CLAUDE_AGENTS_JQ=/nonexistent/jq run find_jq
+@test "CLAUDE_STATUSBAR_JQ overrides the jq lookup" {
+  CLAUDE_STATUSBAR_JQ=/nonexistent/jq run find_jq
   [ -z "$output" ]
-  CLAUDE_AGENTS_JQ=/usr/bin/jq run find_jq
+  CLAUDE_STATUSBAR_JQ=/usr/bin/jq run find_jq
   [ "$output" = /usr/bin/jq ]
 }
 

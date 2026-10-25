@@ -1,4 +1,4 @@
-# PRD: Claude Agents SwiftBar Plugin
+# PRD: Minimalist Claude Code Statusbar SwiftBar Plugin
 
 As of 2026-10-24
 
@@ -10,7 +10,7 @@ An open-source SwiftBar plugin that shows, in one menu-bar item, whether any run
 
 **Approach.** Claude Code hooks write a small state file per session. The SwiftBar plugin reads those files, runs a set of checks to correct states that hooks cannot see (crashes, Esc interrupts, approved long-running tools), and renders the result. When Claude Code's own session registry is present and newer, it overrides the hook state.
 
-**Working name:** `claude-agents` (SwiftBar file `claude-agents.5s.sh`).
+**Name:** Minimalist Claude Code Statusbar (repo and plugin ID `swiftbar-claudecode-minimal`, SwiftBar file `swiftbar-claudecode-minimal.5s.sh`).
 
 ## Goals and non-goals
 
@@ -104,7 +104,7 @@ Hooks are the only writers of state; the SwiftBar plugin reads that state on eve
 flowchart LR
     session["Claude Code session<br/><small>fires hook events on prompt,<br/>tool, notification, stop, end</small>"]
     hook["state-hook.sh<br/><small>async, atomic write, exit 0</small>"]
-    files["State files<br/><small>~/.claude/swiftbar-agents/</small>"]
+    files["State files<br/><small>~/.claude/swiftbar-claudecode-minimal/</small>"]
     registry["Session registry<br/><small>~/.claude/sessions/PID.json<br/>optional, feeds C2</small>"]
     signals["Processes + transcript<br/><small>ps, child processes, tail -c<br/>feeds C1, C3, C4, C5</small>"]
     plugin["SwiftBar plugin<br/><small>every 5 s or on poke<br/>C1–C5 checks, then render</small>"]
@@ -123,8 +123,8 @@ The dashed poke makes changes show within a second; the 5-second poll is the fal
 
 **Components**
 
-- **`state-hook.sh`** — one POSIX `sh` script registered for every event. Reads the hook JSON from stdin, maps the event to a state (see State model), writes the session's file atomically, then runs `open -g 'swiftbar://refreshplugin?name=claude-agents'` (debounced to one per 500 ms).
-- **`claude-agents.5s.sh`** — the SwiftBar plugin. One `ps -axo pid,ppid,lstart,comm` snapshot per run, then for each state file: checks, filters, sort, render.
+- **`state-hook.sh`** — one POSIX `sh` script registered for every event. Reads the hook JSON from stdin, maps the event to a state (see State model), writes the session's file atomically, then runs `open -g 'swiftbar://refreshplugin?name=swiftbar-claudecode-minimal'` (debounced to one per 500 ms).
+- **`swiftbar-claudecode-minimal.5s.sh`** — the SwiftBar plugin. One `ps -axo pid,ppid,lstart,comm` snapshot per run, then for each state file: checks, filters, sort, render.
 - **Optional inputs** — Claude Code's session registry (C2) and the transcript tail (C3). Both are read-only, and the plugin works fully without them.
 
 **Focus on click (v1: herdr only, fail-safe)**
@@ -157,7 +157,7 @@ Three stored states — `busy`, `waiting` and `idle` — plus `uncertain`, which
 
 Every write is atomic (write to a temp file, then `mv`) and stamps `updatedAt` in milliseconds.
 
-**State file** — `~/.claude/swiftbar-agents/<session_id>.json`
+**State file** — `~/.claude/swiftbar-claudecode-minimal/<session_id>.json`
 
 ```json
 {
@@ -211,23 +211,23 @@ Ship two pieces in one repo: a Claude Code plugin that carries the hooks, and th
 **Repo layout**
 
 ```
-claude-agents/
+swiftbar-claudecode-minimal/
   .claude-plugin/plugin.json     Claude Code plugin manifest
   hooks/hooks.json               hook registrations (all async)
   hooks/state-hook.sh            the one hook script: event → state file
-  swiftbar/claude-agents.5s.sh   the SwiftBar plugin
+  swiftbar/swiftbar-claudecode-minimal.5s.sh   the SwiftBar plugin
   install.sh / uninstall.sh      for non-plugin installs
   tests/                         bats tests with fixture state files
 ```
 
 **Install paths**
 
-1. **Claude Code plugin (recommended):** `/plugin install` from the repo's marketplace entry registers the hooks with no edits to `settings.json`. Then link `claude-agents.5s.sh` into the SwiftBar plugin folder (the README gives the one-liner).
+1. **Claude Code plugin (recommended):** `/plugin install` from the repo's marketplace entry registers the hooks with no edits to `settings.json`. Then link `swiftbar-claudecode-minimal.5s.sh` into the SwiftBar plugin folder (the README gives the one-liner).
 2. **install.sh:** merges hook entries into `~/.claude/settings.json` with `jq`, appending to existing arrays and tagging each entry so `uninstall.sh` removes only its own. Backs up `settings.json` first. Links the SwiftBar script into the folder SwiftBar reports (`defaults read com.ameba.SwiftBar PluginDirectory`), or asks for one.
 
 **Coexistence:** existing hooks (for example herdr's `SessionStart` hook or an audit-log `PostToolUse` hook) are never replaced or reordered. Our hooks are async, exit 0 on any error, and print nothing to stdout, so they can't block or change Claude Code's behavior.
 
-**Config file** — `~/.config/claude-agents/config`, shell `key=value`, written by the dropdown's Settings and filter items:
+**Config file** — `~/.config/swiftbar-claudecode-minimal/config`, shell `key=value`, written by the dropdown's Settings and filter items:
 
 | Key | Default | Meaning |
 | --- | --- | --- |
@@ -236,7 +236,7 @@ claude-agents/
 | `use_registry` | `1` | C2 registry override |
 | `instant_refresh` | `1` | Hooks poke SwiftBar via `swiftbar://refreshplugin` |
 | `icon` | `sparkle` | SF Symbol name |
-| `state_dir` | `~/.claude/swiftbar-agents` | Where hooks write |
+| `state_dir` | `~/.claude/swiftbar-claudecode-minimal` | Where hooks write |
 | `store_prompt_preview` | `1` | Keep an 80-char prompt preview for the title fallback |
 
 **Requirements:** macOS 15 or later (ships `/usr/bin/jq`; older macOS needs Homebrew `jq`), SwiftBar 2.x, a Claude Code version that supports the hook events above. herdr is optional.

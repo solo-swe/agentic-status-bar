@@ -7,21 +7,21 @@ setup() {
   stub_ps
   add_process 4242 1 claude claude "Mon Oct 19 09:12:03 2026"
   # Fixtures use small timestamps; C5 is switched on only by its own tests.
-  printf 'stale_minutes=0\n' > "$CLAUDE_AGENTS_CONFIG"
+  printf 'stale_minutes=0\n' > "$CLAUDE_STATUSBAR_CONFIG"
 }
 teardown() { common_teardown; }
 
-PLUGIN() { "$REPO_ROOT/swiftbar/claude-agents.5s.sh" "$@"; }
+PLUGIN() { "$REPO_ROOT/swiftbar/swiftbar-claudecode-minimal.5s.sh" "$@"; }
 
 # add_session JSON — the state file of a live session (pid 4242) merged with JSON.
 add_session() {
   printf '%s' "$1" | jq -c '{v: 1, sessionId: "s1", pid: 4242, procStart: "Mon Oct 19 09:12:03 2026", cwd: "/x/proj", updatedAt: 1000, stateSince: 1000} + .' \
-    > "$CLAUDE_AGENTS_STATE_DIR/s1.json"
+    > "$CLAUDE_STATUSBAR_STATE_DIR/s1.json"
 }
 
 # add_registry JSON — Claude Code's registry entry for pid 4242 merged with JSON.
 add_registry() {
-  printf '%s' "$1" | jq -c '{pid: 4242, sessionId: "s1"} + .' > "$CLAUDE_AGENTS_REGISTRY_DIR/4242.json"
+  printf '%s' "$1" | jq -c '{pid: 4242, sessionId: "s1"} + .' > "$CLAUDE_STATUSBAR_REGISTRY_DIR/4242.json"
 }
 
 header_is() {
@@ -72,11 +72,11 @@ header_is() {
   run PLUGIN
   header_is 1 sparkle
   run PLUGIN
-  [ "$(grep -c '^\[registry-schema\]' "$CLAUDE_AGENTS_STATE_DIR/plugin.log")" -eq 1 ]
+  [ "$(grep -c '^\[registry-schema\]' "$CLAUDE_STATUSBAR_STATE_DIR/plugin.log")" -eq 1 ]
 }
 
 @test "C2 is off when use_registry=0" {
-  printf 'use_registry=0\nstale_minutes=0\n' > "$CLAUDE_AGENTS_CONFIG"
+  printf 'use_registry=0\nstale_minutes=0\n' > "$CLAUDE_STATUSBAR_CONFIG"
   add_session '{"state":"busy","updatedAt":1000}'
   add_registry '{"status":"idle","statusUpdatedAt":2000}'
   run PLUGIN
@@ -86,9 +86,9 @@ header_is() {
 @test "C2 never modifies the state file" {
   add_session '{"state":"busy","updatedAt":1000}'
   add_registry '{"status":"idle","statusUpdatedAt":2000}'
-  before="$(cat "$CLAUDE_AGENTS_STATE_DIR/s1.json")"
+  before="$(cat "$CLAUDE_STATUSBAR_STATE_DIR/s1.json")"
   run PLUGIN
-  [ "$(cat "$CLAUDE_AGENTS_STATE_DIR/s1.json")" = "$before" ]
+  [ "$(cat "$CLAUDE_STATUSBAR_STATE_DIR/s1.json")" = "$before" ]
 }
 
 # --- C3 interrupt ---------------------------------------------------------
@@ -161,9 +161,9 @@ use_transcript() {
 @test "C3 never modifies the state file" {
   t="$(use_transcript denied-permission)"
   add_session "{\"state\":\"busy\",\"transcriptPath\":\"$t\"}"
-  before="$(cat "$CLAUDE_AGENTS_STATE_DIR/s1.json")"
+  before="$(cat "$CLAUDE_STATUSBAR_STATE_DIR/s1.json")"
   run PLUGIN
-  [ "$(cat "$CLAUDE_AGENTS_STATE_DIR/s1.json")" = "$before" ]
+  [ "$(cat "$CLAUDE_STATUSBAR_STATE_DIR/s1.json")" = "$before" ]
 }
 
 # --- C4 approved tool -----------------------------------------------------
@@ -207,7 +207,7 @@ lstart_at() { date -r "$1" '+%a %b %e %H:%M:%S %Y'; }
 # --- C5 staleness ---------------------------------------------------------
 
 minutes_ago_ms() { echo $(( ($(date +%s) - $1 * 60) * 1000 )); }
-enable_c5() { printf 'stale_minutes=30\n' > "$CLAUDE_AGENTS_CONFIG"; }
+enable_c5() { printf 'stale_minutes=30\n' > "$CLAUDE_STATUSBAR_CONFIG"; }
 
 @test "C5 marks a busy session with no activity past the threshold as uncertain" {
   enable_c5
@@ -241,14 +241,14 @@ enable_c5() { printf 'stale_minutes=30\n' > "$CLAUDE_AGENTS_CONFIG"; }
 }
 
 @test "C5 uses the configured threshold" {
-  printf 'stale_minutes=60\n' > "$CLAUDE_AGENTS_CONFIG"
+  printf 'stale_minutes=60\n' > "$CLAUDE_STATUSBAR_CONFIG"
   add_session "{\"state\":\"busy\",\"updatedAt\":$(minutes_ago_ms 45)}"
   run PLUGIN
   header_is 1 sparkle
 }
 
 @test "C5 is off when stale_minutes=0" {
-  printf 'stale_minutes=0\n' > "$CLAUDE_AGENTS_CONFIG"
+  printf 'stale_minutes=0\n' > "$CLAUDE_STATUSBAR_CONFIG"
   add_session "{\"state\":\"busy\",\"updatedAt\":$(minutes_ago_ms 600)}"
   run PLUGIN
   header_is 1 sparkle
@@ -267,10 +267,10 @@ enable_c5() { printf 'stale_minutes=30\n' > "$CLAUDE_AGENTS_CONFIG"; }
 @test "uncertain ranks below idle and above busy" {
   enable_c5
   add_session "{\"state\":\"busy\",\"updatedAt\":$(minutes_ago_ms 45)}"
-  printf '{"v":1,"sessionId":"s2","state":"busy","cwd":"/x/fresh","updatedAt":%s}' "$(minutes_ago_ms 1)" > "$CLAUDE_AGENTS_STATE_DIR/s2.json"
+  printf '{"v":1,"sessionId":"s2","state":"busy","cwd":"/x/fresh","updatedAt":%s}' "$(minutes_ago_ms 1)" > "$CLAUDE_STATUSBAR_STATE_DIR/s2.json"
   run PLUGIN
   header_is 1 questionmark.circle
-  printf '{"v":1,"sessionId":"s3","state":"idle","cwd":"/x/done"}' > "$CLAUDE_AGENTS_STATE_DIR/s3.json"
+  printf '{"v":1,"sessionId":"s3","state":"idle","cwd":"/x/done"}' > "$CLAUDE_STATUSBAR_STATE_DIR/s3.json"
   run PLUGIN
   header_is 1 checkmark.circle
 }
@@ -280,23 +280,23 @@ enable_c5() { printf 'stale_minutes=30\n' > "$CLAUDE_AGENTS_CONFIG"; }
   prompt=$(( $(date +%s) - 60 ))
   add_session "{\"state\":\"waiting\",\"reason\":\"permission\",\"stateSince\":$(( prompt * 1000 ))}"
   add_process 7001 4242 /bin/zsh "zsh" "$(lstart_at $(( prompt + 5 )))"
-  before="$(cat "$CLAUDE_AGENTS_STATE_DIR/s1.json")"
+  before="$(cat "$CLAUDE_STATUSBAR_STATE_DIR/s1.json")"
   run PLUGIN
   [[ "$output" == *"working · "* ]]
-  [ "$(cat "$CLAUDE_AGENTS_STATE_DIR/s1.json")" = "$before" ]
+  [ "$(cat "$CLAUDE_STATUSBAR_STATE_DIR/s1.json")" = "$before" ]
 
   add_session "{\"state\":\"busy\",\"updatedAt\":$(minutes_ago_ms 45)}"
   : > "$TEST_TMP/ps-table"
   add_process 4242 1 claude claude "Mon Oct 19 09:12:03 2026"
-  before="$(cat "$CLAUDE_AGENTS_STATE_DIR/s1.json")"
+  before="$(cat "$CLAUDE_STATUSBAR_STATE_DIR/s1.json")"
   run PLUGIN
   [[ "$output" == *"no activity · "* ]]
-  [ "$(cat "$CLAUDE_AGENTS_STATE_DIR/s1.json")" = "$before" ]
+  [ "$(cat "$CLAUDE_STATUSBAR_STATE_DIR/s1.json")" = "$before" ]
 }
 
 @test "a corrupt registry file is ignored" {
   add_session '{"state":"busy","updatedAt":1000}'
-  printf 'garbage' > "$CLAUDE_AGENTS_REGISTRY_DIR/4242.json"
+  printf 'garbage' > "$CLAUDE_STATUSBAR_REGISTRY_DIR/4242.json"
   run PLUGIN
   [ "$status" -eq 0 ]
   header_is 1 sparkle

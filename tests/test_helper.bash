@@ -12,12 +12,12 @@ common_setup() {
 
   # Isolate everything the hook and plugin touch.
   export HOME="$TEST_TMP/home"
-  export CLAUDE_AGENTS_STATE_DIR="$HOME/.claude/swiftbar-agents"
-  export CLAUDE_AGENTS_CONFIG="$HOME/.config/claude-agents/config"
-  export CLAUDE_AGENTS_REGISTRY_DIR="$HOME/.claude/sessions"
-  mkdir -p "$CLAUDE_AGENTS_STATE_DIR" "$(dirname "$CLAUDE_AGENTS_CONFIG")" "$CLAUDE_AGENTS_REGISTRY_DIR"
+  export CLAUDE_STATUSBAR_STATE_DIR="$HOME/.claude/swiftbar-claudecode-minimal"
+  export CLAUDE_STATUSBAR_CONFIG="$HOME/.config/swiftbar-claudecode-minimal/config"
+  export CLAUDE_STATUSBAR_REGISTRY_DIR="$HOME/.claude/sessions"
+  mkdir -p "$CLAUDE_STATUSBAR_STATE_DIR" "$(dirname "$CLAUDE_STATUSBAR_CONFIG")" "$CLAUDE_STATUSBAR_REGISTRY_DIR"
   # Never talk to a real herdr; tests that need one stub it.
-  export CLAUDE_AGENTS_HERDR="$TEST_TMP/no-herdr"
+  export CLAUDE_STATUSBAR_HERDR="$TEST_TMP/no-herdr"
 
   # Fake commands go first on PATH.
   FAKE_BIN="$TEST_TMP/bin"
@@ -88,7 +88,7 @@ run_hook() {
 # state_field FILTER — reads a field from the fixture session's state file.
 FIXTURE_SESSION=3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90
 state_file() {
-  printf '%s\n' "$CLAUDE_AGENTS_STATE_DIR/$FIXTURE_SESSION.json"
+  printf '%s\n' "$CLAUDE_STATUSBAR_STATE_DIR/$FIXTURE_SESSION.json"
 }
 state_field() {
   jq -r "$1" "$(state_file)"

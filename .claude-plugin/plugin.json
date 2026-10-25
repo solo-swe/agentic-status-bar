@@ -1,7 +1,7 @@
 {
-  "name": "claude-agents",
+  "name": "swiftbar-claudecode-minimal",
   "version": "1.0.0-rc.1",
-  "description": "Track every Claude Code session's state (working, waiting for you, idle) for the claude-agents SwiftBar menu-bar plugin.",
+  "description": "Track every Claude Code session's state (working, waiting for you, idle) for Minimalist Claude Code Statusbar, a SwiftBar menu-bar plugin.",
   "author": {
     "name": "Hakan Serce"
   },

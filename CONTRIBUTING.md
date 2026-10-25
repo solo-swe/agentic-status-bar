@@ -36,7 +36,7 @@ Load the repo as a plugin for one session:
 claude --plugin-dir .
 ```
 
-State files then appear in `~/.claude/swiftbar-agents/`, one per session. Your existing hooks keep
+State files then appear in `~/.claude/swiftbar-claudecode-minimal/`, one per session. Your existing hooks keep
 running alongside.
 
 ## Layout
@@ -45,6 +45,6 @@ running alongside.
 | --- | --- |
 | `hooks/state-hook.sh` | The hook: one state file per session |
 | `hooks/hooks.json` | Hook registrations for the Claude Code plugin |
-| `swiftbar/claude-agents.5s.sh` | The SwiftBar plugin |
+| `swiftbar/swiftbar-claudecode-minimal.5s.sh` | The SwiftBar plugin |
 | `lib/common.sh` | Config, time and file helpers shared by both |
 | `doc/PRD.md` | Product requirements |

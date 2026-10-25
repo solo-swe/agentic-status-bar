@@ -2,7 +2,7 @@
 # Undo install.sh: removes only the hook entries it added and the SwiftBar link.
 # Asks before deleting state files and config (or pass --purge to delete them).
 #
-# Overrides: CLAUDE_AGENTS_SETTINGS (settings file), CLAUDE_AGENTS_SWIFTBAR_DIR (plugin folder).
+# Overrides: CLAUDE_STATUSBAR_SETTINGS (settings file), CLAUDE_STATUSBAR_SWIFTBAR_DIR (plugin folder).
 
 set -u
 
@@ -10,27 +10,27 @@ repo="$(cd "$(dirname "$0")" && pwd)" || exit 1
 # shellcheck source=lib/common.sh
 . "$repo/lib/common.sh" || exit 1
 
-MARKER='# claude-agents'
-PLUGIN_NAME=claude-agents.5s.sh
+MARKER='# swiftbar-claudecode-minimal'
+PLUGIN_NAME=swiftbar-claudecode-minimal.5s.sh
 
 purge=0
 [ "${1:-}" = "--purge" ] && purge=1
 
 JQ="$(find_jq)"
 if [ -z "$JQ" ]; then
-  echo "claude-agents needs jq. Install it with: brew install jq" >&2
+  echo "Minimalist Claude Code Statusbar needs jq. Install it with: brew install jq" >&2
   exit 1
 fi
 
 # --- Hooks ----------------------------------------------------------------
 
-settings="${CLAUDE_AGENTS_SETTINGS:-$HOME/.claude/settings.json}"
+settings="${CLAUDE_STATUSBAR_SETTINGS:-$HOME/.claude/settings.json}"
 if [ -e "$settings" ]; then
   if ! "$JQ" -e 'type == "object"' "$settings" >/dev/null 2>&1; then
     echo "Not changing $settings: it isn't a valid JSON object." >&2
     exit 1
   fi
-  backup="$settings.bak-claude-agents-$(date +%Y%m%d-%H%M%S)"
+  backup="$settings.bak-swiftbar-claudecode-minimal-$(date +%Y%m%d-%H%M%S)"
   cp -p "$settings" "$backup" || exit 1
   echo "Backed up $settings to $backup"
 
@@ -55,12 +55,12 @@ if [ -e "$settings" ]; then
     echo "Could not update $settings" >&2
     exit 1
   }
-  echo "Removed claude-agents hooks from $settings"
+  echo "Removed Minimalist Claude Code Statusbar hooks from $settings"
 fi
 
 # --- SwiftBar -------------------------------------------------------------
 
-plugin_dir="${CLAUDE_AGENTS_SWIFTBAR_DIR:-$(defaults read com.ameba.SwiftBar PluginDirectory 2>/dev/null)}"
+plugin_dir="${CLAUDE_STATUSBAR_SWIFTBAR_DIR:-$(defaults read com.ameba.SwiftBar PluginDirectory 2>/dev/null)}"
 plugin_dir="$(ca_expand_home "$plugin_dir")"
 link="$plugin_dir/$PLUGIN_NAME"
 if [ -n "$plugin_dir" ] && [ -L "$link" ] && [ "$(readlink "$link")" = "$repo/swiftbar/$PLUGIN_NAME" ]; then

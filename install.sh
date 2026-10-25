@@ -1,10 +1,10 @@
 #!/bin/sh
-# Install claude-agents without the Claude Code plugin system:
+# Install Minimalist Claude Code Statusbar without the Claude Code plugin system:
 #   1. adds the state hook to ~/.claude/settings.json (existing hooks are kept as they are),
 #   2. links the SwiftBar plugin into SwiftBar's plugin folder.
 # Run it again at any time; it never adds anything twice. Undo with ./uninstall.sh.
 #
-# Overrides: CLAUDE_AGENTS_SETTINGS (settings file), CLAUDE_AGENTS_SWIFTBAR_DIR (plugin folder).
+# Overrides: CLAUDE_STATUSBAR_SETTINGS (settings file), CLAUDE_STATUSBAR_SWIFTBAR_DIR (plugin folder).
 
 set -u
 
@@ -13,17 +13,17 @@ repo="$(cd "$(dirname "$0")" && pwd)" || exit 1
 . "$repo/lib/common.sh" || exit 1
 
 # Every hook entry we add ends with this, so uninstall.sh can find exactly ours.
-MARKER='# claude-agents'
+MARKER='# swiftbar-claudecode-minimal'
 HOOK_CMD="'$repo/hooks/state-hook.sh' $MARKER"
-PLUGIN_NAME=claude-agents.5s.sh
+PLUGIN_NAME=swiftbar-claudecode-minimal.5s.sh
 
 JQ="$(find_jq)"
 if [ -z "$JQ" ]; then
-  echo "claude-agents needs jq. Install it with: brew install jq" >&2
+  echo "Minimalist Claude Code Statusbar needs jq. Install it with: brew install jq" >&2
   exit 1
 fi
 
-settings="${CLAUDE_AGENTS_SETTINGS:-$HOME/.claude/settings.json}"
+settings="${CLAUDE_STATUSBAR_SETTINGS:-$HOME/.claude/settings.json}"
 
 # --- Hooks ----------------------------------------------------------------
 
@@ -33,7 +33,7 @@ if [ -e "$settings" ]; then
     echo "Not changing $settings: it isn't a valid JSON object." >&2
     exit 1
   fi
-  backup="$settings.bak-claude-agents-$(date +%Y%m%d-%H%M%S)"
+  backup="$settings.bak-swiftbar-claudecode-minimal-$(date +%Y%m%d-%H%M%S)"
   cp -p "$settings" "$backup" || exit 1
   echo "Backed up $settings to $backup"
 else
@@ -58,7 +58,7 @@ echo "Hooks registered in $settings"
 
 # --- SwiftBar -------------------------------------------------------------
 
-plugin_dir="${CLAUDE_AGENTS_SWIFTBAR_DIR:-$(defaults read com.ameba.SwiftBar PluginDirectory 2>/dev/null)}"
+plugin_dir="${CLAUDE_STATUSBAR_SWIFTBAR_DIR:-$(defaults read com.ameba.SwiftBar PluginDirectory 2>/dev/null)}"
 if [ -z "$plugin_dir" ] && [ -t 0 ]; then
   printf 'SwiftBar has no plugin folder yet. Folder to use (empty to skip): '
   read -r plugin_dir

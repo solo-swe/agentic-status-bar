@@ -1,4 +1,4 @@
-# claude-agents
+# Minimalist Claude Code Statusbar
 
 A minimal [SwiftBar](https://github.com/swiftbar/SwiftBar) plugin that shows, in one menu-bar item, whether any running [Claude Code](https://claude.com/claude-code) agent needs you.
 
@@ -10,14 +10,14 @@ A minimal [SwiftBar](https://github.com/swiftbar/SwiftBar) plugin that shows, in
 
 The menu-bar item shows the most urgent state and how many sessions are in it:
 
-| Menu bar | Meaning |
-| --- | --- |
-| Red exclamation mark + count | An agent is waiting on a permission prompt or a question |
-| Amber check mark + count | An agent has finished and is waiting for your next prompt |
-| Gray question mark + count | A busy agent has shown no activity for longer than the stale threshold |
-| Dimmed icon + count | All agents are working; nothing needs you |
-| Faint icon | No Claude Code sessions running |
-| Warning triangle | Some state files couldn't be read (see Troubleshooting) |
+| Menu bar                     | Meaning                                                                |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| Red exclamation mark + count | An agent is waiting on a permission prompt or a question               |
+| Amber check mark + count     | An agent has finished and is waiting for your next prompt              |
+| Gray question mark + count   | A busy agent has shown no activity for longer than the stale threshold |
+| Dimmed icon + count          | All agents are working; nothing needs you                              |
+| Faint icon                   | No Claude Code sessions running                                        |
+| Warning triangle             | Some state files couldn't be read (see Troubleshooting)                |
 
 The dropdown lists every session, most urgent first, then the filters and settings:
 
@@ -43,7 +43,7 @@ If a session runs in a [herdr](https://herdr.dev) pane, clicking its row jumps t
 
 ## How it works
 
-1. **Claude Code hooks** (`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Notification`, `Stop`, `SessionEnd`, subagent events) write one small JSON state file per session to `~/.claude/swiftbar-agents/`.
+1. **Claude Code hooks** (`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Notification`, `Stop`, `SessionEnd`, subagent events) write one small JSON state file per session to `~/.claude/swiftbar-claudecode-minimal/`.
 2. **The SwiftBar plugin** reads those files every 5 seconds, or right away when a hook asks SwiftBar to refresh, and corrects states the hooks can't see:
    - removes sessions whose process has exited,
    - shows sessions as idle after Esc or a denied permission,
@@ -65,8 +65,8 @@ Everything stays on your machine. Hooks run async and always exit 0, so they can
 Clone the repo somewhere permanent; SwiftBar runs the plugin from it:
 
 ```sh
-git clone https://github.com/<github-user>/claude-agents.git ~/code/claude-agents
-cd ~/code/claude-agents
+git clone https://github.com/<github-user>/swiftbar-claudecode-minimal.git ~/code/swiftbar-claudecode-minimal
+cd ~/code/swiftbar-claudecode-minimal
 ```
 
 Then pick one way to register the hooks.
@@ -82,39 +82,39 @@ Your existing hooks are left exactly as they are. Running it again adds nothing.
 **Option B: Claude Code plugin.** Registers the hooks without editing `settings.json`. Inside Claude Code:
 
 ```
-/plugin marketplace add ~/code/claude-agents
-/plugin install claude-agents@claude-agents
+/plugin marketplace add ~/code/swiftbar-claudecode-minimal
+/plugin install swiftbar-claudecode-minimal@swiftbar-claudecode-minimal
 ```
 
 Then link the SwiftBar plugin yourself:
 
 ```sh
-ln -s "$PWD/swiftbar/claude-agents.5s.sh" "$(defaults read com.ameba.SwiftBar PluginDirectory)/"
+ln -s "$PWD/swiftbar/swiftbar-claudecode-minimal.5s.sh" "$(defaults read com.ameba.SwiftBar PluginDirectory)/"
 ```
 
 Hooks load when a session starts, so restart running Claude Code sessions to see them in the menu bar.
 
 ## Configuration
 
-Settings live in `~/.config/claude-agents/config` (`key=value`). The dropdown's **Show** and **Settings** items change them for you, and **Settings… → Reveal config file** opens it.
+Settings live in `~/.config/swiftbar-claudecode-minimal/config` (`key=value`). The dropdown's **Show** and **Settings** items change them for you, and **Settings… → Reveal config file** opens it.
 
-| Key | Default | Meaning |
-| --- | --- | --- |
-| `show_interactive`, `show_headless`, `show_subagents`, `show_ide` | `1` | Which session types to show (`show_ide` covers IDE and desktop sessions) |
-| `stale_minutes` | `30` | Minutes without activity before a busy session shows `?`; `0` = off |
-| `use_registry` | `1` | Use Claude Code's session registry when it is newer |
-| `instant_refresh` | `1` | Hooks trigger an immediate SwiftBar refresh |
-| `icon` | `sparkle` | SF Symbol name for the busy and empty menu-bar icon |
-| `store_prompt_preview` | `1` | Keep an 80-character prompt preview for row titles |
-| `state_dir` | `~/.claude/swiftbar-agents` | Where hooks write state files |
+| Key                                                               | Default                                 | Meaning                                                                  |
+| ----------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------ |
+| `show_interactive`, `show_headless`, `show_subagents`, `show_ide` | `1`                                     | Which session types to show (`show_ide` covers IDE and desktop sessions) |
+| `stale_minutes`                                                   | `30`                                    | Minutes without activity before a busy session shows `?`; `0` = off      |
+| `use_registry`                                                    | `1`                                     | Use Claude Code's session registry when it is newer                      |
+| `instant_refresh`                                                 | `1`                                     | Hooks trigger an immediate SwiftBar refresh                              |
+| `icon`                                                            | `sparkle`                               | SF Symbol name for the busy and empty menu-bar icon                      |
+| `store_prompt_preview`                                            | `1`                                     | Keep an 80-character prompt preview for row titles                       |
+| `state_dir`                                                       | `~/.claude/swiftbar-claudecode-minimal` | Where hooks write state files                                            |
 
 ## Troubleshooting
 
-- **"claude-agents needs jq" in the menu:** install it with `brew install jq` (macOS 14 or older).
+- **"Minimalist Claude Code Statusbar needs jq" in the menu:** install it with `brew install jq` (macOS 14 or older).
 - **A session doesn't appear:** it was started before the hooks were installed. Restart it.
-- **Warning triangle:** a state file in `~/.claude/swiftbar-agents/` is corrupt or from a newer version of claude-agents. Delete the file or update; a running session writes a fresh one on its next event.
+- **Warning triangle:** a state file in `~/.claude/swiftbar-claudecode-minimal/` is corrupt or from a newer version of Minimalist Claude Code Statusbar. Delete the file or update; a running session writes a fresh one on its next event.
 - **`install.sh` skipped the SwiftBar link:** SwiftBar has no plugin folder yet. Open SwiftBar once to choose one, then run `./install.sh` again.
-- **Something looks wrong:** messages are logged to `~/.claude/swiftbar-agents/plugin.log`, for example when Claude Code's session registry changes format.
+- **Something looks wrong:** messages are logged to `~/.claude/swiftbar-claudecode-minimal/plugin.log`, for example when Claude Code's session registry changes format.
 
 ## Development
 

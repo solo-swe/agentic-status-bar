@@ -1,7 +1,7 @@
 #!/bin/sh
 # shellcheck source-path=SCRIPTDIR disable=SC2016
 # (SC2016: jq programs use $variables inside single quotes on purpose.)
-# claude-agents hook: turns Claude Code hook events into one state file per session
+# Minimalist Claude Code Statusbar hook: turns Claude Code hook events into one state file per session
 # ($state_dir/<session_id>.json) for the SwiftBar plugin to read.
 #
 # It must never get in Claude Code's way: no `set -e`, all output discarded,
@@ -109,7 +109,7 @@ write_state() {
 }
 
 # SwiftBar refreshes a plugin when this URL is opened.
-REFRESH_URL='swiftbar://refreshplugin?name=claude-agents'
+REFRESH_URL='swiftbar://refreshplugin?name=swiftbar-claudecode-minimal'
 POKE_INTERVAL_MS=500
 
 # poke_swiftbar — asks SwiftBar to refresh now, at most once per POKE_INTERVAL_MS.
@@ -128,9 +128,9 @@ poke_swiftbar() {
 
 # find_claude_pid — walks up from our parent to the first claude process and
 # prints its PID. Prints nothing if none is found within a few levels.
-# CLAUDE_AGENTS_PARENT_PID overrides the starting point (used by tests).
+# CLAUDE_STATUSBAR_PARENT_PID overrides the starting point (used by tests).
 find_claude_pid() {
-  _pid="${CLAUDE_AGENTS_PARENT_PID:-$PPID}"
+  _pid="${CLAUDE_STATUSBAR_PARENT_PID:-$PPID}"
   _depth=0
   while [ -n "$_pid" ] && [ "$_pid" -gt 1 ] && [ "$_depth" -lt 6 ]; do
     _comm="$(ps -o comm= -p "$_pid" 2>/dev/null)"

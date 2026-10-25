@@ -7,7 +7,7 @@ EVENTS="SessionStart UserPromptSubmit PreToolUse PostToolUse Notification Stop S
 @test "plugin.json is valid and names the plugin" {
   run jq -r '.name' "$REPO_ROOT/.claude-plugin/plugin.json"
   [ "$status" -eq 0 ]
-  [ "$output" = claude-agents ]
+  [ "$output" = swiftbar-claudecode-minimal ]
   run jq -r '.version' "$REPO_ROOT/.claude-plugin/plugin.json"
   [[ "$output" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]
 }
@@ -28,7 +28,7 @@ EVENTS="SessionStart UserPromptSubmit PreToolUse PostToolUse Notification Stop S
 
 @test "marketplace.json lists the plugin from this repo with the same version" {
   run jq -r '.plugins[0].name' "$REPO_ROOT/.claude-plugin/marketplace.json"
-  [ "$output" = claude-agents ]
+  [ "$output" = swiftbar-claudecode-minimal ]
   run jq -r '.plugins[0].source' "$REPO_ROOT/.claude-plugin/marketplace.json"
   [ "$output" = ./ ]
   [ "$(jq -r '.plugins[0].version' "$REPO_ROOT/.claude-plugin/marketplace.json")" = "$(jq -r '.version' "$REPO_ROOT/.claude-plugin/plugin.json")" ]

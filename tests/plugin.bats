@@ -7,12 +7,12 @@ setup() {
 }
 teardown() { common_teardown; }
 
-PLUGIN() { "$REPO_ROOT/swiftbar/claude-agents.5s.sh" "$@"; }
+PLUGIN() { "$REPO_ROOT/swiftbar/swiftbar-claudecode-minimal.5s.sh" "$@"; }
 
 # add_state ID JSON — writes a state file (compact, like the hook does), updated just now.
 add_state() {
   printf '%s' "$2" | jq -c --arg id "$1" --argjson now "$(( $(date +%s) * 1000 ))" \
-    '{v: 1, sessionId: $id, updatedAt: $now} + .' > "$CLAUDE_AGENTS_STATE_DIR/$1.json"
+    '{v: 1, sessionId: $id, updatedAt: $now} + .' > "$CLAUDE_STATUSBAR_STATE_DIR/$1.json"
 }
 
 # header_is TEXT SYMBOL — the menu-bar line shows TEXT with SF Symbol SYMBOL.
@@ -38,9 +38,9 @@ header_is() {
 
 @test "corrupt and future-version files show the warning state" {
   add_state ok '{"state":"busy"}'
-  printf 'not json' > "$CLAUDE_AGENTS_STATE_DIR/corrupt.json"
-  printf '{"v":2,"state":"busy"}' > "$CLAUDE_AGENTS_STATE_DIR/future.json"
-  printf '[1,2]' > "$CLAUDE_AGENTS_STATE_DIR/array.json"
+  printf 'not json' > "$CLAUDE_STATUSBAR_STATE_DIR/corrupt.json"
+  printf '{"v":2,"state":"busy"}' > "$CLAUDE_STATUSBAR_STATE_DIR/future.json"
+  printf '[1,2]' > "$CLAUDE_STATUSBAR_STATE_DIR/array.json"
   run PLUGIN
   [ "$status" -eq 0 ]
   header_is 1 exclamationmark.triangle
@@ -49,8 +49,8 @@ header_is() {
 
 @test "temp and lock files are ignored" {
   add_state a '{"state":"busy"}'
-  printf 'partial' > "$CLAUDE_AGENTS_STATE_DIR/a.json.tmp.123"
-  mkdir "$CLAUDE_AGENTS_STATE_DIR/a.json.lock"
+  printf 'partial' > "$CLAUDE_STATUSBAR_STATE_DIR/a.json.tmp.123"
+  mkdir "$CLAUDE_STATUSBAR_STATE_DIR/a.json.lock"
   run PLUGIN
   header_is 1 sparkle
 }
@@ -86,7 +86,7 @@ header_is() {
 }
 
 @test "the configured icon is used for busy and empty states" {
-  printf 'icon=bolt\n' > "$CLAUDE_AGENTS_CONFIG"
+  printf 'icon=bolt\n' > "$CLAUDE_STATUSBAR_CONFIG"
   add_state a '{"state":"busy"}'
   run PLUGIN
   header_is 1 bolt
@@ -185,7 +185,7 @@ rows() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo'; }
 @test "each row has a submenu with session actions" {
   add_state abc123 '{"state":"busy","cwd":"/x/p","transcriptPath":"/x/t.jsonl"}'
   run PLUGIN
-  plugin="$REPO_ROOT/swiftbar/claude-agents.5s.sh"
+  plugin="$REPO_ROOT/swiftbar/swiftbar-claudecode-minimal.5s.sh"
   [[ "$output" == *"--Copy session ID | bash=\"$plugin\" param1=copy-id param2=abc123 terminal=false"* ]]
   [[ "$output" == *"--Copy working directory | bash=\"$plugin\" param1=copy-cwd param2=abc123 terminal=false"* ]]
   [[ "$output" == *"--Open folder in Finder | bash=\"$plugin\" param1=open-folder param2=abc123"* ]]
@@ -242,7 +242,7 @@ rows() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo'; }
   add_state a '{"state":"busy","pid":4242,"procStart":"Mon Oct 19 09:12:03 2026"}'
   run PLUGIN
   header_is 1 sparkle
-  [ -e "$CLAUDE_AGENTS_STATE_DIR/a.json" ]
+  [ -e "$CLAUDE_STATUSBAR_STATE_DIR/a.json" ]
 }
 
 @test "C1 drops and deletes a session whose process is gone" {
@@ -251,8 +251,8 @@ rows() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo'; }
   add_state gone '{"state":"waiting","pid":5555,"procStart":"Mon Oct 19 09:00:00 2026"}'
   run PLUGIN
   header_is 1 sparkle
-  [ -e "$CLAUDE_AGENTS_STATE_DIR/alive.json" ]
-  [ ! -e "$CLAUDE_AGENTS_STATE_DIR/gone.json" ]
+  [ -e "$CLAUDE_STATUSBAR_STATE_DIR/alive.json" ]
+  [ ! -e "$CLAUDE_STATUSBAR_STATE_DIR/gone.json" ]
 }
 
 @test "C1 treats a reused PID with a different start time as dead" {
@@ -260,7 +260,7 @@ rows() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo'; }
   add_state reused '{"state":"busy","pid":4242,"procStart":"Mon Oct 19 09:12:03 2026"}'
   run PLUGIN
   header_is "" sparkle
-  [ ! -e "$CLAUDE_AGENTS_STATE_DIR/reused.json" ]
+  [ ! -e "$CLAUDE_STATUSBAR_STATE_DIR/reused.json" ]
 }
 
 @test "C1 ignores extra spaces in start times" {
@@ -274,18 +274,18 @@ rows() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo'; }
   add_state nopid '{"state":"busy"}'
   run PLUGIN
   header_is 1 sparkle
-  [ -e "$CLAUDE_AGENTS_STATE_DIR/nopid.json" ]
+  [ -e "$CLAUDE_STATUSBAR_STATE_DIR/nopid.json" ]
 }
 
 @test "missing jq shows an install hint" {
-  CLAUDE_AGENTS_JQ=/nonexistent/jq run PLUGIN
+  CLAUDE_STATUSBAR_JQ=/nonexistent/jq run PLUGIN
   [ "$status" -eq 0 ]
   [[ "${lines[0]}" == "⚠︎ | sfimage=exclamationmark.triangle" ]]
   [[ "$output" == *"brew install jq"* ]]
 }
 
 @test "plugin works through a symlink" {
-  ln -s "$REPO_ROOT/swiftbar/claude-agents.5s.sh" "$TEST_TMP/linked.5s.sh"
+  ln -s "$REPO_ROOT/swiftbar/swiftbar-claudecode-minimal.5s.sh" "$TEST_TMP/linked.5s.sh"
   add_state a '{"state":"busy"}'
   run "$TEST_TMP/linked.5s.sh"
   [ "$status" -eq 0 ]

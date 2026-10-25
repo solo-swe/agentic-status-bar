@@ -1,13 +1,13 @@
 # shellcheck shell=sh disable=SC2034
 # (SC2034: the cfg_* variables are read by the scripts that source this file.)
-# Shared helpers for the claude-agents hook and SwiftBar plugin. Source it; don't run it.
+# Shared helpers for the Minimalist Claude Code Statusbar hook and SwiftBar plugin. Source it; don't run it.
 #
 # Config values are exposed as cfg_<key> variables after load_config.
 
 CA_CONFIG_KEYS="show_interactive show_headless show_subagents show_ide stale_minutes use_registry instant_refresh icon store_prompt_preview state_dir"
 
 ca_config_file() {
-  printf '%s\n' "${CLAUDE_AGENTS_CONFIG:-$HOME/.config/claude-agents/config}"
+  printf '%s\n' "${CLAUDE_STATUSBAR_CONFIG:-$HOME/.config/swiftbar-claudecode-minimal/config}"
 }
 
 # ca_is_key KEY — true if KEY is a known config key.
@@ -47,7 +47,7 @@ load_config() {
   cfg_instant_refresh=1
   cfg_icon=sparkle
   cfg_store_prompt_preview=1
-  cfg_state_dir="$HOME/.claude/swiftbar-agents"
+  cfg_state_dir="$HOME/.claude/swiftbar-claudecode-minimal"
 
   _ca_file="$(ca_config_file)"
   if [ -r "$_ca_file" ]; then
@@ -63,8 +63,8 @@ load_config() {
   fi
 
   # The environment wins over the config file (used by tests and custom setups).
-  if [ -n "${CLAUDE_AGENTS_STATE_DIR:-}" ]; then
-    cfg_state_dir="$CLAUDE_AGENTS_STATE_DIR"
+  if [ -n "${CLAUDE_STATUSBAR_STATE_DIR:-}" ]; then
+    cfg_state_dir="$CLAUDE_STATUSBAR_STATE_DIR"
   fi
   cfg_state_dir="$(ca_expand_home "$cfg_state_dir")"
 }
@@ -99,10 +99,10 @@ atomic_write() {
 }
 
 # find_jq — prints the path of jq, or nothing if it isn't installed.
-# CLAUDE_AGENTS_JQ, when set, is the only candidate (used by tests).
+# CLAUDE_STATUSBAR_JQ, when set, is the only candidate (used by tests).
 find_jq() {
-  if [ -n "${CLAUDE_AGENTS_JQ+set}" ]; then
-    [ -x "$CLAUDE_AGENTS_JQ" ] && printf '%s\n' "$CLAUDE_AGENTS_JQ"
+  if [ -n "${CLAUDE_STATUSBAR_JQ+set}" ]; then
+    [ -x "$CLAUDE_STATUSBAR_JQ" ] && printf '%s\n' "$CLAUDE_STATUSBAR_JQ"
     return 0
   fi
   for _ca_jq in /usr/bin/jq /opt/homebrew/bin/jq /usr/local/bin/jq; do
@@ -115,10 +115,10 @@ find_jq() {
 }
 
 # find_herdr — prints the path of herdr, or nothing if it isn't installed.
-# CLAUDE_AGENTS_HERDR, when set, is the only candidate (used by tests).
+# CLAUDE_STATUSBAR_HERDR, when set, is the only candidate (used by tests).
 find_herdr() {
-  if [ -n "${CLAUDE_AGENTS_HERDR+set}" ]; then
-    [ -x "$CLAUDE_AGENTS_HERDR" ] && printf '%s\n' "$CLAUDE_AGENTS_HERDR"
+  if [ -n "${CLAUDE_STATUSBAR_HERDR+set}" ]; then
+    [ -x "$CLAUDE_STATUSBAR_HERDR" ] && printf '%s\n' "$CLAUDE_STATUSBAR_HERDR"
     return 0
   fi
   for _ca_herdr in /opt/homebrew/bin/herdr /usr/local/bin/herdr; do

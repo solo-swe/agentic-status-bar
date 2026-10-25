@@ -2,7 +2,7 @@
 # shellcheck source-path=SCRIPTDIR disable=SC2016
 # (SC2016: jq programs use $variables inside single quotes on purpose.)
 #
-# <xbar.title>Claude Agents</xbar.title>
+# <xbar.title>Minimalist Claude Code Statusbar</xbar.title>
 # <xbar.version>v1.0.0-rc.1</xbar.version>
 # <xbar.author>Hakan Serce</xbar.author>
 # <xbar.desc>Shows in one menu-bar item whether any running Claude Code agent needs you.</xbar.desc>
@@ -360,7 +360,7 @@ REFRESH_JQ='
 render_jq_missing() {
   echo "⚠︎ | sfimage=exclamationmark.triangle"
   echo "---"
-  echo "claude-agents needs jq"
+  echo "Minimalist Claude Code Statusbar needs jq"
   echo "Install it with: brew install jq | color=gray"
 }
 
@@ -395,7 +395,7 @@ refresh() {
 
   _registry=""
   if [ "$cfg_use_registry" = 1 ]; then
-    set -- "${CLAUDE_AGENTS_REGISTRY_DIR:-$HOME/.claude/sessions}"/*.json
+    set -- "${CLAUDE_STATUSBAR_REGISTRY_DIR:-$HOME/.claude/sessions}"/*.json
     _registry="$(join_files "$@")"
   fi
 
@@ -405,7 +405,7 @@ refresh() {
   # behind could keep a $(...) pipe open and stall the refresh.
   _herdr="$(find_herdr)"
   _herdr_file=/dev/null
-  if [ -n "$_herdr" ] && _herdr_file="$(mktemp "${TMPDIR:-/tmp}/claude-agents-herdr.XXXXXX")"; then
+  if [ -n "$_herdr" ] && _herdr_file="$(mktemp "${TMPDIR:-/tmp}/swiftbar-claudecode-minimal-herdr.XXXXXX")"; then
     trap 'rm -f "$_herdr_file"' EXIT
     run_with_timeout "$HERDR_LIST_TIMEOUT" "$_herdr" agent list > "$_herdr_file" 2>/dev/null
   fi
@@ -474,7 +474,7 @@ focus_session() {
 # write_default_config — a config file with every key at its current value.
 write_default_config() {
   cat <<EOF
-# claude-agents settings (key=value). The SwiftBar menu edits this file too.
+# Minimalist Claude Code Statusbar settings (key=value). The SwiftBar menu edits this file too.
 show_interactive=$cfg_show_interactive
 show_headless=$cfg_show_headless
 show_subagents=$cfg_show_subagents

@@ -1,5 +1,5 @@
 {
-  "description": "Write per-session state files for the claude-agents SwiftBar plugin",
+  "description": "Write per-session state files for Minimalist Claude Code Statusbar (a SwiftBar plugin)",
   "hooks": {
     "SessionStart": [
       { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/state-hook.sh", "async": true, "timeout": 10 }] }
