@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": ["Bash(git status)"]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "^(startup|resume)$",
+        "hooks": [
+          { "type": "command", "command": "bash ~/.claude/hooks/terminal-agent-state.sh session", "timeout": 10 }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          { "type": "command", "command": "jq -c . >> \"$HOME/.claude/audit.log\"", "async": true }
+        ]
+      }
+    ]
+  }
+}

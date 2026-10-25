@@ -1213,7 +1213,8 @@
           "text": "All listed cases already covered: 28 tests in tests/reach.bats plus 5 subagent hook tests in tests/hook.bats",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "commit": "416429c6b575036b29156d105a1e67a0745c2bab"
     },
     {
       "id": "T-033",
@@ -1228,7 +1229,7 @@
       "use_cases": [
         "U10"
       ],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-013",
         "T-014"
@@ -1237,7 +1238,20 @@
         "install.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:21:40Z"
+      "updated_at": "2026-10-25T07:37:28Z",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T07:36:30Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-25T07:37:28Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T07:37:28Z",
+          "kind": "outcome",
+          "text": "install.sh: backs up settings, appends one marked async hook per event (idempotent, never reorders), refuses invalid JSON, links plugin into SwiftBar folder (defaults/prompt/skip); 9 tests",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-034",
