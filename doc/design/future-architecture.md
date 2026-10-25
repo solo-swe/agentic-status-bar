@@ -65,6 +65,104 @@ The "core" is everything except drawing: the state model, hook handling, checks 
 
 **Recommendation: Swift.** It's the only choice where the hook, the core and a native app share one language and one test suite.
 
+## Swift, the alternatives, and the cross-platform question
+
+### Can Swift do everything on macOS?
+
+Yes. Every piece the app needs is reachable from Swift without writing another language:
+
+| Need | From Swift |
+| --- | --- |
+| Status item, popover, settings window | AppKit and SwiftUI |
+| Process checks (C1, C4) | `libproc` and `sysctl`: C APIs imported directly through the `Darwin` module |
+| File watching | FSEvents (CoreServices, a C API) or `DispatchSource` |
+| Notifications with action buttons | `UserNotifications` |
+| Start at login | `ServiceManagement` (`SMAppService`) |
+| Updates | Sparkle 2: written in Objective-C, but used from Swift as an ordinary framework through Swift Package Manager |
+| JSON, hook payloads, state files | `Codable` |
+| Running `herdr`, `atm` | `Foundation.Process` |
+| The hook binary | A Swift command-line target |
+
+Nothing needs an Objective-C or C file of our own. Swift calls C and Objective-C APIs directly, so Objective-C would only matter if we had to subclass or swizzle something exotic, and nothing planned needs that.
+
+### Alternatives, and why one might pick them
+
+| Language and UI | Platforms | Reason to choose it | Reason not to |
+| --- | --- | --- | --- |
+| **Swift + AppKit/SwiftUI** | macOS (the core also builds on Linux and Windows; the UI doesn't) | Best macOS result: native look, colored status item, notifications, login items, small binary, one language from hook to UI | macOS-only UI |
+| Objective-C + AppKit | macOS | Only to reuse old Objective-C code (we have none) | Older, more verbose, no SwiftUI, no advantage over Swift |
+| **Rust + Tauri 2** | macOS, Windows, Linux | One code base for three platforms; a fast, small, safe core; Rust hook starts in about 2 ms; Tauri has tray, notification, autostart and updater plugins and signs and notarizes macOS builds | The tray is a lowest common denominator (below); the popover is a web view; two languages (Rust and HTML/TypeScript); a steeper learning curve than Swift |
+| Go + a tray library (e.g. `fyne` or `systray`) | All three | Simple language, single static binary, easy cross-compiling | Weakest native UI; menus only, or a non-native widget toolkit; notifications and login items through platform-specific code |
+| C# + Avalonia (.NET) | All three | Mature cross-platform desktop UI with a tray icon; one language for UI and core | A .NET runtime for a tray tool (tens of MB); a weaker macOS feel; a slow hook startup unless compiled ahead of time |
+| Electron (TypeScript) | All three | Web skills, the largest ecosystem | 100+ MB and a background browser for a status icon; at odds with "minimal" |
+| Kotlin Compose Multiplatform | All three | Modern declarative UI | A JVM for a tray tool; the hook can't be a JVM process (startup) |
+| Flutter desktop (Dart) | All three | One UI for everything | Tray and notifications through community plugins; a large app; little gain for a menu-sized UI |
+
+Only Rust + Tauri is a serious alternative to Swift. The others either have a weak tray story or a heavy runtime.
+
+### Can Rust + Tauri give one implementation for macOS, Windows and Linux?
+
+**The core: yes, realistically.** Hook handling, state files, checks C3 and C5 (transcript reads), mutes, filters, themes and the atm calls are plain logic and file I/O. Process checks (C1, C4) port through the `sysinfo` crate, which gives process start times and parents on all three. One Rust core can serve all three platforms.
+
+**The UI: yes for a basic tray and menu, but not with equal quality everywhere.** Tauri's tray API spells out the gaps:
+
+| Feature | macOS | Windows | Linux |
+| --- | --- | --- | --- |
+| Count as text next to the icon (`set_title`) | Yes | **No**: the count must be drawn into the icon image | Only with an icon, and not in every desktop |
+| Tooltip | Yes | Yes | **No** |
+| Left click opens the menu | Yes | Yes | **No** (right click only) |
+| Tray visible by default | Yes | Often hidden in the overflow area until the user pins it | **GNOME, the most common desktop, shows no tray icons** without an AppIndicator extension; KDE and others do |
+| Colored or template icon | Yes | Colored icon | Colored icon |
+| Notification action buttons ("Focus", "Mute 1 hour") | Yes | Partial, through Windows toast APIs | Depends on the desktop's notification server |
+
+**Platform integration is the real cost, not the UI framework:**
+
+- **WSL.** Many Windows users run Claude Code inside WSL. The hooks then write state files inside the Linux file system, and the session processes live in WSL's process space, invisible to a Windows tray app. Checks C1 and C4 can't see them. Supporting WSL means a bridge (a small Linux-side agent, or reading `\\wsl$\` paths and skipping process checks). This is a project of its own.
+- **Focusing a session.** Today that's `herdr agent focus`. Each platform has different terminals (Windows Terminal, GNOME Terminal, Konsole, iTerm2, Ghostty), and many have no API for focusing a tab. Expect "focus" to work on fewer setups outside macOS.
+- **Hook commands.** On Windows, Claude Code runs hooks through Git Bash; the hook binary path, quoting and settings file location differ per platform.
+- **Signing and testing.** Windows code signing (an EV or Azure Trusted Signing certificate, a separate cost from Apple's), Linux packaging (AppImage, deb, rpm, Flatpak), and a CI and manual test matrix of three operating systems and several Linux desktops.
+
+**Verdict:** not a pipe dream, but not "write once" either. A Rust + Tauri version that works on all three is reasonable for the core and the basic tray. Matching the macOS experience on Windows and Linux, and supporting WSL, is where the effort goes. A fair estimate is 1.5 to 2 times the macOS-only effort to ship all three, plus the ongoing cost of a three-platform test matrix. It's worth it only with evidence of demand from Windows or Linux users.
+
+### A phased path: Swift first, cross-platform later
+
+Yes, this can be phased. The key is knowing what each step throws away, and keeping that small.
+
+**What carries over to any later stack** (if we build it to be language-neutral now):
+
+- the state file schema (`v: 1`) and the hook protocol;
+- the fixtures: real hook payloads, transcripts, registry files;
+- a **conformance suite**: pairs of "input files" → expected `asb snapshot --json` output. Each case is data, not code, so a Rust core can be checked against the same cases the Swift core passed. This replaces the bats suite as the oracle;
+- the UX rules in the PRD (priorities, icons, mutes, notification rules).
+
+**What would be rewritten:** the core logic (about 1,500 to 2,000 lines of Swift by then) and the UI.
+
+**Phases:**
+
+| Phase | Stack | Platforms | Notes |
+| --- | --- | --- | --- |
+| 1 | Swift core + Swift CLI (`asb`), SwiftBar front end | macOS | Option D. Build the conformance suite here. |
+| 2 | Swift core + Swift app | macOS | Option B, then C. The product is proven on one platform. |
+| **Checkpoint** | | | Decide on cross-platform only with evidence: users asking for Windows or Linux, or your own need. |
+| 3a | Rust core (`asb` rewritten), checked by the conformance suite; the macOS app keeps its Swift UI and talks to the core through `asb snapshot --json` or a library binding (UniFFI) | macOS | Only the core moves. The macOS app stays as polished as before. |
+| 3b | Tauri front end on the Rust core | Windows, Linux | A new UI for the new platforms. Solve WSL and terminal focus per platform. |
+| 3c (optional) | Tauri on macOS too, retiring the Swift UI | All three | Only if keeping two UIs costs more than the macOS polish is worth. |
+
+The rewrite in 3a is bounded: a core of that size, checked by a data-driven suite, is days of work for an agent loop rather than weeks. The macOS UI isn't thrown away unless you choose 3c.
+
+**The alternative: a Rust core from day one.** Write the hook and core in Rust now (phase 1), with the Swift macOS app on top (phase 2). The core is never rewritten, and Windows and Linux only need a Tauri front end later. The cost is two languages from the start, a language boundary (CLI JSON or UniFFI) in the macOS app, and a steeper learning curve, all paid before knowing whether other platforms matter.
+
+**A third route: the Swift core on other platforms.** Swift's toolchain runs on Linux and Windows, and `ASBCore` uses only Foundation, so the core itself could build there. A Tauri front end could call `asb snapshot --json` across a process boundary with no core rewrite. The catches: process checks need per-platform code (`libproc` is macOS-only), and Swift on Windows has the least mature tooling of the three. Worth a spike at the checkpoint, before committing to a Rust rewrite.
+
+### What to do now to keep the cross-platform door open
+
+- Keep `ASBCore` free of AppKit and SwiftUI: Foundation only. All platform specifics go behind small protocols (`ProcessInspector`, `Notifier`, `SessionFocuser`, `LoginItem`), with the macOS implementations in the app target.
+- Make `asb snapshot --json` the single source of truth for what any UI shows, and define it as a versioned schema next to the state file schema.
+- Build the conformance suite as data (input files plus expected JSON), not as Swift test code only.
+- Keep paths configurable (state dir, config dir, settings file) rather than assuming `~/Library` everywhere in the core.
+
+These cost almost nothing on top of the macOS plan and decide whether a later move is a port or a rewrite.
+
 ## Option A: stay a SwiftBar plugin
 
 Unchanged from the first version of this doc. It's cheap and fully working, but it doesn't match the decisions: the audience isn't SwiftBar users, and notifications need an app. Keep it only as a stepping stone.
@@ -259,11 +357,12 @@ At about 250 ms per call, they can't run on every refresh. Cache per project roo
 ## Recommendation
 
 1. **Freeze the state file schema** (`v: 1`) and document it as a public contract, so the Swift hook and reader can be checked against it.
-2. **Do D first:** create the `agentic-status-bar` package with `ASBCore` and the `asb` CLI. Port the reconciler and the hook (`asb hook`), then install and uninstall (`asb install`), with the bats suite as the oracle and SwiftBar as the throwaway front end. Stop adding features to the jq code in the meantime, except fixes. Do the renames at this step.
+2. **Do D first:** create the `agentic-status-bar` package with `ASBCore` and the `asb` CLI. Port the reconciler and the hook (`asb hook`), then install and uninstall (`asb install`), with the bats suite as the oracle and SwiftBar as the throwaway front end. Stop adding features to the jq code in the meantime, except fixes. Do the renames at this step. Keep `ASBCore` Foundation-only with platform code behind protocols, and build the data-driven conformance suite, so a later cross-platform move is a port, not a rewrite.
 3. **Build B on the same core:** an AppKit status item with SwiftUI rows and settings, FSEvents, `SMAppService`, notifications, Sparkle, and a first-run hook install. Ship notarized DMGs on GitHub Releases.
 4. **Remove the SwiftBar plugin**, the remaining shell scripts and the bats suite once the app does everything the plugin does.
 5. **Add C inside the app:** C-menu and C-attention first (cheapest, and they add a new kind of "needs you"), then C-notify. Propose C-dashboard to atm once `snapshot --json` exists.
 6. **Homebrew later:** an own tap at 1.0 or when outside users ask; `homebrew/cask` once notable.
+7. **Cross-platform checkpoint** after step 5: decide on Windows and Linux only with evidence of demand. If yes, spike the Swift core on Linux first, then choose between that and a Rust core (phase 3a), with a Tauri front end for Windows and Linux (3b).
 
 ## Open questions
 
@@ -271,3 +370,5 @@ At about 250 ms per call, they can't run on every refresh. Cache per project roo
 2. **Bundle ID and owner:** a personal reverse-DNS ID (`com.<name>.agentic-status-bar`) or an organization one, since it can't change after release without losing Sparkle updates and preferences.
 3. **Repo:** rename `swiftbar-claudecode-minimal` to `agentic-status-bar` at step 2 (GitHub keeps redirects), or start a new repository and archive this one?
 4. **Config after the app:** keep a plain `key=value` config file next to the app's Settings (handy for dotfiles), or Settings only?
+5. **Cross-platform weight:** is Windows or Linux likely enough to start with a Rust core now (no core rewrite later, but two languages from day one), or Swift first with the checkpoint (recommended)?
+6. **WSL:** if Windows ever comes, must sessions inside WSL be supported? It is the largest single cost of a Windows version.

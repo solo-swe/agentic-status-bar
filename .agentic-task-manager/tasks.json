@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 48
+    "next_id": 49
   },
   "tasks": [
     {
@@ -1699,16 +1699,47 @@
       "description": "Record in doc/design/future-architecture.md: app name agentic-status-bar, short form and CLI name asb; minimum macOS 14; the hook moves to Swift (no shell left); the SwiftBar plugin is removed once the Swift migration is complete; atm's JSON becomes a stable contract at some point, and we live with drift until then. Add a detailed Homebrew section: from the start vs later (own tap vs homebrew/cask, cask vs formula for the CLI, notability rules, auto_updates with Sparkle, release automation), with 'later' as the recommendation. Update the recommendation and open questions.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "doc/design/future-architecture.md"
       ],
       "created_at": "2026-10-25T23:28:36Z",
-      "updated_at": "2026-10-25T23:28:36Z",
+      "updated_at": "2026-10-25T23:30:23Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T23:28:36Z",
+      "started_by": "claude:c631bc24",
+      "commit": "104bd274a6f907c9276200d0cd99e5640f2c1616",
+      "completed_at": "2026-10-25T23:30:23Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-25T23:30:23Z",
+          "kind": "outcome",
+          "text": "Doc records name agentic-status-bar/asb, macOS 14, Swift hook with stable binary path, renames, SwiftBar plugin removal, atm lenient decoding; Homebrew section recommends later (GitHub Releases+Sparkle, own tap at 1.0, homebrew/cask once notable)",
+          "by": "claude:c631bc24"
+        }
+      ]
+    },
+    {
+      "id": "T-048",
+      "name": "Doc: Swift vs alternatives and the cross-platform question",
+      "phase": 5,
+      "type": "docs",
+      "description": "Add a section to doc/design/future-architecture.md answering: can Swift do everything for the macOS app or does any part need another language; alternatives (Objective-C, Rust/Tauri, Go, .NET/Avalonia, Electron, Kotlin Compose, Flutter) and reasons to prefer any of them; can Rust/Tauri give one implementation for macOS, Windows and Linux (tray differences, GNOME tray, WSL, process checks, terminal focus, notifications), and at what effort; and a phased path that solidifies on Swift first and moves to a cross-platform stack later, with what to do now to keep that cheap. Update the recommendation and open questions.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "in_progress",
+      "dependencies": [],
+      "files": [
+        "doc/design/future-architecture.md"
+      ],
+      "created_at": "2026-10-25T23:42:09Z",
+      "updated_at": "2026-10-25T23:42:09Z",
+      "created_by": "claude:c631bc24",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-25T23:42:09Z",
       "started_by": "claude:c631bc24"
     }
   ]
