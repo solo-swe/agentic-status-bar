@@ -4,8 +4,8 @@ import SwiftUI
 /// The popover the status item opens: the session rows, or a placeholder when there are none.
 struct PopoverView: View {
     let store: SessionStore
-    /// Called after a row was clicked, so the popover can close.
-    let didFocus: () -> Void
+    /// Closes the popover (after an action that brings another app to the front).
+    let close: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -21,11 +21,15 @@ struct PopoverView: View {
                     placeholder
                 } else {
                     ForEach(rows) { item in
-                        SessionRow(item: item) { id in
-                            store.perform("focus", [id])
-                            didFocus()
-                        }
+                        SessionRow(item: item, perform: perform)
                     }
+                }
+                if snapshot.activeMutes > 0 {
+                    Divider().padding(.vertical, 2)
+                    Button("Unmute all projects") { perform("unmute-all", []) }
+                        .buttonStyle(.borderless)
+                        .padding(.horizontal, 8)
+                        .frame(height: 22)
                 }
             } else {
                 placeholder
@@ -40,6 +44,15 @@ struct PopoverView: View {
             .foregroundStyle(.secondary)
             .padding(.horizontal, 8)
             .frame(height: 22)
+    }
+
+    /// Actions that switch to another app; the popover closes for them and stays open for the rest,
+    /// so a mute shows up in place.
+    static let closingActions: Set = ["focus", "open-folder", "reveal-transcript"]
+
+    private func perform(_ action: String, _ args: [String]) {
+        store.perform(action, args)
+        if Self.closingActions.contains(action) { close() }
     }
 
     static func invalidNote(_ count: Int) -> String {

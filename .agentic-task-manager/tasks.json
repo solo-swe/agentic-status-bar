@@ -3127,7 +3127,7 @@
       "description": "Clicking the status item opens an NSPopover hosting a SwiftUI list: one row per session in snapshot order (state symbol in its color, project — title, state word, duration or mute text), subagent rows indented, muted rows last, a 'No Claude Code sessions' placeholder and an invalid-files note. Clicking a row focuses it (herdr) when it has a pane; the popover closes on outside click. Keep rows compact (menu-like height).",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-081"
       ],
@@ -3137,11 +3137,22 @@
         "App/Sources/StatusItemController.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T04:36:42Z",
+      "updated_at": "2026-10-26T04:39:27Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T04:36:42Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "077e097ca3818af9d4411b47ddce56391211e3cc",
+      "completed_at": "2026-10-26T04:39:27Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T04:39:27Z",
+          "kind": "outcome",
+          "text": "Popover with session rows, subagents indented, focus on click; checked by the user",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-083",
@@ -3155,7 +3166,7 @@
       "description": "Each row gets a context menu (and a hover '…' button): Mute project for 1 hour / for today, or Unmute project; Copy session ID; Copy working directory; Open folder in Finder; Reveal transcript; Focus (when in herdr). An 'Unmute all projects' button shows while mutes are active. Use the ASBCore action functions directly (not the CLI).",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-082",
         "T-069"
@@ -3165,9 +3176,11 @@
         "App/Sources/PopoverView.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:25Z",
+      "updated_at": "2026-10-26T04:39:33Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T04:39:33Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-084",
