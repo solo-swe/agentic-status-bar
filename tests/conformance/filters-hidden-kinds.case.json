@@ -1,0 +1,23 @@
+{
+  "description": "Hidden kinds are left out of rows and the menu-bar count; desktop follows the IDE filter (reach.bats: hidden kinds are left out of rows and the menu-bar count)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "show_headless=0\nshow_ide=0\nstale_minutes=0\n",
+    "state": {
+      "cli.json": {"v": 1, "sessionId": "cli", "state": "busy", "kind": "interactive"},
+      "script.json": {"v": 1, "sessionId": "script", "state": "waiting", "reason": "permission", "kind": "headless"},
+      "vscode.json": {"v": 1, "sessionId": "vscode", "state": "idle", "kind": "ide"},
+      "app.json": {"v": 1, "sessionId": "app", "state": "idle", "kind": "desktop"}
+    }
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "busy", "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "count": 1},
+    "sessions": [
+      {"sessionId": "cli", "project": "unknown", "title": "", "kind": "interactive",
+       "shown": "busy", "since": 1792891080000, "label": "unknown                                         ",
+       "word": "working", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

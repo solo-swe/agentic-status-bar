@@ -1,0 +1,18 @@
+{
+  "description": "An unknown theme falls back to the default (reach.bats: an unknown theme in the config falls back to the default)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "theme=nope\nstale_minutes=0\n",
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "state": "idle", "cwd": "/x/p", "stateSince": 1792891020000}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "idle", "symbol": "zzz", "color": "#B25000,#FFD60A", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "p", "title": "", "cwd": "/x/p", "kind": "interactive",
+       "shown": "idle", "since": 1792891020000, "label": "p                                               ",
+       "word": "idle", "detail": "1m", "muted": false, "focusable": false,
+       "symbol": "zzz", "color": "#B25000,#FFD60A", "subagents": []}
+    ]
+  }
+}

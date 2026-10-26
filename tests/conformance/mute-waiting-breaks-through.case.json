@@ -1,0 +1,20 @@
+{
+  "description": "A muted session waiting on the user still turns the menu bar red (mute.bats: a muted session waiting on the user still turns the menu bar red)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {"a.json": {"v": 1, "sessionId": "a", "state": "waiting", "reason": "permission", "cwd": "/x/alpha",
+                         "stateSince": 1792891075000}},
+    "mutes": {"/x/alpha": {"until": 1792894680000, "at": 1792891000000, "today": false}}
+  },
+  "expected": {
+    "activeMutes": 1, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "waiting", "symbol": "exclamationmark.circle.fill", "color": "#D70015,#FF453A", "count": 1},
+    "sessions": [
+      {"sessionId": "a", "project": "alpha", "title": "", "cwd": "/x/alpha", "kind": "interactive",
+       "shown": "waiting", "reason": "permission", "since": 1792891075000, "label": "alpha                                           ",
+       "word": "permission", "detail": "5s", "muted": false, "muteUntil": 1792894680000, "muteToday": false,
+       "focusable": false, "symbol": "exclamationmark.circle.fill", "color": "#D70015,#FF453A", "subagents": []}
+    ]
+  }
+}

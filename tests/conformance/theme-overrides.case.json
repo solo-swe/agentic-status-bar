@@ -1,0 +1,18 @@
+{
+  "description": "Per-state icon and color overrides win over the theme (reach.bats: per-state icon and color overrides win over the theme)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "theme=monochrome\nicon_idle=moon.zzz\ncolor_idle=#112233,#445566\nstale_minutes=0\n",
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "state": "idle", "cwd": "/x/p", "stateSince": 1792891020000}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "idle", "symbol": "moon.zzz", "color": "#112233,#445566", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "p", "title": "", "cwd": "/x/p", "kind": "interactive",
+       "shown": "idle", "since": 1792891020000, "label": "p                                               ",
+       "word": "idle", "detail": "1m", "muted": false, "focusable": false,
+       "symbol": "moon.zzz", "color": "#112233,#445566", "subagents": []}
+    ]
+  }
+}

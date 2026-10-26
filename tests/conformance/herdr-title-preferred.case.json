@@ -1,0 +1,22 @@
+{
+  "description": "herdr terminal titles are preferred over the prompt preview (reach.bats: herdr terminal titles are preferred over the prompt preview)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "state": "idle", "cwd": "/x/s1", "promptPreview": "first prompt",
+                          "stateSince": 1792891020000}},
+    "herdr": {"id": "cli:agent:list", "result": {"type": "agent_list", "agents": [
+      {"agent": "claude", "agent_session": {"value": "s1"}, "terminal_title_stripped": "Spec for the parser", "pane_id": "w2:p1"},
+      {"agent": "other", "agent_session": {"value": "s1"}, "terminal_title_stripped": "not claude"}]}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "idle", "symbol": "zzz", "color": "#B25000,#FFD60A", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "s1", "title": "Spec for the parser", "cwd": "/x/s1", "kind": "interactive",
+       "shown": "idle", "since": 1792891020000, "label": "s1 — Spec for the parser                        ",
+       "word": "idle", "detail": "1m", "muted": false, "focusable": false,
+       "symbol": "zzz", "color": "#B25000,#FFD60A", "subagents": []}
+    ]
+  }
+}

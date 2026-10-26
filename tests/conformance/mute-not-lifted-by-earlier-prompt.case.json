@@ -1,0 +1,20 @@
+{
+  "description": "A prompt sent before the mute doesn't lift it (mute.bats: a prompt sent before the mute doesn't lift it)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {"a.json": {"v": 1, "sessionId": "a", "state": "idle", "cwd": "/x/alpha", "stateSince": 1792891020000,
+                         "promptAt": 1792890960000}},
+    "mutes": {"/x/alpha": {"until": 1792894600000, "at": 1792891000000, "today": false}}
+  },
+  "expected": {
+    "activeMutes": 1, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "muted", "symbol": "bell.slash", "color": "#8E8E93,#98989D"},
+    "sessions": [
+      {"sessionId": "a", "project": "alpha", "title": "", "cwd": "/x/alpha", "kind": "interactive",
+       "shown": "idle", "since": 1792891020000, "label": "alpha                                           ",
+       "word": "idle", "detail": "muted until 19:16", "muted": true, "muteUntil": 1792894600000, "muteToday": false,
+       "focusable": false, "symbol": "bell.slash", "color": "#8E8E93,#98989D", "subagents": []}
+    ]
+  }
+}

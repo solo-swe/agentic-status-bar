@@ -2490,7 +2490,7 @@
       "description": "Turn every scenario in tests/checks.bats and tests/plugin.bats that isn't already a conformance case into one under tests/conformance/ (input files plus expected.json). Name cases after the bats test. All must pass `swift test`; any behavior difference from the shell plugin is a bug in the Swift core unless the bats test itself is wrong (then say so in a task note).",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-065",
         "T-053"
@@ -2499,11 +2499,22 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:27:24Z",
+      "updated_at": "2026-10-26T00:35:17Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:27:24Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "a9171cf777bca4e7a1b28c86864b78ec88c8c3a3",
+      "completed_at": "2026-10-26T00:35:17Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:35:17Z",
+          "kind": "outcome",
+          "text": "Single-file case format (.case.json) added to the runner and README; 48 hand-written cases cover every snapshot scenario of checks.bats (C2-C5) and plugin.bats (rows, header, C1); all 52 cases pass with no behavior differences found",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-067",
@@ -2517,7 +2528,7 @@
       "description": "Same as the previous task for tests/mute.bats and tests/reach.bats (filters, subagents, herdr titles, themes): each scenario becomes a conformance case and passes `swift test`.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-065",
         "T-053"
@@ -2526,9 +2537,11 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:20Z",
+      "updated_at": "2026-10-26T00:35:17Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T00:35:17Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-068",

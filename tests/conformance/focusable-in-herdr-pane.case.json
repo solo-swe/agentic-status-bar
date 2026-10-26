@@ -1,0 +1,27 @@
+{
+  "description": "Only a session in a herdr pane is focusable, and only with herdr installed (reach.bats: a row in a herdr pane focuses it on click; a row outside herdr has no click action)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {
+      "a.json": {"v": 1, "sessionId": "a", "state": "idle", "cwd": "/x/a", "herdrPane": "w2:p1",
+                 "termBundleId": "com.example.terminal", "stateSince": 1792891020000},
+      "b.json": {"v": 1, "sessionId": "b", "state": "idle", "cwd": "/x/b", "stateSince": 1792891020000}
+    },
+    "herdr": {"id": "cli:agent:list", "result": {"type": "agent_list", "agents": []}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "idle", "symbol": "zzz", "color": "#B25000,#FFD60A", "count": 2},
+    "sessions": [
+      {"sessionId": "a", "project": "a", "title": "", "cwd": "/x/a", "kind": "interactive",
+       "shown": "idle", "since": 1792891020000, "label": "a                                               ",
+       "word": "idle", "detail": "1m", "muted": false, "focusable": true, "herdrPane": "w2:p1",
+       "termBundleId": "com.example.terminal", "symbol": "zzz", "color": "#B25000,#FFD60A", "subagents": []},
+      {"sessionId": "b", "project": "b", "title": "", "cwd": "/x/b", "kind": "interactive",
+       "shown": "idle", "since": 1792891020000, "label": "b                                               ",
+       "word": "idle", "detail": "1m", "muted": false, "focusable": false,
+       "symbol": "zzz", "color": "#B25000,#FFD60A", "subagents": []}
+    ]
+  }
+}

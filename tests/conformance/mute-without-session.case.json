@@ -1,0 +1,14 @@
+{
+  "description": "A mute counts as active even without a running session in its project (drives Unmute all) (mute.bats: Unmute all appears only while something is muted)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "mutes": {"/x/alpha": {"until": 1792894680000, "at": 1792891080000, "today": false},
+              "/x/beta": {"until": 1792911600000, "at": 1792891080000, "today": true}}
+  },
+  "expected": {
+    "activeMutes": 2, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "none", "symbol": "sparkle", "color": "#C7C7CC,#48484A"},
+    "sessions": []
+  }
+}

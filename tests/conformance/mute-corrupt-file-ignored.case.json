@@ -1,0 +1,19 @@
+{
+  "description": "A corrupt mutes file counts as no mutes (mute.bats: a corrupt mutes file is ignored and replaced on the next change)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {"a.json": {"v": 1, "sessionId": "a", "state": "idle", "cwd": "/x/alpha", "stateSince": 1792891020000}},
+    "mutes": "garbage"
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "idle", "symbol": "zzz", "color": "#B25000,#FFD60A", "count": 1},
+    "sessions": [
+      {"sessionId": "a", "project": "alpha", "title": "", "cwd": "/x/alpha", "kind": "interactive",
+       "shown": "idle", "since": 1792891020000, "label": "alpha                                           ",
+       "word": "idle", "detail": "1m", "muted": false, "focusable": false,
+       "symbol": "zzz", "color": "#B25000,#FFD60A", "subagents": []}
+    ]
+  }
+}

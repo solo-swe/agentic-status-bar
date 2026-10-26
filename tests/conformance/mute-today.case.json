@@ -1,0 +1,19 @@
+{
+  "description": "A project muted for today says so (mute.bats: a project muted for today says so)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {"a.json": {"v": 1, "sessionId": "a", "state": "idle", "cwd": "/x/alpha", "stateSince": 1792891020000}},
+    "mutes": {"/x/alpha": {"until": 1792911600000, "at": 1792891080000, "today": true}}
+  },
+  "expected": {
+    "activeMutes": 1, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "muted", "symbol": "bell.slash", "color": "#8E8E93,#98989D"},
+    "sessions": [
+      {"sessionId": "a", "project": "alpha", "title": "", "cwd": "/x/alpha", "kind": "interactive",
+       "shown": "idle", "since": 1792891020000, "label": "alpha                                           ",
+       "word": "idle", "detail": "muted today", "muted": true, "muteUntil": 1792911600000, "muteToday": true,
+       "focusable": false, "symbol": "bell.slash", "color": "#8E8E93,#98989D", "subagents": []}
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "The subagents icon and color follow the theme and overrides (reach.bats: the subagents icon and color follow the theme and overrides)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "theme=high_contrast\ncolor_subagents=#112233\nstale_minutes=0\n",
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "state": "idle", "cwd": "/x/s1", "stateSince": 1792891070000,
+                          "subagents": {"a1": {"type": "Explore", "since": 1792891020000}}}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "busy", "symbol": "bolt.fill", "color": "#000000,#FFFFFF", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "s1", "title": "", "cwd": "/x/s1", "kind": "interactive",
+       "shown": "subagents", "since": 1792891020000, "label": "s1                                              ",
+       "word": "waiting on 1 subagent", "detail": "1m", "muted": false, "focusable": false,
+       "symbol": "hourglass.circle.fill", "color": "#112233",
+       "subagents": [{"id": "a1", "type": "Explore", "since": 1792891020000, "detail": "1m"}]}
+    ]
+  }
+}

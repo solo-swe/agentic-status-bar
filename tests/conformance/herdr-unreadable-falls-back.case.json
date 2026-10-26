@@ -1,0 +1,20 @@
+{
+  "description": "An unreadable herdr answer falls back to the prompt preview (reach.bats: a failing or slow herdr list falls back to the prompt preview)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "state": "idle", "cwd": "/x/s1", "promptPreview": "first prompt",
+                          "stateSince": 1792891020000, "herdrPane": "w2:p1"}},
+    "herdr": "garbage"
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "idle", "symbol": "zzz", "color": "#B25000,#FFD60A", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "s1", "title": "first prompt", "cwd": "/x/s1", "kind": "interactive",
+       "shown": "idle", "since": 1792891020000, "label": "s1 — first prompt                               ",
+       "word": "idle", "detail": "1m", "muted": false, "focusable": true, "herdrPane": "w2:p1",
+       "symbol": "zzz", "color": "#B25000,#FFD60A", "subagents": []}
+    ]
+  }
+}

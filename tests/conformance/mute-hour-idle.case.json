@@ -1,0 +1,26 @@
+{
+  "description": "A muted idle session is out of the count, last, with the muted icon and end time (mute.bats: a muted idle session is out of the count and shows the muted icon)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {
+      "a.json": {"v": 1, "sessionId": "a", "state": "idle", "cwd": "/x/alpha", "stateSince": 1792891020000},
+      "b.json": {"v": 1, "sessionId": "b", "state": "idle", "cwd": "/x/beta", "stateSince": 1792891020000}
+    },
+    "mutes": {"/x/alpha": {"until": 1792894680000, "at": 1792891080000, "today": false}}
+  },
+  "expected": {
+    "activeMutes": 1, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "idle", "symbol": "zzz", "color": "#B25000,#FFD60A", "count": 1},
+    "sessions": [
+      {"sessionId": "b", "project": "beta", "title": "", "cwd": "/x/beta", "kind": "interactive",
+       "shown": "idle", "since": 1792891020000, "label": "beta                                            ",
+       "word": "idle", "detail": "1m", "muted": false, "focusable": false,
+       "symbol": "zzz", "color": "#B25000,#FFD60A", "subagents": []},
+      {"sessionId": "a", "project": "alpha", "title": "", "cwd": "/x/alpha", "kind": "interactive",
+       "shown": "idle", "since": 1792891020000, "label": "alpha                                           ",
+       "word": "idle", "detail": "muted until 19:18", "muted": true, "muteUntil": 1792894680000, "muteToday": false,
+       "focusable": false, "symbol": "bell.slash", "color": "#8E8E93,#98989D", "subagents": []}
+    ]
+  }
+}

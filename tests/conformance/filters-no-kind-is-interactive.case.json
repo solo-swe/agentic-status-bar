@@ -1,0 +1,21 @@
+{
+  "description": "Sessions without a kind count as interactive (reach.bats: sessions without a kind count as interactive)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "show_interactive=0\nstale_minutes=0\n",
+    "state": {
+      "old.json": {"v": 1, "sessionId": "old", "state": "busy"},
+      "script.json": {"v": 1, "sessionId": "script", "state": "waiting", "reason": "permission", "kind": "headless"}
+    }
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "waiting", "symbol": "exclamationmark.circle.fill", "color": "#D70015,#FF453A", "count": 1},
+    "sessions": [
+      {"sessionId": "script", "project": "unknown", "title": "", "kind": "headless",
+       "shown": "waiting", "reason": "permission", "since": 1792891080000, "label": "unknown                                         ",
+       "word": "permission", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "exclamationmark.circle.fill", "color": "#D70015,#FF453A", "subagents": []}
+    ]
+  }
+}

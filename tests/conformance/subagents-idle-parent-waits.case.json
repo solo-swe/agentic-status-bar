@@ -1,0 +1,21 @@
+{
+  "description": "An idle parent with running subagents waits on them and counts as busy (reach.bats: an idle parent with running subagents waits on them and counts as busy)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "state": "idle", "cwd": "/x/s1", "updatedAt": 1792891080000, "stateSince": 1792891070000,
+                          "subagents": {"a1": {"type": "Explore", "since": 1792890990000}, "a2": {"type": "Plan", "since": 1792891050000}}}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "busy", "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "s1", "title": "", "cwd": "/x/s1", "kind": "interactive",
+       "shown": "subagents", "since": 1792890990000, "label": "s1                                              ",
+       "word": "waiting on 2 subagents", "detail": "1m", "muted": false, "focusable": false,
+       "symbol": "hourglass", "color": "#6E6E73,#AEAEB2",
+       "subagents": [{"id": "a1", "type": "Explore", "since": 1792890990000, "detail": "1m"},
+                     {"id": "a2", "type": "Plan", "since": 1792891050000, "detail": "30s"}]}
+    ]
+  }
+}
