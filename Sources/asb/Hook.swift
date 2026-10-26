@@ -22,12 +22,32 @@ struct HookCommand: ParsableCommand {
         let config = Config.load(paths)
         let stateDir = paths.stateDir(config: config)
         let file = (stateDir as NSString).appendingPathComponent("\(payload.sessionId).json")
+        // Looked up only when needed: walking the process table costs time on every tool call.
+        var metadata: HookMetadata?
+        func details() -> HookMetadata {
+            if let metadata { return metadata }
+            let found = HookMetadata.gather(
+                environment: environment, parentPid: getppid(), inspector: ProcessInspectors.fromEnvironment(environment))
+            metadata = found
+            return found
+        }
 
         let current = FileManager.default.contents(atPath: file)
             .flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
         let now = Int64(Date().timeIntervalSince1970 * 1000)
-        switch HookEvents.apply(payload, to: current, now: now, started: started,
-                                storePromptPreview: config.storePromptPreview) {
+        var outcome = HookEvents.apply(
+            payload, to: current, now: now, started: started, storePromptPreview: config.storePromptPreview,
+            sessionStartChanges: { details().apply(to: &$0, cwd: payload.cwd, transcriptPath: payload.transcriptPath) })
+
+        // Backfill sessions that were running before the hooks were installed.
+        if case .write(let state) = outcome, payload.event != "SessionStart", !payload.cwd.isEmpty,
+           HookMetadata.needsBackfill(state) {
+            var filled: [String: Any] = state
+            details().apply(to: &filled, cwd: payload.cwd, transcriptPath: payload.transcriptPath)
+            outcome = .write(HookEvents.hashable(filled))
+        }
+
+        switch outcome {
         case .write(let state):
             try? FileManager.default.createDirectory(atPath: stateDir, withIntermediateDirectories: true)
             var data = HookEvents.encode(state)
@@ -37,6 +57,12 @@ struct HookCommand: ParsableCommand {
             try? FileManager.default.removeItem(atPath: file)
         case .none:
             break
+        }
+
+        if payload.event == "SessionStart", let pid = metadata?.pid {
+            for stale in HookMetadata.staleFiles(for: pid, in: StateDirectory.read(stateDir), own: file) {
+                try? FileManager.default.removeItem(atPath: stale)
+            }
         }
     }
 }

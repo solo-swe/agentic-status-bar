@@ -178,8 +178,8 @@ public enum HookEvents {
         }
     }
 
-    /// The JSON object as hashable values, so outcomes can be compared in tests.
-    static func hashable(_ object: [String: Any]) -> [String: AnyHashable] {
+    /// The JSON object as hashable values (outcomes can be compared in tests).
+    public static func hashable(_ object: [String: Any]) -> [String: AnyHashable] {
         object.compactMapValues(hashableValue)
     }
 

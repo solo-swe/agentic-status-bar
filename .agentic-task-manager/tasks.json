@@ -2685,7 +2685,7 @@
       "description": "Add `asb hook`: read the hook payload JSON from stdin and update the session's state file exactly like hooks/state-hook.sh does for SessionStart (idle, except a compact restart keeps state), UserPromptSubmit (busy, promptPreview of 80 chars with whitespace collapsed unless it starts with <task-notification> or store_prompt_preview=0, promptAt unless task notification), PreToolUse (busy, lastTool, clear reason/message), PostToolUse (busy), Notification (permission_prompt → waiting/permission or question when lastTool is AskUserQuestion, elicitation_dialog → question, idle_prompt → idle, else decide by message text, unknown types ignored), Stop (idle, clear reason/message), SubagentStart/SubagentStop (subagents map; the empty-type stop after Stop ignored), SessionEnd (delete the file). stateSince changes only when the state changes. Never print anything and always exit 0, also on bad input or unsafe session IDs. Use the payloads in tests/fixtures/payloads in Swift tests.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-055",
         "T-054"
@@ -2696,11 +2696,22 @@
         "Tests/ASBCoreTests/HookEventsTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:52:12Z",
+      "updated_at": "2026-10-26T01:00:32Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:52:12Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "d0ad1cfaf0538157eda6db48c9fdf7f3ae589cf2",
+      "completed_at": "2026-10-26T01:00:32Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T01:00:32Z",
+          "kind": "outcome",
+          "text": "HookPayload + pure HookEvents.apply (all 9 events, newer-wins drop, stateSince rule, unknown fields kept) and asb hook (silent, exit 0); metadata and locking follow in T-072/T-073",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-072",
@@ -2714,7 +2725,7 @@
       "description": "Port the metadata part of hooks/state-hook.sh: find the claude process by walking parents from CLAUDE_STATUSBAR_PARENT_PID or the parent pid (comm claude, or node with claude in its args) and record pid and procStart (in the same string format as today so old and new files compare), cwd, transcriptPath, kind (CLAUDE_CODE_ENTRYPOINT cli → interactive, sdk-* or a -p/--print flag → headless, IDE values → ide, desktop → desktop), herdrPane from HERDR_PANE_ID, termBundleId from __CFBundleIdentifier. On SessionStart also delete other state files with the same pid. Backfill once: the first non-start event of a session whose file lacks pid or cwd fills them without resetting state or stateSince; pid null when no claude ancestor. Port the corresponding tests from tests/hook.bats.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-071",
         "T-056"
@@ -2725,9 +2736,11 @@
         "Tests/ASBCoreTests/HookMetadataTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:22Z",
+      "updated_at": "2026-10-26T01:00:33Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T01:00:33Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-073",
