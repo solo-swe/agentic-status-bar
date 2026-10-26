@@ -5,10 +5,11 @@ import SwiftUI
 /// file the CLI uses, so the app, `asb` and the SwiftBar plugin stay in sync.
 struct SettingsView: View {
     let store: SessionStore
+    let hooks: HookInstaller
 
     var body: some View {
         TabView {
-            GeneralSettings(store: store)
+            GeneralSettings(store: store, hooks: hooks)
                 .tabItem { Label("General", systemImage: "gearshape") }
             AppearanceSettings(store: store)
                 .tabItem { Label("Appearance", systemImage: "paintpalette") }
@@ -51,9 +52,33 @@ struct SettingsView: View {
 /// Which sessions to show, and when a quiet one counts as uncertain.
 private struct GeneralSettings: View {
     let store: SessionStore
+    let hooks: HookInstaller
+    @State private var confirmingRemove = false
 
     var body: some View {
         Form {
+            Section {
+                LabeledContent("Claude Code hooks") {
+                    if hooks.installed {
+                        Button("Remove Hooks…") { confirmingRemove = true }
+                    } else {
+                        Button("Install Hooks") { hooks.install() }
+                    }
+                }
+            } footer: {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(hooks.installed ? "Installed in \(FirstRunView.tilde(hooks.settingsFile)). \(FirstRunView.restartNote)"
+                         : "Not installed: no sessions will show up.")
+                    if let failure = hooks.failure { Text(failure).foregroundStyle(.red) }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+            .confirmationDialog("Remove the hooks?", isPresented: $confirmingRemove) {
+                Button("Remove Hooks", role: .destructive) { hooks.uninstall() }
+            } message: {
+                Text("Claude Code stops reporting sessions to the app. Your settings are backed up first; state and config files are kept.")
+            }
             Section("Show") {
                 toggle("Interactive sessions", "show_interactive", \.showInteractive)
                 toggle("Headless sessions (claude -p)", "show_headless", \.showHeadless)

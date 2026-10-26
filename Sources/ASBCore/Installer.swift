@@ -110,6 +110,23 @@ public struct Installer {
         log("Removed \(link)")
     }
 
+    /// Whether the settings have our hook for every event (an unreadable file counts as no).
+    public var hooksInstalled: Bool {
+        guard let settings = try? readSettings(backup: false) else { return false }
+        return HookSettings.count(settings) >= HookSettings.events.count
+    }
+
+    /// Whether the stable copy is byte for byte the asb being run.
+    public var binaryIsCurrent: Bool {
+        guard let stable = fm.contents(atPath: stableBinary) else { return false }
+        return fm.contents(atPath: sourceBinary) == stable
+    }
+
+    /// Replaces the stable copy with the asb being run, leaving the settings alone.
+    public func updateBinary() throws {
+        try copyBinary()
+    }
+
     func copyBinary() throws {
         let source = URL(fileURLWithPath: sourceBinary).resolvingSymlinksInPath().path
         guard source != URL(fileURLWithPath: stableBinary).resolvingSymlinksInPath().path else { return }

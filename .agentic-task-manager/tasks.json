@@ -3269,7 +3269,7 @@
       "description": "On launch, if the hooks aren't installed, show a short first-run window explaining what will change (hooks added to ~/.claude/settings.json, backed up) and run the bundled asb install on confirmation. On every launch, if the stable copy at ~/Library/Application Support/agentic-status-bar/bin/asb differs in version from the bundled one, replace it. Settings gets 'Remove hooks…' (asb uninstall) with a confirmation. Remind the user that running sessions pick up hooks on restart.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-079",
         "T-075"
@@ -3280,7 +3280,7 @@
         "App/Sources/SettingsView.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T04:43:18Z",
+      "updated_at": "2026-10-26T05:42:03Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -3290,7 +3290,9 @@
           "text": "Not started: it adds to SettingsView, so T-084 goes first",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "started_at": "2026-10-26T05:42:03Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-087",
@@ -3645,7 +3647,7 @@
       "description": "A background subagent fires SubagentStop each time it pauses to wait on its own background work, and SubagentStart when it resumes, so the list drops agents Claude Code still shows as working. Stop and SubagentStop payloads carry background_tasks, the parent session's in-flight task registry (hooks docs › Stop input). Use it: entries of type 'subagent' (not in a finished status) are running background subagents, keyed by id (= agent_id), marked background. On Stop the subagent list becomes exactly those (no foreground subagent runs while the main agent stops). On SubagentStop, the stopping agent stays when it is still in the list (paused), other background-marked agents missing from the list are removed, foreground ones are left alone; an older SubagentStop only removes or keeps its own agent. Without background_tasks the old add/remove rules apply. Keep each agent's first since. Update doc/state-file-schema.md, HookEventsTests, a payload fixture.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/HookEvents.swift",
@@ -3653,11 +3655,22 @@
         "doc/state-file-schema.md"
       ],
       "created_at": "2026-10-26T05:37:35Z",
-      "updated_at": "2026-10-26T05:37:44Z",
+      "updated_at": "2026-10-26T05:42:02Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T05:37:44Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "6d4d7d8f76f9577deb86899f6745b1f75a518074",
+      "completed_at": "2026-10-26T05:42:02Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T05:42:02Z",
+          "kind": "outcome",
+          "text": "Background subagents follow the background_tasks registry on Stop and SubagentStop; installed live",
+          "by": "claude:c631bc24"
+        }
+      ]
     }
   ]
 }

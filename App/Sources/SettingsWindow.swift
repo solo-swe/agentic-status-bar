@@ -6,10 +6,12 @@ import SwiftUI
 @MainActor
 final class SettingsWindow {
     private let store: SessionStore
+    private let hooks: HookInstaller
     private var window: NSWindow?
 
-    init(store: SessionStore) {
+    init(store: SessionStore, hooks: HookInstaller) {
         self.store = store
+        self.hooks = hooks
     }
 
     /// Opens the window, or brings it to the front; a menu-bar app has to activate itself first.
@@ -21,7 +23,7 @@ final class SettingsWindow {
     }
 
     private func make() -> NSWindow {
-        let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView(store: store)))
+        let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView(store: store, hooks: hooks)))
         window.title = "Agentic Status Bar Settings"
         window.styleMask = [.titled, .closable, .miniaturizable]
         // Kept after closing, so reopening is instant and keeps its place.

@@ -160,6 +160,30 @@ private struct Home {
     #expect(try FileManager.default.destinationOfSymbolicLink(atPath: home.link) == home.plugin)
 }
 
+@Test func hooksInstalledFollowsTheSettings() throws {
+    let home = try Home(settings: Data(contentsOf: fixtureSettings))
+    #expect(!home.installer().hooksInstalled)
+    try home.installer().install()
+    #expect(home.installer().hooksInstalled)
+    try home.installer().uninstall(purge: false)
+    #expect(!home.installer().hooksInstalled)
+    #expect(!(try Home(settings: Data("not json".utf8))).installer().hooksInstalled)
+    #expect(!(try Home()).installer().hooksInstalled)
+}
+
+@Test func theStableCopyIsUpdatedWhenItDiffers() throws {
+    let home = try Home()
+    #expect(!home.installer().binaryIsCurrent)
+    try home.installer().updateBinary()
+    #expect(home.installer().binaryIsCurrent)
+    try Data("#!/bin/sh\n# newer\n".utf8).write(to: URL(fileURLWithPath: home.source))
+    #expect(!home.installer().binaryIsCurrent)
+    try home.installer().updateBinary()
+    #expect(home.installer().binaryIsCurrent)
+    // Updating the copy never touches the settings.
+    #expect(!FileManager.default.fileExists(atPath: home.settings))
+}
+
 @Test func installBacksUpTheSettingsFile() throws {
     let home = try Home(settings: Data(contentsOf: fixtureSettings))
     try home.installer(now: Date(timeIntervalSince1970: 0)).install()
