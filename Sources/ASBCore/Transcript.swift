@@ -48,17 +48,34 @@ public enum Transcript {
             || (type == "user" && promptText(entry).hasPrefix(interruptMarker))
     }
 
+    public enum TurnEnd: Equatable, Sendable {
+        /// The turn finished normally (`turn_duration`): its Stop hook was missed.
+        case finished
+        /// The interrupt marker: Esc, or a denied permission. It can also stop subagents.
+        case interrupted
+    }
+
+    /// How the turn after the latest prompt in `entries` ended; nil while it runs. An interrupt marker
+    /// anywhere in it wins (Claude Code writes `turn_duration` after the marker too).
+    public static func turnEnd(_ entries: [[String: Any]]) -> TurnEnd? {
+        let afterPrompt = entries.lastIndex(where: isPrompt).map { entries[($0 + 1)...] } ?? entries[...]
+        let ends = afterPrompt.filter(endsTurn)
+        if ends.isEmpty { return nil }
+        return ends.contains { $0["type"] as? String == "user" } ? .interrupted : .finished
+    }
+
     /// Whether the turn after the latest prompt in `entries` has already ended.
     public static func turnEnded(_ entries: [[String: Any]]) -> Bool {
-        let afterPrompt = entries.lastIndex(where: isPrompt).map { entries[($0 + 1)...] } ?? entries[...]
-        return afterPrompt.contains(where: endsTurn)
+        turnEnd(entries) != nil
     }
 }
 
 extension Checks {
     /// C3: a busy or waiting session whose transcript shows that its turn already ended (Esc, or a
-    /// denied permission, fire no hook) is idle since its last update. Only sessions whose file says
-    /// busy or waiting have their transcript read.
+    /// denied permission, fire no hook; a Stop can be missed) is idle since its last update. Only an
+    /// interrupt marks it `interrupted`, which keeps running subagents from showing: a turn that
+    /// finished normally leaves its subagents running. Only sessions whose file says busy or waiting
+    /// have their transcript read.
     public static func interrupts(
         _ sessions: [ReconciledSession], transcripts: [String: TranscriptInput]
     ) -> [ReconciledSession] {
@@ -68,11 +85,11 @@ extension Checks {
                   let path = session.file.transcriptPath, let transcript = transcripts[path]
             else { return session }
             let entries = Transcript.tailEntries(transcript.contents)
-            guard !entries.isEmpty, Transcript.turnEnded(entries) else { return session }
+            guard !entries.isEmpty, let end = Transcript.turnEnd(entries) else { return session }
             var s = session
             s.shown = "idle"
             s.shownSince = s.file.updatedAt
-            s.interrupted = true
+            s.interrupted = end == .interrupted
             return s
         }
     }

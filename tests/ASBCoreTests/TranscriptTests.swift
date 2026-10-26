@@ -30,7 +30,16 @@ private func afterC3(state: String, extra: String = "", transcript: Data?) -> Re
 }
 
 @Test func c3ShowsABusySessionAsIdleWhenTheTurnAlreadyEnded() throws {
-    #expect(afterC3(state: "busy", transcript: try fixture("completed-turn")).shown == "idle")
+    let s = afterC3(state: "busy", transcript: try fixture("completed-turn"))
+    // A normal end means a missed Stop, not an interrupt: running subagents still count.
+    #expect(s.shown == "idle" && !s.interrupted)
+}
+
+@Test func anInterruptMarkerDecidesHowATurnEnded() throws {
+    #expect(Transcript.turnEnd(Transcript.tailEntries(try fixture("completed-turn"))) == .finished)
+    // The marker is followed by a turn_duration; the turn still counts as interrupted.
+    #expect(Transcript.turnEnd(Transcript.tailEntries(try fixture("denied-permission"))) == .interrupted)
+    #expect(Transcript.turnEnd([]) == nil)
 }
 
 @Test func c3LeavesASessionBusyWhenEscCameBeforeAnyOutput() throws {

@@ -3560,7 +3560,7 @@
       "description": "The newer-wins rule compares a hook's start time with the file's updatedAt (the previous write time), so hooks that start close together drop each other: of three SubagentStart events in the same millisecond window only one or two land (a session with 3 subagents shows 2), and a Stop is dropped when a PostToolUse that started just before it writes first (the file stays busy). Fix: record the applied event's start time in a new field eventAt and compare against that (a file without it accepts the event). SubagentStart/SubagentStop older than eventAt still add or remove their subagent (the map is keyed by agent ID, so order doesn't matter) but change nothing else. Update doc/state-file-schema.md (field table, Newer wins), HookEventsTests and the bats test.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/HookEvents.swift",
@@ -3569,11 +3569,22 @@
         "doc/state-file-schema.md"
       ],
       "created_at": "2026-10-26T05:12:19Z",
-      "updated_at": "2026-10-26T05:12:57Z",
+      "updated_at": "2026-10-26T05:16:01Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T05:12:57Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "dfa7d63218ef712e73cd05a7f98a4633cd1cbab8",
+      "completed_at": "2026-10-26T05:16:01Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T05:16:01Z",
+          "kind": "outcome",
+          "text": "Newer-wins compares eventAt (event start) instead of updatedAt; older subagent events still merge",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-097",
@@ -3587,7 +3598,7 @@
       "description": "C3 marks a busy session idle when its transcript shows the turn ended, and always sets interrupted, which keeps the subagents check from showing 'waiting on subagents' (the parent shows zzz while its subagents work). Only the interrupt marker (Esc, denied permission) can stop subagents; a normal turn end (turn_duration) means the Stop hook was missed. Set interrupted only for the marker. Add a TranscriptTests/ChecksTests case and a conformance case (busy file, ended turn, running subagents -> subagents).",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/Transcript.swift",
@@ -3595,9 +3606,11 @@
         "tests/conformance"
       ],
       "created_at": "2026-10-26T05:12:19Z",
-      "updated_at": "2026-10-26T05:12:19Z",
+      "updated_at": "2026-10-26T05:16:07Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T05:16:07Z",
+      "started_by": "claude:c631bc24"
     }
   ]
 }
