@@ -16,7 +16,15 @@
       "Bash(swift package resolve *)",
       "Bash(xcodegen)",
       "Bash(xcodegen *)",
-      "Bash(xcodebuild *)"
+      "Bash(xcodebuild *)",
+      "Bash(.build/debug/asb *)",
+      "Bash(.build/release/asb *)",
+      "Bash(git status)",
+      "Bash(git status *)",
+      "Bash(git mv *)",
+      "Bash(git rm *)",
+      "Bash(ls *)",
+      "Bash(jq *)"
     ]
   }
 }

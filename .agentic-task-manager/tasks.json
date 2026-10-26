@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 95,
+    "next_id": 96,
     "workflow": {
       "type": "direct"
     },
@@ -2884,7 +2884,7 @@
       "description": "Apply the renames from doc/design/future-architecture.md 'Renames': state dir ~/.claude/agentic-status-bar/, config ~/.config/agentic-status-bar/config, environment overrides ASB_STATE_DIR, ASB_CONFIG, ASB_REGISTRY_DIR, ASB_HERDR, ASB_SETTINGS, ASB_SWIFTBAR_DIR, ASB_PARENT_PID, ASB_BIN (replacing CLAUDE_STATUSBAR_*), login item label agentic-status-bar.start-swiftbar, refresh URL name of the renamed plugin file (agentic-status-bar.5s.sh), display name 'Agentic Status Bar'. `asb install` moves an existing old state dir's mutes and config to the new paths, removes the old login item and old SwiftBar link. Update tests and helpers to the new names.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "todo",
       "dependencies": [
         "T-075"
       ],
@@ -2895,11 +2895,16 @@
         "tests/test_helper.bash"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T01:12:18Z",
+      "updated_at": "2026-10-26T04:25:18Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
-      "started_at": "2026-10-26T01:12:18Z",
-      "started_by": "claude:c631bc24"
+      "notes": [
+        {
+          "at": "2026-10-26T04:25:18Z",
+          "kind": "failure",
+          "text": "lease expired (claude:c631bc24)"
+        }
+      ]
     },
     {
       "id": "T-077",
@@ -3409,6 +3414,31 @@
           "by": "claude:c631bc24"
         }
       ]
+    },
+    {
+      "id": "T-095",
+      "name": "Fewer permission prompts: test summary and allowlist",
+      "phase": 6,
+      "type": "infra",
+      "priority": "P0",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Add tests/swift.sh --summary (only failures and totals, so no pipes are needed) and allowlist read-only and repo-local commands in .claude/settings.json (.build asb, git status/mv/rm, ls, jq).",
+      "requirements": [],
+      "use_cases": [],
+      "status": "in_progress",
+      "dependencies": [],
+      "files": [
+        "tests/swift.sh",
+        ".claude/settings.json"
+      ],
+      "created_at": "2026-10-26T04:25:18Z",
+      "updated_at": "2026-10-26T04:25:18Z",
+      "created_by": "claude:c631bc24",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T04:25:18Z",
+      "started_by": "claude:c631bc24"
     }
   ]
 }
