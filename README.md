@@ -83,7 +83,7 @@ Everything stays on your machine. Hooks run async and always exit 0, so they can
 Clone the repo and build `asb`:
 
 ```sh
-git clone https://github.com/hakanserce/swiftbar-claudecode-minimal.git ~/code/agentic-status-bar
+git clone https://github.com/hakanserce/agentic-status-bar.git ~/code/agentic-status-bar
 cd ~/code/agentic-status-bar
 swift build -c release
 .build/release/asb install

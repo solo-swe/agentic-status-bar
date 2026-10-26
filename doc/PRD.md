@@ -10,7 +10,7 @@ An open-source SwiftBar plugin that shows, in one menu-bar item, whether any run
 
 **Approach.** Claude Code hooks write a small state file per session. The SwiftBar plugin reads those files, runs a set of checks to correct states that hooks cannot see (crashes, Esc interrupts, approved long-running tools), and renders the result. When Claude Code's own session registry is present and newer, it overrides the hook state.
 
-**Name:** Minimalist Claude Code Statusbar (repo and plugin ID `swiftbar-claudecode-minimal`, SwiftBar file `swiftbar-claudecode-minimal.5s.sh`).
+**Name:** Agentic Status Bar, short `asb` (repo `agentic-status-bar`, SwiftBar file `agentic-status-bar.5s.sh`). It started as "Minimalist Claude Code Statusbar" (`swiftbar-claudecode-minimal`); the shell-era sections below keep the old paths until the app rewrite of this document.
 
 ## Goals and non-goals
 
@@ -221,7 +221,7 @@ Ship two pieces in one repo: a Claude Code plugin that carries the hooks, and th
 **Repo layout**
 
 ```
-swiftbar-claudecode-minimal/
+agentic-status-bar/
   .claude-plugin/plugin.json     Claude Code plugin manifest
   hooks/hooks.json               hook registrations (all async)
   hooks/state-hook.sh            the one hook script: event → state file

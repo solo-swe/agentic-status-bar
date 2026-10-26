@@ -2982,7 +2982,7 @@
       "description": "Rename hakanserce/swiftbar-claudecode-minimal to hakanserce/agentic-status-bar with `gh repo rename agentic-status-bar` (decided by the user; GitHub keeps redirects), update the local remote URL, and update names, clone URLs and paths in README.md, CONTRIBUTING.md, doc/PRD.md, .claude-plugin/marketplace.json and plugin.json. Don't use real project names in examples.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-076"
       ],
@@ -2994,9 +2994,11 @@
         ".claude-plugin/plugin.json"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:23Z",
+      "updated_at": "2026-10-26T05:48:55Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T05:48:55Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-079",
@@ -3269,7 +3271,7 @@
       "description": "On launch, if the hooks aren't installed, show a short first-run window explaining what will change (hooks added to ~/.claude/settings.json, backed up) and run the bundled asb install on confirmation. On every launch, if the stable copy at ~/Library/Application Support/agentic-status-bar/bin/asb differs in version from the bundled one, replace it. Settings gets 'Remove hooks…' (asb uninstall) with a confirmation. Remind the user that running sessions pick up hooks on restart.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-079",
         "T-075"
@@ -3280,7 +3282,7 @@
         "App/Sources/SettingsView.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T05:42:03Z",
+      "updated_at": "2026-10-26T05:48:51Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -3289,10 +3291,19 @@
           "kind": "handoff",
           "text": "Not started: it adds to SettingsView, so T-084 goes first",
           "by": "claude:c631bc24"
+        },
+        {
+          "at": "2026-10-26T05:48:51Z",
+          "kind": "outcome",
+          "text": "First-run window and Settings install/remove hooks via the bundled asb; stable copy kept current; checked by the user",
+          "by": "claude:c631bc24"
         }
       ],
       "started_at": "2026-10-26T05:42:03Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "f933588f9de3a2c507dfc970ca38bbb165a12085",
+      "completed_at": "2026-10-26T05:48:51Z",
+      "completed_by": "claude:c631bc24"
     },
     {
       "id": "T-087",
