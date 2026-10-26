@@ -18,3 +18,17 @@ jobs:
 
       - name: Tests
         run: tests/run.sh
+
+  swift:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select the newest Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+
+      - name: Swift version
+        run: swift --version
+
+      - name: Build and test
+        run: tests/swift.sh

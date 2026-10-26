@@ -4,6 +4,7 @@
 
 - macOS 15 or later (or Homebrew `jq`)
 - `brew install bats-core shellcheck`
+- Xcode 16 or later (Swift 6) for the Swift package
 
 ## Checks
 
@@ -11,13 +12,17 @@
 tests/lint.sh          # shellcheck on every script
 tests/run.sh           # all bats tests (or: tests/run.sh tests/hook.bats)
 tests/run.sh --bench   # timing against the PRD targets (plugin < 150 ms, hook < 20 ms)
+tests/swift.sh         # build the Swift package and run its tests (or: tests/swift.sh --filter VersionTests)
 ```
+
+The Swift package (`Package.swift`: `ASBCore`, the `asb` CLI, tests in `tests/ASBCoreTests`) is replacing the
+shell code; see `doc/design/future-architecture.md`.
 
 The hook runs on every tool call and the plugin every few seconds, so both keep process
 counts low: the hook makes two jq calls per event, and a plugin refresh does all parsing,
 checks and rendering in one jq program. Check `--bench` after changing either.
 
-CI runs the same two commands. Tests run in a temporary `HOME`, so they never touch your real
+CI runs the same commands (lint and bats in one job, Swift in another). Tests run in a temporary `HOME`, so they never touch your real
 `~/.claude` or config.
 
 Verify behavior with a bats test rather than by hand. `tests/test_helper.bash` provides:

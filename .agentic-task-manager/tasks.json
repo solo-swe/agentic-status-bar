@@ -1798,7 +1798,7 @@
       "description": "Create Package.swift at the repo root (swift-tools-version 6.0, platforms macOS 14) with a library target ASBCore (Sources/ASBCore, Foundation only: no AppKit or SwiftUI, see doc/design/future-architecture.md 'What to do now to keep the cross-platform door open'), an executable target asb (Sources/asb) and a test target ASBCoreTests (Tests/ASBCoreTests, Swift Testing). asb uses swift-argument-parser and for now has only `asb --version` (prints the version from a single constant in ASBCore, e.g. 0.1.0). Add .build/ and .swiftpm/ to .gitignore. Verify with `swift build` and `swift test`. Don't touch the shell code.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "Package.swift",
@@ -1808,11 +1808,22 @@
         ".gitignore"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:01:13Z",
+      "updated_at": "2026-10-26T00:02:19Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:01:13Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "0b5c54a984a1778e175182160f94400a41469104",
+      "completed_at": "2026-10-26T00:02:19Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:02:19Z",
+          "kind": "outcome",
+          "text": "Package AgenticStatusBar: ASBCore (Foundation only), asb (ArgumentParser, --version 0.1.0), ASBCoreTests at tests/ASBCoreTests (lowercase: macOS paths ignore case)",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-050",
@@ -1826,7 +1837,7 @@
       "description": "Add a `swift` job to .github/workflows/ci.yml on macos-latest that runs `swift build` and `swift test` (select the newest Xcode available on the runner if needed). Keep the existing lint and bats job unchanged. Add a tests/swift.sh wrapper (`swift build && swift test`) mirroring tests/run.sh, and mention both in CONTRIBUTING.md.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-049"
       ],
@@ -1836,9 +1847,11 @@
         "CONTRIBUTING.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-26T00:02:21Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T00:02:21Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-051",
