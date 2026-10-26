@@ -45,6 +45,18 @@ final class SessionStore {
         coalescer?.trigger()
     }
 
+    /// Writes one config key (the file the CLI reads too) and shows it at once; the watcher then
+    /// recomputes the snapshot. Invalid keys or values change nothing.
+    func set(_ key: String, _ value: String) {
+        guard (try? Config.set(key, value, in: live.paths.configFile)) == true else { return }
+        config = Config.load(live.paths)
+        refresh()
+    }
+
+    func set(_ key: String, _ on: Bool) {
+        set(key, on ? "1" : "0")
+    }
+
     /// Runs a menu action (`asb action`'s names) off the main thread, then refreshes.
     func perform(_ name: String, _ args: [String]) {
         let (paths, environment) = (live.paths, live.environment)

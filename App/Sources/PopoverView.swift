@@ -34,6 +34,21 @@ struct PopoverView: View {
             } else {
                 placeholder
             }
+            Divider().padding(.vertical, 2)
+            HStack {
+                Spacer()
+                Button {
+                    close()
+                    NSApp.activate()
+                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+                .buttonStyle(.borderless)
+                .help("Settings")
+            }
+            .padding(.horizontal, 8)
+            .frame(height: 22)
         }
         .padding(6)
         .frame(width: 420, alignment: .leading)

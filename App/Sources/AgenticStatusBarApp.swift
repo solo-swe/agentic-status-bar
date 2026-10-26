@@ -1,15 +1,15 @@
 import SwiftUI
 
 /// Agentic Status Bar: a menu-bar item showing whether any Claude Code agent needs you.
-/// It has no windows of its own yet; the status item lives in AppDelegate.
+/// The status item lives in AppDelegate; Settings is the only window.
 @main
 struct AgenticStatusBarApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        // A menu-bar app (LSUIElement): Settings is the only scene, added in a later task.
+        // A menu-bar app (LSUIElement): the popover's gear button opens this.
         Settings {
-            EmptyView()
+            SettingsView(store: appDelegate.store)
         }
     }
 }

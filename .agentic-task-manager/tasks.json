@@ -3166,7 +3166,7 @@
       "description": "Each row gets a context menu (and a hover '…' button): Mute project for 1 hour / for today, or Unmute project; Copy session ID; Copy working directory; Open folder in Finder; Reveal transcript; Focus (when in herdr). An 'Unmute all projects' button shows while mutes are active. Use the ASBCore action functions directly (not the CLI).",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-082",
         "T-069"
@@ -3176,11 +3176,22 @@
         "App/Sources/PopoverView.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T04:39:33Z",
+      "updated_at": "2026-10-26T04:43:12Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T04:39:33Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "ff2d4c4ec0f78dc7806088623aa9ebeb5933a4c8",
+      "completed_at": "2026-10-26T04:43:12Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T04:43:12Z",
+          "kind": "outcome",
+          "text": "Row menu (hover … and right-click) with mute, copy, open, reveal, focus; Unmute all; checked by the user",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-084",
@@ -3194,7 +3205,7 @@
       "description": "A SwiftUI Settings scene (opened from the popover's gear button): session types to show, subagent rows, stale threshold (10/30/60 min, never), theme picker plus per-state symbol (text field with SF Symbol preview) and color (ColorPicker for light and dark) overrides, use registry, instant refresh, store prompt previews, and 'Reveal config file'. Settings read and write the same config file as the CLI (the open question about a separate store stays open; the file keeps CLI and app in sync).",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-082"
       ],
@@ -3203,9 +3214,11 @@
         "App/Sources/AgenticStatusBarApp.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:25Z",
+      "updated_at": "2026-10-26T04:43:20Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T04:43:20Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-085",
@@ -3256,9 +3269,17 @@
         "App/Sources/SettingsView.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:25Z",
+      "updated_at": "2026-10-26T04:43:18Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T04:43:18Z",
+          "kind": "handoff",
+          "text": "Not started: it adds to SettingsView, so T-084 goes first",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-087",

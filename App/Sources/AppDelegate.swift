@@ -3,7 +3,7 @@ import ASBCore
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    private let store = SessionStore()
+    let store = SessionStore()
     private var statusItem: StatusItemController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
