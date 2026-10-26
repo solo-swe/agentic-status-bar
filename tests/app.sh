@@ -10,7 +10,7 @@ fi
 
 xcodegen generate --spec App/project.yml --quiet || exit 1
 
-action=build
-[ "${1:-}" = "--test" ] && action=test
+action="build"
+[ "${1:-}" = "--test" ] && action="test"
 xcodebuild -project App/AgenticStatusBar.xcodeproj -scheme AgenticStatusBar -configuration Debug \
   -derivedDataPath .build/xcode -quiet "$action"
