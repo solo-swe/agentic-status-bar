@@ -1952,7 +1952,7 @@
       "description": "Create tests/conformance/README.md defining a language-neutral case: a directory with input/ (state/*.json, registry/*.json, transcripts/*.jsonl, processes.json [{pid, ppid, start (epoch s), comm}], herdr.json (agent list output, optional), config (optional), mutes (optional), clock.json {now_ms, tz}) and expected.json (the snapshot). Add a Swift test (Tests/ASBCoreTests/ConformanceTests.swift) that loads every case, runs the core with a fake clock, fake process inspector and fake herdr, and compares JSON semantically (key order ignored), printing a readable diff on failure. Add one case: no-sessions. The runner should skip core pieces not yet implemented only via an explicit 'pending' marker file, never silently.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-052"
       ],
@@ -1963,11 +1963,22 @@
         "Tests/ASBCoreTests/ConformanceTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:04:52Z",
+      "updated_at": "2026-10-26T00:13:49Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:04:52Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "23cab62fd173598e77cb8a36a96ca87caaa303ec",
+      "completed_at": "2026-10-26T00:13:49Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:13:49Z",
+          "kind": "outcome",
+          "text": "Case format in tests/conformance/README.md, runner with diff and pending-as-known-issue, self-tests for the runner; pure Engine.snapshot(SnapshotInputs) entry point (stub handles no sessions)",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-054",
@@ -1981,7 +1992,7 @@
       "description": "Port lib/common.sh config handling to Sources/ASBCore/Config.swift: the key whitelist (show_*, stale_minutes, use_registry, instant_refresh, icon, store_prompt_preview, state_dir, theme, icon_<state>, color_<state> for waiting idle uncertain busy subagents muted none warning), defaults, value validation (plain words/paths; colors #RRGGBB or a light,dark pair), comments and unknown keys ignored, ~ expansion, and setConfig(key, value) that keeps other lines and writes atomically. Paths come from a Paths struct with environment overrides (for now CLAUDE_STATUSBAR_CONFIG and CLAUDE_STATUSBAR_STATE_DIR, renamed later). Port tests/common.bats cases to Tests/ASBCoreTests/ConfigTests.swift.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-049"
       ],
@@ -1991,9 +2002,11 @@
         "Tests/ASBCoreTests/ConfigTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:15Z",
+      "updated_at": "2026-10-26T00:13:49Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T00:13:49Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-055",
@@ -2043,9 +2056,17 @@
         "Tests/ASBCoreTests/ProcessesTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:15Z",
+      "updated_at": "2026-10-26T00:13:48Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:13:48Z",
+          "kind": "note",
+          "text": "Use ProcessRecord from Sources/ASBCore/Engine.swift (pid, ppid, start epoch s, comm, args) as the inspector's output type instead of a new ProcessInfo; the engine stays pure and takes [ProcessRecord] in SnapshotInputs.",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-057",
@@ -2289,9 +2310,17 @@
         "tests/bench.sh"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:19Z",
+      "updated_at": "2026-10-26T00:13:48Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:13:48Z",
+          "kind": "note",
+          "text": "The pure entry point is Engine.snapshot(SnapshotInputs) -> SnapshotResult in Sources/ASBCore/Engine.swift; this task gathers SnapshotInputs from disk/system and acts on deadFiles and registrySchemaIssue.",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-066",
