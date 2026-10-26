@@ -10,16 +10,19 @@ common_setup() {
   TEST_TMP="$(mktemp -d "$REPO_ROOT/tests/tmp/test.XXXXXX")"
   export TEST_TMP
 
-  # Isolate everything the hook and plugin touch.
+  # Isolate everything asb touches.
   export HOME="$TEST_TMP/home"
-  export CLAUDE_STATUSBAR_STATE_DIR="$HOME/.claude/swiftbar-claudecode-minimal"
-  export CLAUDE_STATUSBAR_CONFIG="$HOME/.config/swiftbar-claudecode-minimal/config"
-  export CLAUDE_STATUSBAR_REGISTRY_DIR="$HOME/.claude/sessions"
-  mkdir -p "$CLAUDE_STATUSBAR_STATE_DIR" "$(dirname "$CLAUDE_STATUSBAR_CONFIG")" "$CLAUDE_STATUSBAR_REGISTRY_DIR"
+  export ASB_STATE_DIR="$HOME/.claude/agentic-status-bar"
+  export ASB_CONFIG="$HOME/.config/agentic-status-bar/config"
+  export ASB_REGISTRY_DIR="$HOME/.claude/sessions"
+  mkdir -p "$ASB_STATE_DIR" "$(dirname "$ASB_CONFIG")" "$ASB_REGISTRY_DIR"
   # Never talk to a real herdr; tests that need one stub it.
-  export CLAUDE_STATUSBAR_HERDR="$TEST_TMP/no-herdr"
-  # The SwiftBar plugin runs the asb that tests/run.sh builds.
-  export CLAUDE_STATUSBAR_ASB="$REPO_ROOT/.build/debug/asb"
+  export ASB_HERDR="$TEST_TMP/no-herdr"
+  # The SwiftBar plugin and HOOK run the asb that tests/run.sh builds.
+  export ASB_BIN="$REPO_ROOT/.build/debug/asb"
+  # The shell scripts' names, for their tests (install.bats, common.bats) until they are removed.
+  export CLAUDE_STATUSBAR_STATE_DIR="$ASB_STATE_DIR" CLAUDE_STATUSBAR_CONFIG="$ASB_CONFIG" \
+    CLAUDE_STATUSBAR_REGISTRY_DIR="$ASB_REGISTRY_DIR" CLAUDE_STATUSBAR_HERDR="$ASB_HERDR"
 
   # Fake commands go first on PATH.
   FAKE_BIN="$TEST_TMP/bin"
@@ -51,10 +54,10 @@ STUB
 
 # stub_ps — replaces ps with a fake that answers `ps -o FIELD= -p PID` from
 # $TEST_TMP/ps-table, one process per line: pid|ppid|comm|args|lstart.
-# asb reads the same table (it doesn't run ps) through CLAUDE_STATUSBAR_PS_TABLE.
+# asb reads the same table (it doesn't run ps) through ASB_PS_TABLE.
 stub_ps() {
   : > "$TEST_TMP/ps-table"
-  export CLAUDE_STATUSBAR_PS_TABLE="$TEST_TMP/ps-table"
+  export ASB_PS_TABLE="$TEST_TMP/ps-table"
   stub_command ps '
 case " $* " in
   *" -axo "*)
@@ -88,7 +91,7 @@ add_process() {
 
 # HOOK — the hook (`asb hook`), reading the payload from stdin.
 HOOK() {
-  "$CLAUDE_STATUSBAR_ASB" hook
+  "$ASB_BIN" hook
 }
 
 # run_hook FIXTURE — feeds tests/fixtures/payloads/FIXTURE.json to the hook.
@@ -99,7 +102,7 @@ run_hook() {
 # state_field FILTER — reads a field from the fixture session's state file.
 FIXTURE_SESSION=3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90
 state_file() {
-  printf '%s\n' "$CLAUDE_STATUSBAR_STATE_DIR/$FIXTURE_SESSION.json"
+  printf '%s\n' "$ASB_STATE_DIR/$FIXTURE_SESSION.json"
 }
 state_field() {
   jq -r "$1" "$(state_file)"

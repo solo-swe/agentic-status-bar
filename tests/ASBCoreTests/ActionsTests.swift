@@ -22,13 +22,13 @@ private final class FakeRunner: CommandRunner {
 private struct Fixture {
     let home: URL
     let runner = FakeRunner()
-    var stateDir: URL { home.appendingPathComponent(".claude/swiftbar-claudecode-minimal") }
-    var configFile: String { home.appendingPathComponent(".config/swiftbar-claudecode-minimal/config").path }
+    var stateDir: URL { home.appendingPathComponent(".claude/agentic-status-bar") }
+    var configFile: String { home.appendingPathComponent(".config/agentic-status-bar/config").path }
     let now: Int64 = 1_792_891_080_000
 
     init(herdr: String? = nil) throws {
         home = FileManager.default.temporaryDirectory.appendingPathComponent("asb-actions-\(UUID().uuidString)")
-        try FileManager.default.createDirectory(at: home.appendingPathComponent(".claude/swiftbar-claudecode-minimal"),
+        try FileManager.default.createDirectory(at: home.appendingPathComponent(".claude/agentic-status-bar"),
                                                 withIntermediateDirectories: true)
         self.herdr = herdr
     }
@@ -39,7 +39,7 @@ private struct Fixture {
     }
 
     func perform(_ name: String, _ args: String...) {
-        let env = ["CLAUDE_STATUSBAR_HERDR": herdr ?? home.appendingPathComponent("no-herdr").path]
+        let env = ["ASB_HERDR": herdr ?? home.appendingPathComponent("no-herdr").path]
         Actions(paths: Paths.from(environment: env, home: home.path), environment: env, runner: runner,
                 now: { now }, timeZone: TimeZone(identifier: "America/Los_Angeles")!)
             .perform(name, args)
@@ -185,10 +185,10 @@ private struct Fixture {
 
 @Test func loginAddsAndRemovesTheLoginItem() throws {
     let f = try Fixture()
-    let item = f.home.appendingPathComponent("Library/LaunchAgents/swiftbar-claudecode-minimal.start-swiftbar.plist")
+    let item = f.home.appendingPathComponent("Library/LaunchAgents/agentic-status-bar.start-swiftbar.plist")
     f.perform("login")
     let plist = try #require(NSDictionary(contentsOf: item))
-    #expect(plist["Label"] as? String == "swiftbar-claudecode-minimal.start-swiftbar")
+    #expect(plist["Label"] as? String == "agentic-status-bar.start-swiftbar")
     #expect(plist["ProgramArguments"] as? [String] == ["/usr/bin/open", "-g", "-b", "com.ameba.SwiftBar"])
     #expect(plist["RunAtLoad"] as? Bool == true)
     f.perform("login")

@@ -7,7 +7,7 @@ setup() {
   # The hook's parent is a shell (5000) whose parent is claude (4242).
   add_process 5000 4242 /bin/sh "sh -c state-hook.sh" "Mon Oct 19 09:12:04 2026"
   add_process 4242 1 claude "claude" "Mon Oct 19 09:12:03 2026"
-  export CLAUDE_STATUSBAR_PARENT_PID=5000
+  export ASB_PARENT_PID=5000
   export CLAUDE_CODE_ENTRYPOINT=cli
   export HERDR_PANE_ID=w2:p1
   export __CFBundleIdentifier=com.example.terminal
@@ -102,11 +102,11 @@ teardown() { common_teardown; }
 }
 
 @test "SessionStart removes older state files of the same claude process" {
-  printf '{"v":1,"sessionId":"old","pid":4242,"state":"busy"}\n' > "$CLAUDE_STATUSBAR_STATE_DIR/old.json"
-  printf '{"v":1,"sessionId":"other","pid":9999,"state":"busy"}\n' > "$CLAUDE_STATUSBAR_STATE_DIR/other.json"
+  printf '{"v":1,"sessionId":"old","pid":4242,"state":"busy"}\n' > "$ASB_STATE_DIR/old.json"
+  printf '{"v":1,"sessionId":"other","pid":9999,"state":"busy"}\n' > "$ASB_STATE_DIR/other.json"
   run_hook SessionStart
-  [ ! -e "$CLAUDE_STATUSBAR_STATE_DIR/old.json" ]
-  [ -e "$CLAUDE_STATUSBAR_STATE_DIR/other.json" ]
+  [ ! -e "$ASB_STATE_DIR/old.json" ]
+  [ -e "$ASB_STATE_DIR/other.json" ]
   [ -e "$(state_file)" ]
 }
 
@@ -146,7 +146,7 @@ teardown() { common_teardown; }
 }
 
 @test "no prompt preview is stored when store_prompt_preview=0" {
-  printf 'store_prompt_preview=0\n' > "$CLAUDE_STATUSBAR_CONFIG"
+  printf 'store_prompt_preview=0\n' > "$ASB_CONFIG"
   run_hook UserPromptSubmit
   [ "$(state_field .state)" = busy ]
   [ "$(state_field '.promptPreview // "none"')" = none ]
@@ -254,7 +254,7 @@ teardown() { common_teardown; }
   run_hook SessionEnd
   [ "$status" -eq 0 ]
   [ -z "$output" ]
-  [ -z "$(find "$CLAUDE_STATUSBAR_STATE_DIR" -name '*.json')" ]
+  [ -z "$(find "$ASB_STATE_DIR" -name '*.json')" ]
 }
 
 # --- Sessions started before the hooks were installed ----------------------
@@ -353,7 +353,7 @@ teardown() { common_teardown; }
 @test "a state change asks SwiftBar to refresh" {
   run_hook UserPromptSubmit
   wait_for_file "$STUB_CALLS/open"
-  [ "$(stub_calls open)" = "-g swiftbar://refreshplugin?name=swiftbar-claudecode-minimal" ]
+  [ "$(stub_calls open)" = "-g swiftbar://refreshplugin?name=agentic-status-bar" ]
 }
 
 @test "refresh requests are debounced to one per 500 ms" {
@@ -368,7 +368,7 @@ teardown() { common_teardown; }
 @test "a refresh is requested again after the interval" {
   run_hook UserPromptSubmit
   wait_for_file "$STUB_CALLS/open"
-  printf '1\n' > "$CLAUDE_STATUSBAR_STATE_DIR/.last-poke"
+  printf '1\n' > "$ASB_STATE_DIR/.last-poke"
   run_hook Stop
   for _ in $(seq 1 40); do
     [ "$(stub_calls open | wc -l | tr -d ' ')" -ge 2 ] && break
@@ -378,7 +378,7 @@ teardown() { common_teardown; }
 }
 
 @test "no refresh is requested when instant_refresh=0" {
-  printf 'instant_refresh=0\n' > "$CLAUDE_STATUSBAR_CONFIG"
+  printf 'instant_refresh=0\n' > "$ASB_CONFIG"
   run_hook UserPromptSubmit
   sleep 0.3
   [ -z "$(stub_calls open)" ]
@@ -411,7 +411,7 @@ teardown() { common_teardown; }
 }
 
 @test "hook works without jq" {
-  PATH="$FAKE_BIN:/usr/bin:/bin" CLAUDE_STATUSBAR_JQ=/nonexistent/jq run_hook SessionStart
+  PATH="$FAKE_BIN:/usr/bin:/bin" run_hook SessionStart
   [ "$status" -eq 0 ]
   [ -z "$output" ]
   [ "$(state_field .state)" = idle ]
@@ -429,7 +429,7 @@ teardown() { common_teardown; }
 @test "hook ignores unsafe session IDs" {
   run HOOK <<< '{"hook_event_name":"SessionStart","session_id":"../../escape"}'
   [ "$status" -eq 0 ]
-  [ -z "$(ls -A "$CLAUDE_STATUSBAR_STATE_DIR")" ]
+  [ -z "$(ls -A "$ASB_STATE_DIR")" ]
   [ ! -e "$HOME/escape.json" ]
 }
 

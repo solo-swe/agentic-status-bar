@@ -24,7 +24,7 @@ import Testing
     #expect(inspector.process(4242)?.start == 1_792_426_323)
     #expect(inspector.arguments(4242) == "claude --resume")
     #expect(inspector.process(7001)?.ppid == 4242)
-    #expect(ProcessInspectors.fromEnvironment(["CLAUDE_STATUSBAR_PS_TABLE": file.path]) is TableProcessInspector)
+    #expect(ProcessInspectors.fromEnvironment(["ASB_PS_TABLE": file.path]) is TableProcessInspector)
 }
 
 @Test func procStartParsesWithExtraSpaces() {

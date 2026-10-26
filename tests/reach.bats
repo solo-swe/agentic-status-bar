@@ -7,15 +7,15 @@ setup() {
   stub_ps
   stub_command open
   stub_command herdr
-  export CLAUDE_STATUSBAR_HERDR="$FAKE_BIN/herdr"
+  export ASB_HERDR="$FAKE_BIN/herdr"
 }
 teardown() { common_teardown; }
 
-PLUGIN() { "$REPO_ROOT/swiftbar/swiftbar-claudecode-minimal.5s.sh" "$@"; }
+PLUGIN() { "$REPO_ROOT/swiftbar/agentic-status-bar.5s.sh" "$@"; }
 
 add_state() {
   printf '%s' "$2" | jq -c --arg id "$1" --argjson now "$(( $(date +%s) * 1000 ))" \
-    '{v: 1, sessionId: $id, updatedAt: $now, cwd: "/x/\($id)"} + .' > "$CLAUDE_STATUSBAR_STATE_DIR/$1.json"
+    '{v: 1, sessionId: $id, updatedAt: $now, cwd: "/x/\($id)"} + .' > "$ASB_STATE_DIR/$1.json"
 }
 
 # row_of NAME — the session row for project NAME, without its leading ":symbol: ".
@@ -26,7 +26,7 @@ row_of() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo' | sed 's/^:[^: ]*: //
 @test "a row in a herdr pane focuses it on click" {
   add_state s1 '{"state":"idle","herdrPane":"w2:p1"}'
   run PLUGIN
-  [[ "$(row_of s1)" == *"font=Menlo size=12 bash=\"$REPO_ROOT/swiftbar/swiftbar-claudecode-minimal.5s.sh\" param1=focus param2=s1 terminal=false" ]]
+  [[ "$(row_of s1)" == *"font=Menlo size=12 bash=\"$REPO_ROOT/swiftbar/agentic-status-bar.5s.sh\" param1=focus param2=s1 terminal=false" ]]
   [[ "$output" != *"Not in herdr"* ]]
 }
 
@@ -38,7 +38,7 @@ row_of() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo' | sed 's/^:[^: ]*: //
 }
 
 @test "rows have no click action when herdr is not installed" {
-  export CLAUDE_STATUSBAR_HERDR=/nonexistent/herdr
+  export ASB_HERDR=/nonexistent/herdr
   add_state s1 '{"state":"idle","herdrPane":"w2:p1"}'
   run PLUGIN
   [[ "$(row_of s1)" == *"font=Menlo size=12" ]]
@@ -98,7 +98,7 @@ herdr_lists() {
   herdr_lists '[]'
   add_process 4242 1 claude claude "Mon Oct 19 09:12:03 2026"
   add_state s1 '{"state":"idle","pid":4242,"procStart":"Mon Oct 19 09:12:03 2026","promptPreview":"first prompt"}'
-  printf '{"pid":4242,"sessionId":"s1","name":"parser-rewrite","nameSource":"user"}' > "$CLAUDE_STATUSBAR_REGISTRY_DIR/4242.json"
+  printf '{"pid":4242,"sessionId":"s1","name":"parser-rewrite","nameSource":"user"}' > "$ASB_REGISTRY_DIR/4242.json"
   run PLUGIN
   [[ "$(row_of s1)" == "s1 — parser-rewrite "* ]]
 }
@@ -107,7 +107,7 @@ herdr_lists() {
   herdr_lists '[]'
   add_process 4242 1 claude claude "Mon Oct 19 09:12:03 2026"
   add_state s1 '{"state":"idle","pid":4242,"procStart":"Mon Oct 19 09:12:03 2026","promptPreview":"first prompt"}'
-  printf '{"pid":4242,"sessionId":"s1","name":"s1-a3","nameSource":"derived"}' > "$CLAUDE_STATUSBAR_REGISTRY_DIR/4242.json"
+  printf '{"pid":4242,"sessionId":"s1","name":"s1-a3","nameSource":"derived"}' > "$ASB_REGISTRY_DIR/4242.json"
   run PLUGIN
   [[ "$(row_of s1)" == "s1 — first prompt "* ]]
 }
@@ -191,20 +191,20 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
 @test "a parent waiting on subagents with no activity past the threshold shows ?" {
   old=$(( ($(date +%s) - 45 * 60) * 1000 ))
   printf '{"v":1,"sessionId":"s1","state":"idle","updatedAt":%s,"subagents":{"a1":{"type":"Explore","since":%s}}}' "$old" "$old" \
-    > "$CLAUDE_STATUSBAR_STATE_DIR/s1.json"
+    > "$ASB_STATE_DIR/s1.json"
   run PLUGIN
   [[ "${lines[0]}" == ":questionmark.circle: 1 | "* ]]
 }
 
 @test "the subagents icon and color follow the theme and overrides" {
-  printf 'theme=high_contrast\ncolor_subagents=#112233\n' > "$CLAUDE_STATUSBAR_CONFIG"
+  printf 'theme=high_contrast\ncolor_subagents=#112233\n' > "$ASB_CONFIG"
   add_state s1 '{"state":"idle","subagents":{"a1":{"type":"Explore","since":1}}}'
   run PLUGIN
   [[ "$(printf '%s\n' "${lines[@]}" | grep '^:hourglass.circle.fill: s1 ')" == *"sfcolor=#112233"* ]]
 }
 
 @test "subagent rows are hidden when show_subagents=0" {
-  printf 'show_subagents=0\n' > "$CLAUDE_STATUSBAR_CONFIG"
+  printf 'show_subagents=0\n' > "$ASB_CONFIG"
   add_state s1 '{"state":"busy","subagents":{"a1":{"type":"Explore","since":1}}}'
   run PLUGIN
   [ -z "$(sub_rows)" ]
@@ -214,7 +214,7 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
 
 @test "the Show section lists every filter, checked by default" {
   run PLUGIN
-  plugin="$REPO_ROOT/swiftbar/swiftbar-claudecode-minimal.5s.sh"
+  plugin="$REPO_ROOT/swiftbar/agentic-status-bar.5s.sh"
   [[ "$output" == *"Interactive | bash=\"$plugin\" param1=toggle param2=show_interactive terminal=false refresh=true checked=true"* ]]
   [[ "$output" == *"Headless (claude -p) | bash=\"$plugin\" param1=toggle param2=show_headless terminal=false refresh=true checked=true"* ]]
   [[ "$output" == *"param2=show_subagents terminal=false refresh=true checked=true"* ]]
@@ -224,26 +224,26 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
 @test "toggle flips a filter in the config file" {
   run PLUGIN toggle show_headless
   [ "$status" -eq 0 ]
-  grep -q '^show_headless=0$' "$CLAUDE_STATUSBAR_CONFIG"
+  grep -q '^show_headless=0$' "$ASB_CONFIG"
   run PLUGIN toggle show_headless
-  grep -q '^show_headless=1$' "$CLAUDE_STATUSBAR_CONFIG"
+  grep -q '^show_headless=1$' "$ASB_CONFIG"
 }
 
 @test "toggle ignores unknown keys" {
   run PLUGIN toggle stale_minutes
   [ "$status" -eq 0 ]
-  [ ! -e "$CLAUDE_STATUSBAR_CONFIG" ]
+  [ ! -e "$ASB_CONFIG" ]
 }
 
 @test "an unchecked filter is shown without a checkmark" {
-  printf 'show_ide=0\n' > "$CLAUDE_STATUSBAR_CONFIG"
+  printf 'show_ide=0\n' > "$ASB_CONFIG"
   run PLUGIN
   [[ "$output" == *"param2=show_ide terminal=false refresh=true"$'\n'* || "$output" == *"param2=show_ide terminal=false refresh=true" ]]
   [[ "$output" != *"param2=show_ide terminal=false refresh=true checked=true"* ]]
 }
 
 @test "hidden kinds are left out of rows and the menu-bar count" {
-  printf 'show_headless=0\nshow_ide=0\n' > "$CLAUDE_STATUSBAR_CONFIG"
+  printf 'show_headless=0\nshow_ide=0\n' > "$ASB_CONFIG"
   add_state cli '{"state":"busy","kind":"interactive"}'
   add_state script '{"state":"waiting","reason":"permission","kind":"headless"}'
   add_state vscode '{"state":"idle","kind":"ide"}'
@@ -257,7 +257,7 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
 }
 
 @test "sessions without a kind count as interactive" {
-  printf 'show_interactive=0\n' > "$CLAUDE_STATUSBAR_CONFIG"
+  printf 'show_interactive=0\n' > "$ASB_CONFIG"
   add_state old '{"state":"busy"}'
   run PLUGIN
   [ -z "$(row_of old)" ]
@@ -279,7 +279,7 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
 
 @test "set changes the stale threshold to an offered value" {
   run PLUGIN set stale_minutes 60
-  grep -q '^stale_minutes=60$' "$CLAUDE_STATUSBAR_CONFIG"
+  grep -q '^stale_minutes=60$' "$ASB_CONFIG"
   run PLUGIN
   [[ "$output" == *"param3=60 terminal=false refresh=true checked=true"* ]]
 }
@@ -288,16 +288,16 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
   run PLUGIN set stale_minutes 7
   run PLUGIN set icon bolt
   run PLUGIN set stale_minutes '1;touch x'
-  [ ! -e "$CLAUDE_STATUSBAR_CONFIG" ]
+  [ ! -e "$ASB_CONFIG" ]
 }
 
 @test "settings toggles flip their keys" {
   run PLUGIN toggle instant_refresh
   run PLUGIN toggle use_registry
   run PLUGIN toggle store_prompt_preview
-  grep -q '^instant_refresh=0$' "$CLAUDE_STATUSBAR_CONFIG"
-  grep -q '^use_registry=0$' "$CLAUDE_STATUSBAR_CONFIG"
-  grep -q '^store_prompt_preview=0$' "$CLAUDE_STATUSBAR_CONFIG"
+  grep -q '^instant_refresh=0$' "$ASB_CONFIG"
+  grep -q '^use_registry=0$' "$ASB_CONFIG"
+  grep -q '^store_prompt_preview=0$' "$ASB_CONFIG"
   run PLUGIN
   [[ "$output" == *"param2=use_registry terminal=false refresh=true"$'\n'* ]]
 }
@@ -305,10 +305,10 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
 @test "reveal-config creates the config with defaults and reveals it" {
   run PLUGIN reveal-config
   [ "$status" -eq 0 ]
-  grep -q '^stale_minutes=30$' "$CLAUDE_STATUSBAR_CONFIG"
-  grep -q '^theme=default$' "$CLAUDE_STATUSBAR_CONFIG"
-  grep -q '^#   color_idle=#B25000,#FFD60A$' "$CLAUDE_STATUSBAR_CONFIG"
-  [ "$(stub_calls open)" = "-R $CLAUDE_STATUSBAR_CONFIG" ]
+  grep -q '^stale_minutes=30$' "$ASB_CONFIG"
+  grep -q '^theme=default$' "$ASB_CONFIG"
+  grep -q '^#   color_idle=#B25000,#FFD60A$' "$ASB_CONFIG"
+  [ "$(stub_calls open)" = "-R $ASB_CONFIG" ]
 }
 
 # --- Themes ---------------------------------------------------------------
@@ -325,24 +325,24 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
 @test "set theme switches the menu-bar and row icons and colors" {
   add_state s1 '{"state":"idle","cwd":"/x/p"}'
   run PLUGIN set theme high_contrast
-  grep -q '^theme=high_contrast$' "$CLAUDE_STATUSBAR_CONFIG"
+  grep -q '^theme=high_contrast$' "$ASB_CONFIG"
   run PLUGIN
   [ "${lines[0]}" = ":moon.zzz.fill: 1 | sfcolor=#C93400,#FFD60A color=#C93400,#FFD60A" ]
   [[ "$output" == *":moon.zzz.fill: p "*"sfcolor=#C93400,#FFD60A"* ]]
   [[ "$output" == *"param3=high_contrast terminal=false refresh=true checked=true"* ]]
   run PLUGIN set theme fancy
-  grep -q '^theme=high_contrast$' "$CLAUDE_STATUSBAR_CONFIG"
+  grep -q '^theme=high_contrast$' "$ASB_CONFIG"
 }
 
 @test "an unknown theme in the config falls back to the default" {
-  printf 'theme=nope\n' > "$CLAUDE_STATUSBAR_CONFIG"
+  printf 'theme=nope\n' > "$ASB_CONFIG"
   add_state s1 '{"state":"idle"}'
   run PLUGIN
   [ "${lines[0]}" = ":zzz: 1 | sfcolor=#B25000,#FFD60A color=#B25000,#FFD60A" ]
 }
 
 @test "per-state icon and color overrides win over the theme" {
-  printf 'theme=monochrome\nicon_idle=moon.zzz\ncolor_idle=#112233,#445566\n' > "$CLAUDE_STATUSBAR_CONFIG"
+  printf 'theme=monochrome\nicon_idle=moon.zzz\ncolor_idle=#112233,#445566\n' > "$ASB_CONFIG"
   add_state s1 '{"state":"idle","cwd":"/x/p"}'
   run PLUGIN
   [ "${lines[0]}" = ":moon.zzz: 1 | sfcolor=#112233,#445566 color=#112233,#445566" ]
@@ -352,7 +352,7 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
 # --- Start at login -------------------------------------------------------
 
 @test "Start SwiftBar at login adds and removes a login item" {
-  item="$HOME/Library/LaunchAgents/swiftbar-claudecode-minimal.start-swiftbar.plist"
+  item="$HOME/Library/LaunchAgents/agentic-status-bar.start-swiftbar.plist"
   run PLUGIN
   [[ "$output" == *"--Start SwiftBar at login | bash=\""*"param1=login terminal=false refresh=true"$'\n'* ]]
   run PLUGIN login
@@ -368,9 +368,9 @@ sub_rows() { printf '%s\n' "${lines[@]}" | grep '↳ subagent'; }
 }
 
 @test "reveal-config keeps an existing config" {
-  printf 'icon=bolt\n' > "$CLAUDE_STATUSBAR_CONFIG"
+  printf 'icon=bolt\n' > "$ASB_CONFIG"
   run PLUGIN reveal-config
-  [ "$(cat "$CLAUDE_STATUSBAR_CONFIG")" = "icon=bolt" ]
+  [ "$(cat "$ASB_CONFIG")" = "icon=bolt" ]
 }
 
 @test "focus ignores unsafe pane and bundle values" {

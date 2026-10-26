@@ -44,7 +44,7 @@ private func tempDir() throws -> String {
     var opened: [String] = []
     Refresh.poke(stateDir: dir, started: 10_000) { opened.append($0) }
     Refresh.poke(stateDir: dir, started: 10_200) { opened.append($0) }
-    #expect(opened == ["swiftbar://refreshplugin?name=swiftbar-claudecode-minimal"])
+    #expect(opened == ["swiftbar://refreshplugin?name=agentic-status-bar"])
     Refresh.poke(stateDir: dir, started: 10_500) { opened.append($0) }
     #expect(opened.count == 2)
     #expect(try String(contentsOfFile: dir + "/.last-poke", encoding: .utf8) == "10500\n")

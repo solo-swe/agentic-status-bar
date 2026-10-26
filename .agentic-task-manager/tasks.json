@@ -2845,7 +2845,7 @@
       "description": "Port install.sh and uninstall.sh to `asb install` / `asb uninstall [--purge]`: copy the running asb to ~/Library/Application Support/agentic-status-bar/bin/asb; back up ~/.claude/settings.json (CLAUDE_STATUSBAR_SETTINGS overrides) and add one async hook per event (SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Notification, Stop, SubagentStart, SubagentStop, SessionEnd) running \"'<stable path>' hook # agentic-status-bar\", keeping all other hooks and key order; remove entries carrying the old '# swiftbar-claudecode-minimal' marker; refuse an invalid settings file; link the SwiftBar plugin while it exists (CLAUDE_STATUSBAR_SWIFTBAR_DIR or SwiftBar's PluginDirectory). Uninstall removes our hooks (and empty groups), the stable copy, the SwiftBar link and the login item; --purge also state and config, otherwise ask on a TTY. Idempotent. Port tests/install.bats to Swift tests on temp homes.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-074"
       ],
@@ -2855,11 +2855,22 @@
         "Tests/ASBCoreTests/InstallTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T01:06:08Z",
+      "updated_at": "2026-10-26T01:12:17Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T01:06:08Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "fad8c8c0ea7302655d751a8553d1420b7e668168",
+      "completed_at": "2026-10-26T01:12:17Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T01:12:17Z",
+          "kind": "outcome",
+          "text": "asb install/uninstall [--purge]: order-preserving JSON for settings.json, HookSettings (add 9 async hooks, replace old shell entries, exact uninstall), Installer (stable copy under ~/Library/Application Support/agentic-status-bar/bin, backup, SwiftBar link, login item, purge/ask); install.bats ported; smoke-tested on a scratch HOME, not run on the real setup",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-076",
@@ -2873,7 +2884,7 @@
       "description": "Apply the renames from doc/design/future-architecture.md 'Renames': state dir ~/.claude/agentic-status-bar/, config ~/.config/agentic-status-bar/config, environment overrides ASB_STATE_DIR, ASB_CONFIG, ASB_REGISTRY_DIR, ASB_HERDR, ASB_SETTINGS, ASB_SWIFTBAR_DIR, ASB_PARENT_PID, ASB_BIN (replacing CLAUDE_STATUSBAR_*), login item label agentic-status-bar.start-swiftbar, refresh URL name of the renamed plugin file (agentic-status-bar.5s.sh), display name 'Agentic Status Bar'. `asb install` moves an existing old state dir's mutes and config to the new paths, removes the old login item and old SwiftBar link. Update tests and helpers to the new names.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-075"
       ],
@@ -2884,9 +2895,11 @@
         "tests/test_helper.bash"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:23Z",
+      "updated_at": "2026-10-26T01:12:18Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T01:12:18Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-077",

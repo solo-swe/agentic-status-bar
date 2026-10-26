@@ -185,7 +185,7 @@ public struct Actions {
     public static func defaultConfig(_ c: Config) -> String {
         func flag(_ on: Bool) -> String { on ? "1" : "0" }
         var text = """
-            # Minimalist Claude Code Statusbar settings (key=value). The SwiftBar menu edits this file too.
+            # Agentic Status Bar settings (key=value). The menu edits this file too.
             show_interactive=\(flag(c.showInteractive))
             show_headless=\(flag(c.showHeadless))
             show_subagents=\(flag(c.showSubagents))
@@ -234,7 +234,7 @@ public struct Actions {
         try? Self.loginItem.write(toFile: file, atomically: true, encoding: .utf8)
     }
 
-    static let loginItemLabel = "swiftbar-claudecode-minimal.start-swiftbar"
+    static let loginItemLabel = Paths.loginItemLabel
     static let loginItem = """
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

@@ -15,12 +15,12 @@ public struct HookMetadata: Equatable, Sendable {
     public static let maxDepth = 6
 
     /// Gathers the details from the environment and the process table. The walk starts at
-    /// `CLAUDE_STATUSBAR_PARENT_PID` (tests) or the hook's parent.
+    /// `ASB_PARENT_PID` (tests) or the hook's parent.
     public static func gather(
         environment: [String: String], parentPid: Int32, inspector: any ProcessInspector,
         timeZone: TimeZone = .current
     ) -> HookMetadata {
-        let start = environment["CLAUDE_STATUSBAR_PARENT_PID"].flatMap { Int32($0) } ?? parentPid
+        let start = environment["ASB_PARENT_PID"].flatMap { Int32($0) } ?? parentPid
         let pid = findClaude(from: start, inspector: inspector)
         let process = pid.flatMap { inspector.process($0) }
         func nonEmpty(_ key: String) -> String? {

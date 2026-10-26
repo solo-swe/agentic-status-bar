@@ -28,9 +28,9 @@ public struct Paths: Sendable, Equatable {
         let home = home ?? env("HOME") ?? NSHomeDirectory()
         return Paths(
             home: home,
-            configFile: env("CLAUDE_STATUSBAR_CONFIG") ?? "\(home)/.config/swiftbar-claudecode-minimal/config",
-            stateDirOverride: env("CLAUDE_STATUSBAR_STATE_DIR"),
-            registryDir: env("CLAUDE_STATUSBAR_REGISTRY_DIR") ?? "\(home)/.claude/sessions"
+            configFile: env("ASB_CONFIG") ?? "\(home)/.config/agentic-status-bar/config",
+            stateDirOverride: env("ASB_STATE_DIR"),
+            registryDir: env("ASB_REGISTRY_DIR") ?? "\(home)/.claude/sessions"
         )
     }
 
@@ -38,10 +38,17 @@ public struct Paths: Sendable, Equatable {
     public var stableBinary: String { "\(home)/Library/Application Support/agentic-status-bar/bin/asb" }
 
     /// The login item that "Start SwiftBar at login" adds.
-    public var loginItemFile: String { "\(home)/Library/LaunchAgents/swiftbar-claudecode-minimal.start-swiftbar.plist" }
+    public var loginItemFile: String { "\(home)/Library/LaunchAgents/\(Self.loginItemLabel).plist" }
+    public static let loginItemLabel = "agentic-status-bar.start-swiftbar"
 
     /// The default state dir, used when neither the environment nor the config sets one.
-    public var defaultStateDir: String { "\(home)/.claude/swiftbar-claudecode-minimal" }
+    public var defaultStateDir: String { "\(home)/.claude/agentic-status-bar" }
+
+    /// Where the SwiftBar plugin (Minimalist Claude Code Statusbar) kept things before the rename;
+    /// `asb install` moves them.
+    public var oldStateDir: String { "\(home)/.claude/swiftbar-claudecode-minimal" }
+    public var oldConfigFile: String { "\(home)/.config/swiftbar-claudecode-minimal/config" }
+    public var oldLoginItemFile: String { "\(home)/Library/LaunchAgents/swiftbar-claudecode-minimal.start-swiftbar.plist" }
 
     /// Expands a leading `~` to the home directory.
     public func expandingHome(_ path: String) -> String {

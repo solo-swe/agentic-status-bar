@@ -32,7 +32,7 @@ public struct FakeProcessInspector: ProcessInspector {
 }
 
 /// A process table read from a file, one process per line: `pid|ppid|comm|args|lstart` (the bats test
-/// helper's fake `ps` table). Used when `CLAUDE_STATUSBAR_PS_TABLE` is set, for tests.
+/// helper's fake `ps` table). Used when `ASB_PS_TABLE` is set, for tests.
 public struct TableProcessInspector: ProcessInspector {
     public var records: [ProcessRecord]
 
@@ -52,9 +52,9 @@ public struct TableProcessInspector: ProcessInspector {
 }
 
 public enum ProcessInspectors {
-    /// The fake table when `CLAUDE_STATUSBAR_PS_TABLE` is set (tests), else the system's.
+    /// The fake table when `ASB_PS_TABLE` is set (tests), else the system's.
     public static func fromEnvironment(_ environment: [String: String]) -> any ProcessInspector {
-        if let table = environment["CLAUDE_STATUSBAR_PS_TABLE"], !table.isEmpty {
+        if let table = environment["ASB_PS_TABLE"], !table.isEmpty {
             return TableProcessInspector(path: table)
         }
         #if os(macOS)

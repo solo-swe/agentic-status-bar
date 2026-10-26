@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# <xbar.title>Minimalist Claude Code Statusbar</xbar.title>
+# <xbar.title>Agentic Status Bar</xbar.title>
 # <xbar.version>v1.0.0-rc.1</xbar.version>
 # <xbar.author>Hakan Serce</xbar.author>
 # <xbar.desc>Shows in one menu-bar item whether any running Claude Code agent needs you.</xbar.desc>
@@ -31,7 +31,7 @@ repo="${plugin_path%/*}/.."
 
 # asb: the override (tests), the installed copy, or a build in this repo.
 asb=""
-for candidate in "${CLAUDE_STATUSBAR_ASB:-}" \
+for candidate in "${ASB_BIN:-}" \
   "$HOME/Library/Application Support/agentic-status-bar/bin/asb" \
   "$repo/.build/release/asb" "$repo/.build/debug/asb"; do
   if [ -n "$candidate" ] && [ -x "$candidate" ]; then
@@ -44,7 +44,7 @@ if [ -z "$asb" ]; then
   [ "$#" -gt 0 ] && exit 0
   echo ":exclamationmark.triangle: | sfcolor=#B25000,#FFD60A"
   echo "---"
-  echo "Minimalist Claude Code Statusbar needs asb"
+  echo "Agentic Status Bar needs asb"
   echo "Build it with: swift build -c release | color=gray"
   exit 0
 fi

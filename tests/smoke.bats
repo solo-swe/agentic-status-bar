@@ -5,9 +5,9 @@ teardown() { common_teardown; }
 
 @test "HOME and state dirs are isolated in a temp dir" {
   [[ "$HOME" == "$TEST_TMP"/* ]]
-  [ -d "$CLAUDE_STATUSBAR_STATE_DIR" ]
-  [ -d "$CLAUDE_STATUSBAR_REGISTRY_DIR" ]
-  [ -d "$(dirname "$CLAUDE_STATUSBAR_CONFIG")" ]
+  [ -d "$ASB_STATE_DIR" ]
+  [ -d "$ASB_REGISTRY_DIR" ]
+  [ -d "$(dirname "$ASB_CONFIG")" ]
 }
 
 @test "stubbed commands shadow real ones and record their calls" {

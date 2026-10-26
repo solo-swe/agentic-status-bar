@@ -90,10 +90,10 @@ public enum PluginLog {
 
 /// The herdr terminal multiplexer's CLI, used for pane titles and focusing.
 public enum Herdr {
-    /// herdr's path. `CLAUDE_STATUSBAR_HERDR`, when set, is the only candidate (used by tests).
+    /// herdr's path. `ASB_HERDR`, when set, is the only candidate (used by tests).
     public static func find(environment: [String: String]) -> String? {
         let fm = FileManager.default
-        if let only = environment["CLAUDE_STATUSBAR_HERDR"] {
+        if let only = environment["ASB_HERDR"] {
             return fm.isExecutableFile(atPath: only) ? only : nil
         }
         let path = (environment["PATH"] ?? "").split(separator: ":").map { "\($0)/herdr" }

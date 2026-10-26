@@ -7,14 +7,14 @@ setup() {
   stub_ps
   add_process 5000 4242 /bin/sh "sh -c state-hook.sh" "Mon Oct 19 09:12:04 2026"
   add_process 4242 1 claude "claude" "Mon Oct 19 09:12:03 2026"
-  export CLAUDE_STATUSBAR_PARENT_PID=5000
+  export ASB_PARENT_PID=5000
   export CLAUDE_CODE_ENTRYPOINT=cli
   # Never open real URLs from tests.
   stub_command open
 }
 teardown() { common_teardown; }
 
-PLUGIN() { "$REPO_ROOT/swiftbar/swiftbar-claudecode-minimal.5s.sh" "$@"; }
+PLUGIN() { "$REPO_ROOT/swiftbar/agentic-status-bar.5s.sh" "$@"; }
 
 @test "a permission prompt turns the menu bar red with the session's row" {
   run_hook SessionStart

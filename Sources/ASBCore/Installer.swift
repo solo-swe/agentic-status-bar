@@ -19,8 +19,23 @@ public struct Installer {
     public var now: Date = Date()
     /// Progress messages for the user.
     public var log: (String) -> Void = { print($0) }
+    /// Where the SwiftBar plugin kept things before the rename to agentic-status-bar; install moves them.
+    public var old: OldPaths?
 
-    public static let pluginName = "swiftbar-claudecode-minimal.5s.sh"
+    public struct OldPaths {
+        public var stateDir: String
+        public var configFile: String
+        public var loginItemFile: String
+
+        public init(stateDir: String, configFile: String, loginItemFile: String) {
+            self.stateDir = stateDir
+            self.configFile = configFile
+            self.loginItemFile = loginItemFile
+        }
+    }
+
+    public static let pluginName = "agentic-status-bar.5s.sh"
+    public static let oldPluginName = "swiftbar-claudecode-minimal.5s.sh"
 
     public init(
         settingsFile: String, stableBinary: String, sourceBinary: String, pluginFile: String?, swiftBarDir: String?,
@@ -51,8 +66,48 @@ public struct Installer {
         settings = HookSettings.install(settings, command: HookSettings.command(asb: stableBinary))
         try writeSettings(settings)
         log("Hooks registered in \(settingsFile)")
+        migrate()
         linkPlugin()
         log("Done. New Claude Code sessions will show up in the menu bar.")
+    }
+
+    /// Moves the config, state files and mutes from the old paths, and replaces the old login item and
+    /// SwiftBar link. Anything already at the new path wins; nothing is overwritten.
+    func migrate() {
+        guard let old else { return }
+        if fm.fileExists(atPath: old.configFile), !fm.fileExists(atPath: configFile) {
+            try? fm.createDirectory(atPath: (configFile as NSString).deletingLastPathComponent, withIntermediateDirectories: true)
+            if (try? fm.moveItem(atPath: old.configFile, toPath: configFile)) != nil { log("Moved \(old.configFile) to \(configFile)") }
+            removeIfEmpty((old.configFile as NSString).deletingLastPathComponent)
+        }
+        if let names = try? fm.contentsOfDirectory(atPath: old.stateDir) {
+            try? fm.createDirectory(atPath: stateDir, withIntermediateDirectories: true)
+            for name in names where name.hasSuffix(".json") || name == Mutes.fileName || name == "plugin.log" {
+                let from = (old.stateDir as NSString).appendingPathComponent(name)
+                let to = (stateDir as NSString).appendingPathComponent(name)
+                if !fm.fileExists(atPath: to) { try? fm.moveItem(atPath: from, toPath: to) }
+            }
+            log("Moved state files from \(old.stateDir) to \(stateDir)")
+        }
+        if fm.fileExists(atPath: old.loginItemFile) {
+            try? fm.removeItem(atPath: old.loginItemFile)
+            if !fm.fileExists(atPath: loginItemFile) {
+                try? Actions.loginItem.write(toFile: loginItemFile, atomically: true, encoding: .utf8)
+            }
+            log("Replaced the login item \(old.loginItemFile) with \(loginItemFile)")
+        }
+        removeOurLink(named: Self.oldPluginName)
+    }
+
+    /// Removes a SwiftBar link of ours: one pointing at a plugin file of this project.
+    func removeOurLink(named name: String) {
+        guard let dir = swiftBarDir, !dir.isEmpty else { return }
+        let link = (dir as NSString).appendingPathComponent(name)
+        guard let target = try? fm.destinationOfSymbolicLink(atPath: link),
+              target == pluginFile || target.hasSuffix("/swiftbar/\(Self.pluginName)") || target.hasSuffix("/swiftbar/\(Self.oldPluginName)")
+        else { return }
+        try? fm.removeItem(atPath: link)
+        log("Removed \(link)")
     }
 
     func copyBinary() throws {
@@ -121,15 +176,8 @@ public struct Installer {
             try writeSettings(HookSettings.uninstall(settings))
             log("Removed the hooks from \(settingsFile)")
         }
-        if let dir = swiftBarDir, !dir.isEmpty {
-            let link = (dir as NSString).appendingPathComponent(Self.pluginName)
-            // Only our link: one pointing at a plugin file of this project.
-            if let target = try? fm.destinationOfSymbolicLink(atPath: link),
-               target == pluginFile || target.hasSuffix("/swiftbar/\(Self.pluginName)") {
-                try? fm.removeItem(atPath: link)
-                log("Removed \(link)")
-            }
-        }
+        removeOurLink(named: Self.pluginName)
+        removeOurLink(named: Self.oldPluginName)
         if fm.fileExists(atPath: loginItemFile) {
             try? fm.removeItem(atPath: loginItemFile)
             log("Removed \(loginItemFile)")

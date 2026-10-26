@@ -43,15 +43,15 @@ struct UninstallCommand: ParsableCommand {
 }
 
 enum Setup {
-    /// An installer for this machine. Overrides: CLAUDE_STATUSBAR_SETTINGS (settings file),
-    /// CLAUDE_STATUSBAR_SWIFTBAR_DIR (SwiftBar's plugin folder).
+    /// An installer for this machine. Overrides: ASB_SETTINGS (settings file),
+    /// ASB_SWIFTBAR_DIR (SwiftBar's plugin folder).
     static func installer() -> Installer {
         let env = ProcessInfo.processInfo.environment
         let paths = Paths.from(environment: env)
         let config = Config.load(paths)
         let executable = URL(fileURLWithPath: CommandLine.executablePath).resolvingSymlinksInPath().path
-        return Installer(
-            settingsFile: env["CLAUDE_STATUSBAR_SETTINGS"] ?? "\(paths.home)/.claude/settings.json",
+        var installer = Installer(
+            settingsFile: env["ASB_SETTINGS"] ?? "\(paths.home)/.claude/settings.json",
             stableBinary: paths.stableBinary,
             sourceBinary: executable,
             pluginFile: pluginFile(near: executable),
@@ -59,6 +59,8 @@ enum Setup {
             loginItemFile: paths.loginItemFile,
             stateDir: paths.stateDir(config: config),
             configFile: paths.configFile)
+        installer.old = .init(stateDir: paths.oldStateDir, configFile: paths.oldConfigFile, loginItemFile: paths.oldLoginItemFile)
+        return installer
     }
 
     /// The SwiftBar plugin file of the repo asb was built in (walking up from the binary), if any.
@@ -74,7 +76,7 @@ enum Setup {
 
     /// SwiftBar's plugin folder: the override, SwiftBar's preference, or (on a terminal) asked for.
     static func swiftBarDir(_ env: [String: String], home: String) -> String? {
-        if let dir = env["CLAUDE_STATUSBAR_SWIFTBAR_DIR"] { return dir.isEmpty ? nil : expand(dir, home: home) }
+        if let dir = env["ASB_SWIFTBAR_DIR"] { return dir.isEmpty ? nil : expand(dir, home: home) }
         if let dir = defaultsPluginDirectory(env), !dir.isEmpty { return expand(dir, home: home) }
         guard isatty(0) == 1 else { return nil }
         print("SwiftBar has no plugin folder yet. Folder to use (empty to skip): ", terminator: "")

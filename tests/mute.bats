@@ -8,17 +8,17 @@ setup() {
 }
 teardown() { common_teardown; }
 
-PLUGIN() { "$REPO_ROOT/swiftbar/swiftbar-claudecode-minimal.5s.sh" "$@"; }
+PLUGIN() { "$REPO_ROOT/swiftbar/agentic-status-bar.5s.sh" "$@"; }
 
 now_ms() { echo $(( $(date +%s) * 1000 )); }
 
 # add_state ID JSON — a state file updated just now.
 add_state() {
   printf '%s' "$2" | jq -c --arg id "$1" --argjson now "$(now_ms)" \
-    '{v: 1, sessionId: $id, updatedAt: $now} + .' > "$CLAUDE_STATUSBAR_STATE_DIR/$1.json"
+    '{v: 1, sessionId: $id, updatedAt: $now} + .' > "$ASB_STATE_DIR/$1.json"
 }
 
-mutes() { cat "$CLAUDE_STATUSBAR_STATE_DIR/mutes"; }
+mutes() { cat "$ASB_STATE_DIR/mutes"; }
 row_of() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo' | grep "^:[^: ]*: $1 "; }
 header_is() {
   [[ "${lines[0]}" == ":$2:${1:+ $1} | "* ]] || { echo "header: ${lines[0]}"; false; }
@@ -27,7 +27,7 @@ header_is() {
 @test "rows offer muting their project for an hour or for today" {
   add_state a '{"state":"idle","cwd":"/x/alpha"}'
   run PLUGIN
-  plugin="$REPO_ROOT/swiftbar/swiftbar-claudecode-minimal.5s.sh"
+  plugin="$REPO_ROOT/swiftbar/agentic-status-bar.5s.sh"
   [[ "$output" == *"--Mute project for 1 hour | bash=\"$plugin\" param1=mute-hour param2=a terminal=false refresh=true"* ]]
   [[ "$output" == *"--Mute project for today | bash=\"$plugin\" param1=mute-today param2=a terminal=false refresh=true"* ]]
   [[ "$output" != *"Unmute"* ]]
@@ -144,7 +144,7 @@ header_is() {
 @test "expired mutes are ignored and dropped on the next change" {
   add_state a '{"state":"idle","cwd":"/x/alpha"}'
   add_state b '{"state":"idle","cwd":"/x/beta"}'
-  printf '{"/x/alpha":{"until":1000,"at":500,"today":false}}' > "$CLAUDE_STATUSBAR_STATE_DIR/mutes"
+  printf '{"/x/alpha":{"until":1000,"at":500,"today":false}}' > "$ASB_STATE_DIR/mutes"
   run PLUGIN
   header_is 2 zzz
   run PLUGIN mute-hour b
@@ -153,7 +153,7 @@ header_is() {
 
 @test "a corrupt mutes file is ignored and replaced on the next change" {
   add_state a '{"state":"idle","cwd":"/x/alpha"}'
-  printf 'garbage' > "$CLAUDE_STATUSBAR_STATE_DIR/mutes"
+  printf 'garbage' > "$ASB_STATE_DIR/mutes"
   run PLUGIN
   [ "$status" -eq 0 ]
   header_is 1 zzz
@@ -166,5 +166,5 @@ header_is() {
   [ "$status" -eq 0 ]
   run PLUGIN mute-today nosuch
   [ "$status" -eq 0 ]
-  [ ! -s "$CLAUDE_STATUSBAR_STATE_DIR/mutes" ] || [ "$(mutes)" = "{}" ]
+  [ ! -s "$ASB_STATE_DIR/mutes" ] || [ "$(mutes)" = "{}" ]
 }

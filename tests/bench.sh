@@ -14,15 +14,15 @@ HOOK_TARGET_MS=10
 SNAPSHOT_RUNS=20
 SNAPSHOT_TARGET_MS=30
 
-tmp="$(mktemp -d "${TMPDIR:-/tmp}/swiftbar-claudecode-minimal-bench.XXXXXX")" || exit 1
+tmp="$(mktemp -d "${TMPDIR:-/tmp}/agentic-status-bar-bench.XXXXXX")" || exit 1
 trap 'rm -rf "$tmp"' EXIT
 
 export HOME="$tmp/home"
-export CLAUDE_STATUSBAR_STATE_DIR="$HOME/.claude/swiftbar-claudecode-minimal"
-export CLAUDE_STATUSBAR_CONFIG="$HOME/.config/swiftbar-claudecode-minimal/config"
-export CLAUDE_STATUSBAR_REGISTRY_DIR="$HOME/.claude/sessions"
-export CLAUDE_STATUSBAR_HERDR="$tmp/no-herdr"
-mkdir -p "$CLAUDE_STATUSBAR_STATE_DIR" "$CLAUDE_STATUSBAR_REGISTRY_DIR" "$tmp/bin"
+export ASB_STATE_DIR="$HOME/.claude/agentic-status-bar"
+export ASB_CONFIG="$HOME/.config/agentic-status-bar/config"
+export ASB_REGISTRY_DIR="$HOME/.claude/sessions"
+export ASB_HERDR="$tmp/no-herdr"
+mkdir -p "$ASB_STATE_DIR" "$ASB_REGISTRY_DIR" "$tmp/bin"
 # The hook pokes SwiftBar; don't, while benchmarking.
 printf '#!/bin/sh\nexit 0\n' > "$tmp/bin/open"
 chmod +x "$tmp/bin/open"
@@ -48,10 +48,10 @@ for i in 0 1 2 3 4 5 6 7 8 9; do
   done
   printf '{"v":1,"sessionId":"bench-%s","state":"%s","reason":"permission","cwd":"/Users/alex/code/project-%s","kind":"interactive","pid":%s,"procStart":"%s","transcriptPath":"%s","promptPreview":"Refactor module %s","updatedAt":%s,"stateSince":%s,"subagents":{"a%s":{"type":"Explore","since":%s}}}\n' \
     "$i" "$state" "$i" "$pid" "$lstart" "$transcript" "$i" "$now" "$now" "$i" "$now" \
-    > "$CLAUDE_STATUSBAR_STATE_DIR/bench-$i.json"
+    > "$ASB_STATE_DIR/bench-$i.json"
 done
 printf '{"pid":%s,"sessionId":"bench-0","status":"waiting","waitingFor":"permission prompt","statusUpdatedAt":%s}\n' \
-  "$pid" "$now" > "$CLAUDE_STATUSBAR_REGISTRY_DIR/$pid.json"
+  "$pid" "$now" > "$ASB_REGISTRY_DIR/$pid.json"
 
 # time_runs N SHELL_COMMAND — prints one duration in ms per run, timed inside a
 # single perl process so the timer's own startup isn't counted.
@@ -83,10 +83,10 @@ if ! swift build -c release --product asb >"$tmp/build.log" 2>&1; then
   exit 1
 fi
 asb="$repo/.build/release/asb"
-export CLAUDE_STATUSBAR_ASB="$asb"
+export ASB_BIN="$asb"
 
 status=0
-time_runs "$PLUGIN_RUNS" "'$repo/swiftbar/swiftbar-claudecode-minimal.5s.sh'" | report plugin "$PLUGIN_TARGET_MS" || status=1
+time_runs "$PLUGIN_RUNS" "'$repo/swiftbar/agentic-status-bar.5s.sh'" | report plugin "$PLUGIN_TARGET_MS" || status=1
 # The hook gets a real Claude-style payload; its state file is the 11th session.
 time_runs "$HOOK_RUNS" "'$asb' hook < '$repo/tests/fixtures/payloads/PreToolUse.json'" \
   | report hook "$HOOK_TARGET_MS" || status=1

@@ -114,10 +114,14 @@ private struct Home {
     var settings: String { root.appendingPathComponent(".claude/settings.json").path }
     var stable: String { root.appendingPathComponent("Library/Application Support/agentic-status-bar/bin/asb").path }
     var source: String { root.appendingPathComponent("build/asb").path }
-    var plugin: String { root.appendingPathComponent("repo/swiftbar/swiftbar-claudecode-minimal.5s.sh").path }
+    var plugin: String { root.appendingPathComponent("repo/swiftbar/agentic-status-bar.5s.sh").path }
     var swiftBar: String { root.appendingPathComponent("swiftbar-plugins").path }
-    var link: String { swiftBar + "/swiftbar-claudecode-minimal.5s.sh" }
-    var login: String { root.appendingPathComponent("Library/LaunchAgents/swiftbar-claudecode-minimal.start-swiftbar.plist").path }
+    var link: String { swiftBar + "/agentic-status-bar.5s.sh" }
+    var oldLink: String { swiftBar + "/swiftbar-claudecode-minimal.5s.sh" }
+    var login: String { root.appendingPathComponent("Library/LaunchAgents/agentic-status-bar.start-swiftbar.plist").path }
+    var oldLogin: String { root.appendingPathComponent("Library/LaunchAgents/swiftbar-claudecode-minimal.start-swiftbar.plist").path }
+    var oldState: String { root.appendingPathComponent(".claude/swiftbar-claudecode-minimal").path }
+    var oldConfig: String { root.appendingPathComponent(".config/swiftbar-claudecode-minimal/config").path }
     var state: String { root.appendingPathComponent(".claude/agentic-status-bar").path }
     var config: String { root.appendingPathComponent(".config/agentic-status-bar/config").path }
 
@@ -138,6 +142,7 @@ private struct Home {
                           stateDir: state, configFile: config)
         i.now = now
         i.log = { _ in }
+        i.old = .init(stateDir: oldState, configFile: oldConfig, loginItemFile: oldLogin)
         return i
     }
 
@@ -228,6 +233,55 @@ private struct Home {
     #expect(FileManager.default.fileExists(atPath: home.config) && FileManager.default.fileExists(atPath: home.state + "/s1.json"))
     try home.installer().uninstall(purge: false, confirmPurge: { true })
     #expect(!FileManager.default.fileExists(atPath: home.config) && !FileManager.default.fileExists(atPath: home.state))
+}
+
+@Test func installMovesTheOldStateConfigLoginItemAndLink() throws {
+    let home = try Home()
+    let fm = FileManager.default
+    try fm.createDirectory(atPath: home.oldState, withIntermediateDirectories: true)
+    try fm.createDirectory(atPath: (home.oldConfig as NSString).deletingLastPathComponent, withIntermediateDirectories: true)
+    try fm.createDirectory(atPath: (home.oldLogin as NSString).deletingLastPathComponent, withIntermediateDirectories: true)
+    try fm.createDirectory(atPath: home.swiftBar, withIntermediateDirectories: true)
+    try Data(#"{"v":1,"sessionId":"s1"}"#.utf8).write(to: URL(fileURLWithPath: home.oldState + "/s1.json"))
+    try Data("{}".utf8).write(to: URL(fileURLWithPath: home.oldState + "/mutes"))
+    try Data("x".utf8).write(to: URL(fileURLWithPath: home.oldState + "/s1.json.tmp.1"))
+    try Data("theme=monochrome\n".utf8).write(to: URL(fileURLWithPath: home.oldConfig))
+    try Data("x".utf8).write(to: URL(fileURLWithPath: home.oldLogin))
+    try fm.createSymbolicLink(atPath: home.oldLink, withDestinationPath: "/old/repo/swiftbar/swiftbar-claudecode-minimal.5s.sh")
+
+    try home.installer().install()
+    #expect(fm.fileExists(atPath: home.state + "/s1.json") && fm.fileExists(atPath: home.state + "/mutes"))
+    #expect(!fm.fileExists(atPath: home.state + "/s1.json.tmp.1"))
+    #expect(try String(contentsOfFile: home.config, encoding: .utf8) == "theme=monochrome\n")
+    #expect(!fm.fileExists(atPath: home.oldConfig))
+    #expect(!fm.fileExists(atPath: home.oldLogin))
+    #expect(NSDictionary(contentsOfFile: home.login)?["Label"] as? String == "agentic-status-bar.start-swiftbar")
+    #expect((try? fm.destinationOfSymbolicLink(atPath: home.oldLink)) == nil)
+    #expect(try fm.destinationOfSymbolicLink(atPath: home.link) == home.plugin)
+}
+
+@Test func migrationNeverOverwritesNewFiles() throws {
+    let home = try Home()
+    let fm = FileManager.default
+    try fm.createDirectory(atPath: home.oldState, withIntermediateDirectories: true)
+    try fm.createDirectory(atPath: home.state, withIntermediateDirectories: true)
+    try fm.createDirectory(atPath: (home.oldConfig as NSString).deletingLastPathComponent, withIntermediateDirectories: true)
+    try fm.createDirectory(atPath: (home.config as NSString).deletingLastPathComponent, withIntermediateDirectories: true)
+    try Data("old".utf8).write(to: URL(fileURLWithPath: home.oldState + "/s1.json"))
+    try Data("new".utf8).write(to: URL(fileURLWithPath: home.state + "/s1.json"))
+    try Data("theme=monochrome\n".utf8).write(to: URL(fileURLWithPath: home.oldConfig))
+    try Data("theme=default\n".utf8).write(to: URL(fileURLWithPath: home.config))
+    try home.installer().install()
+    #expect(try String(contentsOfFile: home.state + "/s1.json", encoding: .utf8) == "new")
+    #expect(try String(contentsOfFile: home.config, encoding: .utf8) == "theme=default\n")
+}
+
+@Test func uninstallAlsoRemovesTheOldLink() throws {
+    let home = try Home()
+    try FileManager.default.createDirectory(atPath: home.swiftBar, withIntermediateDirectories: true)
+    try FileManager.default.createSymbolicLink(atPath: home.oldLink, withDestinationPath: "/old/repo/swiftbar/swiftbar-claudecode-minimal.5s.sh")
+    try home.installer().uninstall(purge: false)
+    #expect((try? FileManager.default.destinationOfSymbolicLink(atPath: home.oldLink)) == nil)
 }
 
 @Test func uninstallTwiceIsHarmless() throws {

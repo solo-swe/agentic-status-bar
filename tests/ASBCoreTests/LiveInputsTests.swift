@@ -38,8 +38,8 @@ private func tempDir() throws -> URL {
     let config = home.appendingPathComponent("config").path
     try Data("use_registry=0\n".utf8).write(to: URL(fileURLWithPath: config))
 
-    let env = ["CLAUDE_STATUSBAR_STATE_DIR": state.path, "CLAUDE_STATUSBAR_CONFIG": config,
-               "CLAUDE_STATUSBAR_HERDR": home.appendingPathComponent("no-herdr").path]
+    let env = ["ASB_STATE_DIR": state.path, "ASB_CONFIG": config,
+               "ASB_HERDR": home.appendingPathComponent("no-herdr").path]
     let live = LiveInputs(paths: Paths.from(environment: env, home: home.path), environment: env,
                           inspector: FakeProcessInspector([ProcessRecord(pid: 7, ppid: 1, start: 1, comm: "x")]))
     let inputs = live.gather(now: 1000)
@@ -60,7 +60,7 @@ private func tempDir() throws -> URL {
     try Data("{}".utf8).write(to: URL(fileURLWithPath: outside))
     defer { try? FileManager.default.removeItem(atPath: outside) }
 
-    let env = ["CLAUDE_STATUSBAR_STATE_DIR": dir.path]
+    let env = ["ASB_STATE_DIR": dir.path]
     let live = LiveInputs(paths: Paths.from(environment: env, home: dir.path), environment: env, inspector: FakeProcessInspector())
     let result = SnapshotResult(snapshot: Snapshot(generatedAt: 0, header: .init(state: .none, symbol: "", color: "")),
                                 deadFiles: [inside, outside], registrySchemaIssue: true)
@@ -73,8 +73,8 @@ private func tempDir() throws -> URL {
 }
 
 @Test func herdrIsOnlyTheOverrideWhenItIsSet() {
-    #expect(Herdr.find(environment: ["CLAUDE_STATUSBAR_HERDR": "/nonexistent/herdr"]) == nil)
-    #expect(Herdr.find(environment: ["CLAUDE_STATUSBAR_HERDR": "/bin/echo"]) == "/bin/echo")
+    #expect(Herdr.find(environment: ["ASB_HERDR": "/nonexistent/herdr"]) == nil)
+    #expect(Herdr.find(environment: ["ASB_HERDR": "/bin/echo"]) == "/bin/echo")
 }
 
 @Test func herdrRunReturnsOutputAndGivesUpOnASlowCommand() {

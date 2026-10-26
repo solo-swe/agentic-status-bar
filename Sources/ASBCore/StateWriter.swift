@@ -38,7 +38,7 @@ public enum StateWriter {
 /// Asking the front end to refresh right away after a hook changed something.
 public enum Refresh {
     /// SwiftBar refreshes a plugin when this URL is opened.
-    public static let swiftBarURL = "swiftbar://refreshplugin?name=swiftbar-claudecode-minimal"
+    public static let swiftBarURL = "swiftbar://refreshplugin?name=agentic-status-bar"
     /// At most one refresh request per this many milliseconds.
     public static let intervalMs: Int64 = 500
     public static let stampName = ".last-poke"

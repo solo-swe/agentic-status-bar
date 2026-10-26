@@ -22,7 +22,7 @@ private let tree = FakeProcessInspector([
 }
 
 @Test func theWalkCanStartFromTheTestOverride() {
-    let m = HookMetadata.gather(environment: ["CLAUDE_STATUSBAR_PARENT_PID": "5001"], parentPid: 1, inspector: tree, timeZone: la)
+    let m = HookMetadata.gather(environment: ["ASB_PARENT_PID": "5001"], parentPid: 1, inspector: tree, timeZone: la)
     #expect(m.pid == 4242)
 }
 

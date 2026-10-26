@@ -32,8 +32,8 @@ private func tempFile(_ name: String = "config") -> String {
     let fromConfig = Config.parse("state_dir=~/agents")
     #expect(Paths.from(environment: [:], home: home).stateDir(config: fromConfig) == "/Users/alex/agents")
     #expect(Paths.from(environment: [:], home: home).stateDir(config: Config())
-        == "/Users/alex/.claude/swiftbar-claudecode-minimal")
-    let overridden = Paths.from(environment: ["CLAUDE_STATUSBAR_STATE_DIR": "/elsewhere"], home: home)
+        == "/Users/alex/.claude/agentic-status-bar")
+    let overridden = Paths.from(environment: ["ASB_STATE_DIR": "/elsewhere"], home: home)
     #expect(overridden.stateDir(config: fromConfig) == "/elsewhere")
 }
 
@@ -46,10 +46,12 @@ private func tempFile(_ name: String = "config") -> String {
 
 @Test func pathsDefaultsAndOverrides() {
     let paths = Paths.from(environment: [:], home: "/Users/alex")
-    #expect(paths.configFile == "/Users/alex/.config/swiftbar-claudecode-minimal/config")
+    #expect(paths.configFile == "/Users/alex/.config/agentic-status-bar/config")
+    #expect(paths.loginItemFile == "/Users/alex/Library/LaunchAgents/agentic-status-bar.start-swiftbar.plist")
+    #expect(paths.oldStateDir == "/Users/alex/.claude/swiftbar-claudecode-minimal")
     #expect(paths.registryDir == "/Users/alex/.claude/sessions")
     let custom = Paths.from(
-        environment: ["CLAUDE_STATUSBAR_CONFIG": "/tmp/c", "CLAUDE_STATUSBAR_REGISTRY_DIR": "/tmp/r"], home: "/h")
+        environment: ["ASB_CONFIG": "/tmp/c", "ASB_REGISTRY_DIR": "/tmp/r"], home: "/h")
     #expect(custom.configFile == "/tmp/c")
     #expect(custom.registryDir == "/tmp/r")
 }
