@@ -1,8 +1,8 @@
-# Minimalist Claude Code Statusbar
+# Agentic Status Bar
 
-A minimal [SwiftBar](https://github.com/swiftbar/SwiftBar) plugin that shows, in one menu-bar item, whether any running [Claude Code](https://claude.com/claude-code) agent needs you.
+Shows, in one menu-bar item, whether any running [Claude Code](https://claude.com/claude-code) agent needs you. Today it runs as a [SwiftBar](https://github.com/swiftbar/SwiftBar) plugin on top of `asb`, a Swift command-line tool; a standalone macOS app is in progress (see [the design](doc/design/future-architecture.md)).
 
-> **Status: release candidate (1.0.0-rc.1).** See the [PRD](doc/PRD.md) for the full design.
+> **Status: pre-release.** See the [PRD](doc/PRD.md) for the full design.
 
 <!-- Screenshots: doc/screenshots/waiting.png, idle.png, uncertain.png, busy.png, dropdown.png -->
 
@@ -60,60 +60,51 @@ Not working on a project today? Its idle `zzz` doesn't have to sit in the menu b
 
 ## How it works
 
-1. **Claude Code hooks** (`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Notification`, `Stop`, `SessionEnd`, subagent events) write one small JSON state file per session to `~/.claude/swiftbar-claudecode-minimal/`.
-2. **The SwiftBar plugin** reads those files every 5 seconds, or right away when a hook asks SwiftBar to refresh, and corrects states the hooks can't see:
+1. **Claude Code hooks** (`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Notification`, `Stop`, `SessionEnd`, subagent events) run `asb hook`, which writes one small JSON state file per session to `~/.claude/agentic-status-bar/` ([the format](doc/state-file-schema.md)).
+2. **The SwiftBar plugin** runs `asb swiftbar` every 5 seconds, or right away when a hook asks SwiftBar to refresh. It reads those files and corrects states the hooks can't see:
    - removes sessions whose process has exited,
    - shows sessions as idle after Esc or a denied permission,
    - shows sessions running an approved long tool as busy, not waiting,
    - uses Claude Code's own session registry when it is present and newer,
    - marks anything else that has gone quiet for too long as `?` rather than guessing.
 
-Everything stays on your machine. Hooks run async and always exit 0, so they can't slow down or break Claude Code.
+Everything stays on your machine. Hooks run async and always exit 0, so they can't slow down or break Claude Code; `asb hook` takes about 9 ms.
 
 ## Requirements
 
-- macOS 15 or later (ships `/usr/bin/jq`; on older macOS, `brew install jq`)
+- macOS 14 or later
+- Xcode 16 or later (to build `asb`)
 - [SwiftBar](https://github.com/swiftbar/SwiftBar) 2.x
 - Claude Code with hooks support
 - Optional: [herdr](https://herdr.dev) for jumping to the exact pane
 
 ## Install
 
-Clone the repo somewhere permanent; SwiftBar runs the plugin from it:
+Clone the repo and build `asb`:
 
 ```sh
-git clone https://github.com/hakanserce/swiftbar-claudecode-minimal.git ~/code/swiftbar-claudecode-minimal
-cd ~/code/swiftbar-claudecode-minimal
+git clone https://github.com/hakanserce/swiftbar-claudecode-minimal.git ~/code/agentic-status-bar
+cd ~/code/agentic-status-bar
+swift build -c release
+.build/release/asb install
 ```
 
-Then pick one way to register the hooks.
+`asb install`:
 
-**Option A: install script.** Adds the hooks to `~/.claude/settings.json` (after backing it up) and links the plugin into SwiftBar's plugin folder:
+- copies `asb` to `~/Library/Application Support/agentic-status-bar/bin/asb`, so moving or deleting the repo later doesn't break the hooks;
+- adds the hooks to `~/.claude/settings.json`, after backing it up, leaving your other settings and hooks exactly as they are;
+- links the plugin into SwiftBar's plugin folder;
+- moves state and config from the older SwiftBar plugin (Minimalist Claude Code Statusbar) and replaces its hooks.
 
-```sh
-./install.sh
-```
+Running it again changes nothing. Hooks load when a session starts, so restart running Claude Code sessions, or wait for their next event (sessions that were already running fill in their details then).
 
-Your existing hooks are left exactly as they are. Running it again adds nothing. To remove it, run `./uninstall.sh`; it removes only what `install.sh` added and asks before deleting state files and config (`--purge` skips the question).
+To remove everything it added, run `asb uninstall`. It asks before deleting state files and config (`--purge` deletes them without asking).
 
-**Option B: Claude Code plugin.** Registers the hooks without editing `settings.json`. Inside Claude Code:
-
-```
-/plugin marketplace add ~/code/swiftbar-claudecode-minimal
-/plugin install swiftbar-claudecode-minimal@swiftbar-claudecode-minimal
-```
-
-Then link the SwiftBar plugin yourself:
-
-```sh
-ln -s "$PWD/swiftbar/swiftbar-claudecode-minimal.5s.sh" "$(defaults read com.ameba.SwiftBar PluginDirectory)/"
-```
-
-Hooks load when a session starts, so restart running Claude Code sessions to see them in the menu bar.
+There is no Claude Code plugin package any more: the hooks run the installed `asb`, so `asb install` is the one way in.
 
 ## Configuration
 
-Settings live in `~/.config/swiftbar-claudecode-minimal/config` (`key=value`). The dropdown's **Show** and **Settings** items change them for you, and **Settings… → Reveal config file** opens it.
+Settings live in `~/.config/agentic-status-bar/config` (`key=value`). The dropdown's **Show** and **Settings** items change them for you, and **Settings… → Reveal config file** opens it.
 
 | Key                                                               | Default                                 | Meaning                                                                  |
 | ----------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------ |
@@ -125,7 +116,7 @@ Settings live in `~/.config/swiftbar-claudecode-minimal/config` (`key=value`). T
 | `icon_<state>`, `color_<state>`                                   | from the theme                          | Override one state's SF Symbol name, and its `#RRGGBB` color or `light,dark` pair. States: `waiting`, `idle`, `uncertain`, `busy`, `subagents`, `muted`, `none`, `warning` |
 | `icon`                                                            | from the theme                          | Older shortcut: SF Symbol for both the busy and empty icon               |
 | `store_prompt_preview`                                            | `1`                                     | Keep an 80-character prompt preview for row titles                       |
-| `state_dir`                                                       | `~/.claude/swiftbar-claudecode-minimal` | Where hooks write state files                                            |
+| `state_dir`                                                       | `~/.claude/agentic-status-bar`          | Where hooks write state files                                            |
 
 For example, to show idle sessions as a blue moon:
 
@@ -134,27 +125,26 @@ icon_idle=moon.zzz
 color_idle=#0040DD,#64D2FF
 ```
 
-**Settings… → Start SwiftBar at login** adds a login item (`~/Library/LaunchAgents/swiftbar-claudecode-minimal.start-swiftbar.plist`) that opens SwiftBar in the background when you log in; clicking it again removes it. It takes effect at your next login and doesn't touch SwiftBar's own "Launch at login" preference, so you don't need both. macOS may show a "Background item added" notice the first time.
+**Settings… → Start SwiftBar at login** adds a login item (`~/Library/LaunchAgents/agentic-status-bar.start-swiftbar.plist`) that opens SwiftBar in the background when you log in; clicking it again removes it. It takes effect at your next login and doesn't touch SwiftBar's own "Launch at login" preference, so you don't need both. macOS may show a "Background item added" notice the first time.
 
 ## Troubleshooting
 
-- **"Minimalist Claude Code Statusbar needs jq" in the menu:** install it with `brew install jq` (macOS 14 or older).
-- **A session doesn't appear:** it was started before the hooks were installed. Restart it.
-- **Warning triangle:** a state file in `~/.claude/swiftbar-claudecode-minimal/` is corrupt or from a newer version of Minimalist Claude Code Statusbar. Delete the file or update; a running session writes a fresh one on its next event.
-- **`install.sh` skipped the SwiftBar link:** SwiftBar has no plugin folder yet. Open SwiftBar once to choose one, then run `./install.sh` again.
-- **Something looks wrong:** messages are logged to `~/.claude/swiftbar-claudecode-minimal/plugin.log`, for example when Claude Code's session registry changes format.
+- **"Agentic Status Bar needs asb" in the menu:** build it with `swift build -c release` and run `.build/release/asb install`.
+- **A session doesn't appear:** it was started before the hooks were installed and hasn't had an event since. Send it a prompt, or restart it.
+- **Warning triangle:** a state file in `~/.claude/agentic-status-bar/` is corrupt or from a newer version. Delete the file or update; a running session writes a fresh one on its next event.
+- **`asb install` skipped the SwiftBar link:** SwiftBar has no plugin folder yet. Open SwiftBar once to choose one, then run `asb install` again.
+- **Something looks wrong:** messages are logged to `~/.claude/agentic-status-bar/plugin.log`, for example when Claude Code's session registry changes format. `asb snapshot --json --pretty` shows exactly what the menu is built from.
 
 ## Development
 
-See [CONTRIBUTING.md](CONTRIBUTING.md): `tests/lint.sh`, `tests/run.sh` and `tests/run.sh --bench`.
+See [CONTRIBUTING.md](CONTRIBUTING.md): `tests/swift.sh`, `tests/run.sh`, `tests/lint.sh` and `tests/run.sh --bench`.
 
 ## Roadmap
 
-1. **Core**: hooks, state files, menu bar and dropdown, dead-session cleanup
-2. **Accuracy**: registry override, interrupt and approved-tool detection, staleness, instant refresh
-3. **Reach**: herdr focus on click, session-type filters, subagent rows, Settings menu
-4. **Release**: Claude Code plugin packaging, install scripts, tests, v1.0
-5. **Later**: focus support for VS Code and other terminals
+1. **Done:** hooks, state files, menu bar and dropdown, accuracy checks, herdr focus, filters, mutes, themes
+2. **Done:** the move from shell and jq to Swift (`asb`)
+3. **In progress:** a standalone macOS app with notifications, replacing SwiftBar
+4. **Later:** atm integration, Homebrew, focus support for VS Code and other terminals
 
 ## License
 

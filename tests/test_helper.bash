@@ -20,9 +20,6 @@ common_setup() {
   export ASB_HERDR="$TEST_TMP/no-herdr"
   # The SwiftBar plugin and HOOK run the asb that tests/run.sh builds.
   export ASB_BIN="$REPO_ROOT/.build/debug/asb"
-  # The shell scripts' names, for their tests (install.bats, common.bats) until they are removed.
-  export CLAUDE_STATUSBAR_STATE_DIR="$ASB_STATE_DIR" CLAUDE_STATUSBAR_CONFIG="$ASB_CONFIG" \
-    CLAUDE_STATUSBAR_REGISTRY_DIR="$ASB_REGISTRY_DIR" CLAUDE_STATUSBAR_HERDR="$ASB_HERDR"
 
   # Fake commands go first on PATH.
   FAKE_BIN="$TEST_TMP/bin"

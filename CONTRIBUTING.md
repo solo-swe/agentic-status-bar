@@ -2,54 +2,54 @@
 
 ## Requirements
 
-- macOS 15 or later (or Homebrew `jq`)
-- `brew install bats-core shellcheck`
-- Xcode 16 or later (Swift 6) for the Swift package
+- macOS 14 or later, Xcode 16 or later (Swift 6)
+- `brew install bats-core shellcheck` for the end-to-end tests
 
 ## Checks
 
 ```sh
-tests/lint.sh          # shellcheck on every script
-tests/run.sh           # all bats tests (or: tests/run.sh tests/hook.bats)
-tests/run.sh --bench   # timing against the PRD targets (plugin < 150 ms, hook < 20 ms)
-tests/swift.sh         # build the Swift package and run its tests (or: tests/swift.sh --filter VersionTests)
+tests/swift.sh             # build the Swift package and run its tests (or: tests/swift.sh --filter ConfigTests)
+tests/swift.sh --summary   # the same, printing only failures and totals
+tests/run.sh               # build asb, then the bats end-to-end tests (or: tests/run.sh tests/hook.bats)
+tests/lint.sh              # shellcheck on the shell scripts left (the SwiftBar plugin, test scripts)
+tests/run.sh --bench       # timing: plugin < 150 ms, asb hook < 10 ms, asb snapshot < 30 ms
 ```
 
-The Swift package (`Package.swift`: `ASBCore`, the `asb` CLI, tests in `tests/ASBCoreTests`) is replacing the
-shell code; see `doc/design/future-architecture.md`.
+The Swift package (`Package.swift`): `ASBCore` (the logic, Foundation only), the `asb` CLI, and tests in
+`tests/ASBCoreTests`. The conformance cases in `tests/conformance/` pin the snapshot engine's behavior as data (see
+their README); the bats tests check `asb` end to end through the SwiftBar plugin and `asb hook`.
 
-The hook runs on every tool call and the plugin every few seconds, so both keep process
-counts low: the hook makes two jq calls per event, and a plugin refresh does all parsing,
-checks and rendering in one jq program. Check `--bench` after changing either.
+The hook runs on every tool call and the plugin every few seconds; check `--bench` after changing either.
 
-CI runs the same commands (lint and bats in one job, Swift in another). Tests run in a temporary `HOME`, so they never touch your real
-`~/.claude` or config.
+CI runs the same commands (lint and bats in one job, Swift in another). Tests run in a temporary `HOME`, so they
+never touch your real `~/.claude` or config.
 
-Verify behavior with a bats test rather than by hand. `tests/test_helper.bash` provides:
+`tests/test_helper.bash` provides:
 
 - `stub_command NAME [BODY]`: a fake command on `PATH` that records its arguments.
-- `stub_ps` and `add_process`: a fake process table for the PID walk and liveness checks.
-- `run_hook FIXTURE`: feeds `tests/fixtures/payloads/FIXTURE.json` to the hook.
+- `stub_ps` and `add_process`: a fake process table (`asb` reads it through `ASB_PS_TABLE`).
+- `run_hook FIXTURE`: feeds `tests/fixtures/payloads/FIXTURE.json` to `asb hook`.
 
 Payload fixtures and what they showed are described in `tests/fixtures/README.md`.
 
-## Trying the hooks in Claude Code
-
-Load the repo as a plugin for one session:
+## Trying it
 
 ```sh
-claude --plugin-dir .
+swift build -c release
+.build/release/asb install          # hooks + SwiftBar link (backs up ~/.claude/settings.json)
+.build/release/asb snapshot --json --pretty
 ```
 
-State files then appear in `~/.claude/swiftbar-claudecode-minimal/`, one per session. Your existing hooks keep
-running alongside.
+State files appear in `~/.claude/agentic-status-bar/`, one per session. `asb uninstall` removes everything
+`asb install` added.
 
 ## Layout
 
 | Path | What |
 | --- | --- |
-| `hooks/state-hook.sh` | The hook: one state file per session |
-| `hooks/hooks.json` | Hook registrations for the Claude Code plugin |
-| `swiftbar/swiftbar-claudecode-minimal.5s.sh` | The SwiftBar plugin |
-| `lib/common.sh` | Config, time and file helpers shared by both |
+| `Sources/ASBCore/` | State files, checks C1–C5, mutes, themes, menu model, hook events, install |
+| `Sources/asb/` | The CLI: `hook`, `snapshot`, `swiftbar`, `action`, `install`, `uninstall` |
+| `swiftbar/agentic-status-bar.5s.sh` | The SwiftBar plugin: runs `asb swiftbar` and `asb action` |
 | `doc/PRD.md` | Product requirements |
+| `doc/state-file-schema.md`, `doc/snapshot-schema.md` | The file and snapshot formats |
+| `doc/design/future-architecture.md` | Where this is going |

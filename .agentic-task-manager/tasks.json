@@ -2884,7 +2884,7 @@
       "description": "Apply the renames from doc/design/future-architecture.md 'Renames': state dir ~/.claude/agentic-status-bar/, config ~/.config/agentic-status-bar/config, environment overrides ASB_STATE_DIR, ASB_CONFIG, ASB_REGISTRY_DIR, ASB_HERDR, ASB_SETTINGS, ASB_SWIFTBAR_DIR, ASB_PARENT_PID, ASB_BIN (replacing CLAUDE_STATUSBAR_*), login item label agentic-status-bar.start-swiftbar, refresh URL name of the renamed plugin file (agentic-status-bar.5s.sh), display name 'Agentic Status Bar'. `asb install` moves an existing old state dir's mutes and config to the new paths, removes the old login item and old SwiftBar link. Update tests and helpers to the new names.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "done",
       "dependencies": [
         "T-075"
       ],
@@ -2895,7 +2895,7 @@
         "tests/test_helper.bash"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T04:25:18Z",
+      "updated_at": "2026-10-26T04:26:04Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -2903,8 +2903,18 @@
           "at": "2026-10-26T04:25:18Z",
           "kind": "failure",
           "text": "lease expired (claude:c631bc24)"
+        },
+        {
+          "at": "2026-10-26T04:26:04Z",
+          "kind": "outcome",
+          "text": "Renamed to agentic-status-bar (state/config dirs, ASB_* env, login item, plugin file agentic-status-bar.5s.sh, refresh URL, display name); asb install migrates old state/mutes/config, login item and link. Ran asb install on the real setup: hooks now run asb hook from ~/Library/Application Support/agentic-status-bar/bin (settings backed up, own hooks untouched), state and mute moved, SwiftBar relinked; live snapshot verified.",
+          "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "started_at": "2026-10-26T04:25:39Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-26T04:26:04Z",
+      "completed_by": "claude:c631bc24"
     },
     {
       "id": "T-077",
@@ -2918,7 +2928,7 @@
       "description": "Delete hooks/state-hook.sh, lib/common.sh, install.sh, uninstall.sh and the bats tests that only exercised shell internals (tests/common.bats); keep the bats tests that check the CLI end to end. Update .claude-plugin/plugin.json and hooks/hooks.json so the Claude Code plugin route runs the stable `asb hook` path (or drop that route and say so in the README). Update tests/lint.sh for the files left (the one-line SwiftBar plugin). README install becomes: build with `swift build -c release`, then `.build/release/asb install`. CI green.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-076",
         "T-070",
@@ -2937,7 +2947,7 @@
         "README.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T01:06:08Z",
+      "updated_at": "2026-10-26T04:28:18Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -2947,7 +2957,9 @@
           "text": "Before deleting the shell hook, rerun tests/run.sh --bench on a quiet machine: asb hook median must be at most 10 ms (T-074 couldn't measure it under load). If it isn't, find why (startup, config read, process walk) before removing the shell hook.",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "started_at": "2026-10-26T04:28:18Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-078",
@@ -3427,18 +3439,29 @@
       "description": "Add tests/swift.sh --summary (only failures and totals, so no pipes are needed) and allowlist read-only and repo-local commands in .claude/settings.json (.build asb, git status/mv/rm, ls, jq).",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "tests/swift.sh",
         ".claude/settings.json"
       ],
       "created_at": "2026-10-26T04:25:18Z",
-      "updated_at": "2026-10-26T04:25:18Z",
+      "updated_at": "2026-10-26T04:25:38Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T04:25:18Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "eae4f594ead6dd94905d182c88bc5f26d8b260ca",
+      "completed_at": "2026-10-26T04:25:38Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T04:25:38Z",
+          "kind": "outcome",
+          "text": "tests/swift.sh --summary filters its own output; allowlisted .build asb, git status/mv/rm, ls, jq",
+          "by": "claude:c631bc24"
+        }
+      ]
     }
   ]
 }

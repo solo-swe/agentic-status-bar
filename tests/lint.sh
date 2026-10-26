@@ -8,7 +8,7 @@ if ! command -v shellcheck >/dev/null 2>&1; then
 fi
 
 files=""
-for f in hooks/*.sh swiftbar/*.sh lib/*.sh install.sh uninstall.sh tests/*.sh; do
+for f in swiftbar/*.sh tests/*.sh; do
   [ -f "$f" ] && files="$files $f"
 done
 
