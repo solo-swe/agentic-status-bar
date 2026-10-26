@@ -15,10 +15,31 @@ build() {
     -destination "platform=macOS,arch=$(uname -m)" -derivedDataPath .build/xcode "$@"
 }
 
-if [ "${1:-}" != "--test" ]; then
-  build -quiet build
-  exit $?
-fi
+app=".build/xcode/Build/Products/Debug/Agentic Status Bar.app"
+
+case "${1:-}" in
+  --quit)
+    # Quit a running copy started by --run.
+    osascript -e 'tell application id "com.hakanserce.agentic-status-bar" to quit' >/dev/null 2>&1
+    exit 0
+    ;;
+  --run)
+    # Build, then start the app (quitting a running copy first). Extra KEY=VALUE arguments are
+    # passed to it as environment variables, e.g. ASB_STATE_DIR=/path/to/fixture.
+    shift
+    build -quiet build || exit 1
+    osascript -e 'tell application id "com.hakanserce.agentic-status-bar" to quit' >/dev/null 2>&1
+    sleep 1
+    for pair in "$@"; do set -- "$@" --env "$pair"; shift; done
+    open -n "$app" "$@"
+    exit $?
+    ;;
+  --test) ;;
+  *)
+    build -quiet build
+    exit $?
+    ;;
+esac
 
 # Tests: print only failures and the totals.
 log="${TMPDIR:-/tmp}/asb-app-test.$$.log"

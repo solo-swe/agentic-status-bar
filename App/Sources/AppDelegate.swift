@@ -3,13 +3,13 @@ import ASBCore
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    private var statusItem: NSStatusItem?
+    private let store = SessionStore()
+    private var statusItem: StatusItemController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // A placeholder until the status item controller shows the real header.
-        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        item.button?.image = NSImage(systemSymbolName: "sparkle", accessibilityDescription: "Agentic Status Bar")
-        item.button?.toolTip = "Agentic Status Bar \(ASBVersion.current)"
-        statusItem = item
+        // Unit tests host the app: keep it quiet then.
+        guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else { return }
+        statusItem = StatusItemController(store: store)
+        store.start()
     }
 }

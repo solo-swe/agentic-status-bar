@@ -3052,7 +3052,7 @@
       "description": "App/Sources/SessionStore.swift: an @Observable store that computes the ASBCore snapshot off the main thread when the state dir, registry dir, mutes file or config change (FSEvents or DispatchSource, coalesced to at most every 200 ms) and every 5 s (for process liveness and staleness), deletes dead files as the CLI does, and publishes the snapshot on the main actor. Unit test the coalescing with a fake trigger.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-079"
       ],
@@ -3061,11 +3061,22 @@
         "App/Tests/SessionStoreTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T04:31:28Z",
+      "updated_at": "2026-10-26T04:33:16Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T04:31:28Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "23b56aca19579336901866a0b4d82424542d59dd",
+      "completed_at": "2026-10-26T04:33:16Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T04:33:16Z",
+          "kind": "outcome",
+          "text": "SessionStore (@Observable, main actor): DispatchSource watchers on state, registry and config dirs plus a 5 s timer feed a 200 ms Coalescer; snapshot computed off the main thread with LiveInputs (now Sendable), dead files deleted; app test target with 4 Coalescer tests; tests/app.sh --test prints a summary",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-081",
@@ -3079,7 +3090,7 @@
       "description": "App/Sources/StatusItemController.swift: an NSStatusItem whose button shows the header's SF Symbol (non-template, tinted with the theme color for the current menu-bar appearance, light or dark) and the count as an attributed title in the same color; updates on every snapshot. Check by hand in light and dark menu bars with each header state (use fixture state dirs via ASB_STATE_DIR) and note the result.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-080"
       ],
@@ -3087,9 +3098,11 @@
         "App/Sources/StatusItemController.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:24Z",
+      "updated_at": "2026-10-26T04:33:17Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T04:33:17Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-082",
