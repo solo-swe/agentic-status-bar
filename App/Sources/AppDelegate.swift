@@ -7,7 +7,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let hooks = HookInstaller()
     private lazy var login = LoginItem()
     private var statusItem: StatusItemController?
-    private lazy var settings = SettingsWindow(store: store, hooks: hooks, login: login)
+    private lazy var settings = SettingsWindow(store: store, hooks: hooks, login: login, notifier: notifier)
     private lazy var firstRun = FirstRunWindow(hooks: hooks)
     private lazy var notifier = Notifier(store: store)
 

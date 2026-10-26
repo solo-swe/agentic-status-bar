@@ -156,6 +156,10 @@ otherwise the default stays. Writers change one line and keep the others.
 | `icon` | empty | an SF Symbol name (busy and empty icon; older shortcut) |
 | `icon_<state>` | empty | an SF Symbol name |
 | `color_<state>` | empty | `#RRGGBB`, or `#RRGGBB,#RRGGBB` (light, dark) |
+| `notify_waiting` | `1` | `0` or `1`: the app notifies when a session waits on you (also in muted projects) |
+| `notify_idle` | `0` | `0` or `1`: the app notifies when a session goes idle (not in muted projects) |
+| `notify_delay_seconds` | `10` | a whole number: how long a session stays waiting or idle before the notification; the app offers 5, 10, 30 and 60 |
+| `notify_sound` | `1` | `0` or `1` |
 
 `<state>` is one of `waiting`, `idle`, `uncertain`, `busy`, `subagents`, `muted`, `none`, `warning`. All values
 other than colors may contain only letters, digits and `_ . / ~ -`.

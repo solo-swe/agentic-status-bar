@@ -3342,7 +3342,7 @@
       "description": "Use UNUserNotificationCenter (ask permission on first need). Notify once when a session has been waiting (permission or question) for 10 seconds (decided default), including in muted projects since waiting breaks through mutes; not again until it leaves waiting. Idle notifications exist but are off by default. A category with actions 'Focus' (herdr focus) and 'Mute project for 1 hour'; clicking the notification focuses too. Put the rule logic (transitions, debounce, mute handling) in a testable NotificationRules type with unit tests.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-080"
       ],
@@ -3352,11 +3352,22 @@
         "App/Tests/NotificationRulesTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T05:53:29Z",
+      "updated_at": "2026-10-26T05:58:09Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T05:53:29Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "33e64490220df4f6c5e8708741ae6726967a9bd1",
+      "completed_at": "2026-10-26T05:58:09Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T05:58:09Z",
+          "kind": "outcome",
+          "text": "Waiting notifications after 10 s with Focus and Mute actions; checked live by the user",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-088",
@@ -3371,7 +3382,7 @@
       "description": "Settings section: notify when waiting (on), when idle (off), delay (5, 10, 30, 60 s; default 10), sound on/off, and a 'Send test notification' button. Store as new config keys (notify_waiting, notify_idle, notify_delay_seconds, notify_sound) validated in ASBCore Config; update doc/state-file-schema.md's config section.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-087",
         "T-084"
@@ -3382,9 +3393,11 @@
         "doc/state-file-schema.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:26Z",
+      "updated_at": "2026-10-26T05:58:10Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T05:58:10Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-089",

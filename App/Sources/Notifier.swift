@@ -13,8 +13,6 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
     nonisolated static let focusAction = "focus"
     nonisolated static let muteAction = "mute-hour"
 
-    var options = NotificationRules.Options()
-
     private let store: SessionStore
     private let center = UNUserNotificationCenter.current()
     private var rules = NotificationRules()
@@ -52,7 +50,7 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
     func evaluate() {
         guard let snapshot = store.snapshot else { return }
         let now = Int64(Date().timeIntervalSince1970 * 1000)
-        let outcome = rules.evaluate(snapshot, now: now, options: options)
+        let outcome = rules.evaluate(snapshot, now: now, options: NotificationRules.options(store.config))
         if !outcome.cleared.isEmpty {
             let ids = outcome.cleared.map(Self.identifier)
             center.removeDeliveredNotifications(withIdentifiers: ids)
@@ -69,12 +67,20 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
 
     static func identifier(_ sessionId: String) -> String { "asb.\(sessionId)" }
 
+    /// Settings' "Send test notification": a sample, as a waiting session would get it.
+    func sendTest() {
+        deliver([.init(
+            sessionId: "test", kind: .waiting, title: "Agentic Status Bar",
+            body: "Notifications work. This is how a session waiting on you looks.", focusable: false)])
+    }
+
     private func deliver(_ alerts: [NotificationRules.Alert]) {
+        let sound = store.config.notifySound
         let requests = alerts.map { alert in
             let content = UNMutableNotificationContent()
             content.title = alert.title
             content.body = alert.body
-            content.sound = .default
+            content.sound = sound ? .default : nil
             content.categoryIdentifier = alert.focusable ? Self.focusCategory : Self.plainCategory
             content.userInfo = ["sessionId": alert.sessionId, "focusable": alert.focusable]
             content.threadIdentifier = alert.sessionId
@@ -108,7 +114,7 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
         _ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse
     ) async {
         let info = response.notification.request.content.userInfo
-        guard let id = info["sessionId"] as? String else { return }
+        guard let id = info["sessionId"] as? String, id != "test" else { return }
         let focusable = info["focusable"] as? Bool ?? false
         let action = Self.action(for: response.actionIdentifier, focusable: focusable)
         await MainActor.run { [weak self] in

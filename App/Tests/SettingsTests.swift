@@ -22,6 +22,14 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(Set(SettingsView.themes), Set(Theme.builtIn.keys))
     }
 
+    func testNotificationOptionsComeFromTheConfig() {
+        XCTAssertEqual(NotificationRules.options(Config()), NotificationRules.Options())
+        let config = Config.parse("notify_waiting=0\nnotify_idle=1\nnotify_delay_seconds=30\n")
+        XCTAssertEqual(NotificationRules.options(config), .init(waiting: false, idle: true, delay: 30_000))
+        XCTAssertTrue(SettingsView.delayChoices.contains(Config().notifyDelaySeconds))
+        XCTAssertTrue(SettingsView.delayChoices.allSatisfy { Config.isValid(String($0), for: "notify_delay_seconds") })
+    }
+
     func testNames() {
         XCTAssertEqual(SettingsView.themeName("high_contrast"), "High contrast")
         XCTAssertEqual(SettingsView.themeName("monochrome"), "Monochrome")

@@ -7,6 +7,7 @@ struct SettingsView: View {
     let store: SessionStore
     let hooks: HookInstaller
     let login: LoginItem
+    let notifier: Notifier
 
     var body: some View {
         TabView {
@@ -14,6 +15,8 @@ struct SettingsView: View {
                 .tabItem { Label("General", systemImage: "gearshape") }
             AppearanceSettings(store: store)
                 .tabItem { Label("Appearance", systemImage: "paintpalette") }
+            NotificationSettings(store: store, notifier: notifier)
+                .tabItem { Label("Notifications", systemImage: "bell") }
         }
         // One size for both tabs: resizing the window on a tab switch looped AppKit's layout and crashed.
         .frame(width: 520, height: 580)
@@ -25,6 +28,9 @@ struct SettingsView: View {
     ]
 
     static let themes = ["default", "monochrome", "high_contrast"]
+
+    /// The notification delays offered, in seconds.
+    static let delayChoices = [5, 10, 30, 60]
 
     static func themeName(_ id: String) -> String {
         switch id {
@@ -121,6 +127,46 @@ private struct GeneralSettings: View {
                 LabeledContent("Config file") {
                     Button("Show in Finder") { store.perform("reveal-config", []) }
                 }
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    private func toggle(_ title: String, _ key: String, _ value: KeyPath<Config, Bool>) -> some View {
+        Toggle(title, isOn: Binding(get: { store.config[keyPath: value] }, set: { store.set(key, $0) }))
+    }
+}
+
+/// When the app notifies, and a test button.
+private struct NotificationSettings: View {
+    let store: SessionStore
+    let notifier: Notifier
+
+    var body: some View {
+        Form {
+            Section {
+                toggle("When a session is waiting on you", "notify_waiting", \.notifyWaiting)
+                toggle("When a session finishes and goes idle", "notify_idle", \.notifyIdle)
+                Picker("After", selection: Binding(
+                    get: { store.config.notifyDelaySeconds },
+                    set: { store.set("notify_delay_seconds", String($0)) })
+                ) {
+                    ForEach(SettingsView.delayChoices, id: \.self) { Text("\($0) seconds").tag($0) }
+                }
+                toggle("Play a sound", "notify_sound", \.notifySound)
+            } footer: {
+                Text("Waiting notifications also come from muted projects, as the menu bar turns red for them; idle ones don't.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Section {
+                LabeledContent("Check that notifications reach you") {
+                    Button("Send Test Notification") { notifier.sendTest() }
+                }
+            } footer: {
+                Text("If nothing appears, allow Agentic Status Bar in System Settings › Notifications.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)

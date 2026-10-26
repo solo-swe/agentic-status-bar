@@ -8,6 +8,7 @@ public struct Config: Equatable, Sendable {
     public static let keys: [String] = [
         "show_interactive", "show_headless", "show_subagents", "show_ide", "stale_minutes", "use_registry",
         "instant_refresh", "icon", "store_prompt_preview", "state_dir", "theme",
+        "notify_waiting", "notify_idle", "notify_delay_seconds", "notify_sound",
     ] + themeStates.map { "icon_\($0)" } + themeStates.map { "color_\($0)" }
 
     public var showInteractive = true
@@ -27,6 +28,11 @@ public struct Config: Equatable, Sendable {
     /// Per-state overrides, keyed by state; only set entries are present.
     public var iconOverrides: [String: String] = [:]
     public var colorOverrides: [String: String] = [:]
+    /// App notifications: when a session waits on you, when one goes idle, after how long, with a sound.
+    public var notifyWaiting = true
+    public var notifyIdle = false
+    public var notifyDelaySeconds = 10
+    public var notifySound = true
 
     public init() {}
 
@@ -83,6 +89,10 @@ public struct Config: Equatable, Sendable {
         case "icon": icon = value
         case "state_dir": stateDir = value.isEmpty ? nil : value
         case "theme": theme = value
+        case "notify_waiting": notifyWaiting = on
+        case "notify_idle": notifyIdle = on
+        case "notify_delay_seconds": if let n = Int(value), n >= 0 { notifyDelaySeconds = n }
+        case "notify_sound": notifySound = on
         default:
             if key.hasPrefix("icon_") {
                 iconOverrides[String(key.dropFirst(5))] = value.isEmpty ? nil : value

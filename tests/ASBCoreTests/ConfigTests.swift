@@ -18,6 +18,15 @@ private func tempFile(_ name: String = "config") -> String {
     #expect(config.iconOverrides.isEmpty && config.colorOverrides.isEmpty)
 }
 
+@Test func notificationKeys() {
+    let defaults = Config.parse(nil)
+    #expect(defaults.notifyWaiting && !defaults.notifyIdle && defaults.notifySound && defaults.notifyDelaySeconds == 10)
+    let config = Config.parse("notify_waiting=0\nnotify_idle=1\nnotify_delay_seconds=30\nnotify_sound=0\n")
+    #expect(!config.notifyWaiting && config.notifyIdle && !config.notifySound && config.notifyDelaySeconds == 30)
+    #expect(Config.parse("notify_delay_seconds=-5\n").notifyDelaySeconds == 10)
+    #expect(Config.parse("notify_delay_seconds=soon\n").notifyDelaySeconds == 10)
+}
+
 @Test func readsOverridesAndSkipsComments() {
     let config = Config.parse("stale_minutes=10\n# a comment\nicon=bolt\nstate_dir=~/agents\nshow_headless=0\n")
     #expect(config.staleMinutes == 10)

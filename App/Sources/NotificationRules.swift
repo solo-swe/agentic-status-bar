@@ -12,6 +12,11 @@ struct NotificationRules {
         var delay: Int64 = 10_000
     }
 
+    /// The options the config file asks for (notify_* keys).
+    static func options(_ config: Config) -> Options {
+        Options(waiting: config.notifyWaiting, idle: config.notifyIdle, delay: Int64(config.notifyDelaySeconds) * 1000)
+    }
+
     enum Kind: String {
         case waiting, idle
     }

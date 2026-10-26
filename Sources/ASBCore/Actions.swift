@@ -195,6 +195,12 @@ public struct Actions {
             instant_refresh=\(flag(c.instantRefresh))
             store_prompt_preview=\(flag(c.storePromptPreview))
 
+            # App notifications: waiting on you, idle, after how many seconds, with a sound.
+            notify_waiting=\(flag(c.notifyWaiting))
+            notify_idle=\(flag(c.notifyIdle))
+            notify_delay_seconds=\(c.notifyDelaySeconds)
+            notify_sound=\(flag(c.notifySound))
+
             # Theme: default, monochrome or high_contrast.
             theme=\(c.theme)
             # Override the theme for one state (waiting, idle, uncertain, busy, subagents,
