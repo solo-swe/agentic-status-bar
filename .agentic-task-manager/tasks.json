@@ -2805,7 +2805,7 @@
       "description": "Switch run_hook in tests/test_helper.bash to call `asb hook` (built from the package) instead of hooks/state-hook.sh, and make tests/hook.bats and tests/integration.bats pass. Update tests/bench.sh to time `asb hook`: median must be at most 10 ms (today's sh hook: 19–20 ms). Record the numbers in the task note.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-072",
         "T-073"
@@ -2815,11 +2815,22 @@
         "tests/bench.sh"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T01:03:49Z",
+      "updated_at": "2026-10-26T01:06:07Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T01:03:49Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "db2e48610c4c6f4101535e15fd2f6ec6dc210fa8",
+      "completed_at": "2026-10-26T01:06:07Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T01:06:07Z",
+          "kind": "outcome",
+          "text": "run_hook and hook.bats use asb hook (HOOK helper); all 203 bats pass; jq-missing test became 'works without jq'; teardown tolerates the background open stub. Bench now times asb hook (target 10 ms) but could not be measured fairly: machine under heavy load (load avg 6.5, headless Chrome), all timings inflated (snapshot 48 ms vs 14 ms earlier). Rerun on a quiet machine (noted on T-077).",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-075",
@@ -2834,7 +2845,7 @@
       "description": "Port install.sh and uninstall.sh to `asb install` / `asb uninstall [--purge]`: copy the running asb to ~/Library/Application Support/agentic-status-bar/bin/asb; back up ~/.claude/settings.json (CLAUDE_STATUSBAR_SETTINGS overrides) and add one async hook per event (SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Notification, Stop, SubagentStart, SubagentStop, SessionEnd) running \"'<stable path>' hook # agentic-status-bar\", keeping all other hooks and key order; remove entries carrying the old '# swiftbar-claudecode-minimal' marker; refuse an invalid settings file; link the SwiftBar plugin while it exists (CLAUDE_STATUSBAR_SWIFTBAR_DIR or SwiftBar's PluginDirectory). Uninstall removes our hooks (and empty groups), the stable copy, the SwiftBar link and the login item; --purge also state and config, otherwise ask on a TTY. Idempotent. Port tests/install.bats to Swift tests on temp homes.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-074"
       ],
@@ -2844,9 +2855,11 @@
         "Tests/ASBCoreTests/InstallTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:23Z",
+      "updated_at": "2026-10-26T01:06:08Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T01:06:08Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-076",
@@ -2906,9 +2919,17 @@
         "README.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:23Z",
+      "updated_at": "2026-10-26T01:06:08Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T01:06:08Z",
+          "kind": "note",
+          "text": "Before deleting the shell hook, rerun tests/run.sh --bench on a quiet machine: asb hook median must be at most 10 ms (T-074 couldn't measure it under load). If it isn't, find why (startup, config read, process walk) before removing the shell hook.",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-078",

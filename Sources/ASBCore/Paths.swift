@@ -34,6 +34,9 @@ public struct Paths: Sendable, Equatable {
         )
     }
 
+    /// Where `asb install` keeps the asb the hooks run.
+    public var stableBinary: String { "\(home)/Library/Application Support/agentic-status-bar/bin/asb" }
+
     /// The login item that "Start SwiftBar at login" adds.
     public var loginItemFile: String { "\(home)/Library/LaunchAgents/swiftbar-claudecode-minimal.start-swiftbar.plist" }
 
