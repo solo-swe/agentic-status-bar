@@ -37,6 +37,11 @@ struct PopoverView: View {
             }
             Divider().padding(.vertical, 2)
             HStack {
+                // A menu-bar app has no Dock icon or app menu: this is the only way to quit it.
+                Button("Quit") { NSApp.terminate(nil) }
+                    .buttonStyle(.borderless)
+                    .keyboardShortcut("q")
+                    .help("Quit Agentic Status Bar")
                 Spacer()
                 Button {
                     close()

@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 99,
+    "next_id": 100,
     "workflow": {
       "type": "direct"
     },
@@ -3491,7 +3491,7 @@
       "labels": [
         "release"
       ],
-      "description": "Add Sparkle 2 via Swift Package Manager, an EdDSA key pair (public key in Info.plist, private key as a secret provided by the user), a 'Check for Updates…' item, and release.yml steps that upload the zip and DMG to the GitHub Release at .../releases/download/v<version>/agentic-status-bar-<version>.zip and publish an updated appcast.xml. App, CLI and tag versions must match (one source of truth). Document the release steps in CONTRIBUTING.md.",
+      "description": "Add Sparkle 2 via Swift Package Manager, an EdDSA key pair (public key in Info.plist, private key as a secret provided by the user), a 'Check for Updates…' item, and release.yml steps that upload the zip and DMG to the GitHub Release at .../releases/download/v<version>/agentic-status-bar-<version>.zip and publish an updated appcast.xml. App, CLI and tag versions must match (one source of truth). Document the release steps in CONTRIBUTING.md and add an Updates section to README.md (T-093 wrote the rest of the README first).",
       "requirements": [],
       "use_cases": [],
       "status": "todo",
@@ -3502,10 +3502,11 @@
         "App/project.yml",
         "App/Sources/Updater.swift",
         ".github/workflows/release.yml",
-        "CONTRIBUTING.md"
+        "CONTRIBUTING.md",
+        "README.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:27Z",
+      "updated_at": "2026-10-26T06:26:17Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24"
     },
@@ -3521,7 +3522,7 @@
       "description": "Once the app covers everything the SwiftBar plugin does (check the README feature list one by one and note it in the task), delete swiftbar/, `asb swiftbar` and its renderer, the `login` LaunchAgent action, the remaining bats tests, tests/test_helper.bash, tests/run.sh and tests/lint.sh, and the bats/shellcheck CI job. `asb install` and `asb uninstall` stop linking the SwiftBar plugin but still remove an old link. The Swift tests and the conformance suite are the only suites left.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-083",
         "T-084",
@@ -3539,11 +3540,28 @@
         "Sources/asb/Install.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T06:09:44Z",
+      "updated_at": "2026-10-26T06:20:13Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T06:09:44Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "137525bc6069389d2ad2e60c0ca496c809df9fa3",
+      "notes": [
+        {
+          "at": "2026-10-26T06:20:12Z",
+          "kind": "note",
+          "text": "Every README feature is covered by the app (T-081 to T-088); the SwiftBar Refresh item isn't needed, the app watches the state dir. Kept on purpose: tests/lint.sh plus a shellcheck CI job (app.sh, swift.sh, bench.sh and scripts/package.sh remain), tests/bench.sh for hook/snapshot timings, the snapshot's label field (schema v1). The hook no longer pokes SwiftBar; instant_refresh is read but unused.",
+          "by": "claude:c631bc24"
+        },
+        {
+          "at": "2026-10-26T06:20:13Z",
+          "kind": "outcome",
+          "text": "SwiftBar plugin, asb swiftbar, renderer, login action, bats and run.sh removed; install removes old links and login items; 227 Swift + 44 app tests pass",
+          "by": "claude:c631bc24"
+        }
+      ],
+      "completed_at": "2026-10-26T06:20:13Z",
+      "completed_by": "claude:c631bc24"
     },
     {
       "id": "T-093",
@@ -3557,10 +3575,9 @@
       "description": "Rewrite README.md for Agentic Status Bar: what it shows (icon legend for the app), install from the DMG, first run and hooks, the popover and row actions, muting, settings and themes, notifications, start at login, updates, `asb` CLI (hook, install, uninstall, snapshot), uninstall, troubleshooting. Update doc/PRD.md from SwiftBar to the app (UX, architecture, distribution) and CONTRIBUTING.md (swift build/test, xcodegen, release). Mark the migration done in doc/design/future-architecture.md. No real project names in examples.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
-        "T-092",
-        "T-091"
+        "T-092"
       ],
       "files": [
         "README.md",
@@ -3569,9 +3586,11 @@
         "doc/design/future-architecture.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:27Z",
+      "updated_at": "2026-10-26T06:26:18Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T06:26:18Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-094",
@@ -3755,6 +3774,31 @@
           "by": "claude:c631bc24"
         }
       ]
+    },
+    {
+      "id": "T-099",
+      "name": "App: Quit button in the session list",
+      "phase": 6,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "app"
+      ],
+      "description": "The app is a menu-bar-only app (LSUIElement: no Dock icon, no app menu), so it can't be quit. Add a Quit button at the bottom of the session list popover, next to the gear button, that quits the app (NSApp.terminate). Add an app test if practical. README.md already describes 'Quit at the bottom of the session list'.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "in_progress",
+      "dependencies": [],
+      "files": [
+        "App/Sources/PopoverView.swift",
+        "App/Tests/PopoverTests.swift"
+      ],
+      "created_at": "2026-10-26T06:32:59Z",
+      "updated_at": "2026-10-26T06:33:34Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T06:33:34Z",
+      "started_by": "claude:c631bc24"
     }
   ]
 }
