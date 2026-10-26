@@ -6,6 +6,7 @@ struct PopoverView: View {
     let store: SessionStore
     /// Closes the popover (after an action that brings another app to the front).
     let close: () -> Void
+    let openSettings: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -39,8 +40,7 @@ struct PopoverView: View {
                 Spacer()
                 Button {
                     close()
-                    NSApp.activate()
-                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                    openSettings()
                 } label: {
                     Image(systemName: "gearshape")
                 }
