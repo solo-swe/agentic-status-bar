@@ -3256,7 +3256,7 @@
       "description": "A 'Start at login' toggle in Settings using SMAppService.mainApp (register/unregister, status shown, a hint to System Settings › Login Items when approval is required). On first enable, remove the SwiftBar-era LaunchAgent (agentic-status-bar.start-swiftbar) if present.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-084"
       ],
@@ -3265,11 +3265,22 @@
         "App/Sources/SettingsView.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T05:50:02Z",
+      "updated_at": "2026-10-26T05:53:26Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T05:50:02Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "b0c6e479970f8befda4942d0829b233f9ec34af3",
+      "completed_at": "2026-10-26T05:53:26Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T05:53:26Z",
+          "kind": "outcome",
+          "text": "Start at login via SMAppService.mainApp with approval hint; removes the SwiftBar-era LaunchAgent; checked by the user",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-086",
@@ -3331,7 +3342,7 @@
       "description": "Use UNUserNotificationCenter (ask permission on first need). Notify once when a session has been waiting (permission or question) for 10 seconds (decided default), including in muted projects since waiting breaks through mutes; not again until it leaves waiting. Idle notifications exist but are off by default. A category with actions 'Focus' (herdr focus) and 'Mute project for 1 hour'; clicking the notification focuses too. Put the rule logic (transitions, debounce, mute handling) in a testable NotificationRules type with unit tests.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-080"
       ],
@@ -3341,9 +3352,11 @@
         "App/Tests/NotificationRulesTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:26Z",
+      "updated_at": "2026-10-26T05:53:29Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T05:53:29Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-088",
