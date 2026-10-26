@@ -43,7 +43,7 @@ One JSON object per Claude Code session, on one line, named after the session ID
 | `lastTool` | string | no | PreToolUse | Name of the last tool started |
 | `promptPreview` | string | no | UserPromptSubmit | The first 80 characters of the last typed prompt, whitespace collapsed. Absent when `store_prompt_preview=0`. |
 | `promptAt` | integer, epoch ms | no | UserPromptSubmit | When the user last sent a prompt (not a background-task result). Lifts a mute on the project. |
-| `subagents` | object | no | SubagentStart, SubagentStop | Running subagents: `{ "<agent_id>": { "type": string, "since": epoch ms } }`; removed when empty |
+| `subagents` | object | no | SubagentStart, SubagentStop, Stop | Running subagents: `{ "<agent_id>": { "type": string, "since": epoch ms, "background": true } }`; `background` marks one Claude Code's task registry listed as a background task. Removed when empty |
 
 ¹ A file created by an early `SubagentStart` gets `state: "busy"`.
 ² Files written before `eventAt` existed lack it until their next write.
@@ -63,10 +63,23 @@ Example:
 | `PreToolUse` | `state = "busy"`, drops `reason` and `message`, sets `lastTool`. |
 | `PostToolUse` | `state = "busy"`, drops `reason` and `message`. |
 | `Notification` | `permission_prompt` → `waiting`, `reason` `"question"` if `lastTool` is `AskUserQuestion`, else `"permission"`, and `message`. `elicitation_dialog` → `waiting`, `"question"`, `message`. `idle_prompt` → `idle`, drops `reason` and `message`. Without `notification_type`, a message containing "needs your permission" counts as `permission_prompt` and "waiting for your input" as `idle_prompt`. Other types change nothing. |
-| `Stop` | `state = "idle"`, drops `reason` and `message`. |
-| `SubagentStart` | Adds `subagents[agent_id] = {type (or "agent" when empty), since: now}`; sets `state = "busy"` only if the file had none. Ignored without `agent_id`. |
-| `SubagentStop` | Removes `subagents[agent_id]`, and `subagents` when it becomes empty. Ignored without `agent_id` or with an empty `agent_type` (one such stop follows every `Stop`). |
+| `Stop` | `state = "idle"`, drops `reason` and `message`. With `background_tasks` (see Background subagents), `subagents` becomes exactly the running background subagents it lists. |
+| `SubagentStart` | Adds `subagents[agent_id] = {type (or "agent" when empty), since: now}` unless the agent is already listed (a resumed subagent keeps its entry); sets `state = "busy"` only if the file had none. Ignored without `agent_id`. |
+| `SubagentStop` | Without `background_tasks`: removes `subagents[agent_id]`. With it: keeps the agent (marked `background`) while the registry still lists it, else removes it; also removes other `background` agents the registry no longer lists and adds listed ones that are missing. `subagents` is dropped when empty. Ignored without `agent_id` or with an empty `agent_type` (one such stop follows every `Stop`). |
 | `SessionEnd` | Deletes the file. |
+
+### Background subagents
+
+A background subagent fires `SubagentStop` each time it pauses to wait on its own background work (a shell
+command, a monitor) and `SubagentStart` when it resumes, so start and stop events alone can't tell "paused" from
+"finished". `Stop` and `SubagentStop` payloads carry `background_tasks`, the parent session's in-flight task registry
+([hooks reference › Stop input](https://code.claude.com/docs/en/hooks)): an entry with `type: "subagent"`, whose `id`
+is the agent ID, is a running background subagent, unless its `status` is a finished one (`completed`, `failed`,
+`killed`, `stopped`, `cancelled`, `error`). It is the source of truth for background subagents; it also clears agents
+killed with TaskStop, which fire no `SubagentStop`. Foreground subagents are never in it: a `SubagentStop` leaves
+them alone, and at `Stop` none can be running. An older `SubagentStop` (see Newer wins) only keeps or removes its own
+agent. Payloads without `background_tasks` (older Claude Code, or the registry wasn't reachable) use the plain
+add/remove rules.
 
 ### Metadata
 

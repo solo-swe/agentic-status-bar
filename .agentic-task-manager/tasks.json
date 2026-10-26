@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 98,
+    "next_id": 99,
     "workflow": {
       "type": "direct"
     },
@@ -3205,7 +3205,7 @@
       "description": "A SwiftUI Settings scene (opened from the popover's gear button): session types to show, subagent rows, stale threshold (10/30/60 min, never), theme picker plus per-state symbol (text field with SF Symbol preview) and color (ColorPicker for light and dark) overrides, use registry, instant refresh, store prompt previews, and 'Reveal config file'. Settings read and write the same config file as the CLI (the open question about a separate store stays open; the file keeps CLI and app in sync).",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-082"
       ],
@@ -3214,12 +3214,22 @@
         "App/Sources/AgenticStatusBarApp.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T05:12:49Z",
+      "updated_at": "2026-10-26T05:23:13Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T04:43:20Z",
       "started_by": "claude:c631bc24",
-      "commit": "7b0ed9a877ae5d54768f0a3be280bd68730b86ec"
+      "commit": "7b0ed9a877ae5d54768f0a3be280bd68730b86ec",
+      "completed_at": "2026-10-26T05:23:13Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T05:23:13Z",
+          "kind": "outcome",
+          "text": "Tabbed Settings window (General, Appearance) owned by the app; fixed size; checked by the user",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-085",
@@ -3598,7 +3608,7 @@
       "description": "C3 marks a busy session idle when its transcript shows the turn ended, and always sets interrupted, which keeps the subagents check from showing 'waiting on subagents' (the parent shows zzz while its subagents work). Only the interrupt marker (Esc, denied permission) can stop subagents; a normal turn end (turn_duration) means the Stop hook was missed. Set interrupted only for the marker. Add a TranscriptTests/ChecksTests case and a conformance case (busy file, ended turn, running subagents -> subagents).",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/Transcript.swift",
@@ -3606,10 +3616,47 @@
         "tests/conformance"
       ],
       "created_at": "2026-10-26T05:12:19Z",
-      "updated_at": "2026-10-26T05:16:07Z",
+      "updated_at": "2026-10-26T05:18:49Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T05:16:07Z",
+      "started_by": "claude:c631bc24",
+      "commit": "ddacb7c556ea88cd2b126f2dd0f521daf6dc9de7",
+      "completed_at": "2026-10-26T05:18:49Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T05:18:49Z",
+          "kind": "outcome",
+          "text": "C3 sets interrupted only for the interrupt marker; a missed Stop with running subagents shows waiting on subagents",
+          "by": "claude:c631bc24"
+        }
+      ]
+    },
+    {
+      "id": "T-098",
+      "name": "Hook: track background subagents from background_tasks",
+      "phase": 6,
+      "type": "bugfix",
+      "priority": "P0",
+      "labels": [
+        "hook"
+      ],
+      "description": "A background subagent fires SubagentStop each time it pauses to wait on its own background work, and SubagentStart when it resumes, so the list drops agents Claude Code still shows as working. Stop and SubagentStop payloads carry background_tasks, the parent session's in-flight task registry (hooks docs › Stop input). Use it: entries of type 'subagent' (not in a finished status) are running background subagents, keyed by id (= agent_id), marked background. On Stop the subagent list becomes exactly those (no foreground subagent runs while the main agent stops). On SubagentStop, the stopping agent stays when it is still in the list (paused), other background-marked agents missing from the list are removed, foreground ones are left alone; an older SubagentStop only removes or keeps its own agent. Without background_tasks the old add/remove rules apply. Keep each agent's first since. Update doc/state-file-schema.md, HookEventsTests, a payload fixture.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "in_progress",
+      "dependencies": [],
+      "files": [
+        "Sources/ASBCore/HookEvents.swift",
+        "tests/ASBCoreTests/HookEventsTests.swift",
+        "doc/state-file-schema.md"
+      ],
+      "created_at": "2026-10-26T05:37:35Z",
+      "updated_at": "2026-10-26T05:37:44Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T05:37:44Z",
       "started_by": "claude:c631bc24"
     }
   ]

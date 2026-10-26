@@ -14,8 +14,34 @@ public struct HookPayload: Equatable, Sendable {
     public var message = ""
     public var agentId = ""
     public var agentType = ""
+    /// Stop and SubagentStop: the parent session's in-flight background tasks; nil when the payload
+    /// has none (older Claude Code, or the task registry wasn't reachable).
+    public var backgroundTasks: [BackgroundTask]?
 
     public init() {}
+
+    /// One entry of `background_tasks` (hooks docs › Stop input).
+    public struct BackgroundTask: Equatable, Sendable {
+        public var id: String
+        /// `subagent`, `shell`, `monitor`, `workflow`, ...
+        public var type: String
+        public var status: String
+        public var agentType: String
+
+        public init(id: String, type: String, status: String = "running", agentType: String = "") {
+            self.id = id
+            self.type = type
+            self.status = status
+            self.agentType = agentType
+        }
+
+        /// Statuses of a task that is no longer in flight, should the registry still list one.
+        static let finished: Set = ["completed", "failed", "killed", "stopped", "cancelled", "canceled", "error"]
+
+        public var isRunningSubagent: Bool {
+            type == "subagent" && !id.isEmpty && !Self.finished.contains(status.lowercased())
+        }
+    }
 
     /// Nil when the input isn't a JSON object.
     public static func parse(_ data: Data) -> HookPayload? {
@@ -43,6 +69,14 @@ public struct HookPayload: Equatable, Sendable {
         p.message = s("message")
         p.agentId = s("agent_id")
         p.agentType = s("agent_type")
+        if let tasks = object["background_tasks"] as? [Any] {
+            p.backgroundTasks = tasks.compactMap { entry in
+                guard let task = entry as? [String: Any], let id = task["id"] as? String else { return nil }
+                return BackgroundTask(
+                    id: id, type: task["type"] as? String ?? "", status: task["status"] as? String ?? "",
+                    agentType: task["agent_type"] as? String ?? "")
+            }
+        }
         return p
     }
 }
@@ -136,17 +170,51 @@ public enum HookEvents {
             s["state"] = "idle"
             s["reason"] = nil
             s["message"] = nil
+            // No foreground subagent runs while the main agent stops: the running subagents are
+            // exactly the background ones the task registry lists.
+            if let tasks = payload.backgroundTasks {
+                let old = s["subagents"] as? [String: Any] ?? [:]
+                var agents: [String: Any] = [:]
+                for task in tasks where task.isRunningSubagent {
+                    agents[task.id] = backgroundEntry(task, old: old[task.id], now: now)
+                }
+                s["subagents"] = agents.isEmpty ? nil : agents
+            }
         case "SubagentStart":
             guard !payload.agentId.isEmpty else { return .none }
             if !older, s["state"] == nil || s["state"] is NSNull || (s["state"] as? Bool) == false { s["state"] = "busy" }
             var agents = s["subagents"] as? [String: Any] ?? [:]
-            agents[payload.agentId] = ["type": payload.agentType.isEmpty ? "agent" : payload.agentType, "since": now]
+            // A resumed subagent keeps its entry (and first start time).
+            if agents[payload.agentId] == nil {
+                agents[payload.agentId] = ["type": payload.agentType.isEmpty ? "agent" : payload.agentType, "since": now]
+            }
             s["subagents"] = agents
         case "SubagentStop":
             // An extra SubagentStop with an empty agent_type follows every Stop; it has no matching start.
             guard !payload.agentId.isEmpty, !payload.agentType.isEmpty else { return .none }
             var agents = s["subagents"] as? [String: Any] ?? [:]
-            agents[payload.agentId] = nil
+            if let tasks = payload.backgroundTasks {
+                let running = Dictionary(
+                    tasks.filter(\.isRunningSubagent).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+                // A background subagent stops each time it pauses for its own background work; it
+                // has finished only when the registry no longer lists it.
+                agents[payload.agentId] = running[payload.agentId].map {
+                    backgroundEntry($0, old: agents[payload.agentId], now: now)
+                }
+                if !older {
+                    // Other background subagents that left the registry finished (a kill fires no
+                    // SubagentStop); foreground ones are never in it and are left alone.
+                    for (id, entry) in agents where id != payload.agentId && running[id] == nil
+                        && (entry as? [String: Any])?["background"] as? Bool == true {
+                        agents[id] = nil
+                    }
+                    for task in running.values where agents[task.id] == nil {
+                        agents[task.id] = backgroundEntry(task, old: nil, now: now)
+                    }
+                }
+            } else {
+                agents[payload.agentId] = nil
+            }
             s["subagents"] = agents.isEmpty ? nil : agents
         default:
             return .none
@@ -166,6 +234,16 @@ public enum HookEvents {
         let changed = !isEqualJSON(s["state"], old["state"])
         if changed || s["stateSince"] == nil || s["stateSince"] is NSNull { s["stateSince"] = now }
         return hashable(s)
+    }
+
+    /// A `subagents` entry for a background subagent the task registry lists: its existing entry's
+    /// type and start time when there is one, marked `background`.
+    static func backgroundEntry(_ task: HookPayload.BackgroundTask, old: Any?, now: Int64) -> [String: Any] {
+        var entry = old as? [String: Any] ?? [:]
+        if entry["type"] as? String == nil { entry["type"] = task.agentType.isEmpty ? "agent" : task.agentType }
+        if entry["since"] == nil { entry["since"] = now }
+        entry["background"] = true
+        return entry
     }
 
     /// The first 80 characters of a prompt, runs of whitespace collapsed to one space, no leading space.

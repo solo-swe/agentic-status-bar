@@ -232,6 +232,96 @@ private func has(_ state: [String: Any]?, _ key: String) -> Bool { state?[key] !
     #expect(!has(s, "state") && has(s, "subagents"))
 }
 
+// MARK: Background subagents (background_tasks)
+
+private typealias BGTask = HookPayload.BackgroundTask
+
+private func subagents(_ state: [String: Any]?) -> [String: [String: Any]] {
+    (state?["subagents"] as? [String: Any] ?? [:]).compactMapValues { $0 as? [String: Any] }
+}
+
+private func stop(_ agent: String, tasks: [BGTask]?) throws -> HookPayload {
+    var p = try payload("SubagentStop")
+    p.agentId = agent
+    p.backgroundTasks = tasks
+    return p
+}
+
+@Test func backgroundTasksAreRead() throws {
+    let json = #"{"hook_event_name":"Stop","session_id":"s","background_tasks":[{"id":"a1","type":"subagent","status":"running","description":"d","agent_type":"Explore"},{"id":"b2","type":"shell","status":"running","command":"npm test"},{"type":"subagent"}]}"#
+    let p = try #require(HookPayload.parse(Data(json.utf8)))
+    #expect(p.backgroundTasks == [BGTask(id:"a1", type: "subagent", status: "running", agentType: "Explore"), BGTask(id:"b2", type: "shell")])
+    #expect(try payload("Stop").backgroundTasks == [])
+    #expect(HookPayload.parse(Data(#"{"hook_event_name":"Stop"}"#.utf8))?.backgroundTasks == nil)
+}
+
+@Test func onlySubagentsStillInFlightCount() {
+    #expect(BGTask(id:"a", type: "subagent").isRunningSubagent)
+    #expect(BGTask(id:"a", type: "subagent", status: "").isRunningSubagent)
+    #expect(!BGTask(id:"a", type: "subagent", status: "completed").isRunningSubagent)
+    #expect(!BGTask(id:"a", type: "shell").isRunningSubagent)
+    #expect(!BGTask(id:"", type: "subagent").isRunningSubagent)
+}
+
+@Test func aBackgroundSubagentThatPausesStaysListed() throws {
+    let start: [String: Any] = ["state": "idle", "subagents": ["a": ["type": "Explore", "since": 1000]]]
+    let s = written(apply(try stop("a", tasks: [BGTask(id:"a", type: "subagent")]), to: start, at: 5000))
+    #expect(num(subagents(s)["a"], "since") == 1000 && str(subagents(s)["a"], "type") == "Explore")
+    #expect(subagents(s)["a"]?["background"] as? Bool == true)
+    // Once the registry no longer lists it, its next stop removes it.
+    #expect(!has(written(apply(try stop("a", tasks: []), to: s, at: 6000)), "subagents"))
+}
+
+@Test func aSubagentStopRefreshesTheBackgroundSubagentsFromTheRegistry() throws {
+    let start: [String: Any] = ["state": "busy", "subagents": [
+        "gone": ["type": "Explore", "since": 1000, "background": true],
+        "fg": ["type": "Plan", "since": 1000],
+        "a": ["type": "Explore", "since": 1000],
+    ]]
+    let tasks = [BGTask(id:"a", type: "subagent"), BGTask(id:"missed", type: "subagent", agentType: "general-purpose"),
+                 BGTask(id:"sh", type: "shell")]
+    let s = subagents(written(apply(try stop("a", tasks: tasks), to: start, at: 5000)))
+    // A background agent that left the registry (killed) goes; a foreground one stays; a listed one
+    // whose start was missed is added.
+    #expect(Set(s.keys) == ["a", "fg", "missed"])
+    #expect(str(s["missed"], "type") == "general-purpose" && num(s["missed"], "since") == 5000)
+}
+
+@Test func anOlderSubagentStopOnlyDecidesAboutItsOwnAgent() throws {
+    let start: [String: Any] = ["eventAt": 9000, "subagents": [
+        "a": ["type": "Explore", "since": 1000], "b": ["type": "Explore", "since": 1000, "background": true],
+    ]]
+    let s = subagents(written(apply(try stop("a", tasks: []), to: start, at: 9500, started: 8000)))
+    #expect(Set(s.keys) == ["b"])
+}
+
+@Test func stopKeepsExactlyTheRunningBackgroundSubagents() throws {
+    var p = try payload("Stop")
+    p.backgroundTasks = [BGTask(id:"a", type: "subagent"), BGTask(id:"done", type: "subagent", status: "completed"),
+                         BGTask(id:"sh", type: "shell")]
+    let start: [String: Any] = ["state": "busy", "subagents": ["a": ["type": "Explore", "since": 1000], "fg": ["type": "Plan", "since": 1000]]]
+    let s = written(apply(p, to: start, at: 5000))
+    #expect(Set(subagents(s).keys) == ["a"] && num(subagents(s)["a"], "since") == 1000)
+    p.backgroundTasks = []
+    #expect(!has(written(apply(p, to: start, at: 5000)), "subagents"))
+    // Without the registry Stop leaves the subagents alone.
+    p.backgroundTasks = nil
+    #expect(Set(subagents(written(apply(p, to: start, at: 5000))).keys) == ["a", "fg"])
+}
+
+@Test func withoutTheRegistryASubagentStopRemovesItsAgent() throws {
+    let start: [String: Any] = ["subagents": ["a": ["type": "Explore", "since": 1000, "background": true]]]
+    #expect(!has(written(apply(try stop("a", tasks: nil), to: start, at: 5000)), "subagents"))
+}
+
+@Test func aResumedSubagentKeepsItsFirstStart() throws {
+    var p = try payload("SubagentStart")
+    p.agentId = "a"
+    let start: [String: Any] = ["state": "idle", "subagents": ["a": ["type": "Explore", "since": 1000, "background": true]]]
+    let s = subagents(written(apply(p, to: start, at: 5000)))
+    #expect(num(s["a"], "since") == 1000 && s["a"]?["background"] as? Bool == true)
+}
+
 @Test func unknownFieldsInTheStateAreKept() throws {
     #expect(str(try run(["Stop"], start: ["v": 1, "futureField": "kept"]).1, "futureField") == "kept")
 }
