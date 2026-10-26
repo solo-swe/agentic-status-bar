@@ -302,11 +302,17 @@ rows() { printf '%s\n' "${lines[@]}" | grep 'font=Menlo' | sed 's/^:[^: ]*: //';
   [ -e "$CLAUDE_STATUSBAR_STATE_DIR/nopid.json" ]
 }
 
-@test "missing jq shows an install hint" {
-  CLAUDE_STATUSBAR_JQ=/nonexistent/jq run PLUGIN
+@test "a missing asb shows a build hint and actions do nothing" {
+  # A copy of the plugin outside the repo has no .build to fall back to.
+  mkdir -p "$TEST_TMP/elsewhere/swiftbar"
+  cp "$REPO_ROOT/swiftbar/swiftbar-claudecode-minimal.5s.sh" "$TEST_TMP/elsewhere/swiftbar/"
+  CLAUDE_STATUSBAR_ASB=/nonexistent/asb run "$TEST_TMP/elsewhere/swiftbar/swiftbar-claudecode-minimal.5s.sh"
   [ "$status" -eq 0 ]
-  [[ "${lines[0]}" == "⚠︎ | sfimage=exclamationmark.triangle" ]]
-  [[ "$output" == *"brew install jq"* ]]
+  [[ "${lines[0]}" == ":exclamationmark.triangle: | sfcolor=#B25000,#FFD60A" ]]
+  [[ "$output" == *"swift build -c release"* ]]
+  CLAUDE_STATUSBAR_ASB=/nonexistent/asb run "$TEST_TMP/elsewhere/swiftbar/swiftbar-claudecode-minimal.5s.sh" copy-id abc
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 @test "plugin works through a symlink" {

@@ -15,14 +15,17 @@ public struct Paths: Sendable, Equatable {
         self.registryDir = registryDir
     }
 
+    /// `home` defaults to `$HOME`, then the account's home directory. (NSHomeDirectory alone would ignore
+    /// `$HOME`, so tests that move it couldn't keep asb out of the real one.)
     public static func from(
         environment: [String: String] = ProcessInfo.processInfo.environment,
-        home: String = NSHomeDirectory()
+        home: String? = nil
     ) -> Paths {
         func env(_ key: String) -> String? {
             guard let value = environment[key], !value.isEmpty else { return nil }
             return value
         }
+        let home = home ?? env("HOME") ?? NSHomeDirectory()
         return Paths(
             home: home,
             configFile: env("CLAUDE_STATUSBAR_CONFIG") ?? "\(home)/.config/swiftbar-claudecode-minimal/config",

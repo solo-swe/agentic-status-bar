@@ -31,6 +31,40 @@ public struct FakeProcessInspector: ProcessInspector {
     }
 }
 
+/// A process table read from a file, one process per line: `pid|ppid|comm|args|lstart` (the bats test
+/// helper's fake `ps` table). Used when `CLAUDE_STATUSBAR_PS_TABLE` is set, for tests.
+public struct TableProcessInspector: ProcessInspector {
+    public var records: [ProcessRecord]
+
+    public init(path: String, timeZone: TimeZone = .current) {
+        let text = (try? String(contentsOfFile: path, encoding: .utf8)) ?? ""
+        records = text.split(whereSeparator: \.isNewline).compactMap { line in
+            let f = line.split(separator: "|", omittingEmptySubsequences: false).map(String.init)
+            guard f.count >= 5, let pid = Int32(f[0]), let ppid = Int32(f[1]) else { return nil }
+            return ProcessRecord(pid: pid, ppid: ppid, start: ProcStart.parse(f[4], timeZone: timeZone) ?? 0,
+                                 comm: f[2], args: f[3])
+        }
+    }
+
+    public func processes() -> [ProcessRecord] { FakeProcessInspector(records).processes() }
+    public func process(_ pid: Int32) -> ProcessRecord? { FakeProcessInspector(records).process(pid) }
+    public func arguments(_ pid: Int32) -> String? { FakeProcessInspector(records).arguments(pid) }
+}
+
+public enum ProcessInspectors {
+    /// The fake table when `CLAUDE_STATUSBAR_PS_TABLE` is set (tests), else the system's.
+    public static func fromEnvironment(_ environment: [String: String]) -> any ProcessInspector {
+        if let table = environment["CLAUDE_STATUSBAR_PS_TABLE"], !table.isEmpty {
+            return TableProcessInspector(path: table)
+        }
+        #if os(macOS)
+        return DarwinProcessInspector()
+        #else
+        return FakeProcessInspector()
+        #endif
+    }
+}
+
 /// Process start times as `ps -o lstart=` prints them ("Mon Oct 19 09:12:03 2026", local time),
 /// the format of the state files' `procStart`.
 public enum ProcStart {

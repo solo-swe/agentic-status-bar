@@ -37,6 +37,13 @@ private func tempFile(_ name: String = "config") -> String {
     #expect(overridden.stateDir(config: fromConfig) == "/elsewhere")
 }
 
+@Test func homeComesFromTheHomeVariable() {
+    let paths = Paths.from(environment: ["HOME": "/tmp/fake-home"])
+    #expect(paths.home == "/tmp/fake-home")
+    #expect(paths.loginItemFile.hasPrefix("/tmp/fake-home/Library/LaunchAgents/"))
+    #expect(Paths.from(environment: [:]).home == NSHomeDirectory())
+}
+
 @Test func pathsDefaultsAndOverrides() {
     let paths = Paths.from(environment: [:], home: "/Users/alex")
     #expect(paths.configFile == "/Users/alex/.config/swiftbar-claudecode-minimal/config")

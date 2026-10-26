@@ -12,6 +12,12 @@ if ! command -v bats >/dev/null 2>&1; then
   exit 1
 fi
 
+# The SwiftBar plugin runs asb; build it first (tests use .build/debug/asb).
+if ! swift build --product asb >/dev/null 2>&1; then
+  echo "swift build failed; run it to see why" >&2
+  exit 1
+fi
+
 if [ "$#" -gt 0 ]; then
   exec bats "$@"
 fi

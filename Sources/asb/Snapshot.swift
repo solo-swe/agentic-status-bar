@@ -18,7 +18,7 @@ struct SnapshotCommand: ParsableCommand {
         let environment = ProcessInfo.processInfo.environment
         let live = LiveInputs(
             paths: Paths.from(environment: environment), environment: environment,
-            inspector: DarwinProcessInspector())
+            inspector: ProcessInspectors.fromEnvironment(environment))
         let inputs = live.gather()
         let result = Engine.snapshot(inputs)
         live.apply(result, configText: inputs.configText)

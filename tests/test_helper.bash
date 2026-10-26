@@ -18,6 +18,8 @@ common_setup() {
   mkdir -p "$CLAUDE_STATUSBAR_STATE_DIR" "$(dirname "$CLAUDE_STATUSBAR_CONFIG")" "$CLAUDE_STATUSBAR_REGISTRY_DIR"
   # Never talk to a real herdr; tests that need one stub it.
   export CLAUDE_STATUSBAR_HERDR="$TEST_TMP/no-herdr"
+  # The SwiftBar plugin runs the asb that tests/run.sh builds.
+  export CLAUDE_STATUSBAR_ASB="$REPO_ROOT/.build/debug/asb"
 
   # Fake commands go first on PATH.
   FAKE_BIN="$TEST_TMP/bin"
@@ -46,9 +48,11 @@ STUB
 }
 
 # stub_ps — replaces ps with a fake that answers `ps -o FIELD= -p PID` from
-# $TEST_TMP/ps-table, one process per line: pid|ppid|comm|args|lstart
+# $TEST_TMP/ps-table, one process per line: pid|ppid|comm|args|lstart.
+# asb reads the same table (it doesn't run ps) through CLAUDE_STATUSBAR_PS_TABLE.
 stub_ps() {
   : > "$TEST_TMP/ps-table"
+  export CLAUDE_STATUSBAR_PS_TABLE="$TEST_TMP/ps-table"
   stub_command ps '
 case " $* " in
   *" -axo "*)

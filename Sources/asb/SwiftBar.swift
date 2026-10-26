@@ -14,7 +14,7 @@ struct SwiftBarCommand: ParsableCommand {
     func run() throws {
         let environment = ProcessInfo.processInfo.environment
         let paths = Paths.from(environment: environment)
-        let live = LiveInputs(paths: paths, environment: environment, inspector: DarwinProcessInspector())
+        let live = LiveInputs(paths: paths, environment: environment, inspector: ProcessInspectors.fromEnvironment(environment))
         let inputs = live.gather()
         let result = Engine.snapshot(inputs)
         live.apply(result, configText: inputs.configText)

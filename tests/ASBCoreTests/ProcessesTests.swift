@@ -13,6 +13,20 @@ import Testing
     #expect(fake.processes().count == 1)
 }
 
+@Test func tableInspectorReadsTheBatsFakeProcessTable() throws {
+    let file = FileManager.default.temporaryDirectory.appendingPathComponent("asb-ps-\(UUID().uuidString)")
+    defer { try? FileManager.default.removeItem(at: file) }
+    try "4242|1|claude|claude --resume|Mon Oct 19 09:12:03 2026\nbad line\n7001|4242|/bin/zsh|zsh -c npm test|Mon Oct 19 09:13:00 2026\n"
+        .write(to: file, atomically: true, encoding: .utf8)
+    let la = TimeZone(identifier: "America/Los_Angeles")!
+    let inspector = TableProcessInspector(path: file.path, timeZone: la)
+    #expect(inspector.processes().map(\.pid) == [4242, 7001])
+    #expect(inspector.process(4242)?.start == 1_792_426_323)
+    #expect(inspector.arguments(4242) == "claude --resume")
+    #expect(inspector.process(7001)?.ppid == 4242)
+    #expect(ProcessInspectors.fromEnvironment(["CLAUDE_STATUSBAR_PS_TABLE": file.path]) is TableProcessInspector)
+}
+
 @Test func procStartParsesWithExtraSpaces() {
     let la = TimeZone(identifier: "America/Los_Angeles")!
     let seconds = ProcStart.parse("Mon Oct 19 09:12:03 2026", timeZone: la)
