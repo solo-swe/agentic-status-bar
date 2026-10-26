@@ -3461,7 +3461,7 @@
       "description": "A tag-triggered workflow (.github/workflows/release.yml): import the Developer ID Application certificate from secrets, archive the app with hardened runtime, sign the embedded asb too, notarize with notarytool (App Store Connect API key from secrets), staple, and produce agentic-status-bar-<version>.zip (only the .app) and a DMG with versioned names. Needs the user to create the certificate and API key and add the secrets: if they're missing, block this task on the user with the exact secret names needed.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-079"
       ],
@@ -3470,7 +3470,7 @@
         "scripts/notarize.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T23:46:43Z",
+      "updated_at": "2026-10-26T23:53:12Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -3485,10 +3485,18 @@
           "kind": "answer",
           "text": "Add the five Actions secrets listed in scripts/notarize.md (DEVELOPER_ID_CERT_P12, DEVELOPER_ID_CERT_PASSWORD, NOTARY_API_KEY_P8, NOTARY_API_KEY_ID, NOTARY_API_ISSUER_ID), then push a test tag (e.g. v0.1.0) to verify the signed, notarized build. Done? → 2026-10-26: membership active; the user created the certificate and API key and set all five secrets (DEVELOPER_ID_CERT_P12, DEVELOPER_ID_CERT_PASSWORD, NOTARY_API_KEY_P8, NOTARY_API_KEY_ID, NOTARY_API_ISSUER_ID).",
           "by": "claude:c631bc24"
+        },
+        {
+          "at": "2026-10-26T23:53:12Z",
+          "kind": "outcome",
+          "text": "v0.1.0 release run 40422277052 green; DMG and zip app pass spctl (Notarized Developer ID), stapler validate and codesign --deep --strict; asb signed with hardened runtime. Draft release left for the user to publish.",
+          "by": "claude:c631bc24"
         }
       ],
       "started_at": "2026-10-26T23:46:43Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-26T23:53:12Z",
+      "completed_by": "claude:c631bc24"
     },
     {
       "id": "T-091",
