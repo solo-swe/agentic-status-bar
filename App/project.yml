@@ -18,9 +18,29 @@ settings:
     CURRENT_PROJECT_VERSION: "1"
 
 targets:
+  AgenticStatusBarTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: AgenticStatusBar
+    info:
+      path: Generated/Tests-Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hakanserce.agentic-status-bar.tests
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Agentic Status Bar.app/Contents/MacOS/Agentic Status Bar"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+
   AgenticStatusBar:
     type: application
     platform: macOS
+    scheme:
+      testTargets:
+        - AgenticStatusBarTests
     sources:
       - path: Sources
     dependencies:

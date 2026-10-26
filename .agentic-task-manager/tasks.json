@@ -3010,7 +3010,7 @@
       "description": "Create the app with XcodeGen (App/project.yml generating App/AgenticStatusBar.xcodeproj, which is git-ignored): bundle ID com.hakanserce.agentic-status-bar, macOS 14, LSUIElement (no Dock icon), hardened runtime, linking ASBCore from the local package and copying the asb executable into Contents/Helpers. An AppDelegate that starts and shows a placeholder status item. Add `xcodegen generate && xcodebuild build` to CI (unsigned). Document in CONTRIBUTING.md.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-065"
       ],
@@ -3023,11 +3023,22 @@
         "CONTRIBUTING.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T04:30:17Z",
+      "updated_at": "2026-10-26T04:31:27Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T04:30:17Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "f9ff40ddacf8113b5e467bf8cf51b644779cd65e",
+      "completed_at": "2026-10-26T04:31:27Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T04:31:27Z",
+          "kind": "outcome",
+          "text": "XcodeGen spec App/project.yml (bundle com.hakanserce.agentic-status-bar, macOS 14, LSUIElement, hardened runtime, ad-hoc), links ASBCore, post-build embeds asb in Contents/Helpers; placeholder status item; tests/app.sh builds it locally and in a new CI job",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-080",
@@ -3041,7 +3052,7 @@
       "description": "App/Sources/SessionStore.swift: an @Observable store that computes the ASBCore snapshot off the main thread when the state dir, registry dir, mutes file or config change (FSEvents or DispatchSource, coalesced to at most every 200 ms) and every 5 s (for process liveness and staleness), deletes dead files as the CLI does, and publishes the snapshot on the main actor. Unit test the coalescing with a fake trigger.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-079"
       ],
@@ -3050,9 +3061,11 @@
         "App/Tests/SessionStoreTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:24Z",
+      "updated_at": "2026-10-26T04:31:28Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T04:31:28Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-081",

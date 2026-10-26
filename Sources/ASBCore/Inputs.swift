@@ -1,7 +1,7 @@
 import Foundation
 
 /// Gathers `SnapshotInputs` from disk and the system, and carries out a snapshot's side effects.
-public struct LiveInputs {
+public struct LiveInputs: Sendable {
     public var paths: Paths
     public var environment: [String: String]
     public var inspector: any ProcessInspector

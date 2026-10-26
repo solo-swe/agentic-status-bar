@@ -10,7 +10,20 @@ fi
 
 xcodegen generate --spec App/project.yml --quiet || exit 1
 
-action="build"
-[ "${1:-}" = "--test" ] && action="test"
-xcodebuild -project App/AgenticStatusBar.xcodeproj -scheme AgenticStatusBar -configuration Debug \
-  -derivedDataPath .build/xcode -quiet "$action"
+build() {
+  xcodebuild -project App/AgenticStatusBar.xcodeproj -scheme AgenticStatusBar -configuration Debug \
+    -destination "platform=macOS,arch=$(uname -m)" -derivedDataPath .build/xcode "$@"
+}
+
+if [ "${1:-}" != "--test" ]; then
+  build -quiet build
+  exit $?
+fi
+
+# Tests: print only failures and the totals.
+log="${TMPDIR:-/tmp}/asb-app-test.$$.log"
+build test >"$log" 2>&1
+status=$?
+grep -e "\.swift:[0-9]*:[0-9]*: error:" -e "failed (" -e "Executed [0-9]* test" -e "TEST SUCCEEDED" -e "TEST FAILED" "$log"
+rm -f "$log"
+exit "$status"

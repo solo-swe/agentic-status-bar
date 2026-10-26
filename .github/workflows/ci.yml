@@ -48,5 +48,5 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
-      - name: Build the app (unsigned)
-        run: tests/app.sh
+      - name: Build and test the app (unsigned)
+        run: tests/app.sh --test
