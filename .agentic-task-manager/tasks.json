@@ -1837,7 +1837,7 @@
       "description": "Add a `swift` job to .github/workflows/ci.yml on macos-latest that runs `swift build` and `swift test` (select the newest Xcode available on the runner if needed). Keep the existing lint and bats job unchanged. Add a tests/swift.sh wrapper (`swift build && swift test`) mirroring tests/run.sh, and mention both in CONTRIBUTING.md.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-049"
       ],
@@ -1847,11 +1847,22 @@
         "CONTRIBUTING.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:02:21Z",
+      "updated_at": "2026-10-26T00:02:50Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:02:21Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "5997b3f433d48a24741c67fca420eb14e41d6e69",
+      "completed_at": "2026-10-26T00:02:50Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:02:50Z",
+          "kind": "outcome",
+          "text": "CI swift job (newest Xcode, tests/swift.sh); wrapper and CONTRIBUTING updated; CI job unverified until the phase push",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-051",
@@ -1865,16 +1876,18 @@
       "description": "Write doc/state-file-schema.md: the per-session state file (schema v: 1) field by field (types, optional or not, who writes it, meaning), taken from doc/PRD.md and hooks/state-hook.sh: v, sessionId, state, reason, message, updatedAt, stateSince, pid, procStart, cwd, kind, termBundleId, herdrPane, transcriptPath, lastTool, promptPreview, promptAt, subagents{agent_id:{type,since}}. Also the writer rules (newer event wins via updatedAt, atomic temp+rename, per-session lock, SessionEnd deletes), the mutes file ({cwd:{until,at,today}}), and the config file keys with validation rules (from lib/common.sh). State that readers must ignore unknown fields and reject v > 1. Link it from the PRD.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "doc/state-file-schema.md",
         "doc/PRD.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-26T00:02:51Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T00:02:51Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-052",

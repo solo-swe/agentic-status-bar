@@ -166,7 +166,7 @@ Three stored states — `busy`, `waiting` and `idle` — plus `uncertain`, which
 
 Every write is atomic (write to a temp file, then `mv`) and stamps `updatedAt` in milliseconds.
 
-**State file** — `~/.claude/swiftbar-claudecode-minimal/<session_id>.json`
+**State file** — `~/.claude/swiftbar-claudecode-minimal/<session_id>.json`. The full contract (every field, the writer and reader rules, the mutes and config files) is in [state-file-schema.md](state-file-schema.md).
 
 ```json
 {
