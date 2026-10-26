@@ -1992,7 +1992,7 @@
       "description": "Port lib/common.sh config handling to Sources/ASBCore/Config.swift: the key whitelist (show_*, stale_minutes, use_registry, instant_refresh, icon, store_prompt_preview, state_dir, theme, icon_<state>, color_<state> for waiting idle uncertain busy subagents muted none warning), defaults, value validation (plain words/paths; colors #RRGGBB or a light,dark pair), comments and unknown keys ignored, ~ expansion, and setConfig(key, value) that keeps other lines and writes atomically. Paths come from a Paths struct with environment overrides (for now CLAUDE_STATUSBAR_CONFIG and CLAUDE_STATUSBAR_STATE_DIR, renamed later). Port tests/common.bats cases to Tests/ASBCoreTests/ConfigTests.swift.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-049"
       ],
@@ -2002,11 +2002,22 @@
         "Tests/ASBCoreTests/ConfigTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:13:49Z",
+      "updated_at": "2026-10-26T00:14:49Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:13:49Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "b7def47dad319a24d6c3e8a0da3610f93e77b185",
+      "completed_at": "2026-10-26T00:14:49Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:14:49Z",
+          "kind": "outcome",
+          "text": "Config.parse/load/set with the key whitelist and validation (colors included), Paths with env overrides and state dir precedence; common.bats cases ported",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-055",
@@ -2020,7 +2031,7 @@
       "description": "Sources/ASBCore/StateFile.swift: a Codable StateFile matching doc/state-file-schema.md (unknown fields ignored, all but v and sessionId optional) and a loader that reads *.json in the state dir (skipping *.tmp.* and *.lock), counting files that don't parse, aren't objects or have v outside 1...1 as invalid. Return [StateFile with its path] plus invalidCount. Tests port the plugin.bats cases 'plugin loads valid state files', 'corrupt and future-version files', 'temp and lock files are ignored'.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-049",
         "T-051"
@@ -2030,9 +2041,11 @@
         "Tests/ASBCoreTests/StateFileTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:15Z",
+      "updated_at": "2026-10-26T00:14:49Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T00:14:49Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-056",
