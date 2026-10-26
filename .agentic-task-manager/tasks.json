@@ -3470,7 +3470,7 @@
         "scripts/notarize.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T06:09:36Z",
+      "updated_at": "2026-10-26T23:09:26Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T06:06:17Z",
@@ -3480,7 +3480,15 @@
       "questions": [
         "Add the five Actions secrets listed in scripts/notarize.md (DEVELOPER_ID_CERT_P12, DEVELOPER_ID_CERT_PASSWORD, NOTARY_API_KEY_P8, NOTARY_API_KEY_ID, NOTARY_API_ISSUER_ID), then push a test tag (e.g. v0.1.0) to verify the signed, notarized build. Done?"
       ],
-      "blocked_at": "2026-10-26T06:09:36Z"
+      "blocked_at": "2026-10-26T06:09:36Z",
+      "notes": [
+        {
+          "at": "2026-10-26T23:09:26Z",
+          "kind": "note",
+          "text": "2026-10-26: user ordered the 1-year Apple Developer Program membership; Apple says processing may take up to 48 hours. Once it's active: create the Developer ID certificate and API key (scripts/notarize.md steps 1-2), add the five secrets, push a test tag.",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-091",
