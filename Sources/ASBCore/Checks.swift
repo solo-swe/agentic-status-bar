@@ -14,6 +14,10 @@ public struct ReconciledSession: Equatable, Sendable {
     public var sessionName: String?
     /// Set by check C3: the transcript shows the turn was interrupted.
     public var interrupted = false
+    /// The project's active mute, if any (see Mutes); `muted` is false while the session waits.
+    public var muteUntil: Int64?
+    public var muteToday = false
+    public var muted = false
 
     public init(_ file: StateFile) {
         self.file = file

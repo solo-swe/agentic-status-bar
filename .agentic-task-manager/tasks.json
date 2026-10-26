@@ -2277,7 +2277,7 @@
       "description": "Port the 'subagents' state (see doc/PRD.md 'Waiting on subagents'): with entries in subagents, not interrupted, and shown idle, or busy with lastTool Task or Agent, shown becomes subagents with shownSince = earliest subagent since; it runs before C5 and C5 applies to it. Then the filters: show_interactive/headless/ide (ide covers desktop), sessions without kind count as interactive; show_subagents only hides subagent rows. Port the subagent and filter tests from tests/reach.bats; conformance cases.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-060"
       ],
@@ -2288,11 +2288,22 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:21:42Z",
+      "updated_at": "2026-10-26T00:22:21Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:21:42Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "f2c38dd61f8a65ffd558dd870ebb7458b6d66431",
+      "completed_at": "2026-10-26T00:22:21Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:22:21Z",
+          "kind": "outcome",
+          "text": "Checks.subagents (before C5, interrupt wins) and Filters (kind defaults to interactive, desktop follows ide, unknown shown); reach.bats subagent and filter cases ported; conformance cases left to T-067",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-062",
@@ -2306,7 +2317,7 @@
       "description": "Sources/ASBCore/Mutes.swift: read the mutes file ({cwd:{until,at,today}}; corrupt → empty), compute active mutes (until > now and at >= the latest promptAt of any session in that cwd), mark sessions muteUntil/muteToday and muted (unless shown is waiting), and the mutation functions muteHour(cwd), muteToday(cwd) (until next local midnight), unmute(cwd), unmuteAll(), each dropping expired entries and writing atomically. Port tests/mute.bats logic to Tests/ASBCoreTests/MutesTests.swift with a fake clock and time zone; conformance cases mute-*.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-054",
         "T-055"
@@ -2317,9 +2328,11 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:18Z",
+      "updated_at": "2026-10-26T00:22:21Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T00:22:21Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-063",
