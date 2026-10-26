@@ -2646,7 +2646,7 @@
       "description": "Replace the body of swiftbar/swiftbar-claudecode-minimal.5s.sh with a few lines that exec `asb swiftbar` (and `asb action \"$@\"` when called with arguments), finding asb via CLAUDE_STATUSBAR_ASB, else the stable install path ~/Library/Application Support/agentic-status-bar/bin/asb, else .build/release/asb next to the repo; if none exists print a one-line 'run asb install' menu. Update tests/test_helper.bash so the plugin tests build and use the package's asb. All plugin, checks, mute, reach and integration bats tests must pass unchanged in behavior; fix the Swift side, not the tests, unless a test relied on jq internals.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-068",
         "T-069"
@@ -2656,11 +2656,22 @@
         "tests/test_helper.bash"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:42:15Z",
+      "updated_at": "2026-10-26T00:52:11Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:42:15Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "da4223e5635d4e31ec8d83f17d43244ee679a491",
+      "completed_at": "2026-10-26T00:52:11Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:52:11Z",
+          "kind": "outcome",
+          "text": "Plugin is now a thin sh front end that execs asb swiftbar/asb action (asb from CLAUDE_STATUSBAR_ASB, the stable path, or the repo build); bats use .build/debug/asb and CLAUDE_STATUSBAR_PS_TABLE; all 203 bats pass; plugin refresh 16 ms (was 103). Fixed: Paths now honors $HOME (a test had written a login item to the real home; removed). Shell hook median 21 ms on a busy machine, to be replaced by asb hook.",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-071",
@@ -2674,7 +2685,7 @@
       "description": "Add `asb hook`: read the hook payload JSON from stdin and update the session's state file exactly like hooks/state-hook.sh does for SessionStart (idle, except a compact restart keeps state), UserPromptSubmit (busy, promptPreview of 80 chars with whitespace collapsed unless it starts with <task-notification> or store_prompt_preview=0, promptAt unless task notification), PreToolUse (busy, lastTool, clear reason/message), PostToolUse (busy), Notification (permission_prompt → waiting/permission or question when lastTool is AskUserQuestion, elicitation_dialog → question, idle_prompt → idle, else decide by message text, unknown types ignored), Stop (idle, clear reason/message), SubagentStart/SubagentStop (subagents map; the empty-type stop after Stop ignored), SessionEnd (delete the file). stateSince changes only when the state changes. Never print anything and always exit 0, also on bad input or unsafe session IDs. Use the payloads in tests/fixtures/payloads in Swift tests.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-055",
         "T-054"
@@ -2685,9 +2696,11 @@
         "Tests/ASBCoreTests/HookEventsTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:21Z",
+      "updated_at": "2026-10-26T00:52:12Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T00:52:12Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-072",
