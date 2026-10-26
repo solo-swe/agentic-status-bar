@@ -12,9 +12,21 @@ hand.
 
 You need a paid Apple Developer account.
 
-1. **Developer ID Application certificate.** In Xcode › Settings › Accounts › Manage Certificates, add a
-   "Developer ID Application" certificate (or create one at developer.apple.com › Certificates). In Keychain Access,
-   export it with its private key as a `.p12` file and choose a password.
+1. **Developer ID Application certificate.** Creating one needs the Account Holder role. On the developer website
+   (these steps don't depend on the Xcode version):
+   1. Make a certificate signing request: open **Keychain Access** (Spotlight finds it), choose **Keychain Access ›
+      Certificate Assistant › Request a Certificate from a Certificate Authority**, enter your email address and a
+      common name, leave the CA email address empty, choose **Saved to disk** and save the `.certSigningRequest` file.
+   2. At developer.apple.com › Account › **Certificates, Identifiers & Profiles** › **Certificates**, click **+**,
+      choose **Developer ID**, then **Developer ID Application**, and continue. If asked for an intermediary, choose
+      **G2 Sub-CA**. Upload the request file and download the `.cer` file.
+   3. Double-click the `.cer` file: it appears in Keychain Access under **My Certificates** as "Developer ID
+      Application: <your name> (<team ID>)", with its private key.
+   4. Export it: select it in **My Certificates**, choose **File › Export Items…**, pick **Personal Information
+      Exchange (.p12)**, and set a password.
+
+   Xcode can also create the certificate from its account settings (Manage Certificates); the menu names differ
+   between Xcode versions, so the website route is the one described here.
 2. **App Store Connect API key** for `notarytool`. At appstoreconnect.apple.com › Users and Access › Integrations ›
    App Store Connect API, create a team key with the **Developer** role. Download the `AuthKey_<KEYID>.p8` file (it
    can be downloaded only once) and note the **Key ID** and the **Issuer ID** shown on that page.
