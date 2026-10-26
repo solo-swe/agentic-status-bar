@@ -5,7 +5,7 @@ import Foundation
 struct InstallCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "install",
-        abstract: "Add the hooks to Claude Code's settings and link the SwiftBar plugin. Safe to run again."
+        abstract: "Add the hooks to Claude Code's settings. Safe to run again."
     )
 
     func run() throws {
@@ -44,7 +44,7 @@ struct UninstallCommand: ParsableCommand {
 
 enum Setup {
     /// An installer for this machine. Overrides: ASB_SETTINGS (settings file),
-    /// ASB_SWIFTBAR_DIR (SwiftBar's plugin folder).
+    /// ASB_SWIFTBAR_DIR (SwiftBar's plugin folder, where an old link of ours is removed).
     static func installer() -> Installer {
         let env = ProcessInfo.processInfo.environment
         let paths = Paths.from(environment: env)
@@ -54,7 +54,6 @@ enum Setup {
             settingsFile: env["ASB_SETTINGS"] ?? "\(paths.home)/.claude/settings.json",
             stableBinary: paths.stableBinary,
             sourceBinary: executable,
-            pluginFile: pluginFile(near: executable),
             swiftBarDir: swiftBarDir(env, home: paths.home),
             loginItemFile: paths.loginItemFile,
             stateDir: paths.stateDir(config: config),
@@ -63,25 +62,11 @@ enum Setup {
         return installer
     }
 
-    /// The SwiftBar plugin file of the repo asb was built in (walking up from the binary), if any.
-    static func pluginFile(near executable: String) -> String? {
-        var dir = (executable as NSString).deletingLastPathComponent
-        for _ in 0..<5 {
-            let candidate = (dir as NSString).appendingPathComponent("swiftbar/\(Installer.pluginName)")
-            if FileManager.default.fileExists(atPath: candidate) { return candidate }
-            dir = (dir as NSString).deletingLastPathComponent
-        }
-        return nil
-    }
-
-    /// SwiftBar's plugin folder: the override, SwiftBar's preference, or (on a terminal) asked for.
+    /// SwiftBar's plugin folder: the override, or SwiftBar's preference; nil without SwiftBar.
     static func swiftBarDir(_ env: [String: String], home: String) -> String? {
         if let dir = env["ASB_SWIFTBAR_DIR"] { return dir.isEmpty ? nil : expand(dir, home: home) }
         if let dir = defaultsPluginDirectory(env), !dir.isEmpty { return expand(dir, home: home) }
-        guard isatty(0) == 1 else { return nil }
-        print("SwiftBar has no plugin folder yet. Folder to use (empty to skip): ", terminator: "")
-        let answer = (readLine() ?? "").trimmingCharacters(in: .whitespaces)
-        return answer.isEmpty ? nil : expand(answer, home: home)
+        return nil
     }
 
     static func defaultsPluginDirectory(_ env: [String: String]) -> String? {
@@ -92,5 +77,19 @@ enum Setup {
 
     static func expand(_ path: String, home: String) -> String {
         Paths(home: home, configFile: "", registryDir: "").expandingHome(path)
+    }
+}
+
+extension CommandLine {
+    /// The absolute path of the running executable.
+    static var executablePath: String {
+        let path = arguments[0]
+        if path.hasPrefix("/") { return path }
+        if path.contains("/") {
+            return URL(fileURLWithPath: FileManager.default.currentDirectoryPath).appendingPathComponent(path).standardized.path
+        }
+        // Found through PATH.
+        let dirs = (ProcessInfo.processInfo.environment["PATH"] ?? "").split(separator: ":")
+        return dirs.map { "\($0)/\(path)" }.first { FileManager.default.isExecutableFile(atPath: $0) } ?? path
     }
 }

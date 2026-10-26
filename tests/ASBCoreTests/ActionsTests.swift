@@ -142,12 +142,13 @@ private struct Fixture {
     #expect(f.config() == "show_headless=0\n")
     f.perform("toggle", "show_headless")
     #expect(f.config() == "show_headless=1\n")
-    f.perform("toggle", "instant_refresh")
     f.perform("toggle", "use_registry")
     f.perform("toggle", "store_prompt_preview")
     f.perform("toggle", "evil")
     f.perform("toggle", "state_dir")
-    #expect(f.config() == "show_headless=1\ninstant_refresh=0\nuse_registry=0\nstore_prompt_preview=0\n")
+    // instant_refresh asked SwiftBar to refresh; nothing toggles it any more.
+    f.perform("toggle", "instant_refresh")
+    #expect(f.config() == "show_headless=1\nuse_registry=0\nstore_prompt_preview=0\n")
 }
 
 @Test func setTakesOnlyTheMenusChoices() throws {
@@ -183,16 +184,11 @@ private struct Fixture {
     #expect(text.hasSuffix("icon_idle=moon.zzz\ncolor_busy=#000000\nicon=bolt\n"))
 }
 
-@Test func loginAddsAndRemovesTheLoginItem() throws {
+@Test func theSwiftBarLoginActionIsGone() throws {
     let f = try Fixture()
-    let item = f.home.appendingPathComponent("Library/LaunchAgents/agentic-status-bar.start-swiftbar.plist")
     f.perform("login")
-    let plist = try #require(NSDictionary(contentsOf: item))
-    #expect(plist["Label"] as? String == "agentic-status-bar.start-swiftbar")
-    #expect(plist["ProgramArguments"] as? [String] == ["/usr/bin/open", "-g", "-b", "com.ameba.SwiftBar"])
-    #expect(plist["RunAtLoad"] as? Bool == true)
-    f.perform("login")
-    #expect(!FileManager.default.fileExists(atPath: item.path))
+    #expect(!FileManager.default.fileExists(
+        atPath: f.home.appendingPathComponent("Library/LaunchAgents/agentic-status-bar.start-swiftbar.plist").path))
 }
 
 // MARK: Mutes

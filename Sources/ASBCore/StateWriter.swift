@@ -34,23 +34,3 @@ public enum StateWriter {
         return true
     }
 }
-
-/// Asking the front end to refresh right away after a hook changed something.
-public enum Refresh {
-    /// SwiftBar refreshes a plugin when this URL is opened.
-    public static let swiftBarURL = "swiftbar://refreshplugin?name=agentic-status-bar"
-    /// At most one refresh request per this many milliseconds.
-    public static let intervalMs: Int64 = 500
-    public static let stampName = ".last-poke"
-
-    /// Calls `open` with the refresh URL unless one was requested less than `intervalMs` before `started`.
-    /// The time of the last request is kept in `<state dir>/.last-poke`.
-    public static func poke(stateDir: String, started: Int64, open: (String) -> Void) {
-        let stamp = (stateDir as NSString).appendingPathComponent(stampName)
-        let last = (try? String(contentsOfFile: stamp, encoding: .utf8))
-            .flatMap { Int64($0.trimmingCharacters(in: .whitespacesAndNewlines)) } ?? 0
-        guard started - last >= intervalMs else { return }
-        StateWriter.atomicWrite(Data("\(started)\n".utf8), to: stamp)
-        open(swiftBarURL)
-    }
-}

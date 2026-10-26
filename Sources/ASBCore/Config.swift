@@ -18,6 +18,7 @@ public struct Config: Equatable, Sendable {
     /// Minutes without activity before a busy session counts as uncertain; 0 = off.
     public var staleMinutes = 30
     public var useRegistry = true
+    /// No longer used: it asked SwiftBar to refresh after each hook event. Still read, so old files parse.
     public var instantRefresh = true
     public var storePromptPreview = true
     /// Older shortcut for the busy and empty icon; "" = from the theme.

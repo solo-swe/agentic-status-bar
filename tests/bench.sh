@@ -1,15 +1,12 @@
 #!/bin/sh
-# Times the SwiftBar plugin with 10 sessions (median under 150 ms), `asb hook` (under
-# 10 ms; the shell hook took 19 to 20 ms) and `asb snapshot` on the same sessions (under
-# 30 ms). Exits 1 if a target is missed.
-# Run it with: tests/run.sh --bench
+# Times `asb hook` (median under 10 ms; the shell hook took 19 to 20 ms) and `asb snapshot`
+# on 10 sessions (under 30 ms). Exits 1 if a target is missed.
+# Run it with: tests/bench.sh
 
 cd "$(dirname "$0")/.." || exit 1
 repo="$(pwd)"
 
-PLUGIN_RUNS=20
 HOOK_RUNS=50
-PLUGIN_TARGET_MS=150
 HOOK_TARGET_MS=10
 SNAPSHOT_RUNS=20
 SNAPSHOT_TARGET_MS=30
@@ -22,11 +19,7 @@ export ASB_STATE_DIR="$HOME/.claude/agentic-status-bar"
 export ASB_CONFIG="$HOME/.config/agentic-status-bar/config"
 export ASB_REGISTRY_DIR="$HOME/.claude/sessions"
 export ASB_HERDR="$tmp/no-herdr"
-mkdir -p "$ASB_STATE_DIR" "$ASB_REGISTRY_DIR" "$tmp/bin"
-# The hook pokes SwiftBar; don't, while benchmarking.
-printf '#!/bin/sh\nexit 0\n' > "$tmp/bin/open"
-chmod +x "$tmp/bin/open"
-export PATH="$tmp/bin:$PATH"
+mkdir -p "$ASB_STATE_DIR" "$ASB_REGISTRY_DIR"
 
 now_ms() { perl -MTime::HiRes=time -e 'printf "%d\n", time() * 1000'; }
 
@@ -76,17 +69,15 @@ report() {
   [ "$_verdict" = ok ]
 }
 
-# asb, built for release (as it ships); the plugin runs it too.
+# asb, built for release (as it ships).
 if ! swift build -c release --product asb >"$tmp/build.log" 2>&1; then
   echo "swift build failed:" >&2
   cat "$tmp/build.log" >&2
   exit 1
 fi
 asb="$repo/.build/release/asb"
-export ASB_BIN="$asb"
 
 status=0
-time_runs "$PLUGIN_RUNS" "'$repo/swiftbar/agentic-status-bar.5s.sh'" | report plugin "$PLUGIN_TARGET_MS" || status=1
 # The hook gets a real Claude-style payload; its state file is the 11th session.
 time_runs "$HOOK_RUNS" "'$asb' hook < '$repo/tests/fixtures/payloads/PreToolUse.json'" \
   | report hook "$HOOK_TARGET_MS" || status=1

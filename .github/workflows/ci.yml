@@ -5,23 +5,16 @@ on:
   pull_request:
 
 jobs:
-  test:
+  lint:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
-      # tests/run.sh builds asb, which the bats tests run.
-      - name: Select the newest Xcode
-        run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+      - name: Install shellcheck
+        run: brew install shellcheck
 
-      - name: Install bats and shellcheck
-        run: brew install bats-core shellcheck
-
-      - name: Shellcheck
+      - name: Shellcheck the scripts
         run: tests/lint.sh
-
-      - name: Tests
-        run: tests/run.sh
 
   swift:
     runs-on: macos-latest

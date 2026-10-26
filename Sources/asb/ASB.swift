@@ -8,7 +8,7 @@ struct ASB: ParsableCommand {
         abstract: "Agentic Status Bar: shows which Claude Code sessions need you.",
         version: ASBVersion.current,
         subcommands: [
-            SnapshotCommand.self, SwiftBarCommand.self, ActionCommand.self, HookCommand.self,
+            SnapshotCommand.self, ActionCommand.self, HookCommand.self,
             InstallCommand.self, UninstallCommand.self,
         ]
     )

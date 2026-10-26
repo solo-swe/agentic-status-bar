@@ -36,7 +36,6 @@ struct HookCommand: ParsableCommand {
             return found
         }
 
-        var changed = false
         StateWriter.withLock(file) {
             let current = FileManager.default.contents(atPath: file)
                 .flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
@@ -57,30 +56,18 @@ struct HookCommand: ParsableCommand {
             case .write(let state):
                 var data = HookEvents.encode(state)
                 data.append(UInt8(ascii: "\n"))
-                changed = StateWriter.atomicWrite(data, to: file)
+                StateWriter.atomicWrite(data, to: file)
             case .delete:
                 try? FileManager.default.removeItem(atPath: file)
-                changed = true
             case .none:
                 break
             }
         }
 
+        // The app watches the state dir, so a write is all it takes to update the menu bar.
         if payload.event == "SessionStart", let pid = metadata?.pid {
             for stale in HookMetadata.staleFiles(for: pid, in: StateDirectory.read(stateDir), own: file) {
                 try? FileManager.default.removeItem(atPath: stale)
-            }
-        }
-
-        if changed && config.instantRefresh {
-            Refresh.poke(stateDir: stateDir, started: started) { url in
-                // In the background, like `open -g URL &`: the hook doesn't wait for SwiftBar.
-                let open = Process()
-                open.executableURL = URL(fileURLWithPath: ProcessRunner(environment: environment).resolve("open") ?? "/usr/bin/open")
-                open.arguments = ["-g", url]
-                open.standardOutput = FileHandle.nullDevice
-                open.standardError = FileHandle.nullDevice
-                try? open.run()
             }
         }
     }

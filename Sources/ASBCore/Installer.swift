@@ -1,17 +1,15 @@
 import Foundation
 
-/// `asb install` and `asb uninstall`: the hooks in Claude Code's settings, a copy of asb at a stable
-/// path for them to run, and the SwiftBar plugin link. Everything it touches is a parameter, so tests
-/// run it in a temporary home.
+/// `asb install` and `asb uninstall`: the hooks in Claude Code's settings and a copy of asb at a stable
+/// path for them to run. Install also cleans up after the SwiftBar plugin this project used to be.
+/// Everything it touches is a parameter, so tests run it in a temporary home.
 public struct Installer {
     public var settingsFile: String
     /// Where the hooks run asb from: stays put when the repo or a download moves.
     public var stableBinary: String
     /// The asb being run, copied to `stableBinary`.
     public var sourceBinary: String
-    /// The SwiftBar plugin file to link, when one is known.
-    public var pluginFile: String?
-    /// SwiftBar's plugin folder, when known.
+    /// SwiftBar's plugin folder, when known: an old link to our plugin there is removed.
     public var swiftBarDir: String?
     public var loginItemFile: String
     public var stateDir: String
@@ -38,13 +36,12 @@ public struct Installer {
     public static let oldPluginName = "swiftbar-claudecode-minimal.5s.sh"
 
     public init(
-        settingsFile: String, stableBinary: String, sourceBinary: String, pluginFile: String?, swiftBarDir: String?,
+        settingsFile: String, stableBinary: String, sourceBinary: String, swiftBarDir: String?,
         loginItemFile: String, stateDir: String, configFile: String
     ) {
         self.settingsFile = settingsFile
         self.stableBinary = stableBinary
         self.sourceBinary = sourceBinary
-        self.pluginFile = pluginFile
         self.swiftBarDir = swiftBarDir
         self.loginItemFile = loginItemFile
         self.stateDir = stateDir
@@ -67,12 +64,12 @@ public struct Installer {
         try writeSettings(settings)
         log("Hooks registered in \(settingsFile)")
         migrate()
-        linkPlugin()
+        removeSwiftBarPlugin()
         log("Done. New Claude Code sessions will show up in the menu bar.")
     }
 
-    /// Moves the config, state files and mutes from the old paths, and replaces the old login item and
-    /// SwiftBar link. Anything already at the new path wins; nothing is overwritten.
+    /// Moves the config, state files and mutes from the old paths. Anything already at the new path
+    /// wins; nothing is overwritten.
     func migrate() {
         guard let old else { return }
         if fm.fileExists(atPath: old.configFile), !fm.fileExists(atPath: configFile) {
@@ -89,13 +86,16 @@ public struct Installer {
             }
             log("Moved state files from \(old.stateDir) to \(stateDir)")
         }
-        if fm.fileExists(atPath: old.loginItemFile) {
-            try? fm.removeItem(atPath: old.loginItemFile)
-            if !fm.fileExists(atPath: loginItemFile) {
-                try? Actions.loginItem.write(toFile: loginItemFile, atomically: true, encoding: .utf8)
-            }
-            log("Replaced the login item \(old.loginItemFile) with \(loginItemFile)")
+    }
+
+    /// The SwiftBar plugin is gone: removes our links in SwiftBar's plugin folder and the login items
+    /// that started SwiftBar (the app is its own login item, in its Settings).
+    func removeSwiftBarPlugin() {
+        for item in [old?.loginItemFile, loginItemFile].compactMap({ $0 }) where fm.fileExists(atPath: item) {
+            try? fm.removeItem(atPath: item)
+            log("Removed the SwiftBar login item \(item)")
         }
+        removeOurLink(named: Self.pluginName)
         removeOurLink(named: Self.oldPluginName)
     }
 
@@ -104,7 +104,7 @@ public struct Installer {
         guard let dir = swiftBarDir, !dir.isEmpty else { return }
         let link = (dir as NSString).appendingPathComponent(name)
         guard let target = try? fm.destinationOfSymbolicLink(atPath: link),
-              target == pluginFile || target.hasSuffix("/swiftbar/\(Self.pluginName)") || target.hasSuffix("/swiftbar/\(Self.oldPluginName)")
+              target.hasSuffix("/swiftbar/\(Self.pluginName)") || target.hasSuffix("/swiftbar/\(Self.oldPluginName)")
         else { return }
         try? fm.removeItem(atPath: link)
         log("Removed \(link)")
@@ -168,37 +168,16 @@ public struct Installer {
         }
     }
 
-    func linkPlugin() {
-        guard let pluginFile, let dir = swiftBarDir, !dir.isEmpty else {
-            log("Skipped the SwiftBar link: SwiftBar has no plugin folder yet.")
-            return
-        }
-        let link = (dir as NSString).appendingPathComponent(Self.pluginName)
-        do {
-            try fm.createDirectory(atPath: dir, withIntermediateDirectories: true)
-            if (try? fm.destinationOfSymbolicLink(atPath: link)) != nil { try fm.removeItem(atPath: link) }
-            try fm.createSymbolicLink(atPath: link, withDestinationPath: pluginFile)
-            log("Linked \(link)")
-        } catch {
-            log("Could not link \(link): \(error.localizedDescription)")
-        }
-    }
-
     // MARK: Uninstall
 
-    /// Removes our hooks, the SwiftBar link, the login item and the stable asb. State and config go
-    /// too when `purge` is set or `confirmPurge` says yes.
+    /// Removes our hooks, SwiftBar-era leftovers and the stable asb. State and config go too when
+    /// `purge` is set or `confirmPurge` says yes.
     public func uninstall(purge: Bool, confirmPurge: () -> Bool = { false }) throws {
         if let settings = try readSettings(backup: true) {
             try writeSettings(HookSettings.uninstall(settings))
             log("Removed the hooks from \(settingsFile)")
         }
-        removeOurLink(named: Self.pluginName)
-        removeOurLink(named: Self.oldPluginName)
-        if fm.fileExists(atPath: loginItemFile) {
-            try? fm.removeItem(atPath: loginItemFile)
-            log("Removed \(loginItemFile)")
-        }
+        removeSwiftBarPlugin()
         if fm.fileExists(atPath: stableBinary) {
             try? fm.removeItem(atPath: stableBinary)
             removeIfEmpty((stableBinary as NSString).deletingLastPathComponent)

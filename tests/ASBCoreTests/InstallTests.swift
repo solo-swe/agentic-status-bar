@@ -137,8 +137,7 @@ private struct Home {
     }
 
     func installer(swiftBarDir: String? = "default", now: Date = Date()) -> Installer {
-        var i = Installer(settingsFile: settings, stableBinary: stable, sourceBinary: source, pluginFile: plugin,
-                          swiftBarDir: swiftBarDir == "default" ? swiftBar : swiftBarDir, loginItemFile: login,
+        var i = Installer(settingsFile: settings, stableBinary: stable, sourceBinary: source, swiftBarDir: swiftBarDir == "default" ? swiftBar : swiftBarDir, loginItemFile: login,
                           stateDir: state, configFile: config)
         i.now = now
         i.log = { _ in }
@@ -149,15 +148,21 @@ private struct Home {
     func readSettings() throws -> OrderedJSON { try OrderedJSON.parse(Data(contentsOf: URL(fileURLWithPath: settings))) }
 }
 
-@Test func installCopiesAsbRegistersHooksAndLinksThePlugin() throws {
+@Test func installCopiesAsbRegistersHooksAndRemovesTheSwiftBarPlugin() throws {
     let home = try Home(settings: Data(contentsOf: fixtureSettings))
+    let fm = FileManager.default
+    try fm.createDirectory(atPath: home.swiftBar, withIntermediateDirectories: true)
+    try fm.createSymbolicLink(atPath: home.link, withDestinationPath: home.plugin)
+    try fm.createDirectory(atPath: (home.login as NSString).deletingLastPathComponent, withIntermediateDirectories: true)
+    try Data("x".utf8).write(to: URL(fileURLWithPath: home.login))
     try home.installer().install()
-    #expect(FileManager.default.isExecutableFile(atPath: home.stable))
+    #expect(fm.isExecutableFile(atPath: home.stable))
     let settings = try home.readSettings()
     #expect(HookSettings.count(settings) == 9)
     #expect(settings["hooks"]?["Stop"]?.arrayValue?.last?["hooks"]?.arrayValue?.first?["command"]
             == .string("'\(home.stable)' hook # agentic-status-bar"))
-    #expect(try FileManager.default.destinationOfSymbolicLink(atPath: home.link) == home.plugin)
+    #expect((try? fm.destinationOfSymbolicLink(atPath: home.link)) == nil)
+    #expect(!fm.fileExists(atPath: home.login))
 }
 
 @Test func hooksInstalledFollowsTheSettings() throws {
@@ -216,14 +221,11 @@ private struct Home {
     #expect(throws: Installer.Failure.self) { try array.installer().install() }
 }
 
-@Test func installSkipsTheLinkWithoutAPluginFolder() throws {
+@Test func installWorksWithoutSwiftBar() throws {
     let home = try Home()
-    var messages: [String] = []
-    var installer = home.installer(swiftBarDir: nil)
-    installer.log = { messages.append($0) }
-    try installer.install()
-    #expect(messages.contains { $0.hasPrefix("Skipped the SwiftBar link") })
+    try home.installer(swiftBarDir: nil).install()
     #expect(HookSettings.count(try home.readSettings()) == 9)
+    #expect(!FileManager.default.fileExists(atPath: home.swiftBar))
 }
 
 @Test func uninstallUndoesInstall() throws {
@@ -278,10 +280,10 @@ private struct Home {
     #expect(!fm.fileExists(atPath: home.state + "/s1.json.tmp.1"))
     #expect(try String(contentsOfFile: home.config, encoding: .utf8) == "theme=monochrome\n")
     #expect(!fm.fileExists(atPath: home.oldConfig))
-    #expect(!fm.fileExists(atPath: home.oldLogin))
-    #expect(NSDictionary(contentsOfFile: home.login)?["Label"] as? String == "agentic-status-bar.start-swiftbar")
+    // The SwiftBar login item and link are removed, not replaced.
+    #expect(!fm.fileExists(atPath: home.oldLogin) && !fm.fileExists(atPath: home.login))
     #expect((try? fm.destinationOfSymbolicLink(atPath: home.oldLink)) == nil)
-    #expect(try fm.destinationOfSymbolicLink(atPath: home.link) == home.plugin)
+    #expect((try? fm.destinationOfSymbolicLink(atPath: home.link)) == nil)
 }
 
 @Test func migrationNeverOverwritesNewFiles() throws {

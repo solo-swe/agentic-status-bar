@@ -38,22 +38,3 @@ private func tempDir() throws -> String {
     #expect(try String(contentsOfFile: file, encoding: .utf8) == "two\n")
     #expect(try FileManager.default.contentsOfDirectory(atPath: dir) == ["s1.json"])
 }
-
-@Test func refreshRequestsAreDebouncedTo500Ms() throws {
-    let dir = try tempDir()
-    var opened: [String] = []
-    Refresh.poke(stateDir: dir, started: 10_000) { opened.append($0) }
-    Refresh.poke(stateDir: dir, started: 10_200) { opened.append($0) }
-    #expect(opened == ["swiftbar://refreshplugin?name=agentic-status-bar"])
-    Refresh.poke(stateDir: dir, started: 10_500) { opened.append($0) }
-    #expect(opened.count == 2)
-    #expect(try String(contentsOfFile: dir + "/.last-poke", encoding: .utf8) == "10500\n")
-}
-
-@Test func aCorruptStampCountsAsNoEarlierRequest() throws {
-    let dir = try tempDir()
-    try "garbage".write(toFile: dir + "/.last-poke", atomically: true, encoding: .utf8)
-    var opened = 0
-    Refresh.poke(stateDir: dir, started: 10_000) { _ in opened += 1 }
-    #expect(opened == 1)
-}

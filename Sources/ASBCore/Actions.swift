@@ -72,8 +72,7 @@ public struct Actions {
 
     /// The config keys the menu's checkmark items toggle.
     public static let toggleKeys: Set = [
-        "show_interactive", "show_headless", "show_subagents", "show_ide", "instant_refresh", "use_registry",
-        "store_prompt_preview",
+        "show_interactive", "show_headless", "show_subagents", "show_ide", "use_registry", "store_prompt_preview",
     ]
     /// The only values `set` accepts: the menu's choices.
     public static let settable: [String: Set<String>] = [
@@ -87,7 +86,6 @@ public struct Actions {
         case "focus": focus(first)
         case "toggle": toggle(first)
         case "set": if args.count >= 2 { set(first, args[1]) }
-        case "login": toggleLoginItem()
         case "reveal-config": revealConfig()
         case "mute-hour": muteProject(first) { Mutes.muteHour(&$0, cwd: $1, now: now()) }
         case "mute-today": muteProject(first) { Mutes.muteToday(&$0, cwd: $1, now: now(), timeZone: timeZone) }
@@ -159,7 +157,6 @@ public struct Actions {
         case "show_headless": c.showHeadless
         case "show_subagents": c.showSubagents
         case "show_ide": c.showIDE
-        case "instant_refresh": c.instantRefresh
         case "use_registry": c.useRegistry
         default: c.storePromptPreview
         }
@@ -185,14 +182,13 @@ public struct Actions {
     public static func defaultConfig(_ c: Config) -> String {
         func flag(_ on: Bool) -> String { on ? "1" : "0" }
         var text = """
-            # Agentic Status Bar settings (key=value). The menu edits this file too.
+            # Agentic Status Bar settings (key=value). The app's Settings edit this file too.
             show_interactive=\(flag(c.showInteractive))
             show_headless=\(flag(c.showHeadless))
             show_subagents=\(flag(c.showSubagents))
             show_ide=\(flag(c.showIDE))
             stale_minutes=\(c.staleMinutes)
             use_registry=\(flag(c.useRegistry))
-            instant_refresh=\(flag(c.instantRefresh))
             store_prompt_preview=\(flag(c.storePromptPreview))
 
             # App notifications: waiting on you, idle, after how many seconds, with a sound.
@@ -226,39 +222,4 @@ public struct Actions {
         guard let cwd = field(id, { $0.cwd }) else { return }
         updateMutes { change(&$0, cwd) }
     }
-
-    /// Adds or removes a login item that opens SwiftBar in the background at login. It takes effect at
-    /// the next login and never starts or stops anything now; SwiftBar's own setting is left alone.
-    func toggleLoginItem() {
-        let file = paths.loginItemFile
-        if FileManager.default.fileExists(atPath: file) {
-            try? FileManager.default.removeItem(atPath: file)
-            return
-        }
-        try? FileManager.default.createDirectory(
-            atPath: (file as NSString).deletingLastPathComponent, withIntermediateDirectories: true)
-        try? Self.loginItem.write(toFile: file, atomically: true, encoding: .utf8)
-    }
-
-    static let loginItemLabel = Paths.loginItemLabel
-    static let loginItem = """
-        <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-        <plist version="1.0">
-        <dict>
-          <key>Label</key>
-          <string>\(loginItemLabel)</string>
-          <key>ProgramArguments</key>
-          <array>
-            <string>/usr/bin/open</string>
-            <string>-g</string>
-            <string>-b</string>
-            <string>com.ameba.SwiftBar</string>
-          </array>
-          <key>RunAtLoad</key>
-          <true/>
-        </dict>
-        </plist>
-
-        """
 }

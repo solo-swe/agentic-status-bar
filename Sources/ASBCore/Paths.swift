@@ -37,7 +37,8 @@ public struct Paths: Sendable, Equatable {
     /// Where `asb install` keeps the asb the hooks run.
     public var stableBinary: String { "\(home)/Library/Application Support/agentic-status-bar/bin/asb" }
 
-    /// The login item that "Start SwiftBar at login" adds.
+    /// The login item the SwiftBar plugin's "Start SwiftBar at login" added; install and the app's
+    /// Start at login remove it.
     public var loginItemFile: String { "\(home)/Library/LaunchAgents/\(Self.loginItemLabel).plist" }
     public static let loginItemLabel = "agentic-status-bar.start-swiftbar"
 

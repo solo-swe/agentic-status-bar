@@ -120,7 +120,6 @@ private struct GeneralSettings: View {
                     ForEach(SettingsView.staleChoices, id: \.minutes) { Text($0.label).tag($0.minutes) }
                 }
                 toggle("Find sessions in Claude Code's registry", "use_registry", \.useRegistry)
-                toggle("Update the menu bar on every hook event", "instant_refresh", \.instantRefresh)
                 toggle("Use the first prompt as a session's title", "store_prompt_preview", \.storePromptPreview)
             }
             Section {
