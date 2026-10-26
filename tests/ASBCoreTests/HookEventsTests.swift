@@ -194,10 +194,42 @@ private func has(_ state: [String: Any]?, _ key: String) -> Bool { state?[key] !
     #expect(apply(p, to: nil, at: 1) == .none)
 }
 
-@Test func anEventOlderThanTheStoredUpdateIsDropped() throws {
+@Test func anEventThatStartedBeforeTheLastOneIsDropped() throws {
     let p = try payload("Stop")
-    #expect(apply(p, to: ["state": "busy", "updatedAt": 5000], at: 6000, started: 4000) == .none)
-    #expect(apply(p, to: ["state": "busy", "updatedAt": 5000], at: 6000, started: 5000) != .none)
+    #expect(apply(p, to: ["state": "busy", "eventAt": 5000], at: 6000, started: 4000) == .none)
+    #expect(num(written(apply(p, to: ["state": "busy", "eventAt": 5000], at: 6000, started: 5000)), "eventAt") == 5000)
+}
+
+@Test func theRuleComparesEventStartsNotWriteTimes() throws {
+    // PostToolUse started at 1000 and wrote at 1500; Stop started at 1200, between the two.
+    let post = written(apply(try payload("PostToolUse"), to: ["state": "busy"], at: 1500, started: 1000))
+    #expect(num(post, "eventAt") == 1000 && num(post, "updatedAt") == 1500)
+    #expect(str(written(apply(try payload("Stop"), to: post, at: 1600, started: 1200)), "state") == "idle")
+    // A file from before eventAt accepts the event.
+    #expect(apply(try payload("Stop"), to: ["state": "busy", "updatedAt": 9000], at: 6000, started: 4000) != .none)
+}
+
+@Test func subagentsStartedTogetherAllLandInAnyOrder() throws {
+    var state: [String: Any]? = ["state": "busy", "lastTool": "Agent"]
+    // Three starts at 1000, 1001 and 1002 get the lock in reverse order.
+    for (id, started) in [("c", Int64(1002)), ("b", 1001), ("a", 1000)] {
+        var p = try payload("SubagentStart")
+        p.agentId = id
+        state = written(apply(p, to: state, at: 2000 + started, started: started))
+    }
+    #expect(Set((state?["subagents"] as? [String: Any] ?? [:]).keys) == ["a", "b", "c"])
+    #expect(num(state, "eventAt") == 1002)
+    // An older stop still removes its subagent, and leaves the state alone.
+    var stop = try payload("SubagentStop")
+    stop.agentId = "b"
+    let after = written(apply(stop, to: (state ?? [:]).merging(["state": "idle"]) { $1 }, at: 4000, started: 900))
+    #expect(Set((after?["subagents"] as? [String: Any] ?? [:]).keys) == ["a", "c"])
+    #expect(str(after, "state") == "idle" && num(after, "eventAt") == 1002)
+}
+
+@Test func anOlderSubagentStartDoesNotSetTheState() throws {
+    let s = written(apply(try payload("SubagentStart"), to: ["eventAt": 5000], at: 6000, started: 4000))
+    #expect(!has(s, "state") && has(s, "subagents"))
 }
 
 @Test func unknownFieldsInTheStateAreKept() throws {
@@ -214,5 +246,5 @@ private func has(_ state: [String: Any]?, _ key: String) -> Bool { state?[key] !
         return
     }
     let text = String(decoding: HookEvents.encode(s), as: UTF8.self)
-    #expect(text == #"{"sessionId":"3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90","state":"idle","stateSince":7,"updatedAt":7,"v":1}"#)
+    #expect(text == #"{"eventAt":7,"sessionId":"3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90","state":"idle","stateSince":7,"updatedAt":7,"v":1}"#)
 }

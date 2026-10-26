@@ -433,8 +433,13 @@ teardown() { common_teardown; }
   [ ! -e "$HOME/escape.json" ]
 }
 
-@test "an event older than the stored update does not overwrite it" {
-  printf '{"v":1,"sessionId":"%s","state":"waiting","updatedAt":9999999999999,"stateSince":1}\n' "$FIXTURE_SESSION" > "$(state_file)"
+@test "an event that started before the last applied one does not overwrite it" {
+  printf '{"v":1,"sessionId":"%s","state":"waiting","eventAt":9999999999999,"updatedAt":9999999999999,"stateSince":1}\n' "$FIXTURE_SESSION" > "$(state_file)"
   run_hook SessionStart
   [ "$(state_field .state)" = waiting ]
+}
+
+@test "the hook records when its event started" {
+  run_hook Stop
+  [[ "$(state_field .eventAt)" =~ ^[0-9]{13}$ ]]
 }

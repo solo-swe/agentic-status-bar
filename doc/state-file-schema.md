@@ -31,6 +31,7 @@ One JSON object per Claude Code session, on one line, named after the session ID
 | `reason` | `"permission"`, `"question"` | when waiting | Notification | Why the session waits |
 | `message` | string | no | Notification | Claude Code's notification text |
 | `updatedAt` | integer, epoch ms | yes | every write | When this file was last written |
+| `eventAt` | integer, epoch ms | yes² | every write | When the hook of the latest event applied started (see Writer rules › Newer wins) |
 | `stateSince` | integer, epoch ms | yes | every write | When `state` last changed (unchanged when a write keeps the state) |
 | `pid` | integer or `null` | no | SessionStart, backfill | PID of the `claude` process; `null` means none was found (don't look again) |
 | `procStart` | string | with `pid` | SessionStart, backfill | That process's start time as `ps -o lstart=` prints it in local time, e.g. `"Mon Oct 19 09:12:03 2026"`. Compare after collapsing runs of spaces. |
@@ -45,11 +46,12 @@ One JSON object per Claude Code session, on one line, named after the session ID
 | `subagents` | object | no | SubagentStart, SubagentStop | Running subagents: `{ "<agent_id>": { "type": string, "since": epoch ms } }`; removed when empty |
 
 ¹ A file created by an early `SubagentStart` gets `state: "busy"`.
+² Files written before `eventAt` existed lack it until their next write.
 
 Example:
 
 ```json
-{"v":1,"sessionId":"3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90","state":"waiting","reason":"permission","message":"Claude needs your permission to use Bash","updatedAt":1792891073038,"stateSince":1792891073038,"pid":48213,"procStart":"Mon Oct 19 09:12:03 2026","cwd":"/Users/alex/code/api-gateway","kind":"interactive","termBundleId":"com.mitchellh.ghostty","herdrPane":"w2:p1","transcriptPath":"/Users/alex/.claude/projects/api-gateway/3f9c2a7e.jsonl","lastTool":"Bash","promptPreview":"Add rate limiting to the auth routes","promptAt":1792891060000,"subagents":{"a1":{"type":"Explore","since":1792891070000}}}
+{"v":1,"sessionId":"3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90","state":"waiting","reason":"permission","message":"Claude needs your permission to use Bash","updatedAt":1792891073038,"eventAt":1792891073031,"stateSince":1792891073038,"pid":48213,"procStart":"Mon Oct 19 09:12:03 2026","cwd":"/Users/alex/code/api-gateway","kind":"interactive","termBundleId":"com.mitchellh.ghostty","herdrPane":"w2:p1","transcriptPath":"/Users/alex/.claude/projects/api-gateway/3f9c2a7e.jsonl","lastTool":"Bash","promptPreview":"Add rate limiting to the auth routes","promptAt":1792891060000,"subagents":{"a1":{"type":"Explore","since":1792891070000}}}
 ```
 
 ### Events
@@ -84,9 +86,14 @@ Recorded at `SessionStart`, and backfilled once by the first other event of a se
 1. **Lock:** take the per-session lock `<file>.lock` (a directory, created with `mkdir`), retrying 50 times every
    10 ms; give up silently if it can't be taken. Release it after writing.
 2. **Newer wins:** hooks run asynchronously and can finish out of order. Each event notes its start time (epoch ms)
-   when the hook starts. If the file's `updatedAt` is later than that, the event is dropped.
+   when the hook starts. If the file's `eventAt` (the start time of the latest event applied) is later than that,
+   the event started earlier and is dropped; a file without `eventAt` accepts it. `SubagentStart` and
+   `SubagentStop` are the exception: an earlier one still adds or removes its subagent (the map is keyed by agent ID,
+   so order doesn't matter) but changes nothing else. Comparing with `updatedAt`, the time of the previous *write*,
+   would drop events whose hooks started together, such as parallel subagents or a `Stop` right after a tool.
 3. **Read-modify-write:** a missing or corrupt file counts as `{}`. Apply the event, then set `v`, `sessionId`,
-   `updatedAt = now`, and `stateSince = now` when `state` changed or `stateSince` is missing.
+   `updatedAt = now`, `eventAt` = the later of its old value and this event's start time, and `stateSince = now`
+   when `state` changed or `stateSince` is missing.
 4. **Atomic:** write to `<file>.tmp.<pid>`, then rename over the file.
 5. **Silent:** the hook never prints, never fails Claude Code, and always exits 0, also on bad input.
 6. **Refresh:** when a write happened and `instant_refresh=1`, ask the front end to refresh, at most once per 500 ms

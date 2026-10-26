@@ -64,15 +64,19 @@ public enum HookEvents {
     }
 
     /// Applies `payload` to the current state (`current`: the parsed file, or nil when missing or
-    /// corrupt). `started` is when the hook started (epoch ms): an event older than the file's last
-    /// update is dropped, so async hooks finishing out of order can't go back in time.
+    /// corrupt). `started` is when the hook started (epoch ms). An event that started before the
+    /// last applied one (`eventAt`) is dropped, so async hooks finishing out of order can't go back
+    /// in time; subagent events still add or remove their subagent, since that map is keyed by agent
+    /// ID and its order doesn't matter.
     public static func apply(
         _ payload: HookPayload, to current: [String: Any]?, now: Int64, started: Int64,
         storePromptPreview: Bool, sessionStartChanges: (inout [String: Any]) -> Void = { _ in }
     ) -> Outcome {
         if payload.event == "SessionEnd" { return .delete }
         let old = current ?? [:]
-        if let updated = (old["updatedAt"] as? NSNumber)?.int64Value, updated > started { return .none }
+        let lastEvent = (old["eventAt"] as? NSNumber)?.int64Value
+        let older = lastEvent.map { $0 > started } ?? false
+        if older && payload.event != "SubagentStart" && payload.event != "SubagentStop" { return .none }
 
         var s = old
         switch payload.event {
@@ -134,7 +138,7 @@ public enum HookEvents {
             s["message"] = nil
         case "SubagentStart":
             guard !payload.agentId.isEmpty else { return .none }
-            if s["state"] == nil || s["state"] is NSNull || (s["state"] as? Bool) == false { s["state"] = "busy" }
+            if !older, s["state"] == nil || s["state"] is NSNull || (s["state"] as? Bool) == false { s["state"] = "busy" }
             var agents = s["subagents"] as? [String: Any] ?? [:]
             agents[payload.agentId] = ["type": payload.agentType.isEmpty ? "agent" : payload.agentType, "since": now]
             s["subagents"] = agents
@@ -147,15 +151,18 @@ public enum HookEvents {
         default:
             return .none
         }
-        return .write(stamped(s, old: old, sessionId: payload.sessionId, now: now))
+        return .write(stamped(s, old: old, sessionId: payload.sessionId, now: now, eventAt: max(started, lastEvent ?? started)))
     }
 
-    /// Sets v, sessionId and updatedAt, and stateSince when the state changed (or was never set).
-    static func stamped(_ new: [String: Any], old: [String: Any], sessionId: String, now: Int64) -> [String: AnyHashable] {
+    /// Sets v, sessionId, updatedAt and eventAt, and stateSince when the state changed (or was never set).
+    static func stamped(
+        _ new: [String: Any], old: [String: Any], sessionId: String, now: Int64, eventAt: Int64
+    ) -> [String: AnyHashable] {
         var s = new
         s["v"] = 1
         s["sessionId"] = sessionId
         s["updatedAt"] = now
+        s["eventAt"] = eventAt
         let changed = !isEqualJSON(s["state"], old["state"])
         if changed || s["stateSince"] == nil || s["stateSince"] is NSNull { s["stateSince"] = now }
         return hashable(s)

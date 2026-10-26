@@ -3214,12 +3214,12 @@
         "App/Sources/AgenticStatusBarApp.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T04:54:47Z",
+      "updated_at": "2026-10-26T05:12:49Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T04:43:20Z",
       "started_by": "claude:c631bc24",
-      "commit": "b57596677d938cc40470d29f3168a038a876b27a"
+      "commit": "7b0ed9a877ae5d54768f0a3be280bd68730b86ec"
     },
     {
       "id": "T-085",
@@ -3560,7 +3560,7 @@
       "description": "The newer-wins rule compares a hook's start time with the file's updatedAt (the previous write time), so hooks that start close together drop each other: of three SubagentStart events in the same millisecond window only one or two land (a session with 3 subagents shows 2), and a Stop is dropped when a PostToolUse that started just before it writes first (the file stays busy). Fix: record the applied event's start time in a new field eventAt and compare against that (a file without it accepts the event). SubagentStart/SubagentStop older than eventAt still add or remove their subagent (the map is keyed by agent ID, so order doesn't matter) but change nothing else. Update doc/state-file-schema.md (field table, Newer wins), HookEventsTests and the bats test.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/HookEvents.swift",
@@ -3569,9 +3569,11 @@
         "doc/state-file-schema.md"
       ],
       "created_at": "2026-10-26T05:12:19Z",
-      "updated_at": "2026-10-26T05:12:19Z",
+      "updated_at": "2026-10-26T05:12:57Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T05:12:57Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-097",
