@@ -10,13 +10,25 @@ hand.
 
 ## One-time setup
 
-You need a paid Apple Developer account.
+0. **Join the Apple Developer Program.** A free Apple Account can't create Developer ID certificates; the paid
+   membership (99 USD a year) can. Sign in at developer.apple.com › **Account** and use its **Enroll** button (or the
+   [enrollment page](https://developer.apple.com/programs/enroll/), or the **Apple Developer** app on a Mac, iPhone
+   or iPad, which Apple suggests for individuals; finish on the same device you start on). You need:
+   - an Apple Account with two-factor authentication;
+   - as an **individual**, your legal name (no alias or company name, which delays the review) and a photo ID;
+   - as an **organization**, a legal entity, a D-U-N-S Number, a work email and website on its domain, and the
+     authority to sign for it.
 
+   Apple reviews the request and emails you; then you agree to the license and pay. The membership shows in the
+   Account page once active (Apple says to contact Developer Support if it hasn't within 24 hours of paying). Whoever
+   enrolls is the **Account Holder**, the role the next step needs.
 1. **Developer ID Application certificate.** Creating one needs the Account Holder role. On the developer website
    (these steps don't depend on the Xcode version):
    1. Make a certificate signing request: open **Keychain Access** (Spotlight finds it), choose **Keychain Access ›
       Certificate Assistant › Request a Certificate from a Certificate Authority**, enter your email address and a
-      common name, leave the CA email address empty, choose **Saved to disk** and save the `.certSigningRequest` file.
+      common name, leave the CA email address empty, choose **Saved to disk** and save the `.certSigningRequest` file
+      anywhere outside the repository. It is only needed for the upload below; making it also puts the private key
+      in your login keychain, so do this whole step on the Mac you'll export from.
    2. At developer.apple.com › Account › **Certificates, Identifiers & Profiles** › **Certificates**, click **+**,
       choose **Developer ID**, then **Developer ID Application**, and continue. If asked for an intermediary, choose
       **G2 Sub-CA**. Upload the request file and download the `.cer` file.
