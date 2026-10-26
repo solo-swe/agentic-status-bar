@@ -10,38 +10,52 @@ hand.
 
 ## One-time setup
 
-0. **Join the Apple Developer Program.** A free Apple Account can't create Developer ID certificates; the paid
-   membership (99 USD a year) can. Sign in at developer.apple.com › **Account** and use its **Enroll** button (or the
-   [enrollment page](https://developer.apple.com/programs/enroll/), or the **Apple Developer** app on a Mac, iPhone
-   or iPad, which Apple suggests for individuals; finish on the same device you start on). You need:
-   - an Apple Account with two-factor authentication;
-   - as an **individual**, your legal name (no alias or company name, which delays the review) and a photo ID;
-   - as an **organization**, a legal entity, a D-U-N-S Number, a work email and website on its domain, and the
-     authority to sign for it.
+These steps follow Apple's Account Help and App Store Connect Help (links at each step); Apple renames buttons now and
+then, so if one differs, the linked page has the current wording.
 
-   Apple reviews the request and emails you; then you agree to the license and pay. The membership shows in the
-   Account page once active (Apple says to contact Developer Support if it hasn't within 24 hours of paying). Whoever
-   enrolls is the **Account Holder**, the role the next step needs.
-1. **Developer ID Application certificate.** Creating one needs the Account Holder role. On the developer website
-   (these steps don't depend on the Xcode version):
-   1. Make a certificate signing request: open **Keychain Access** (Spotlight finds it), choose **Keychain Access ›
-      Certificate Assistant › Request a Certificate from a Certificate Authority**, enter your email address and a
-      common name, leave the CA email address empty, choose **Saved to disk** and save the `.certSigningRequest` file
-      anywhere outside the repository. It is only needed for the upload below; making it also puts the private key
-      in your login keychain, so do this whole step on the Mac you'll export from.
-   2. At developer.apple.com › Account › **Certificates, Identifiers & Profiles** › **Certificates**, click **+**,
-      choose **Developer ID**, then **Developer ID Application**, and continue. If asked for an intermediary, choose
-      **G2 Sub-CA**. Upload the request file and download the `.cer` file.
-   3. Double-click the `.cer` file: it appears in Keychain Access under **My Certificates** as "Developer ID
-      Application: <your name> (<team ID>)", with its private key.
-   4. Export it: select it in **My Certificates**, choose **File › Export Items…**, pick **Personal Information
+0. **Join the Apple Developer Program**
+   ([Program enrollment](https://developer.apple.com/help/account/membership/program-enrollment)). Developer ID
+   certificates need the paid membership (99 USD a year, shown in local currency). Start from your account at
+   developer.apple.com/account, the [enrollment page](https://developer.apple.com/programs/enroll/), or the
+   **Apple Developer** app. You need an Apple Account with two-factor authentication; an individual enrolls under
+   their legal name (an alias or company name delays it), an organization needs a D-U-N-S Number. Individuals agree
+   to the license and pay during enrollment; organizations pay after Apple verifies them. Apple first emails an
+   order acknowledgement, then a confirmation once the order is processed; the membership then shows in your account.
+   Whoever enrolls becomes the **Account Holder**, the role steps 1 and 2 need.
+1. **Developer ID Application certificate**
+   ([Create Developer ID certificates](https://developer.apple.com/help/account/certificates/create-developer-id-certificates/)).
+   Only the Account Holder can create it; a team can have up to five.
+   1. Make a certificate signing request
+      ([how](https://developer.apple.com/help/account/certificates/create-a-certificate-signing-request)): open
+      **Keychain Access** (in `/Applications/Utilities`), choose **Keychain Access › Certificate Assistant › Request
+      a Certificate from a Certificate Authority**, enter your email address in **User Email Address** and a name for
+      the key in **Common Name**, leave **CA Email Address** empty, select **Saved to disk** and click **Continue**.
+      Save the `.certSigningRequest` file anywhere outside the repository: it is only needed for the upload below
+      and can be deleted after. Making it also puts the private key in your login keychain, so do this whole step
+      on the Mac you'll export from.
+   2. In your account, open **Certificates, Identifiers & Profiles**, click **Certificates** in the sidebar, then the
+      add button (**+**).
+   3. Under **Software**, select **Developer ID** and click **Continue**, then choose **Developer ID Application**
+      (it signs a Mac app; **Developer ID Installer** is for `.pkg` installers, not needed here). Not **Apple
+      Development** or **Apple Distribution**: those sign development builds and App Store or Ad Hoc builds, which
+      Gatekeeper doesn't accept for an app downloaded from the web.
+   4. Click **Choose File**, select the `.certSigningRequest` file, click **Continue**, then **Download**. The `.cer`
+      file goes to `Downloads`.
+   5. Double-click the `.cer` file: it appears in Keychain Access under **My Certificates** as "Developer ID
+      Application: <your name> (<team ID>)", with the private key under it.
+   6. Export it: select it in **My Certificates**, choose **File › Export Items…**, pick **Personal Information
       Exchange (.p12)**, and set a password.
-
-   Xcode can also create the certificate from its account settings (Manage Certificates); the menu names differ
-   between Xcode versions, so the website route is the one described here.
-2. **App Store Connect API key** for `notarytool`. At appstoreconnect.apple.com › Users and Access › Integrations ›
-   App Store Connect API, create a team key with the **Developer** role. Download the `AuthKey_<KEYID>.p8` file (it
-   can be downloaded only once) and note the **Key ID** and the **Issuer ID** shown on that page.
+2. **App Store Connect API key** for `notarytool`
+   ([App Store Connect API](https://developer.apple.com/help/app-store-connect/get-started/app-store-connect-api)).
+   At appstoreconnect.apple.com:
+   1. **Users and Access › Integrations** opens with **App Store Connect API** selected. The first time, the Account
+      Holder clicks **Request Access**, agrees to the terms and clicks **Submit**; Apple reviews the request, so it
+      may not be approved at once.
+   2. Click **Team Keys**, then **Generate API Key** (or **+** if there's a key already). Enter a name, choose
+      **Developer** under **Access**, and click **Generate**. Make a team key, not an individual key (Edit Profile ›
+      Individual API Key): the secrets below use the team's Issuer ID.
+   3. Download the `AuthKey_<KEYID>.p8` file (it can be downloaded only once) and note the **Key ID** shown for the
+      key and the **Issuer ID** shown above the list.
 3. **Repository secrets.** Add these in GitHub › Settings › Secrets and variables › Actions, or with `gh secret set`:
 
 | Secret | Value |
