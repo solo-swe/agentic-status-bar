@@ -16,7 +16,8 @@ public struct ProcessRunner: CommandRunner {
         self.environment = environment
     }
 
-    func resolve(_ command: String) -> String? {
+    /// The path of `command`: as given when it contains a slash, else the first match on PATH.
+    public func resolve(_ command: String) -> String? {
         if command.contains("/") { return command }
         let dirs = (environment["PATH"] ?? "").split(separator: ":").map(String.init) + ["/usr/bin", "/bin"]
         return dirs.map { "\($0)/\(command)" }.first { FileManager.default.isExecutableFile(atPath: $0) }
