@@ -21,7 +21,10 @@ final class SettingsWindow {
     }
 
     private func make() -> NSWindow {
-        let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView(store: store)))
+        let host = NSHostingController(rootView: SettingsView(store: store))
+        // The window follows the selected tab's size.
+        host.sizingOptions = .preferredContentSize
+        let window = NSWindow(contentViewController: host)
         window.title = "Agentic Status Bar Settings"
         window.styleMask = [.titled, .closable, .miniaturizable]
         // Kept after closing, so reopening is instant and keeps its place.
