@@ -56,6 +56,27 @@ final class PopoverTests: XCTestCase {
         XCTAssertFalse(rows[0].actions.isEmpty)
     }
 
+    /// Rows built by ASBCore's MenuModel: waiting first, muted last, with the state words.
+    func testRowsFromTheMenuModelPutMutedLast() throws {
+        func reconciled(_ id: String, _ state: String, muted: Bool = false) throws -> ReconciledSession {
+            let json = #"{"v":1,"sessionId":"\#(id)","state":"\#(state)","updatedAt":1,"stateSince":1,"cwd":"/w/\#(id)"}"#
+            var s = ReconciledSession(try XCTUnwrap(StateFile.parse(RawFile(path: "\(id).json", contents: Data(json.utf8)))))
+            s.muted = muted
+            return s
+        }
+        let context = MenuModel.Context(now: 61_000, timeZone: .current, theme: Theme.resolve(Config()))
+        let snapshot = MenuModel.snapshot(
+            [try reconciled("quiet", "idle", muted: true), try reconciled("busy", "busy"), try reconciled("asks", "waiting")],
+            context)
+        let rows = RowItem.rows(snapshot)
+        XCTAssertEqual(rows.map(\.id), ["asks", "busy", "quiet"])
+        XCTAssertEqual(rows.map(\.word), ["permission", "working", "idle"])
+        XCTAssertEqual(rows.map(\.muted), [false, false, true])
+        XCTAssertEqual(rows[0].detail, "1m")
+        XCTAssertEqual(rows[2].symbol, "bell.slash")
+        XCTAssertEqual(rows[2].actions.first?.action, "unmute")
+    }
+
     func testTheInvalidFilesNote() {
         XCTAssertEqual(PopoverView.invalidNote(1), "1 state file can't be read")
         XCTAssertEqual(PopoverView.invalidNote(3), "3 state files can't be read")

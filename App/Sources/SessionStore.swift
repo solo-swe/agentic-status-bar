@@ -22,10 +22,17 @@ final class SessionStore {
     @ObservationIgnored private var computing = false
     @ObservationIgnored private var again = false
 
-    init(environment: [String: String] = ProcessInfo.processInfo.environment) {
+    /// Makes the runner actions start commands with (tests record them instead).
+    @ObservationIgnored private let runner: @Sendable ([String: String]) -> CommandRunner
+
+    init(
+        environment: [String: String] = ProcessInfo.processInfo.environment,
+        runner: @escaping @Sendable ([String: String]) -> CommandRunner = { ProcessRunner(environment: $0) }
+    ) {
         live = LiveInputs(
             paths: Paths.from(environment: environment), environment: environment,
             inspector: ProcessInspectors.fromEnvironment(environment))
+        self.runner = runner
     }
 
     var paths: Paths { live.paths }
@@ -57,13 +64,16 @@ final class SessionStore {
         set(key, on ? "1" : "0")
     }
 
-    /// Runs a menu action (`asb action`'s names) off the main thread, then refreshes.
-    func perform(_ name: String, _ args: [String]) {
-        let (paths, environment) = (live.paths, live.environment)
+    /// Runs a menu action (`asb action`'s names) off the main thread, then refreshes. `done` runs
+    /// after the action (tests wait on it).
+    func perform(_ name: String, _ args: [String], done: (@MainActor () -> Void)? = nil) {
+        let (paths, environment, runner) = (live.paths, live.environment, runner)
         Task.detached(priority: .userInitiated) {
-            Actions(paths: paths, environment: environment, runner: ProcessRunner(environment: environment))
-                .perform(name, args)
-            await MainActor.run { [weak self] in self?.refresh() }
+            Actions(paths: paths, environment: environment, runner: runner(environment)).perform(name, args)
+            await MainActor.run { [weak self] in
+                self?.refresh()
+                done?()
+            }
         }
     }
 

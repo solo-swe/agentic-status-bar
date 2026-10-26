@@ -37,6 +37,24 @@ final class StatusItemTests: XCTestCase {
         XCTAssertEqual(p.toolTip, "Agentic Status Bar: All sessions muted")
     }
 
+    func testEveryHeaderStateHasATooltipAndItsThemeColor() throws {
+        let theme = Theme.resolve(Config())
+        let expected: [(Snapshot.HeaderState, Int?, String)] = [
+            (.warning, 2, "Some state files can't be read"), (.waiting, 1, "1 waiting on you"), (.idle, 3, "3 idle"),
+            (.uncertain, 1, "1 with no recent activity"), (.busy, 4, "4 working"), (.muted, nil, "All sessions muted"),
+            (.none, nil, "No Claude Code sessions"),
+        ]
+        for (state, count, what) in expected {
+            let header = Snapshot.Header(
+                state: state, symbol: theme.symbol(state.rawValue), color: theme.color(state.rawValue), count: count)
+            let p = StatusItemController.presentation(header)
+            XCTAssertEqual(p.toolTip, "Agentic Status Bar: \(what)")
+            XCTAssertEqual(p.title, count.map { "\u{2009}\($0)" } ?? "")
+            XCTAssertNotNil(p.color, "\(state) has no theme color")
+            XCTAssertNotNil(ThemeColor.symbol(p.symbol, color: p.color), "\(state)'s symbol \(p.symbol) doesn't exist")
+        }
+    }
+
     func testSymbolsAreDrawnInColorNotAsTemplates() throws {
         let colored = try XCTUnwrap(ThemeColor.symbol("zzz", color: ThemeColor.color("#B25000")))
         XCTAssertFalse(colored.isTemplate)

@@ -3382,7 +3382,7 @@
       "description": "Settings section: notify when waiting (on), when idle (off), delay (5, 10, 30, 60 s; default 10), sound on/off, and a 'Send test notification' button. Store as new config keys (notify_waiting, notify_idle, notify_delay_seconds, notify_sound) validated in ASBCore Config; update doc/state-file-schema.md's config section.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-087",
         "T-084"
@@ -3393,11 +3393,22 @@
         "doc/state-file-schema.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T05:58:10Z",
+      "updated_at": "2026-10-26T06:04:32Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T05:58:10Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "b89e3c57b2131b6b2fc2e8db17ab09595ebd4f23",
+      "completed_at": "2026-10-26T06:04:32Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T06:04:32Z",
+          "kind": "outcome",
+          "text": "Notifications tab: waiting, idle, delay, sound, test button; notify_* config keys; checked by the user",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-089",
@@ -3411,7 +3422,7 @@
       "description": "Add App tests: the status item's title and color per header state, row view models (labels, words, muted rows last), action wiring with a fake action runner, and NotificationRules edge cases (quick approval within the delay, muted waiting, session ending while waiting). Run them in CI with xcodebuild test.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-083",
         "T-087"
@@ -3421,9 +3432,11 @@
         ".github/workflows/ci.yml"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:26Z",
+      "updated_at": "2026-10-26T06:04:34Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T06:04:34Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-090",

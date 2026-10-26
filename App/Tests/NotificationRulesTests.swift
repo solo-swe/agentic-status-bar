@@ -78,6 +78,34 @@ final class NotificationRulesTests: XCTestCase {
         XCTAssertEqual(out.nextDue, 25_000)
     }
 
+    func testAQuickApprovalWithinTheDelayNeverNotifies() {
+        var rules = NotificationRules()
+        XCTAssertEqual(rules.evaluate(snapshot(session("a", .waiting, since: 0)), now: 3000, options: defaults).nextDue, 10_000)
+        // Approved after 4 s: busy again before the delay ran out.
+        let out = rules.evaluate(snapshot(session("a", .busy, since: 4000)), now: 10_000, options: defaults)
+        XCTAssertEqual(out, .init())
+    }
+
+    func testASessionEndingWhileWaitingWithdrawsItsNotification() {
+        var rules = NotificationRules()
+        _ = rules.evaluate(snapshot(session("a", .waiting, since: 0), session("b", .waiting, since: 0)), now: 20_000, options: defaults)
+        let out = rules.evaluate(snapshot(session("b", .waiting, since: 0)), now: 25_000, options: defaults)
+        XCTAssertEqual(out.cleared, ["a"])
+        XCTAssertEqual(out.alerts, [])
+        // If it comes back waiting (a new file for the same ID), it is notified again.
+        XCTAssertEqual(rules.evaluate(snapshot(session("a", .waiting, since: 0)), now: 30_000, options: defaults).alerts.count, 1)
+    }
+
+    func testAMutedSessionThatStopsWaitingIsNotNotifiedForIdle() {
+        var options = defaults
+        options.idle = true
+        var rules = NotificationRules()
+        _ = rules.evaluate(snapshot(session("a", .waiting, since: 0, muted: true)), now: 20_000, options: options)
+        let out = rules.evaluate(snapshot(session("a", .idle, since: 21_000, muted: true)), now: 60_000, options: options)
+        XCTAssertEqual(out.cleared, ["a"])
+        XCTAssertEqual(out.alerts, [])
+    }
+
     func testTurningWaitingOffNotifiesNothing() {
         var options = defaults
         options.waiting = false
