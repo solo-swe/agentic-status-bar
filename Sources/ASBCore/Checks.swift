@@ -8,12 +8,17 @@ public struct ReconciledSession: Equatable, Sendable {
     public var shown: String
     /// Since when `shown` holds when a check changed it; nil means the file's `stateSince`.
     public var shownSince: Int64?
+    /// Why a waiting session waits: the file's `reason`, or the registry's (C2).
+    public var reason: String?
+    /// A name the user gave the session in Claude Code (from the registry, C2).
+    public var sessionName: String?
     /// Set by check C3: the transcript shows the turn was interrupted.
     public var interrupted = false
 
     public init(_ file: StateFile) {
         self.file = file
         self.shown = file.state ?? "busy"
+        self.reason = file.reason
     }
 }
 

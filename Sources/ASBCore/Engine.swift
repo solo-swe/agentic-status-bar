@@ -101,15 +101,36 @@ public struct SnapshotResult: Sendable, Equatable {
 /// Computes snapshots. Pure: no file system, clock or process access.
 public enum Engine {
     public static func snapshot(_ inputs: SnapshotInputs) -> SnapshotResult {
-        let parsed = ParsedStates.parse(inputs.stateFiles)
-        let sessions = parsed.sessions.map(ReconciledSession.init)
-        let (_, dead) = Checks.liveness(sessions, processes: inputs.processes, timeZone: inputs.timeZone)
+        let reconciled = reconcile(inputs)
 
-        // The other checks, filters, mutes, themes and the menu model are filled in by the
-        // core port tasks; until then the snapshot has no rows.
+        // Filters, mutes, themes and the menu model are filled in by the core port tasks;
+        // until then the snapshot has no rows.
         let header = Snapshot.Header(state: .none, symbol: "sparkle", color: "#C7C7CC,#48484A")
         return SnapshotResult(
-            snapshot: Snapshot(generatedAt: inputs.now, invalidFiles: parsed.invalidCount, header: header),
-            deadFiles: dead)
+            snapshot: Snapshot(generatedAt: inputs.now, invalidFiles: reconciled.invalidCount, header: header),
+            deadFiles: reconciled.deadFiles,
+            registrySchemaIssue: reconciled.registrySchemaIssue)
+    }
+
+    /// The sessions after the reconciliation checks, in state file order.
+    public struct Reconciled: Equatable, Sendable {
+        public var sessions: [ReconciledSession]
+        public var invalidCount: Int
+        public var deadFiles: [String]
+        public var registrySchemaIssue: Bool
+    }
+
+    /// Parses the state files and runs the checks (C1 to C5) on them.
+    public static func reconcile(_ inputs: SnapshotInputs) -> Reconciled {
+        let config = Config.parse(inputs.configText)
+        let parsed = ParsedStates.parse(inputs.stateFiles)
+        var (sessions, dead) = Checks.liveness(
+            parsed.sessions.map(ReconciledSession.init), processes: inputs.processes, timeZone: inputs.timeZone)
+        var schemaIssue = false
+        if config.useRegistry {
+            (sessions, schemaIssue) = Checks.registry(sessions, entries: RegistryEntry.parse(inputs.registryFiles))
+        }
+        return Reconciled(
+            sessions: sessions, invalidCount: parsed.invalidCount, deadFiles: dead, registrySchemaIssue: schemaIssue)
     }
 }
