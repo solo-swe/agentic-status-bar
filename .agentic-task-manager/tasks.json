@@ -2528,7 +2528,7 @@
       "description": "Same as the previous task for tests/mute.bats and tests/reach.bats (filters, subagents, herdr titles, themes): each scenario becomes a conformance case and passes `swift test`.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-065",
         "T-053"
@@ -2537,11 +2537,22 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:35:17Z",
+      "updated_at": "2026-10-26T00:38:17Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:35:17Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "c588cb3b894a0a6b9d930f117e98b2a8f4f175d7",
+      "completed_at": "2026-10-26T00:38:17Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:38:17Z",
+          "kind": "outcome",
+          "text": "27 cases for mutes, herdr titles and focus, subagents, themes and filters from mute.bats and reach.bats; 79 cases pass, no behavior differences found",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-068",
@@ -2556,7 +2567,7 @@
       "description": "Add `asb swiftbar`, printing exactly what swiftbar/swiftbar-claudecode-minimal.5s.sh prints today, from the menu model: header with inline :symbol: and sfcolor/color, '---', invalid-files line, placeholder, rows with font=Menlo size=12 sfcolor and herdr click action, row submenus (not-in-herdr note, mute/unmute, copy id/cwd, open folder, reveal transcript), subagent rows, Unmute all, Show toggles, Settings (Start SwiftBar at login, Theme submenu, stale options, toggles, Reveal config file), Refresh. Actions call `asb action ...` via bash=<path of asb>. Golden tests: capture the shell plugin's output for a few fixture setups into Tests/ASBCoreTests/Golden/ and compare.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-065"
       ],
@@ -2566,9 +2577,11 @@
         "Tests/ASBCoreTests/SwiftBarRendererTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:21Z",
+      "updated_at": "2026-10-26T00:38:19Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T00:38:19Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-069",

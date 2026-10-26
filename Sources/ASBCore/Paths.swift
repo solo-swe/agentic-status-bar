@@ -31,6 +31,9 @@ public struct Paths: Sendable, Equatable {
         )
     }
 
+    /// The login item that "Start SwiftBar at login" adds.
+    public var loginItemFile: String { "\(home)/Library/LaunchAgents/swiftbar-claudecode-minimal.start-swiftbar.plist" }
+
     /// The default state dir, used when neither the environment nor the config sets one.
     public var defaultStateDir: String { "\(home)/.claude/swiftbar-claudecode-minimal" }
 
