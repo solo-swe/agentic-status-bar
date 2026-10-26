@@ -3090,7 +3090,7 @@
       "description": "App/Sources/StatusItemController.swift: an NSStatusItem whose button shows the header's SF Symbol (non-template, tinted with the theme color for the current menu-bar appearance, light or dark) and the count as an attributed title in the same color; updates on every snapshot. Check by hand in light and dark menu bars with each header state (use fixture state dirs via ASB_STATE_DIR) and note the result.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-080"
       ],
@@ -3098,11 +3098,22 @@
         "App/Sources/StatusItemController.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T04:33:17Z",
+      "updated_at": "2026-10-26T04:36:38Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T04:33:17Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "65048f4f8aebdb3502f4e06cca23bc1f1da83a75",
+      "completed_at": "2026-10-26T04:36:38Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T04:36:38Z",
+          "kind": "outcome",
+          "text": "Colored status item with count; visually checked by the user on live sessions",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-082",
@@ -3116,7 +3127,7 @@
       "description": "Clicking the status item opens an NSPopover hosting a SwiftUI list: one row per session in snapshot order (state symbol in its color, project — title, state word, duration or mute text), subagent rows indented, muted rows last, a 'No Claude Code sessions' placeholder and an invalid-files note. Clicking a row focuses it (herdr) when it has a pane; the popover closes on outside click. Keep rows compact (menu-like height).",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-081"
       ],
@@ -3126,9 +3137,11 @@
         "App/Sources/StatusItemController.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:25Z",
+      "updated_at": "2026-10-26T04:36:42Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T04:36:42Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-083",

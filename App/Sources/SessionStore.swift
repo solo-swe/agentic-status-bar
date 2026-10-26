@@ -45,6 +45,16 @@ final class SessionStore {
         coalescer?.trigger()
     }
 
+    /// Runs a menu action (`asb action`'s names) off the main thread, then refreshes.
+    func perform(_ name: String, _ args: [String]) {
+        let (paths, environment) = (live.paths, live.environment)
+        Task.detached(priority: .userInitiated) {
+            Actions(paths: paths, environment: environment, runner: ProcessRunner(environment: environment))
+                .perform(name, args)
+            await MainActor.run { [weak self] in self?.refresh() }
+        }
+    }
+
     private func watch() {
         let config = Config.load(live.paths)
         let stateDir = live.paths.stateDir(config: config)

@@ -1,6 +1,7 @@
 import AppKit
 import ASBCore
 import Observation
+import SwiftUI
 
 /// The menu-bar item: the header's symbol in its theme color, and the count next to it in the same
 /// color. Updates whenever the store publishes a snapshot.
@@ -9,12 +10,32 @@ final class StatusItemController {
     let item: NSStatusItem
     private let store: SessionStore
 
+    private let popover = NSPopover()
+
     init(store: SessionStore) {
         self.store = store
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         item.button?.imagePosition = .imageLeading
+        // Closes on a click outside it.
+        popover.behavior = .transient
+        popover.animates = false
+        popover.contentViewController = NSHostingController(
+            rootView: PopoverView(store: store) { [weak popover] in popover?.performClose(nil) })
+        item.button?.target = self
+        item.button?.action = #selector(togglePopover)
         update()
         observe()
+    }
+
+    @objc private func togglePopover() {
+        guard let button = item.button else { return }
+        if popover.isShown {
+            popover.performClose(nil)
+        } else {
+            store.refresh()
+            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            popover.contentViewController?.view.window?.makeKey()
+        }
     }
 
     private func observe() {
