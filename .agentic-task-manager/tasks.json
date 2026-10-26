@@ -2357,7 +2357,7 @@
       "description": "Sources/ASBCore/Themes.swift: the built-in themes default, monochrome and high_contrast with symbol and light,dark color for waiting, idle, uncertain, busy, subagents, muted, none, warning (copy the THEMES JSON from swiftbar/swiftbar-claudecode-minimal.5s.sh), unknown theme → default, the legacy icon key for busy and none, and icon_<state>/color_<state> overrides on top. Tests port the theme cases from tests/reach.bats.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-054"
       ],
@@ -2366,11 +2366,22 @@
         "Tests/ASBCoreTests/ThemesTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:23:16Z",
+      "updated_at": "2026-10-26T00:23:46Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:23:16Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "09310dd2c2a89cf3fff8e933009e595ffd291bd9",
+      "completed_at": "2026-10-26T00:23:46Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:23:46Z",
+          "kind": "outcome",
+          "text": "Theme.builtIn (default, monochrome, high_contrast, all 8 states) and Theme.resolve (unknown → default, icon key for busy/none, per-state overrides)",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-064",
@@ -2384,7 +2395,7 @@
       "description": "Sources/ASBCore/MenuModel.swift builds the Snapshot from reconciled sessions: header priority (warning if invalid files, then waiting, idle, uncertain, busy count over unmuted sessions; all muted → muted symbol without count; none → none symbol), rows sorted by rank (waiting 0, idle 1, uncertain 2, busy/subagents 3, muted 5) then since, label = project (cwd basename or 'unknown') + ' — ' + title (herdr terminal title, then sessionName, then promptPreview), '|' replaced by '│', fitted to 48 characters with '…' or padded, ':name:' broken with a zero-width space; word (permission, question, idle, no activity, waiting on N subagent(s), working); durations (s, m, h, d); mute text ('muted today' or 'muted until HH:MM'); subagent rows sorted by since. Port the row tests from tests/plugin.bats; conformance cases rows-*.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-061",
         "T-062",
@@ -2397,7 +2408,7 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:18:10Z",
+      "updated_at": "2026-10-26T00:23:46Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -2407,7 +2418,9 @@
           "text": "Remove tests/conformance/c1-alive/pending (and any other pending markers that only wait on rows) once the menu model fills Snapshot.sessions; the runner fails while a passing case is still marked pending.",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "started_at": "2026-10-26T00:23:46Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-065",

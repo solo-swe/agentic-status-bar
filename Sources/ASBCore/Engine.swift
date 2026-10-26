@@ -101,13 +101,16 @@ public struct SnapshotResult: Sendable, Equatable {
 /// Computes snapshots. Pure: no file system, clock or process access.
 public enum Engine {
     public static func snapshot(_ inputs: SnapshotInputs) -> SnapshotResult {
+        let config = Config.parse(inputs.configText)
         let reconciled = reconcile(inputs)
-
-        // Filters, mutes, themes and the menu model are filled in by the core port tasks;
-        // until then the snapshot has no rows.
-        let header = Snapshot.Header(state: .none, symbol: "sparkle", color: "#C7C7CC,#48484A")
+        let visible = Filters.apply(reconciled.sessions, config)
+        let active = Mutes.active(Mutes.parse(inputs.mutesText), sessions: visible, now: inputs.now)
+        let context = MenuModel.Context(
+            now: inputs.now, timeZone: inputs.timeZone, theme: Theme.resolve(config),
+            showSubagents: config.showSubagents, titles: HerdrTitles.parse(inputs.herdrList),
+            herdrInstalled: inputs.herdrInstalled, invalidFiles: reconciled.invalidCount, activeMutes: active.count)
         return SnapshotResult(
-            snapshot: Snapshot(generatedAt: inputs.now, invalidFiles: reconciled.invalidCount, header: header),
+            snapshot: MenuModel.snapshot(Mutes.apply(visible, active: active), context),
             deadFiles: reconciled.deadFiles,
             registrySchemaIssue: reconciled.registrySchemaIssue)
     }
