@@ -130,6 +130,7 @@ public enum Engine {
         if config.useRegistry {
             (sessions, schemaIssue) = Checks.registry(sessions, entries: RegistryEntry.parse(inputs.registryFiles))
         }
+        sessions = Checks.interrupts(sessions, transcripts: inputs.transcripts)
         return Reconciled(
             sessions: sessions, invalidCount: parsed.invalidCount, deadFiles: dead, registrySchemaIssue: schemaIssue)
     }

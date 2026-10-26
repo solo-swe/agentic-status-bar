@@ -2157,7 +2157,7 @@
       "description": "Read Claude Code's registry (~/.claude/sessions/<pid>.json, dir overridable via CLAUDE_STATUSBAR_REGISTRY_DIR for now), match by pid and sessionId, take a user-given name (nameSource != derived) as sessionName, and when statusUpdatedAt is newer than updatedAt map status busy/idle/waiting (waitingFor containing 'permission' → reason permission, else question). An entry without a string status sets a registrySchemaIssue flag (logged once by the caller to plugin.log); unknown statuses are ignored; use_registry=0 turns it off. Port tests/checks.bats C2 cases plus the name tests from reach.bats; conformance cases c2-*.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-057"
       ],
@@ -2168,11 +2168,22 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:18:10Z",
+      "updated_at": "2026-10-26T00:19:13Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:18:10Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "b4edcb005c86c9ac55683026ab1af8f8b9362c4e",
+      "completed_at": "2026-10-26T00:19:13Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:19:13Z",
+          "kind": "outcome",
+          "text": "RegistryEntry.parse and Checks.registry (C2: newer wins, waiting reason, user-given names, schema-issue flag, off with use_registry=0); Engine.reconcile exposes checked sessions; C2 conformance cases left to T-066",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-059",
@@ -2186,7 +2197,7 @@
       "description": "Sources/ASBCore/Transcript.swift: read the last 8192 bytes of a transcript (drop the first, cut line when the file is larger), parse JSONL entries leniently, and expose mtime. C3: a busy or waiting session whose transcript, after the latest real user prompt (type user, not isMeta, text content, not starting with '[Request interrupted by user'), has the interrupt marker or a system/turn_duration entry becomes idle with shownSince = updatedAt and an interrupted flag. Use the fixtures in tests/fixtures/transcripts. Port the C3 cases from tests/checks.bats; conformance cases c3-*.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-057"
       ],
@@ -2197,9 +2208,11 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:17Z",
+      "updated_at": "2026-10-26T00:19:14Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T00:19:14Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-060",
