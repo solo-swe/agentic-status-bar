@@ -8,7 +8,7 @@ if ! command -v shellcheck >/dev/null 2>&1; then
 fi
 
 files=""
-for f in swiftbar/*.sh tests/*.sh; do
+for f in swiftbar/*.sh tests/*.sh scripts/*.sh; do
   [ -f "$f" ] && files="$files $f"
 done
 

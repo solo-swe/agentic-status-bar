@@ -75,8 +75,22 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
     }
 
     private func deliver(_ alerts: [NotificationRules.Alert]) {
+        if asked {
+            post(alerts)
+            return
+        }
+        // Ask on first need; macOS only shows the prompt once.
+        center.requestAuthorization(options: [.alert, .sound]) { [weak self] granted, _ in
+            Task { @MainActor in
+                self?.asked = true
+                if granted { self?.post(alerts) }
+            }
+        }
+    }
+
+    private func post(_ alerts: [NotificationRules.Alert]) {
         let sound = store.config.notifySound
-        let requests = alerts.map { alert in
+        for alert in alerts {
             let content = UNMutableNotificationContent()
             content.title = alert.title
             content.body = alert.body
@@ -84,20 +98,7 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
             content.categoryIdentifier = alert.focusable ? Self.focusCategory : Self.plainCategory
             content.userInfo = ["sessionId": alert.sessionId, "focusable": alert.focusable]
             content.threadIdentifier = alert.sessionId
-            return UNNotificationRequest(identifier: Self.identifier(alert.sessionId), content: content, trigger: nil)
-        }
-        let center = self.center
-        let send = { for request in requests { center.add(request) } }
-        if asked {
-            send()
-            return
-        }
-        // Ask on first need; macOS only shows the prompt once.
-        center.requestAuthorization(options: [.alert, .sound]) { [weak self] granted, _ in
-            Task { @MainActor in
-                self?.asked = true
-                if granted { send() }
-            }
+            center.add(UNNotificationRequest(identifier: Self.identifier(alert.sessionId), content: content, trigger: nil))
         }
     }
 

@@ -1,0 +1,57 @@
+name: Release
+
+# Push a tag like v0.2.0 to build, sign, notarize and attach the app to a draft GitHub release.
+# Needs the secrets listed in scripts/notarize.md.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select the newest Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Import the Developer ID certificate
+        env:
+          CERT_P12: ${{ secrets.DEVELOPER_ID_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.DEVELOPER_ID_CERT_PASSWORD }}
+        run: |
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          password="$(uuidgen)"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          printf '%s' "$CERT_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -k "$keychain" -P "$CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$password" "$keychain"
+          security list-keychains -d user -s "$keychain" login.keychain-db
+          rm "$RUNNER_TEMP/cert.p12"
+
+      - name: Write the notary API key
+        env:
+          NOTARY_KEY_P8: ${{ secrets.NOTARY_API_KEY_P8 }}
+        run: printf '%s' "$NOTARY_KEY_P8" | base64 --decode > "$RUNNER_TEMP/notary.p8"
+
+      - name: Build, sign, notarize and package
+        env:
+          IDENTITY: Developer ID Application
+          NOTARY_KEY: ${{ runner.temp }}/notary.p8
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
+          NOTARY_ISSUER: ${{ secrets.NOTARY_API_ISSUER_ID }}
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: scripts/package.sh "${GITHUB_REF_NAME#v}"
+
+      - name: Draft the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/*.zip dist/*.dmg --draft --generate-notes --title "Agentic Status Bar ${GITHUB_REF_NAME#v}"

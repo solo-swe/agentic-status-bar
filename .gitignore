@@ -5,3 +5,4 @@ tests/tmp/
 .swiftpm/
 App/*.xcodeproj/
 App/Generated/
+dist/
