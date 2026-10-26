@@ -3575,7 +3575,7 @@
       "description": "Rewrite README.md for Agentic Status Bar: what it shows (icon legend for the app), install from the DMG, first run and hooks, the popover and row actions, muting, settings and themes, notifications, start at login, updates, `asb` CLI (hook, install, uninstall, snapshot), uninstall, troubleshooting. Update doc/PRD.md from SwiftBar to the app (UX, architecture, distribution) and CONTRIBUTING.md (swift build/test, xcodegen, release). Mark the migration done in doc/design/future-architecture.md. No real project names in examples.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-092"
       ],
@@ -3588,11 +3588,22 @@
         "doc/snapshot-schema.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T06:37:38Z",
+      "updated_at": "2026-10-26T06:38:30Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T06:26:18Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "3b4ff454f6c121c7a52e21f36d958a3eaa19a940",
+      "completed_at": "2026-10-26T06:38:30Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T06:38:30Z",
+          "kind": "outcome",
+          "text": "README, CONTRIBUTING, PRD and the schema docs describe the app; design doc marks D and B done; Sparkle's README section moved to T-091",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-094",
