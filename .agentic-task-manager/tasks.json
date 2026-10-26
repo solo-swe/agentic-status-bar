@@ -2395,7 +2395,7 @@
       "description": "Sources/ASBCore/MenuModel.swift builds the Snapshot from reconciled sessions: header priority (warning if invalid files, then waiting, idle, uncertain, busy count over unmuted sessions; all muted → muted symbol without count; none → none symbol), rows sorted by rank (waiting 0, idle 1, uncertain 2, busy/subagents 3, muted 5) then since, label = project (cwd basename or 'unknown') + ' — ' + title (herdr terminal title, then sessionName, then promptPreview), '|' replaced by '│', fitted to 48 characters with '…' or padded, ':name:' broken with a zero-width space; word (permission, question, idle, no activity, waiting on N subagent(s), working); durations (s, m, h, d); mute text ('muted today' or 'muted until HH:MM'); subagent rows sorted by since. Port the row tests from tests/plugin.bats; conformance cases rows-*.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-061",
         "T-062",
@@ -2408,7 +2408,7 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:23:46Z",
+      "updated_at": "2026-10-26T00:25:38Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -2417,10 +2417,19 @@
           "kind": "note",
           "text": "Remove tests/conformance/c1-alive/pending (and any other pending markers that only wait on rows) once the menu model fills Snapshot.sessions; the runner fails while a passing case is still marked pending.",
           "by": "claude:c631bc24"
+        },
+        {
+          "at": "2026-10-26T00:25:38Z",
+          "kind": "outcome",
+          "text": "MenuModel (header priority over unmuted sessions, rank/since sort, labels fitted by Unicode scalars, words, durations, mute text, subagent rows, focusable) and HerdrTitles; Engine.snapshot now complete; c1-alive passes with its hand-written expectation",
+          "by": "claude:c631bc24"
         }
       ],
       "started_at": "2026-10-26T00:23:46Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "28510f096db7194ce83f120688d41441ce2c1a32",
+      "completed_at": "2026-10-26T00:25:38Z",
+      "completed_by": "claude:c631bc24"
     },
     {
       "id": "T-065",
@@ -2435,7 +2444,7 @@
       "description": "Add `asb snapshot --json`: gather real inputs (state dir, registry dir, transcripts of busy/waiting sessions, libproc processes, `herdr agent list` with a 1 s timeout into a temp file, config, mutes), run the reconciler and menu model, delete dead state files, log the registry schema issue once to plugin.log, print the snapshot. Must finish under 30 ms for 10 sessions (add a small benchmark in tests/bench.sh or a Swift test). Compare by hand with the shell plugin's output on your live sessions and note any difference in the task.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-064",
         "T-058"
@@ -2446,7 +2455,7 @@
         "tests/bench.sh"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:13:48Z",
+      "updated_at": "2026-10-26T00:25:38Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -2456,7 +2465,9 @@
           "text": "The pure entry point is Engine.snapshot(SnapshotInputs) -> SnapshotResult in Sources/ASBCore/Engine.swift; this task gathers SnapshotInputs from disk/system and acts on deadFiles and registrySchemaIssue.",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "started_at": "2026-10-26T00:25:38Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-066",
