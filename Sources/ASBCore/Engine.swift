@@ -101,9 +101,15 @@ public struct SnapshotResult: Sendable, Equatable {
 /// Computes snapshots. Pure: no file system, clock or process access.
 public enum Engine {
     public static func snapshot(_ inputs: SnapshotInputs) -> SnapshotResult {
-        // The checks, filters, mutes, themes and menu model are filled in by the
-        // core port tasks; until then only an empty state dir is handled.
+        let parsed = ParsedStates.parse(inputs.stateFiles)
+        let sessions = parsed.sessions.map(ReconciledSession.init)
+        let (_, dead) = Checks.liveness(sessions, processes: inputs.processes, timeZone: inputs.timeZone)
+
+        // The other checks, filters, mutes, themes and the menu model are filled in by the
+        // core port tasks; until then the snapshot has no rows.
         let header = Snapshot.Header(state: .none, symbol: "sparkle", color: "#C7C7CC,#48484A")
-        return SnapshotResult(snapshot: Snapshot(generatedAt: inputs.now, header: header))
+        return SnapshotResult(
+            snapshot: Snapshot(generatedAt: inputs.now, invalidFiles: parsed.invalidCount, header: header),
+            deadFiles: dead)
     }
 }

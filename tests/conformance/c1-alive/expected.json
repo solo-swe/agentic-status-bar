@@ -1,0 +1,26 @@
+{
+  "activeMutes": 0,
+  "generatedAt": 1792891080000,
+  "header": {"color": "#B25000,#FFD60A", "count": 1, "state": "idle", "symbol": "zzz"},
+  "invalidFiles": 0,
+  "sessions": [
+    {
+      "color": "#B25000,#FFD60A",
+      "cwd": "/x/proj",
+      "detail": "1m",
+      "focusable": false,
+      "kind": "interactive",
+      "label": "proj                                            ",
+      "muted": false,
+      "project": "proj",
+      "sessionId": "s1",
+      "shown": "idle",
+      "since": 1792891020000,
+      "subagents": [],
+      "symbol": "zzz",
+      "title": "",
+      "word": "idle"
+    }
+  ],
+  "version": 1
+}
