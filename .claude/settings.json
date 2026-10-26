@@ -5,7 +5,18 @@
       "Bash(tests/run.sh *)",
       "Bash(tests/lint.sh)",
       "Bash(tests/lint.sh *)",
-      "Bash(atm *)"
+      "Bash(atm *)",
+      "Bash(tests/swift.sh)",
+      "Bash(tests/swift.sh *)",
+      "Bash(swift build)",
+      "Bash(swift build *)",
+      "Bash(swift test)",
+      "Bash(swift test *)",
+      "Bash(swift package resolve)",
+      "Bash(swift package resolve *)",
+      "Bash(xcodegen)",
+      "Bash(xcodegen *)",
+      "Bash(xcodebuild *)"
     ]
   }
 }

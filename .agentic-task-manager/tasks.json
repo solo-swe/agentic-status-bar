@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 94,
+    "next_id": 95,
     "workflow": {
       "type": "direct"
     },
@@ -2995,6 +2995,30 @@
       "updated_at": "2026-10-25T23:58:27Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24"
+    },
+    {
+      "id": "T-094",
+      "name": "Allow Swift and Xcode build commands without prompts",
+      "phase": 6,
+      "type": "infra",
+      "priority": "P0",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "Add swift build/test, tests/swift.sh, xcodegen and xcodebuild to the project allowlist in .claude/settings.json so the Swift migration loop runs without approval prompts.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "in_progress",
+      "dependencies": [],
+      "files": [
+        ".claude/settings.json"
+      ],
+      "created_at": "2026-10-26T00:01:05Z",
+      "updated_at": "2026-10-26T00:01:05Z",
+      "created_by": "claude:c631bc24",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T00:01:05Z",
+      "started_by": "claude:c631bc24"
     }
   ]
 }
