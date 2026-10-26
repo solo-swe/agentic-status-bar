@@ -1912,7 +1912,7 @@
       "description": "Define what every front end reads: write doc/snapshot-schema.md and Sources/ASBCore/Snapshot.swift (Codable, sorted keys when encoded). Snapshot v1: version, generatedAt (ms), invalidFiles (count), activeMutes (count), header {state: waiting|idle|uncertain|busy|muted|none|warning, symbol, color (light,dark), count (number or null)}, sessions [ {sessionId, project, title, cwd, kind, shown (waiting|idle|uncertain|busy|subagents), reason, since (ms), label (fitted row label), word (state word), muted, muteUntil, muteToday, herdrPane, termBundleId, transcriptPath, symbol, color, subagents [{id, type, since}]} ] in display order. Mirror the shell plugin's behavior (swiftbar/swiftbar-claudecode-minimal.5s.sh HEADER_JQ and ROWS_JQ). Unit test: encoding round-trips and key order is stable.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-049",
         "T-051"
@@ -1923,11 +1923,22 @@
         "Tests/ASBCoreTests/SnapshotTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:03:51Z",
+      "updated_at": "2026-10-26T00:04:52Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:03:51Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "a84084406bbbd0cb89113da241485ee9225c711f",
+      "completed_at": "2026-10-26T00:04:52Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:04:52Z",
+          "kind": "outcome",
+          "text": "Snapshot v1 types (sorted keys, optionals omitted) with detail/focusable fields for renderers; doc/snapshot-schema.md",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-053",
@@ -1941,7 +1952,7 @@
       "description": "Create tests/conformance/README.md defining a language-neutral case: a directory with input/ (state/*.json, registry/*.json, transcripts/*.jsonl, processes.json [{pid, ppid, start (epoch s), comm}], herdr.json (agent list output, optional), config (optional), mutes (optional), clock.json {now_ms, tz}) and expected.json (the snapshot). Add a Swift test (Tests/ASBCoreTests/ConformanceTests.swift) that loads every case, runs the core with a fake clock, fake process inspector and fake herdr, and compares JSON semantically (key order ignored), printing a readable diff on failure. Add one case: no-sessions. The runner should skip core pieces not yet implemented only via an explicit 'pending' marker file, never silently.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-052"
       ],
@@ -1952,9 +1963,11 @@
         "Tests/ASBCoreTests/ConformanceTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:56:22Z",
+      "updated_at": "2026-10-26T00:04:52Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T00:04:52Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-054",
