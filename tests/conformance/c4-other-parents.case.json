@@ -1,0 +1,21 @@
+{
+  "description": "C4: children of other processes don't count (checks.bats: C4 ignores children of other processes)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "processes": [{"pid": 4242, "ppid": 1, "start": 1792426323, "comm": "claude"},
+                  {"pid": 7004, "ppid": 9999, "start": 1792891025, "comm": "zsh"}],
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "pid": 4242, "procStart": "Mon Oct 19 09:12:03 2026", "cwd": "/x/proj",
+                          "state": "waiting", "reason": "permission", "updatedAt": 1792891020000, "stateSince": 1792891020000}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "waiting", "symbol": "exclamationmark.circle.fill", "color": "#D70015,#FF453A", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "proj", "title": "", "cwd": "/x/proj", "kind": "interactive",
+       "shown": "waiting", "reason": "permission", "since": 1792891020000, "label": "proj                                            ",
+       "word": "permission", "detail": "1m", "muted": false, "focusable": false,
+       "symbol": "exclamationmark.circle.fill", "color": "#D70015,#FF453A", "subagents": []}
+    ]
+  }
+}

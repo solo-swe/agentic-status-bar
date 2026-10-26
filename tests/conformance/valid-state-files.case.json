@@ -1,0 +1,22 @@
+{
+  "description": "Valid state files become rows; equal rank and time keep file order (plugin.bats: plugin loads valid state files)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {"a.json": {"v": 1, "sessionId": "a", "state": "busy"}, "b.json": {"v": 1, "sessionId": "b", "state": "busy"}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "busy", "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "count": 2},
+    "sessions": [
+      {"sessionId": "a", "project": "unknown", "title": "", "kind": "interactive",
+       "shown": "busy", "since": 1792891080000, "label": "unknown                                         ",
+       "word": "working", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []},
+      {"sessionId": "b", "project": "unknown", "title": "", "kind": "interactive",
+       "shown": "busy", "since": 1792891080000, "label": "unknown                                         ",
+       "word": "working", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

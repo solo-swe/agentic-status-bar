@@ -1,0 +1,30 @@
+{
+  "description": "State words cover question, idle and working (plugin.bats: state words cover question, idle, working)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {
+      "q.json": {"v": 1, "sessionId": "q", "state": "waiting", "reason": "question", "cwd": "/x/q"},
+      "i.json": {"v": 1, "sessionId": "i", "state": "idle", "cwd": "/x/i"},
+      "b.json": {"v": 1, "sessionId": "b", "state": "busy", "cwd": "/x/b"}
+    }
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "waiting", "symbol": "exclamationmark.circle.fill", "color": "#D70015,#FF453A", "count": 1},
+    "sessions": [
+      {"sessionId": "q", "project": "q", "title": "", "cwd": "/x/q", "kind": "interactive",
+       "shown": "waiting", "reason": "question", "since": 1792891080000, "label": "q                                               ",
+       "word": "question", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "exclamationmark.circle.fill", "color": "#D70015,#FF453A", "subagents": []},
+      {"sessionId": "i", "project": "i", "title": "", "cwd": "/x/i", "kind": "interactive",
+       "shown": "idle", "since": 1792891080000, "label": "i                                               ",
+       "word": "idle", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "zzz", "color": "#B25000,#FFD60A", "subagents": []},
+      {"sessionId": "b", "project": "b", "title": "", "cwd": "/x/b", "kind": "interactive",
+       "shown": "busy", "since": 1792891080000, "label": "b                                               ",
+       "word": "working", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

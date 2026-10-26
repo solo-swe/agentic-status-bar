@@ -1,0 +1,21 @@
+{
+  "description": "C3: the marker is out of reach beyond the last 8 KB, so the session stays busy (checks.bats: C3 only reads the last 8 KB of the transcript)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "cwd": "/x/proj", "state": "busy", "transcriptPath": "transcripts/t.jsonl",
+                          "updatedAt": 1792891020000, "stateSince": 1792890960000}},
+    "transcripts": {"t.jsonl": {"fixture": "denied-permission", "repeat": {"times": 30, "line":
+      {"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}]}}}}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "busy", "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "proj", "title": "", "cwd": "/x/proj", "kind": "interactive",
+       "shown": "busy", "since": 1792890960000, "label": "proj                                            ",
+       "word": "working", "detail": "2m", "muted": false, "focusable": false, "transcriptPath": "transcripts/t.jsonl",
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

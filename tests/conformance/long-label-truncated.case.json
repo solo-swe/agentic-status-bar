@@ -1,0 +1,20 @@
+{
+  "description": "Long labels are cut to 48 characters with an ellipsis (plugin.bats: long labels are truncated to the label width with an ellipsis)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {"a.json": {"v": 1, "sessionId": "a", "state": "busy", "cwd": "/x/project",
+                         "promptPreview": "A very long prompt preview that goes on and on past the limit"}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "busy", "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "count": 1},
+    "sessions": [
+      {"sessionId": "a", "project": "project", "title": "A very long prompt preview that goes on and on past the limit",
+       "cwd": "/x/project", "kind": "interactive", "shown": "busy", "since": 1792891080000,
+       "label": "project — A very long prompt preview that goes …",
+       "word": "working", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

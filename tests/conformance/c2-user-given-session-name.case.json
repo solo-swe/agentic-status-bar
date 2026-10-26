@@ -1,0 +1,23 @@
+{
+  "description": "C2: a name the user gave the session is the row title (reach.bats: a user-given session name is used when herdr has no title)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "processes": [{"pid": 4242, "ppid": 1, "start": 1792426323, "comm": "claude"}],
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "pid": 4242, "procStart": "Mon Oct 19 09:12:03 2026", "cwd": "/x/proj",
+                          "state": "idle", "updatedAt": 1792891020000, "stateSince": 1792891020000, "promptPreview": "first prompt"}},
+    "registry": {"4242.json": {"pid": 4242, "sessionId": "s1", "status": "idle", "statusUpdatedAt": 1792890960000,
+                               "name": "parser-rewrite", "nameSource": "user"}},
+    "herdr": {"id": "cli:agent:list", "result": {"agents": [], "type": "agent_list"}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "idle", "symbol": "zzz", "color": "#B25000,#FFD60A", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "proj", "title": "parser-rewrite", "cwd": "/x/proj", "kind": "interactive",
+       "shown": "idle", "since": 1792891020000, "label": "proj — parser-rewrite                           ",
+       "word": "idle", "detail": "1m", "muted": false, "focusable": false,
+       "symbol": "zzz", "color": "#B25000,#FFD60A", "subagents": []}
+    ]
+  }
+}

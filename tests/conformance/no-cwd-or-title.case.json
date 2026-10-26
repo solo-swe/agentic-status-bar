@@ -1,0 +1,18 @@
+{
+  "description": "A session without cwd or title still renders (plugin.bats: a session without cwd or title still renders)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {"a.json": {"v": 1, "sessionId": "a", "state": "idle"}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "idle", "symbol": "zzz", "color": "#B25000,#FFD60A", "count": 1},
+    "sessions": [
+      {"sessionId": "a", "project": "unknown", "title": "", "kind": "interactive",
+       "shown": "idle", "since": 1792891080000, "label": "unknown                                         ",
+       "word": "idle", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "zzz", "color": "#B25000,#FFD60A", "subagents": []}
+    ]
+  }
+}

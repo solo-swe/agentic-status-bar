@@ -1,0 +1,22 @@
+{
+  "description": "C2: use_registry=0 ignores the registry, names included (checks.bats: C2 is off when use_registry=0)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "use_registry=0\nstale_minutes=0\n",
+    "processes": [{"pid": 4242, "ppid": 1, "start": 1792426323, "comm": "claude"}],
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "pid": 4242, "procStart": "Mon Oct 19 09:12:03 2026", "cwd": "/x/proj",
+                          "state": "busy", "updatedAt": 1792890960000, "stateSince": 1792890960000}},
+    "registry": {"4242.json": {"pid": 4242, "sessionId": "s1", "status": "idle", "statusUpdatedAt": 1792891020000,
+                               "name": "parser-rewrite", "nameSource": "user"}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "busy", "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "proj", "title": "", "cwd": "/x/proj", "kind": "interactive",
+       "shown": "busy", "since": 1792890960000, "label": "proj                                            ",
+       "word": "working", "detail": "2m", "muted": false, "focusable": false,
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

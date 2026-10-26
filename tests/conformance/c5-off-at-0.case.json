@@ -1,0 +1,20 @@
+{
+  "description": "C5: stale_minutes=0 turns the check off (checks.bats: C5 is off when stale_minutes=0)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "processes": [{"pid": 4242, "ppid": 1, "start": 1792426323, "comm": "claude"}],
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "pid": 4242, "procStart": "Mon Oct 19 09:12:03 2026", "cwd": "/x/proj",
+                          "state": "busy", "updatedAt": 1792855080000, "stateSince": 1792855080000}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "busy", "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "proj", "title": "", "cwd": "/x/proj", "kind": "interactive",
+       "shown": "busy", "since": 1792855080000, "label": "proj                                            ",
+       "word": "working", "detail": "10h", "muted": false, "focusable": false,
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

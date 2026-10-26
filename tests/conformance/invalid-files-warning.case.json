@@ -1,0 +1,23 @@
+{
+  "description": "Corrupt, non-object and future-version files show the warning with the count of readable sessions (plugin.bats: corrupt and future-version files show the warning state)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {
+      "ok.json": {"v": 1, "sessionId": "ok", "state": "busy"},
+      "corrupt.json": "not json",
+      "future.json": {"v": 2, "state": "busy"},
+      "array.json": "[1,2]"
+    }
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 3, "version": 1,
+    "header": {"state": "warning", "symbol": "exclamationmark.triangle", "color": "#B25000,#FFD60A", "count": 1},
+    "sessions": [
+      {"sessionId": "ok", "project": "unknown", "title": "", "kind": "interactive",
+       "shown": "busy", "since": 1792891080000, "label": "unknown                                         ",
+       "word": "working", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

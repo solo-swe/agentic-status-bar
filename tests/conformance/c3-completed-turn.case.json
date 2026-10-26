@@ -1,0 +1,20 @@
+{
+  "description": "C3: a busy session whose turn already ended is idle (checks.bats: C3 shows a busy session as idle when the turn already ended)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "cwd": "/x/proj", "state": "busy", "transcriptPath": "transcripts/t.jsonl",
+                          "updatedAt": 1792891020000, "stateSince": 1792890960000}},
+    "transcripts": {"t.jsonl": {"fixture": "completed-turn"}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "idle", "symbol": "zzz", "color": "#B25000,#FFD60A", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "proj", "title": "", "cwd": "/x/proj", "kind": "interactive",
+       "shown": "idle", "since": 1792891020000, "label": "proj                                            ",
+       "word": "idle", "detail": "1m", "muted": false, "focusable": false, "transcriptPath": "transcripts/t.jsonl",
+       "symbol": "zzz", "color": "#B25000,#FFD60A", "subagents": []}
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "description": "The configured icon is used when there are no sessions (plugin.bats: the configured icon is used for busy and empty states)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "icon=bolt\n"
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "none", "symbol": "bolt", "color": "#C7C7CC,#48484A"},
+    "sessions": []
+  }
+}

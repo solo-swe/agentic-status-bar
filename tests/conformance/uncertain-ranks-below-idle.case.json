@@ -1,0 +1,32 @@
+{
+  "description": "Uncertain ranks below idle and above busy (checks.bats: uncertain ranks below idle and above busy)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=30\n",
+    "processes": [{"pid": 4242, "ppid": 1, "start": 1792426323, "comm": "claude"}],
+    "state": {
+      "s1.json": {"v": 1, "sessionId": "s1", "pid": 4242, "procStart": "Mon Oct 19 09:12:03 2026", "cwd": "/x/proj",
+                  "state": "busy", "updatedAt": 1792888380000},
+      "s2.json": {"v": 1, "sessionId": "s2", "state": "busy", "cwd": "/x/fresh", "updatedAt": 1792891020000},
+      "s3.json": {"v": 1, "sessionId": "s3", "state": "idle", "cwd": "/x/done"}
+    }
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "idle", "symbol": "zzz", "color": "#B25000,#FFD60A", "count": 1},
+    "sessions": [
+      {"sessionId": "s3", "project": "done", "title": "", "cwd": "/x/done", "kind": "interactive",
+       "shown": "idle", "since": 1792891080000, "label": "done                                            ",
+       "word": "idle", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "zzz", "color": "#B25000,#FFD60A", "subagents": []},
+      {"sessionId": "s1", "project": "proj", "title": "", "cwd": "/x/proj", "kind": "interactive",
+       "shown": "uncertain", "since": 1792888380000, "label": "proj                                            ",
+       "word": "no activity", "detail": "45m", "muted": false, "focusable": false,
+       "symbol": "questionmark.circle", "color": "#8E8E93,#98989D", "subagents": []},
+      {"sessionId": "s2", "project": "fresh", "title": "", "cwd": "/x/fresh", "kind": "interactive",
+       "shown": "busy", "since": 1792891080000, "label": "fresh                                           ",
+       "word": "working", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "description": "Waiting wins and counts the waiting sessions (plugin.bats: waiting wins and shows the number of waiting sessions in red)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {
+      "a.json": {"v": 1, "sessionId": "a", "state": "waiting", "reason": "permission"},
+      "b.json": {"v": 1, "sessionId": "b", "state": "waiting", "reason": "question"},
+      "c.json": {"v": 1, "sessionId": "c", "state": "idle"},
+      "d.json": {"v": 1, "sessionId": "d", "state": "busy"}
+    }
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "waiting", "symbol": "exclamationmark.circle.fill", "color": "#D70015,#FF453A", "count": 2},
+    "sessions": [
+      {"sessionId": "a", "project": "unknown", "title": "", "kind": "interactive",
+       "shown": "waiting", "reason": "permission", "since": 1792891080000, "label": "unknown                                         ",
+       "word": "permission", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "exclamationmark.circle.fill", "color": "#D70015,#FF453A", "subagents": []},
+      {"sessionId": "b", "project": "unknown", "title": "", "kind": "interactive",
+       "shown": "waiting", "reason": "question", "since": 1792891080000, "label": "unknown                                         ",
+       "word": "question", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "exclamationmark.circle.fill", "color": "#D70015,#FF453A", "subagents": []},
+      {"sessionId": "c", "project": "unknown", "title": "", "kind": "interactive",
+       "shown": "idle", "since": 1792891080000, "label": "unknown                                         ",
+       "word": "idle", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "zzz", "color": "#B25000,#FFD60A", "subagents": []},
+      {"sessionId": "d", "project": "unknown", "title": "", "kind": "interactive",
+       "shown": "busy", "since": 1792891080000, "label": "unknown                                         ",
+       "word": "working", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

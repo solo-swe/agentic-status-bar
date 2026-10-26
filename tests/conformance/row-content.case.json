@@ -1,0 +1,20 @@
+{
+  "description": "A row shows project, title, state word and duration (plugin.bats: a row shows project, title, state word and duration)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {"a.json": {"v": 1, "sessionId": "a", "state": "waiting", "reason": "permission", "cwd": "/Users/alex/code/api-gateway",
+                         "promptPreview": "Add rate limiting", "stateSince": 1792890955000}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "waiting", "symbol": "exclamationmark.circle.fill", "color": "#D70015,#FF453A", "count": 1},
+    "sessions": [
+      {"sessionId": "a", "project": "api-gateway", "title": "Add rate limiting", "cwd": "/Users/alex/code/api-gateway",
+       "kind": "interactive", "shown": "waiting", "reason": "permission", "since": 1792890955000,
+       "label": "api-gateway — Add rate limiting                 ",
+       "word": "permission", "detail": "2m", "muted": false, "focusable": false,
+       "symbol": "exclamationmark.circle.fill", "color": "#D70015,#FF453A", "subagents": []}
+    ]
+  }
+}

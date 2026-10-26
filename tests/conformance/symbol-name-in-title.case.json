@@ -1,0 +1,18 @@
+{
+  "description": "A :name: in a title gets a zero-width space so SwiftBar doesn't draw it as a symbol (plugin.bats: a :name: in a title doesn't become a symbol)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {"a.json": {"v": 1, "sessionId": "a", "state": "busy", "cwd": "/x/p", "promptPreview": "fix the :bug: now"}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "busy", "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "count": 1},
+    "sessions": [
+      {"sessionId": "a", "project": "p", "title": "fix the :bug: now", "cwd": "/x/p", "kind": "interactive",
+       "shown": "busy", "since": 1792891080000, "label": "p — fix the :​bug: now                           ",
+       "word": "working", "detail": "0s", "muted": false, "focusable": false,
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

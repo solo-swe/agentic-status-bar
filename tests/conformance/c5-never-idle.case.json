@@ -1,0 +1,20 @@
+{
+  "description": "C5: an idle session is never stale (checks.bats: C5 never marks waiting or idle sessions as stale)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=30\n",
+    "processes": [{"pid": 4242, "ppid": 1, "start": 1792426323, "comm": "claude"}],
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "pid": 4242, "procStart": "Mon Oct 19 09:12:03 2026", "cwd": "/x/proj",
+                          "state": "idle", "updatedAt": 1792873080000, "stateSince": 1792873080000}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "idle", "symbol": "zzz", "color": "#B25000,#FFD60A", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "proj", "title": "", "cwd": "/x/proj", "kind": "interactive",
+       "shown": "idle", "since": 1792873080000, "label": "proj                                            ",
+       "word": "idle", "detail": "5h", "muted": false, "focusable": false,
+       "symbol": "zzz", "color": "#B25000,#FFD60A", "subagents": []}
+    ]
+  }
+}

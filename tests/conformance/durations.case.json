@@ -1,0 +1,35 @@
+{
+  "description": "Durations use s, m, h and d (plugin.bats: durations use s, m, h and d)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {
+      "s.json": {"v": 1, "sessionId": "s", "state": "busy", "cwd": "/x/s", "stateSince": 1792891068000},
+      "m.json": {"v": 1, "sessionId": "m", "state": "busy", "cwd": "/x/m", "stateSince": 1792890780000},
+      "h.json": {"v": 1, "sessionId": "h", "state": "busy", "cwd": "/x/h", "stateSince": 1792883780000},
+      "d.json": {"v": 1, "sessionId": "d", "state": "busy", "cwd": "/x/d", "stateSince": 1792711080000}
+    }
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "busy", "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "count": 4},
+    "sessions": [
+      {"sessionId": "d", "project": "d", "title": "", "cwd": "/x/d", "kind": "interactive",
+       "shown": "busy", "since": 1792711080000, "label": "d                                               ",
+       "word": "working", "detail": "2d", "muted": false, "focusable": false,
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []},
+      {"sessionId": "h", "project": "h", "title": "", "cwd": "/x/h", "kind": "interactive",
+       "shown": "busy", "since": 1792883780000, "label": "h                                               ",
+       "word": "working", "detail": "2h", "muted": false, "focusable": false,
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []},
+      {"sessionId": "m", "project": "m", "title": "", "cwd": "/x/m", "kind": "interactive",
+       "shown": "busy", "since": 1792890780000, "label": "m                                               ",
+       "word": "working", "detail": "5m", "muted": false, "focusable": false,
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []},
+      {"sessionId": "s", "project": "s", "title": "", "cwd": "/x/s", "kind": "interactive",
+       "shown": "busy", "since": 1792891068000, "label": "s                                               ",
+       "word": "working", "detail": "12s", "muted": false, "focusable": false,
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

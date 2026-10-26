@@ -6,6 +6,37 @@ the same cases. A case is data only, so behavior is pinned down independently of
 
 ## A case
 
+A case is either one file, `<name>.case.json` (most cases), or a directory (below). Both say the same things.
+
+### Single-file cases
+
+```json
+{
+  "description": "optional: what the case checks",
+  "pending": "optional: why the behavior isn't implemented yet",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "state": "idle"}, "bad.json": "not json"},
+    "registry": {"4242.json": {"pid": 4242, "sessionId": "s1", "status": "idle", "statusUpdatedAt": 1792891020000}},
+    "transcripts": {"t.jsonl": {"fixture": "denied-permission", "lines": [{"type": "user"}], "repeat": {"line": {}, "times": 30}, "mtime": 0}},
+    "processes": [{"pid": 4242, "ppid": 1, "start": 1792426323, "comm": "claude"}],
+    "herdr": {"result": {"agents": []}},
+    "config": "stale_minutes=0\n",
+    "mutes": {"/x/proj": {"until": 1792894680000, "at": 1792891080000, "today": false}}
+  },
+  "expected": {"version": 1, "...": "the snapshot"},
+  "expectedDead": ["state/s1.json"]
+}
+```
+
+- Only `input.clock` and `expected` are required.
+- File contents (`state`, `registry`, `herdr`, `mutes`) are written as JSON; a string is used as the raw contents
+  instead, to give corrupt files.
+- A transcript is built from a fixture in `tests/fixtures/transcripts/` (optional), then `lines`, then
+  `repeat.times` copies of `repeat.line`, each line followed by a newline.
+
+### Directory cases
+
 One directory per case, named after what it checks (`c1-dead`, `mute-today`, ...):
 
 ```

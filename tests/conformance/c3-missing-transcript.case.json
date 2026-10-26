@@ -1,0 +1,19 @@
+{
+  "description": "C3: a transcript that can't be read changes nothing (checks.bats: C3 ignores idle sessions and missing transcripts)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "cwd": "/x/proj", "state": "busy", "transcriptPath": "/nonexistent/t.jsonl",
+                          "updatedAt": 1792891020000, "stateSince": 1792890960000}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "busy", "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "proj", "title": "", "cwd": "/x/proj", "kind": "interactive",
+       "shown": "busy", "since": 1792890960000, "label": "proj                                            ",
+       "word": "working", "detail": "2m", "muted": false, "focusable": false, "transcriptPath": "/nonexistent/t.jsonl",
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

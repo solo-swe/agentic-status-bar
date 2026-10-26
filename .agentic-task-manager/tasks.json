@@ -2444,7 +2444,7 @@
       "description": "Add `asb snapshot --json`: gather real inputs (state dir, registry dir, transcripts of busy/waiting sessions, libproc processes, `herdr agent list` with a 1 s timeout into a temp file, config, mutes), run the reconciler and menu model, delete dead state files, log the registry schema issue once to plugin.log, print the snapshot. Must finish under 30 ms for 10 sessions (add a small benchmark in tests/bench.sh or a Swift test). Compare by hand with the shell plugin's output on your live sessions and note any difference in the task.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-064",
         "T-058"
@@ -2455,7 +2455,7 @@
         "tests/bench.sh"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:25:38Z",
+      "updated_at": "2026-10-26T00:27:24Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -2464,10 +2464,19 @@
           "kind": "note",
           "text": "The pure entry point is Engine.snapshot(SnapshotInputs) -> SnapshotResult in Sources/ASBCore/Engine.swift; this task gathers SnapshotInputs from disk/system and acts on deadFiles and registrySchemaIssue.",
           "by": "claude:c631bc24"
+        },
+        {
+          "at": "2026-10-26T00:27:24Z",
+          "kind": "outcome",
+          "text": "asb snapshot --json [--pretty]: LiveInputs gathers state/registry/transcript tails/libproc/herdr (1 s, temp file)/config/mutes, deletes dead files in the state dir, logs registry issue once; matches the shell plugin on live sessions; 12 ms median vs plugin 103 ms",
+          "by": "claude:c631bc24"
         }
       ],
       "started_at": "2026-10-26T00:25:38Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "430fd4ca80080eb326dc1a9be46ac74b9105283e",
+      "completed_at": "2026-10-26T00:27:24Z",
+      "completed_by": "claude:c631bc24"
     },
     {
       "id": "T-066",
@@ -2481,7 +2490,7 @@
       "description": "Turn every scenario in tests/checks.bats and tests/plugin.bats that isn't already a conformance case into one under tests/conformance/ (input files plus expected.json). Name cases after the bats test. All must pass `swift test`; any behavior difference from the shell plugin is a bug in the Swift core unless the bats test itself is wrong (then say so in a task note).",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-065",
         "T-053"
@@ -2490,9 +2499,11 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:19Z",
+      "updated_at": "2026-10-26T00:27:24Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T00:27:24Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-067",
