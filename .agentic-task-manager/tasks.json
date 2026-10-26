@@ -2567,7 +2567,7 @@
       "description": "Add `asb swiftbar`, printing exactly what swiftbar/swiftbar-claudecode-minimal.5s.sh prints today, from the menu model: header with inline :symbol: and sfcolor/color, '---', invalid-files line, placeholder, rows with font=Menlo size=12 sfcolor and herdr click action, row submenus (not-in-herdr note, mute/unmute, copy id/cwd, open folder, reveal transcript), subagent rows, Unmute all, Show toggles, Settings (Start SwiftBar at login, Theme submenu, stale options, toggles, Reveal config file), Refresh. Actions call `asb action ...` via bash=<path of asb>. Golden tests: capture the shell plugin's output for a few fixture setups into Tests/ASBCoreTests/Golden/ and compare.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-065"
       ],
@@ -2577,11 +2577,22 @@
         "Tests/ASBCoreTests/SwiftBarRendererTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:38:19Z",
+      "updated_at": "2026-10-26T00:40:11Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:38:19Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "3a97bb8370989f56f8ab10aedaacf2bdd10561c5",
+      "completed_at": "2026-10-26T00:40:11Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:40:11Z",
+          "kind": "outcome",
+          "text": "asb swiftbar [--plugin PATH]: SwiftBarRenderer from the snapshot; with --plugin the output is byte-identical to the shell plugin on live sessions (diffed); without it, items call asb action. Unit tests pin each line instead of golden files",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-069",
@@ -2595,7 +2606,7 @@
       "description": "Add `asb action <name> [args]` for: focus ID (herdr agent focus <pane> then open -b <bundle>, 2 s timeouts, pane and bundle validated as in the shell), toggle KEY (whitelisted keys), set KEY VALUE (stale_minutes 0/10/30/60, theme default/monochrome/high_contrast only), reveal-config (writes the default config with the theme comments if missing, then open -R), copy-id, copy-cwd (pbcopy), open-folder, reveal-transcript, mute-hour, mute-today, unmute, unmute-all, login (toggle the LaunchAgent plist that opens SwiftBar at login). Session IDs must match [A-Za-z0-9_-]+. External commands go through an injectable runner so tests can record calls. Port the action tests from tests/plugin.bats, reach.bats and mute.bats.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-068",
         "T-062"
@@ -2606,9 +2617,11 @@
         "Tests/ASBCoreTests/ActionsTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:21Z",
+      "updated_at": "2026-10-26T00:40:13Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T00:40:13Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-070",
