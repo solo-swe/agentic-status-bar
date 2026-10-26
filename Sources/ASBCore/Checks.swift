@@ -70,6 +70,22 @@ public enum Checks {
         }
     }
 
+    /// Waiting on subagents: a session with running subagents whose own turn ended (idle, with
+    /// background agents left) or that is blocked in its Task or Agent tool. Runs after C4 and
+    /// before C5. An interrupt (C3) wins: it can stop subagents without a SubagentStop.
+    public static func subagents(_ sessions: [ReconciledSession], now: Int64) -> [ReconciledSession] {
+        sessions.map { session in
+            let tool = session.file.lastTool
+            guard !session.file.subagents.isEmpty, !session.interrupted,
+                  session.shown == "idle" || (session.shown == "busy" && (tool == "Task" || tool == "Agent"))
+            else { return session }
+            var s = session
+            s.shown = "subagents"
+            s.shownSince = session.file.subagents.values.map { $0.since ?? now }.min()
+            return s
+        }
+    }
+
     /// C5: a busy session (or one waiting on subagents) with no sign of life for longer than
     /// `staleMinutes` is uncertain since its last activity: a hook write, the time its state was
     /// shown from, a transcript write, or a child process starting. 0 turns the check off.

@@ -2237,7 +2237,7 @@
       "description": "C4: a waiting session whose claude pid has a child process (not caffeinate) started after shownSince/stateSince becomes busy with shownSince = that start. C5: a busy (or subagents) session whose latest activity (updatedAt, shownSince, transcript mtime, start of any child process) is older than stale_minutes (0 = off) becomes uncertain with shownSince = that activity. Port the C4 and C5 cases from tests/checks.bats; conformance cases c4-*, c5-*.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-059",
         "T-054"
@@ -2248,11 +2248,22 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:20:46Z",
+      "updated_at": "2026-10-26T00:21:42Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:20:46Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "ec1f21472d635dd9a67e35c58c779eaab21e2aa8",
+      "completed_at": "2026-10-26T00:21:42Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:21:42Z",
+          "kind": "outcome",
+          "text": "Checks.approvedTools (C4, caffeinate ignored) and Checks.staleness (C5 on busy and subagents, transcript mtime only for files saying busy/waiting); checks.bats C4/C5 cases ported; conformance cases left to T-066",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-061",
@@ -2266,7 +2277,7 @@
       "description": "Port the 'subagents' state (see doc/PRD.md 'Waiting on subagents'): with entries in subagents, not interrupted, and shown idle, or busy with lastTool Task or Agent, shown becomes subagents with shownSince = earliest subagent since; it runs before C5 and C5 applies to it. Then the filters: show_interactive/headless/ide (ide covers desktop), sessions without kind count as interactive; show_subagents only hides subagent rows. Port the subagent and filter tests from tests/reach.bats; conformance cases.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-060"
       ],
@@ -2277,9 +2288,11 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:17Z",
+      "updated_at": "2026-10-26T00:21:42Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T00:21:42Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-062",
