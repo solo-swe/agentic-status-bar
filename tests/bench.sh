@@ -1,7 +1,7 @@
 #!/bin/sh
-# Times the SwiftBar plugin with 10 sessions and the hook, against the PRD targets:
-# plugin median under 150 ms, hook median under 20 ms; and `asb snapshot` (Swift) on the
-# same sessions, under 30 ms. Exits 1 if a target is missed.
+# Times the SwiftBar plugin with 10 sessions (median under 150 ms), `asb hook` (under
+# 10 ms; the shell hook took 19 to 20 ms) and `asb snapshot` on the same sessions (under
+# 30 ms). Exits 1 if a target is missed.
 # Run it with: tests/run.sh --bench
 
 cd "$(dirname "$0")/.." || exit 1
@@ -10,7 +10,7 @@ repo="$(pwd)"
 PLUGIN_RUNS=20
 HOOK_RUNS=50
 PLUGIN_TARGET_MS=150
-HOOK_TARGET_MS=20
+HOOK_TARGET_MS=10
 SNAPSHOT_RUNS=20
 SNAPSHOT_TARGET_MS=30
 
@@ -76,19 +76,19 @@ report() {
   [ "$_verdict" = ok ]
 }
 
+# asb, built for release (as it ships); the plugin runs it too.
+if ! swift build -c release --product asb >"$tmp/build.log" 2>&1; then
+  echo "swift build failed:" >&2
+  cat "$tmp/build.log" >&2
+  exit 1
+fi
+asb="$repo/.build/release/asb"
+export CLAUDE_STATUSBAR_ASB="$asb"
+
 status=0
 time_runs "$PLUGIN_RUNS" "'$repo/swiftbar/swiftbar-claudecode-minimal.5s.sh'" | report plugin "$PLUGIN_TARGET_MS" || status=1
 # The hook gets a real Claude-style payload; its state file is the 11th session.
-time_runs "$HOOK_RUNS" "'$repo/hooks/state-hook.sh' < '$repo/tests/fixtures/payloads/PreToolUse.json'" \
+time_runs "$HOOK_RUNS" "'$asb' hook < '$repo/tests/fixtures/payloads/PreToolUse.json'" \
   | report hook "$HOOK_TARGET_MS" || status=1
-
-# The Swift snapshot, built for release (as it ships).
-if swift build -c release --product asb >"$tmp/build.log" 2>&1; then
-  time_runs "$SNAPSHOT_RUNS" "'$repo/.build/release/asb' snapshot --json" \
-    | report snapshot "$SNAPSHOT_TARGET_MS" || status=1
-else
-  echo "snapshot: swift build failed, see below" >&2
-  cat "$tmp/build.log" >&2
-  status=1
-fi
+time_runs "$SNAPSHOT_RUNS" "'$asb' snapshot --json" | report snapshot "$SNAPSHOT_TARGET_MS" || status=1
 exit "$status"

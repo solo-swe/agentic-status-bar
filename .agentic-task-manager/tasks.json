@@ -2765,7 +2765,7 @@
       "description": "Port the concurrency rules: a per-session lock (mkdir <file>.lock, 50 tries of 10 ms, give up quietly), skip an event older than the file's updatedAt (the event's start time is taken when the hook starts), write via temp file + rename. When the state changed and instant_refresh=1, open swiftbar://refreshplugin?name=swiftbar-claudecode-minimal in the background, debounced to once per 500 ms via a .last-poke file. Port the lock, ordering and refresh tests from tests/hook.bats.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-071"
       ],
@@ -2775,11 +2775,22 @@
         "Tests/ASBCoreTests/StateWriterTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T01:02:32Z",
+      "updated_at": "2026-10-26T01:03:47Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T01:02:32Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "8d8b3330e63896242c1e533144480b0db7a664e0",
+      "completed_at": "2026-10-26T01:03:47Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T01:03:47Z",
+          "kind": "outcome",
+          "text": "StateWriter.withLock (mkdir lock, 50x10 ms, quiet give-up), atomicWrite (<file>.tmp.<pid> + rename), Refresh.poke (500 ms debounce via .last-poke); asb hook does read-modify-write under the lock and pokes SwiftBar without waiting",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-074",
@@ -2794,7 +2805,7 @@
       "description": "Switch run_hook in tests/test_helper.bash to call `asb hook` (built from the package) instead of hooks/state-hook.sh, and make tests/hook.bats and tests/integration.bats pass. Update tests/bench.sh to time `asb hook`: median must be at most 10 ms (today's sh hook: 19–20 ms). Record the numbers in the task note.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-072",
         "T-073"
@@ -2804,9 +2815,11 @@
         "tests/bench.sh"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:22Z",
+      "updated_at": "2026-10-26T01:03:49Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T01:03:49Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-075",

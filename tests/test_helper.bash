@@ -30,7 +30,9 @@ common_setup() {
 }
 
 common_teardown() {
-  [ -n "${TEST_TMP:-}" ] && rm -rf "$TEST_TMP"
+  [ -n "${TEST_TMP:-}" ] || return 0
+  # The hook starts `open` (a stub here) in the background; it may still be writing its call log.
+  rm -rf "$TEST_TMP" 2>/dev/null || { sleep 0.3; rm -rf "$TEST_TMP"; }
 }
 
 # stub_command NAME [BODY]
@@ -84,9 +86,14 @@ add_process() {
   printf '%s|%s|%s|%s|%s\n' "$1" "$2" "$3" "$4" "$5" >> "$TEST_TMP/ps-table"
 }
 
+# HOOK — the hook (`asb hook`), reading the payload from stdin.
+HOOK() {
+  "$CLAUDE_STATUSBAR_ASB" hook
+}
+
 # run_hook FIXTURE — feeds tests/fixtures/payloads/FIXTURE.json to the hook.
 run_hook() {
-  run "$REPO_ROOT/hooks/state-hook.sh" < "$REPO_ROOT/tests/fixtures/payloads/$1.json"
+  run HOOK < "$REPO_ROOT/tests/fixtures/payloads/$1.json"
 }
 
 # state_field FILTER — reads a field from the fixture session's state file.

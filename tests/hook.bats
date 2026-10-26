@@ -89,7 +89,7 @@ teardown() { common_teardown; }
 @test "SessionStart after compaction keeps the current state" {
   printf '{"v":1,"sessionId":"%s","state":"busy","updatedAt":0,"stateSince":0}\n' "$FIXTURE_SESSION" > "$(state_file)"
   jq '.source = "compact"' "$REPO_ROOT/tests/fixtures/payloads/SessionStart.json" > "$TEST_TMP/compact.json"
-  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/compact.json"
+  run HOOK < "$TEST_TMP/compact.json"
   [ "$(state_field .state)" = busy ]
   [ "$(state_field .stateSince)" = 0 ]
 }
@@ -124,7 +124,7 @@ teardown() { common_teardown; }
 @test "UserPromptSubmit collapses whitespace and truncates the preview to 80 chars" {
   long="$(printf 'line one\n\n  line two %.0s' $(seq 1 20))"
   jq --arg p "$long" '.prompt = $p' "$REPO_ROOT/tests/fixtures/payloads/UserPromptSubmit.json" > "$TEST_TMP/long.json"
-  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/long.json"
+  run HOOK < "$TEST_TMP/long.json"
   preview="$(state_field .promptPreview)"
   [ "${#preview}" -eq 80 ]
   [[ "$preview" == "line one line two line one"* ]]
@@ -198,7 +198,7 @@ teardown() { common_teardown; }
 @test "an elicitation dialog sets waiting with reason question" {
   jq '.notification_type = "elicitation_dialog" | .message = "Server needs input"' \
     "$REPO_ROOT/tests/fixtures/payloads/Notification-permission_prompt.json" > "$TEST_TMP/elicit.json"
-  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/elicit.json"
+  run HOOK < "$TEST_TMP/elicit.json"
   [ "$(state_field .state)" = waiting ]
   [ "$(state_field .reason)" = question ]
   [ "$(state_field .message)" = "Server needs input" ]
@@ -213,12 +213,12 @@ teardown() { common_teardown; }
 
 @test "without notification_type the message text decides" {
   jq 'del(.notification_type)' "$REPO_ROOT/tests/fixtures/payloads/Notification-permission_prompt.json" > "$TEST_TMP/perm.json"
-  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/perm.json"
+  run HOOK < "$TEST_TMP/perm.json"
   [ "$(state_field .state)" = waiting ]
   [ "$(state_field .reason)" = permission ]
 
   jq 'del(.notification_type)' "$REPO_ROOT/tests/fixtures/payloads/Notification-idle_prompt.json" > "$TEST_TMP/idle.json"
-  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/idle.json"
+  run HOOK < "$TEST_TMP/idle.json"
   [ "$(state_field .state)" = idle ]
 }
 
@@ -226,7 +226,7 @@ teardown() { common_teardown; }
   run_hook UserPromptSubmit
   jq '.notification_type = "auth_success" | .message = "Signed in"' \
     "$REPO_ROOT/tests/fixtures/payloads/Notification-idle_prompt.json" > "$TEST_TMP/other.json"
-  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/other.json"
+  run HOOK < "$TEST_TMP/other.json"
   [ "$(state_field .state)" = busy ]
 }
 
@@ -326,7 +326,7 @@ teardown() { common_teardown; }
   run_hook UserPromptSubmit
   run_hook SubagentStart
   jq '.agent_id = "b2" | .agent_type = "Explore"' "$REPO_ROOT/tests/fixtures/payloads/SubagentStart.json" > "$TEST_TMP/start2.json"
-  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/start2.json"
+  run HOOK < "$TEST_TMP/start2.json"
   run_hook SubagentStop
   [ "$(state_field '.subagents | keys | join(",")')" = b2 ]
   [ "$(state_field '.subagents.b2.type')" = Explore ]
@@ -343,7 +343,7 @@ teardown() { common_teardown; }
 
 @test "SubagentStart without an agent_id is ignored" {
   jq 'del(.agent_id)' "$REPO_ROOT/tests/fixtures/payloads/SubagentStart.json" > "$TEST_TMP/noid.json"
-  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/noid.json"
+  run HOOK < "$TEST_TMP/noid.json"
   [ "$status" -eq 0 ]
   [ ! -e "$(state_file)" ]
 }
@@ -386,7 +386,7 @@ teardown() { common_teardown; }
 
 @test "no refresh is requested when nothing changed" {
   jq '.notification_type = "auth_success"' "$REPO_ROOT/tests/fixtures/payloads/Notification-idle_prompt.json" > "$TEST_TMP/other.json"
-  run "$REPO_ROOT/hooks/state-hook.sh" < "$TEST_TMP/other.json"
+  run HOOK < "$TEST_TMP/other.json"
   sleep 0.3
   [ -z "$(stub_calls open)" ]
 }
@@ -394,27 +394,27 @@ teardown() { common_teardown; }
 # --- Robustness -----------------------------------------------------------
 
 @test "hook is silent and exits 0 on bad input" {
-  run "$REPO_ROOT/hooks/state-hook.sh" <<< "not json"
+  run HOOK <<< "not json"
   [ "$status" -eq 0 ]
   [ -z "$output" ]
-  run "$REPO_ROOT/hooks/state-hook.sh" < /dev/null
+  run HOOK < /dev/null
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
 
 @test "every captured payload runs silently with exit 0" {
   for f in "$REPO_ROOT"/tests/fixtures/payloads/*.json; do
-    run "$REPO_ROOT/hooks/state-hook.sh" < "$f"
+    run HOOK < "$f"
     [ "$status" -eq 0 ] || { echo "failed: $f"; false; }
     [ -z "$output" ] || { echo "output from $f: $output"; false; }
   done
 }
 
-@test "hook does nothing and exits 0 when jq is missing" {
-  CLAUDE_STATUSBAR_JQ=/nonexistent/jq run_hook SessionStart
+@test "hook works without jq" {
+  PATH="$FAKE_BIN:/usr/bin:/bin" CLAUDE_STATUSBAR_JQ=/nonexistent/jq run_hook SessionStart
   [ "$status" -eq 0 ]
   [ -z "$output" ]
-  [ ! -e "$(state_file)" ]
+  [ "$(state_field .state)" = idle ]
 }
 
 @test "hook gives up quietly when the session lock is held" {
@@ -427,7 +427,7 @@ teardown() { common_teardown; }
 }
 
 @test "hook ignores unsafe session IDs" {
-  run "$REPO_ROOT/hooks/state-hook.sh" <<< '{"hook_event_name":"SessionStart","session_id":"../../escape"}'
+  run HOOK <<< '{"hook_event_name":"SessionStart","session_id":"../../escape"}'
   [ "$status" -eq 0 ]
   [ -z "$(ls -A "$CLAUDE_STATUSBAR_STATE_DIR")" ]
   [ ! -e "$HOME/escape.json" ]
