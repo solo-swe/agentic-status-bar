@@ -6,16 +6,17 @@ import SwiftUI
 struct SettingsView: View {
     let store: SessionStore
     let hooks: HookInstaller
+    let login: LoginItem
 
     var body: some View {
         TabView {
-            GeneralSettings(store: store, hooks: hooks)
+            GeneralSettings(store: store, hooks: hooks, login: login)
                 .tabItem { Label("General", systemImage: "gearshape") }
             AppearanceSettings(store: store)
                 .tabItem { Label("Appearance", systemImage: "paintpalette") }
         }
         // One size for both tabs: resizing the window on a tab switch looped AppKit's layout and crashed.
-        .frame(width: 520, height: 500)
+        .frame(width: 520, height: 580)
     }
 
     /// The stale threshold choices; the same values `asb action set stale_minutes` accepts.
@@ -53,10 +54,30 @@ struct SettingsView: View {
 private struct GeneralSettings: View {
     let store: SessionStore
     let hooks: HookInstaller
+    let login: LoginItem
     @State private var confirmingRemove = false
 
     var body: some View {
         Form {
+            Section {
+                Toggle("Start at login", isOn: Binding(get: { login.enabled }, set: { login.set($0) }))
+            } footer: {
+                if login.needsApproval || login.failure != nil {
+                    VStack(alignment: .leading, spacing: 4) {
+                        if login.needsApproval {
+                            HStack(spacing: 4) {
+                                Text("Allow it in System Settings › General › Login Items.")
+                                Button("Open Login Items") { login.openSystemSettings() }
+                                    .buttonStyle(.link)
+                            }
+                        }
+                        if let failure = login.failure { Text(failure).foregroundStyle(.red) }
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
+            }
+            .onAppear { login.refresh() }
             Section {
                 LabeledContent("Claude Code hooks") {
                     if hooks.installed {
