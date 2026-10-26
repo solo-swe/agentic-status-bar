@@ -1,6 +1,6 @@
 # Future architecture: from a SwiftBar plugin to agentic-status-bar
 
-Status: the direction and the decisions below are agreed: a standalone Swift app named agentic-status-bar (`asb`), with atm integration. The tech choices and phasing are proposals.
+Status (2026-10-26): **options D and B are done.** `ASBCore` and the `asb` CLI replaced the shell hook and the jq plugin, and the standalone app (AppKit status item, SwiftUI popover and Settings, notifications, start at login, first-run hook install) replaced the SwiftBar plugin, which is removed. Signed releases are wired up and wait on the signing secrets; Sparkle updates come next. Option C (atm integration) and Homebrew are later. The rest of this document is the design as it was decided, kept for the reasoning; "Where we are" below describes the starting point, not today. [README.md](../../README.md) and [the PRD](../PRD.md) describe the app as built.
 
 ## Decisions so far
 

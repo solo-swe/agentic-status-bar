@@ -2,8 +2,7 @@
 
 A snapshot is what every front end shows: the sessions after the reconciliation checks, filters and mutes, in display
 order, plus the menu-bar header. `asb snapshot --json` prints one; the app computes the same with `ASBCore`; the
-SwiftBar renderer and the conformance suite (`tests/conformance/`) are built on it. The Swift types are in
-`Sources/ASBCore/Snapshot.swift`.
+conformance suite (`tests/conformance/`) is built on it. The Swift types are in `Sources/ASBCore/Snapshot.swift`.
 
 Inputs are the state files described in [state-file-schema.md](state-file-schema.md), Claude Code's session
 registry, transcripts, the process table, herdr's agent list, the config and the mutes file.
@@ -57,7 +56,7 @@ Sessions of hidden kinds (filters) are left out entirely.
 | `shown` | string | `waiting`, `idle`, `uncertain`, `busy` or `subagents` (after checks C1–C5) |
 | `reason` | string | `permission` or `question` when waiting |
 | `since` | integer, epoch ms | Since when the session is in `shown` |
-| `label` | string | `project — title` (or `project`), `\|` replaced by `│`, `:name:` broken with a zero-width space, cut to 48 characters with `…` or padded with spaces to 48 |
+| `label` | string | `project — title` (or `project`), `\|` replaced by `│`, `:name:` broken with a zero-width space, cut to 48 characters with `…` or padded with spaces to 48. Shaped for a fixed-width text menu (the SwiftBar plugin's); the app builds its row text from `project` and `title` instead |
 | `word` | string | `permission`, `question`, `idle`, `no activity`, `waiting on N subagent(s)` or `working` |
 | `detail` | string | Time in state (`12s`, `4m`, `2h`, `3d`), or `muted today` / `muted until HH:MM` (local time) when muted |
 | `muted` | boolean | Muted and not waiting |

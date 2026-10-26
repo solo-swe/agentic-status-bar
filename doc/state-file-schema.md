@@ -1,22 +1,23 @@
 # State file schema, version 1
 
-This is the public contract between the writer of session state (the hook) and every reader (the SwiftBar plugin
-today, the `asb` CLI and the app later, other tools). The shell hook (`hooks/state-hook.sh`) and the Swift hook
-(`asb hook`) must both write exactly this; every reader must accept exactly this.
+This is the public contract between the writer of session state (the hook, `asb hook`) and every reader (the app,
+the `asb` CLI, other tools). The hook must write exactly this; every reader must accept exactly this.
 
 Changes that readers could misread need a new version number. Adding an optional field does not.
 
 ## Where
 
-| File | Path today | Path after the rename |
-| --- | --- | --- |
-| Session state | `~/.claude/swiftbar-claudecode-minimal/<sessionId>.json` | `~/.claude/agentic-status-bar/<sessionId>.json` |
-| Mutes | `<state dir>/mutes` | the same, in the new state dir |
-| Refresh stamp | `<state dir>/.last-poke` | the same |
-| Plugin log | `<state dir>/plugin.log` | the same |
-| Config | `~/.config/swiftbar-claudecode-minimal/config` | `~/.config/agentic-status-bar/config` |
+| File | Path |
+| --- | --- |
+| Session state | `~/.claude/agentic-status-bar/<sessionId>.json` |
+| Mutes | `<state dir>/mutes` |
+| Log | `<state dir>/plugin.log` (the name is from the SwiftBar era) |
+| Config | `~/.config/agentic-status-bar/config` |
 
-The state dir can be moved with the config key `state_dir` (or an environment override, for tests).
+The state dir can be moved with the config key `state_dir` (or an environment override, for tests). Before the
+rename, the SwiftBar plugin used `~/.claude/swiftbar-claudecode-minimal/` and
+`~/.config/swiftbar-claudecode-minimal/config`; `asb install` moves them. A `.last-poke` file left in the state dir by
+older hooks is unused.
 
 ## Session state file
 
@@ -109,8 +110,9 @@ Recorded at `SessionStart`, and backfilled once by the first other event of a se
    when `state` changed or `stateSince` is missing.
 4. **Atomic:** write to `<file>.tmp.<pid>`, then rename over the file.
 5. **Silent:** the hook never prints, never fails Claude Code, and always exits 0, also on bad input.
-6. **Refresh:** when a write happened and `instant_refresh=1`, ask the front end to refresh, at most once per 500 ms
-   (stamp in `.last-poke`, epoch ms).
+
+Readers learn about writes by watching the state dir (the rename in rule 4 shows up as a change); the hook doesn't
+notify anyone.
 
 ## Reader rules
 
@@ -149,7 +151,7 @@ otherwise the default stays. Writers change one line and keep the others.
 | `show_interactive`, `show_headless`, `show_subagents`, `show_ide` | `1` | `0` or `1` |
 | `stale_minutes` | `30` | a whole number (`0` = off) |
 | `use_registry` | `1` | `0` or `1` |
-| `instant_refresh` | `1` | `0` or `1` |
+| `instant_refresh` | `1` | `0` or `1`; read but unused (it asked SwiftBar to refresh after each hook event) |
 | `store_prompt_preview` | `1` | `0` or `1` |
 | `state_dir` | the state dir above | a path; `~` is expanded |
 | `theme` | `default` | `default`, `monochrome`, `high_contrast` (unknown → default) |
