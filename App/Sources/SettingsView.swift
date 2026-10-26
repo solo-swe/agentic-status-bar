@@ -13,8 +13,8 @@ struct SettingsView: View {
             AppearanceSettings(store: store)
                 .tabItem { Label("Appearance", systemImage: "paintpalette") }
         }
-        .frame(width: 500)
-        .fixedSize(horizontal: false, vertical: true)
+        // One size for both tabs: resizing the window on a tab switch looped AppKit's layout and crashed.
+        .frame(width: 520, height: 500)
     }
 
     /// The stale threshold choices; the same values `asb action set stale_minutes` accepts.
