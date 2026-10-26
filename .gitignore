@@ -3,3 +3,5 @@ tests/tmp/
 *.log
 .build/
 .swiftpm/
+App/*.xcodeproj/
+App/Generated/

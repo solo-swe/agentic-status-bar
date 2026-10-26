@@ -2928,7 +2928,7 @@
       "description": "Delete hooks/state-hook.sh, lib/common.sh, install.sh, uninstall.sh and the bats tests that only exercised shell internals (tests/common.bats); keep the bats tests that check the CLI end to end. Update .claude-plugin/plugin.json and hooks/hooks.json so the Claude Code plugin route runs the stable `asb hook` path (or drop that route and say so in the README). Update tests/lint.sh for the files left (the one-line SwiftBar plugin). README install becomes: build with `swift build -c release`, then `.build/release/asb install`. CI green.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-076",
         "T-070",
@@ -2947,7 +2947,7 @@
         "README.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T04:28:18Z",
+      "updated_at": "2026-10-26T04:30:17Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -2956,10 +2956,19 @@
           "kind": "note",
           "text": "Before deleting the shell hook, rerun tests/run.sh --bench on a quiet machine: asb hook median must be at most 10 ms (T-074 couldn't measure it under load). If it isn't, find why (startup, config read, process walk) before removing the shell hook.",
           "by": "claude:c631bc24"
+        },
+        {
+          "at": "2026-10-26T04:30:17Z",
+          "kind": "outcome",
+          "text": "Removed the shell hook, lib/common.sh, install/uninstall scripts, the Claude Code plugin packaging (route dropped: hooks run the installed asb) and shell-only tests; bench on a quiet machine: asb hook 9 ms (shell was 19-20), plugin 15 ms, snapshot 12 ms; 170 bats pass; README/CONTRIBUTING describe asb install; CI bats job selects the newest Xcode",
+          "by": "claude:c631bc24"
         }
       ],
       "started_at": "2026-10-26T04:28:18Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "a794e21c3f61fde38071df987ab4e436795efaa1",
+      "completed_at": "2026-10-26T04:30:17Z",
+      "completed_by": "claude:c631bc24"
     },
     {
       "id": "T-078",
@@ -3001,7 +3010,7 @@
       "description": "Create the app with XcodeGen (App/project.yml generating App/AgenticStatusBar.xcodeproj, which is git-ignored): bundle ID com.hakanserce.agentic-status-bar, macOS 14, LSUIElement (no Dock icon), hardened runtime, linking ASBCore from the local package and copying the asb executable into Contents/Helpers. An AppDelegate that starts and shows a placeholder status item. Add `xcodegen generate && xcodebuild build` to CI (unsigned). Document in CONTRIBUTING.md.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-065"
       ],
@@ -3014,9 +3023,11 @@
         "CONTRIBUTING.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:24Z",
+      "updated_at": "2026-10-26T04:30:17Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T04:30:17Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-080",

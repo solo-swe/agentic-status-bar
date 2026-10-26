@@ -4,6 +4,7 @@
 
 - macOS 14 or later, Xcode 16 or later (Swift 6)
 - `brew install bats-core shellcheck` for the end-to-end tests
+- `brew install xcodegen` for the app
 
 ## Checks
 
@@ -13,7 +14,12 @@ tests/swift.sh --summary   # the same, printing only failures and totals
 tests/run.sh               # build asb, then the bats end-to-end tests (or: tests/run.sh tests/hook.bats)
 tests/lint.sh              # shellcheck on the shell scripts left (the SwiftBar plugin, test scripts)
 tests/run.sh --bench       # timing: plugin < 150 ms, asb hook < 10 ms, asb snapshot < 30 ms
+tests/app.sh               # generate the app's Xcode project and build it (--test runs its tests)
 ```
+
+The app's Xcode project is generated from `App/project.yml` by XcodeGen and isn't committed; open
+`App/AgenticStatusBar.xcodeproj` after running `tests/app.sh` (or `xcodegen generate --spec App/project.yml`).
+The build copies `asb` into `Contents/Helpers`. Builds land in `.build/xcode`.
 
 The Swift package (`Package.swift`): `ASBCore` (the logic, Foundation only), the `asb` CLI, and tests in
 `tests/ASBCoreTests`. The conformance cases in `tests/conformance/` pin the snapshot engine's behavior as data (see
@@ -49,6 +55,7 @@ State files appear in `~/.claude/agentic-status-bar/`, one per session. `asb uni
 | --- | --- |
 | `Sources/ASBCore/` | State files, checks C1–C5, mutes, themes, menu model, hook events, install |
 | `Sources/asb/` | The CLI: `hook`, `snapshot`, `swiftbar`, `action`, `install`, `uninstall` |
+| `App/` | The macOS app (XcodeGen spec and sources) |
 | `swiftbar/agentic-status-bar.5s.sh` | The SwiftBar plugin: runs `asb swiftbar` and `asb action` |
 | `doc/PRD.md` | Product requirements |
 | `doc/state-file-schema.md`, `doc/snapshot-schema.md` | The file and snapshot formats |

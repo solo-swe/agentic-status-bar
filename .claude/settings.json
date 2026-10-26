@@ -7,6 +7,8 @@
       "Bash(tests/lint.sh *)",
       "Bash(atm *)",
       "Bash(tests/swift.sh)",
+      "Bash(tests/app.sh)",
+      "Bash(tests/app.sh *)",
       "Bash(tests/swift.sh *)",
       "Bash(swift build)",
       "Bash(swift build *)",
