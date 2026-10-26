@@ -131,6 +131,10 @@ public enum Engine {
             (sessions, schemaIssue) = Checks.registry(sessions, entries: RegistryEntry.parse(inputs.registryFiles))
         }
         sessions = Checks.interrupts(sessions, transcripts: inputs.transcripts)
+        sessions = Checks.approvedTools(sessions, processes: inputs.processes)
+        sessions = Checks.staleness(
+            sessions, staleMinutes: config.staleMinutes, now: inputs.now,
+            transcripts: inputs.transcripts, processes: inputs.processes)
         return Reconciled(
             sessions: sessions, invalidCount: parsed.invalidCount, deadFiles: dead, registrySchemaIssue: schemaIssue)
     }

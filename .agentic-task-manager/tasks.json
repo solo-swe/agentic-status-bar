@@ -2197,7 +2197,7 @@
       "description": "Sources/ASBCore/Transcript.swift: read the last 8192 bytes of a transcript (drop the first, cut line when the file is larger), parse JSONL entries leniently, and expose mtime. C3: a busy or waiting session whose transcript, after the latest real user prompt (type user, not isMeta, text content, not starting with '[Request interrupted by user'), has the interrupt marker or a system/turn_duration entry becomes idle with shownSince = updatedAt and an interrupted flag. Use the fixtures in tests/fixtures/transcripts. Port the C3 cases from tests/checks.bats; conformance cases c3-*.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-057"
       ],
@@ -2208,11 +2208,22 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:19:14Z",
+      "updated_at": "2026-10-26T00:20:46Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:19:14Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "0859e8ab4069b1f5ac8f7b889bdc166362a2dd40",
+      "completed_at": "2026-10-26T00:20:46Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:20:46Z",
+          "kind": "outcome",
+          "text": "Transcript.tailEntries (8 KB, cut first line dropped), prompt/turn-end rules and Checks.interrupts (C3, only for files saying busy/waiting); fixtures-based tests; C3 conformance cases left to T-066",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-060",
@@ -2226,7 +2237,7 @@
       "description": "C4: a waiting session whose claude pid has a child process (not caffeinate) started after shownSince/stateSince becomes busy with shownSince = that start. C5: a busy (or subagents) session whose latest activity (updatedAt, shownSince, transcript mtime, start of any child process) is older than stale_minutes (0 = off) becomes uncertain with shownSince = that activity. Port the C4 and C5 cases from tests/checks.bats; conformance cases c4-*, c5-*.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-059",
         "T-054"
@@ -2237,9 +2248,11 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-25T23:58:17Z",
+      "updated_at": "2026-10-26T00:20:46Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-26T00:20:46Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-061",

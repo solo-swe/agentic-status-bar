@@ -46,4 +46,53 @@ public enum Checks {
         }
         return (alive, dead)
     }
+
+    /// Start times (epoch ms) of the children of `pid`.
+    static func childStarts(of pid: Int32, in processes: [ProcessRecord], excluding name: String? = nil) -> [Int64] {
+        processes.filter { process in
+            process.ppid == pid && (name == nil || (process.comm as NSString).lastPathComponent != name)
+        }.map { $0.start * 1000 }
+    }
+
+    /// C4: a waiting session whose claude process has a child that started after the prompt
+    /// appeared ran an approved tool, so it is busy since that child started. Claude Code starts a
+    /// `caffeinate` child at the start of every turn; it doesn't count.
+    public static func approvedTools(_ sessions: [ReconciledSession], processes: [ProcessRecord]) -> [ReconciledSession] {
+        sessions.map { session in
+            guard session.shown == "waiting", let pid = session.file.pid else { return session }
+            let since = session.shownSince ?? session.file.stateSince ?? 0
+            guard let started = childStarts(of: pid, in: processes, excluding: "caffeinate").filter({ $0 > since }).min()
+            else { return session }
+            var s = session
+            s.shown = "busy"
+            s.shownSince = started
+            return s
+        }
+    }
+
+    /// C5: a busy session (or one waiting on subagents) with no sign of life for longer than
+    /// `staleMinutes` is uncertain since its last activity: a hook write, the time its state was
+    /// shown from, a transcript write, or a child process starting. 0 turns the check off.
+    public static func staleness(
+        _ sessions: [ReconciledSession], staleMinutes: Int, now: Int64,
+        transcripts: [String: TranscriptInput], processes: [ProcessRecord]
+    ) -> [ReconciledSession] {
+        guard staleMinutes > 0 else { return sessions }
+        return sessions.map { session in
+            guard session.shown == "busy" || session.shown == "subagents" else { return session }
+            var activity = [session.file.updatedAt ?? 0, session.shownSince ?? 0]
+            if readsTranscript(session.file), let path = session.file.transcriptPath, let t = transcripts[path] {
+                activity.append(t.mtime)
+            }
+            if let pid = session.file.pid {
+                activity += childStarts(of: pid, in: processes)
+            }
+            let last = activity.max() ?? 0
+            guard now - last > Int64(staleMinutes) * 60_000 else { return session }
+            var s = session
+            s.shown = "uncertain"
+            s.shownSince = last
+            return s
+        }
+    }
 }
