@@ -2031,7 +2031,7 @@
       "description": "Sources/ASBCore/StateFile.swift: a Codable StateFile matching doc/state-file-schema.md (unknown fields ignored, all but v and sessionId optional) and a loader that reads *.json in the state dir (skipping *.tmp.* and *.lock), counting files that don't parse, aren't objects or have v outside 1...1 as invalid. Return [StateFile with its path] plus invalidCount. Tests port the plugin.bats cases 'plugin loads valid state files', 'corrupt and future-version files', 'temp and lock files are ignored'.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-049",
         "T-051"
@@ -2041,11 +2041,22 @@
         "Tests/ASBCoreTests/StateFileTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:14:49Z",
+      "updated_at": "2026-10-26T00:15:38Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:14:49Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "96a7ad94aee4834758cfb14e960a00ccad2a5cba",
+      "completed_at": "2026-10-26T00:15:38Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-26T00:15:38Z",
+          "kind": "outcome",
+          "text": "StateFile.parse (lenient per field, v 1...1, sessionId falls back to file name), ParsedStates with invalid count, StateDirectory.read (*.json regular files only)",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-056",
@@ -2059,7 +2070,7 @@
       "description": "Sources/ASBCore/Processes.swift: protocol ProcessInspector { func snapshot() -> [Int32: ProcessInfo] } with ProcessInfo {pid, ppid, start (epoch seconds), comm, args (optional)}; a FakeProcessInspector for tests; and a macOS implementation using libproc (proc_listallpids, proc_pidinfo PROC_PIDTBSDINFO for ppid, start time and comm) in a file compiled only on macOS (#if os(macOS)) so ASBCore stays portable. Also a helper converting the shell era's procStart strings ('Mon Oct 19 09:12:03 2026', local time, extra spaces allowed) to epoch seconds. Tests: the fake; the real inspector finds the test process itself with a plausible start time and its parent.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-049"
       ],
@@ -2069,7 +2080,7 @@
         "Tests/ASBCoreTests/ProcessesTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:13:48Z",
+      "updated_at": "2026-10-26T00:15:39Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -2079,7 +2090,9 @@
           "text": "Use ProcessRecord from Sources/ASBCore/Engine.swift (pid, ppid, start epoch s, comm, args) as the inspector's output type instead of a new ProcessInfo; the engine stays pure and takes [ProcessRecord] in SnapshotInputs.",
           "by": "claude:c631bc24"
         }
-      ]
+      ],
+      "started_at": "2026-10-26T00:15:39Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-057",
