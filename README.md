@@ -38,8 +38,11 @@ z web-dashboard — Fix flaky login test             idle        14m
 ⌛ search-index — Rebuild the ranking              waiting on 2 subagents  3m
     ↳ Explore                                                  3m
     ↳ Plan                                                     1m
-Quit                                                            ⚙
+Quit                                                       ? ⓘ ⚙
 ```
+
+At the bottom, **?** opens the in-app Help (what each symbol means, in your theme's colors), **ⓘ** the About
+window and the gear Settings.
 
 A session whose subagents are still running, after its own turn ended or while it waits in its Agent tool, shows an
 hourglass and `waiting on N subagents`. In the menu bar it counts as working, not idle. Background subagents that

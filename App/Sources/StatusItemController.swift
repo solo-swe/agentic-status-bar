@@ -12,7 +12,7 @@ final class StatusItemController {
 
     private let popover = NSPopover()
 
-    init(store: SessionStore, openSettings: @escaping () -> Void) {
+    init(store: SessionStore, openSettings: @escaping () -> Void, openHelp: @escaping () -> Void) {
         self.store = store
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         item.button?.imagePosition = .imageLeading
@@ -21,7 +21,8 @@ final class StatusItemController {
         popover.animates = false
         popover.contentViewController = NSHostingController(
             rootView: PopoverView(
-                store: store, close: { [weak popover] in popover?.performClose(nil) }, openSettings: openSettings))
+                store: store, close: { [weak popover] in popover?.performClose(nil) }, openSettings: openSettings,
+                openHelp: openHelp))
         item.button?.target = self
         item.button?.action = #selector(togglePopover)
         update()

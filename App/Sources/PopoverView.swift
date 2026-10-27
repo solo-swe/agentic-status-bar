@@ -7,6 +7,7 @@ struct PopoverView: View {
     /// Closes the popover (after an action that brings another app to the front).
     let close: () -> Void
     let openSettings: () -> Void
+    let openHelp: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -43,6 +44,14 @@ struct PopoverView: View {
                     .keyboardShortcut("q")
                     .help("Quit Agentic Status Bar")
                 Spacer()
+                Button {
+                    close()
+                    openHelp()
+                } label: {
+                    Image(systemName: "questionmark.circle")
+                }
+                .buttonStyle(.borderless)
+                .help("Agentic Status Bar Help")
                 Button {
                     close()
                     AboutPanel.show()

@@ -9,6 +9,7 @@ private final class RecordingActions: NSObject, MainMenuActions {
     func showSettings(_ sender: Any?) { called.append("settings") }
     func showSessions(_ sender: Any?) { called.append("sessions") }
     func checkForUpdates(_ sender: Any?) { called.append("updates") }
+    func showHelp(_ sender: Any?) { called.append("help") }
 }
 
 @MainActor
@@ -16,7 +17,12 @@ final class MainMenuTests: XCTestCase {
     func testTheAppMenuHasAboutSettingsSessionsAndQuit() throws {
         let actions = RecordingActions()
         let menu = MainMenu.make(actions: actions)
-        XCTAssertEqual(menu.items.map(\.title), ["Agentic Status Bar", "Edit", "Window"])
+        XCTAssertEqual(menu.items.map(\.title), ["Agentic Status Bar", "Edit", "Window", "Help"])
+        let help = try XCTUnwrap(menu.items.last?.submenu?.items.first)
+        XCTAssertEqual(help.title, "Agentic Status Bar Help")
+        XCTAssertEqual(help.keyEquivalent, "?")
+        XCTAssertTrue(NSApp.sendAction(try XCTUnwrap(help.action), to: help.target, from: help))
+        XCTAssertEqual(actions.called, ["help"])
         let app = try XCTUnwrap(menu.items.first?.submenu)
         let titles = app.items.filter { !$0.isSeparatorItem }.map(\.title)
         XCTAssertEqual(titles, [
