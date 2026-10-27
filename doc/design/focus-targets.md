@@ -303,26 +303,82 @@ detect (asb hook, well under 1 ms extra, estimated)  →  record layers in the s
                                                                    →  click: resolve live, act inner → outer
 ```
 
-In `ASBCore`:
+### Implementation design
+
+The goal: support terminals one at a time, at our own pace, without touching what already works. So the design is
+built around one interface, `FocusTarget`, with **one implementation per terminal or multiplexer**. Everything
+that is the same for all of them (recording layers, resolving the chain at click time, timeouts, safety checks)
+lives in a small engine that knows no terminal by name.
+
+#### Principles
+
+- **Program to the interface.** The hook-side detector and the click-side chain see only `FocusTarget`. They never
+  name `tmux` or `iTerm2`.
+- **One target, one file, one test file.** `TmuxTarget.swift` and `TmuxTargetTests.swift`. A target owns its
+  detection, its level, its commands and their parsing, and nothing else.
+- **Side effects behind protocols.** Commands go through `CommandRunner` (run, and a new `capture` for output),
+  the process table through `ProcessInspector`, Apple Events through `AppleScriptRunner`, tool paths through
+  `FocusTools`. Tests swap each for a fake, so every target is unit-tested without the real tool installed.
+- **Adding a target is additive.** A new target is a new type, its tests, its fixtures and one line in the
+  registry. No change to the engine, the state file schema (layers are open-ended: `kind` plus fields), the
+  snapshot or the app.
+- **Rollout per target.** The registry has an on/off list, so a target can ship turned off, be tried, then
+  turned on. A target that is off, missing its tool, or failing still leaves the `app` fallback (raise the
+  terminal).
+- **Cheap where it matters.** `detect` is pure: environment and ancestor lookups, no commands, so the hook stays
+  under its 10 ms budget. Commands run only at click time, each with a timeout, within one budget for the chain.
+
+#### Types
 
 ```swift
-/// One layer a session sits in, as recorded or as resolved at click time.
+/// One layer a session sits in: as recorded by the hook, or as resolved at click time.
 public struct FocusLayer: Equatable, Sendable {
-    public var kind: String            // "tmux", "herdr", "zellij", "screen", "iterm2", "terminal", "ghostty", ...
-    public var fields: [String: String] // kind-specific: pane, socket, session, window, bundleId, tty
-    public var inherited: Bool          // came through a multiplexer server; may be stale
+    public var kind: String              // "tmux", "herdr", "iterm2", ... (a target's `kind`)
+    public var fields: [String: String]  // kind-specific: pane, socket, session, window, bundleId, tty
+    public var inherited: Bool           // came through a multiplexer server's environment; may be stale
 }
 
-/// One integration. Detection is pure (environment + ancestors); acting runs commands through CommandRunner.
-public protocol FocusTarget {
-    static var kind: String { get }
-    /// From the hook's environment and claude's ancestors. No commands, no network.
-    static func detect(environment: [String: String], ancestors: [ProcessRecord]) -> FocusLayer?
-    /// Best level this layer can reach with the tools installed (cheap: file checks only).
-    static func level(_ layer: FocusLayer, tools: FocusTools) -> FocusLevel?
-    /// Brings the layer's pane forward. For a multiplexer, returns the attached client (pid, tty) so the
-    /// next layer out can be resolved live.
-    static func focus(_ layer: FocusLayer, runner: CommandRunner, tools: FocusTools) -> FocusResult
+public enum FocusLevel: Int, Comparable, Sendable { case app, window, tab, pane }
+
+/// What a target needs at hook time: pure inputs only.
+public struct DetectionContext: Sendable {
+    public var environment: [String: String]
+    public var ancestors: [ProcessRecord]   // claude's parents, nearest first (pid, name, path, tty)
+}
+
+/// What a target needs at click time: every side effect behind a protocol.
+public struct FocusContext {
+    public var runner: CommandRunner        // run(...) -> Bool, capture(...) -> String?
+    public var appleScript: AppleScriptRunner
+    public var processes: ProcessInspector
+    public var tools: FocusTools
+    public var deadline: Date               // the chain's shared time budget
+}
+
+/// A multiplexer's attached client: where the next layer out is resolved from.
+public struct FocusClient: Equatable, Sendable { public var pid: Int32; public var tty: String }
+
+public enum FocusResult: Equatable, Sendable {
+    case focused                       // done; the next layer out may still need raising
+    case focusedVia(FocusClient)       // a multiplexer: resolve the next layer from this client
+    case unavailable(String)           // can't from here (no tool, no client, setting off): try the fallback
+    case failed(String)                // the command failed or timed out
+}
+
+/// One terminal or multiplexer integration.
+public protocol FocusTarget: Sendable {
+    /// The `kind` this target writes and reads in `focus.layers`.
+    var kind: String { get }
+    /// True for multiplexers (herdr, tmux, zellij, screen): their layer sits inside another one.
+    var isMultiplexer: Bool { get }
+    /// Hook time: this target's layer, if the session runs in it. No commands, no I/O beyond the inputs.
+    func detect(_ context: DetectionContext) -> FocusLayer?
+    /// Click time, live: this target's layer for a client found under a multiplexer (its process and tty).
+    func resolve(client: FocusClient, ancestors: [ProcessRecord]) -> FocusLayer?
+    /// The best level `focus` can reach with the tools installed. Cheap: file checks only.
+    func level(_ layer: FocusLayer, tools: FocusTools) -> FocusLevel?
+    /// Brings the layer's pane, tab or window forward.
+    func focus(_ layer: FocusLayer, in context: FocusContext) -> FocusResult
 }
 ```
 
@@ -332,9 +388,155 @@ public protocol FocusTarget {
 candidates (`/opt/homebrew/bin`, `/usr/local/bin`, `/Applications/WezTerm.app/Contents/MacOS`,
 `/Applications/kitty.app/Contents/MacOS`) come first.
 
-Apple Events go through the same `CommandRunner` as `/usr/bin/osascript` with arguments, so tests stay
-command-recording tests and `ASBCore` stays Foundation-only. The permission check
-(`AEDeterminePermissionToAutomateTarget`) lives in the app, behind a small protocol.
+`AppleScriptRunner` runs `/usr/bin/osascript` through the `CommandRunner`, with the script as a constant and every
+ID passed as an argument, so tests stay command-recording tests and `ASBCore` stays Foundation-only. The permission
+check (`AEDeterminePermissionToAutomateTarget`) lives in the app, behind a small `AutomationPermission` protocol.
+
+#### The engine
+
+Three small types use the targets and know none of them by name:
+
+| Type | Side | Job |
+| --- | --- | --- |
+| `FocusRegistry` | both | The ordered list of targets, filtered by the `focus_targets` setting (default: the ones marked stable). Lookup by `kind`. |
+| `FocusDetector` | hook | Runs every target's `detect`, keeps a multiplexer layer only if its process is an ancestor, orders the layers outermost first, marks app layers under a multiplexer `inherited`. |
+| `FocusChain` | click | Starts at the innermost layer, calls `focus`, and on `focusedVia(client)` asks each target's `resolve` for the next layer out, live. Falls back to the recorded layer, then to `AppTarget` (raise by bundle ID). Stops at the deadline. |
+
+`AppTarget` is the always-present fallback: it raises an app by bundle ID with `open -b`, resolved live from the
+process when it can be.
+
+#### Diagrams
+
+The types:
+
+```mermaid
+classDiagram
+    class FocusTarget {
+        <<protocol>>
+        +kind String
+        +isMultiplexer Bool
+        +detect(DetectionContext) FocusLayer?
+        +resolve(FocusClient, ancestors) FocusLayer?
+        +level(FocusLayer, FocusTools) FocusLevel?
+        +focus(FocusLayer, FocusContext) FocusResult
+    }
+    class FocusRegistry {
+        +targets [FocusTarget]
+        +target(kind) FocusTarget?
+    }
+    class FocusDetector {
+        +layers(DetectionContext) [FocusLayer]
+    }
+    class FocusChain {
+        +focus(layers, FocusContext) FocusResult
+    }
+    class FocusContext {
+        +runner CommandRunner
+        +appleScript AppleScriptRunner
+        +processes ProcessInspector
+        +tools FocusTools
+        +deadline Date
+    }
+    FocusRegistry o-- FocusTarget
+    FocusDetector --> FocusRegistry
+    FocusChain --> FocusRegistry
+    FocusChain --> FocusContext
+    FocusTarget <|.. HerdrTarget
+    FocusTarget <|.. TmuxTarget
+    FocusTarget <|.. ZellijTarget
+    FocusTarget <|.. WezTermTarget
+    FocusTarget <|.. KittyTarget
+    FocusTarget <|.. ITerm2Target
+    FocusTarget <|.. TerminalAppTarget
+    FocusTarget <|.. GhosttyTarget
+    FocusTarget <|.. VSCodeTarget
+    FocusTarget <|.. AppTarget
+```
+
+A click on a session running in tmux inside iTerm2:
+
+```mermaid
+sequenceDiagram
+    participant App as App (row click)
+    participant Chain as FocusChain
+    participant Tmux as TmuxTarget
+    participant ITerm as ITerm2Target
+    participant Runner as CommandRunner / AppleScriptRunner
+    App->>Chain: focus(layers: [iterm2 (inherited), tmux %12])
+    Chain->>Tmux: focus(tmux %12)
+    Tmux->>Runner: tmux list-clients, switch-client -c tty -t %12
+    Tmux-->>Chain: focusedVia(client pid 812, /dev/ttys007)
+    Chain->>ITerm: resolve(client, its ancestors)
+    ITerm-->>Chain: iterm2 layer (live, tty /dev/ttys007)
+    Chain->>ITerm: focus(iterm2 layer)
+    ITerm->>Runner: osascript select session (tty as argument), open -b com.googlecode.iterm2
+    ITerm-->>Chain: focused
+    Chain-->>App: focused
+```
+
+#### Files
+
+```text
+Sources/ASBCore/Focus/
+  FocusTypes.swift          FocusLayer, FocusLevel, FocusResult, FocusClient, contexts
+  FocusTarget.swift         the protocol
+  FocusTools.swift          tool paths and overrides
+  AppleScriptRunner.swift   osascript with arguments only
+  FocusRegistry.swift       the list, the on/off setting
+  FocusDetector.swift       hook side
+  FocusChain.swift          click side
+  Targets/
+    AppTarget.swift  HerdrTarget.swift  TmuxTarget.swift  ZellijTarget.swift  ScreenTarget.swift
+    WezTermTarget.swift  KittyTarget.swift  ITerm2Target.swift  TerminalAppTarget.swift
+    GhosttyTarget.swift  VSCodeTarget.swift
+tests/ASBCoreTests/Focus/
+  FocusTargetContract.swift   shared checks every target must pass
+  FocusDetectorTests.swift  FocusChainTests.swift  FocusRegistryTests.swift
+  <Name>TargetTests.swift     one per target
+tests/Integration/Focus/       opt-in, real tools (below)
+tests/fixtures/env/            environment dumps per setup (invented values)
+```
+
+#### Testing
+
+Three levels, so each target is covered on its own and together with the others:
+
+1. **The contract, for every target.** `FocusTargetContract` is a set of checks each target's test file runs on
+   itself:
+   - `detect` on an empty environment returns nil;
+   - every field value that fails the kind's character check (`; rm -rf ~`, a newline, a relative path) leads to
+     no command at all;
+   - `level` is nil when the target's tool is missing;
+   - `focus` past the deadline returns `failed` without running anything;
+   - AppleScript targets never put an ID inside the script text.
+
+   A new target gets these checks for free.
+2. **Unit tests, per target.** Detection from the environment fixtures and fake ancestor chains; `level` for
+   each tool and setting state; `focus` with a `FakeRunner` that scripts each command's output: the exact
+   command lines, parsing of real output samples (`tmux list-clients`, `wezterm cli list --format json`,
+   `kitten @ ls`), and every failure branch (tool missing, no client, non-zero exit, timeout, unparsable output).
+   The engine has its own tests with fake targets: ordering, the `inherited` rule, chaining, fallbacks, deadline.
+   Target: every branch of every target covered; measure with `swift test --enable-code-coverage` and keep
+   `Sources/ASBCore/Focus/` at 90% or more lines.
+3. **Integration tests, opt-in.** Tests tagged `.integration` run only with `ASB_INTEGRATION=1` and skip when the
+   tool isn't installed. They use the real CLI but never the screen:
+   - **tmux:** start a private server (`tmux -L asb-test-<uuid> -f /dev/null`), create a session with two panes,
+     run `TmuxTarget.focus` against pane two, check `display -p '#{pane_active}'`, kill the server. Runs headless,
+     so it can run in CI (`brew install tmux`) as a separate job.
+   - **herdr, WezTerm, Zellij:** the same pattern where the tool can run headless (WezTerm's mux server, a
+     detached Zellij session); otherwise local only.
+   - **kitty, iTerm2, Terminal.app, Ghostty, VS Code:** they need a GUI and, for Apple Events, a permission
+     prompt, so they're covered by the manual checklist in `doc/RELEASING.md`. No test scripts clicks or
+     keystrokes.
+
+#### Adding a terminal
+
+1. Research it (as in the per-target sections above) and add its row to the feasibility table.
+2. Add `Targets/<Name>Target.swift` implementing `FocusTarget`, and its environment fixtures.
+3. Add `<Name>TargetTests.swift`: run the contract, then unit tests for detect, level, focus and each failure.
+4. Add an integration test if the tool can run headless.
+5. Register it, turned off; try it locally; turn it on in a release.
+6. Add its line to the manual checklist, the README and Help.
 
 ### At hook time
 
@@ -477,6 +679,9 @@ and the help text can say "brings its terminal to the front".
 
 ### Test strategy
 
+The three levels (the contract, unit tests per target, opt-in integration tests) are in Implementation design ›
+Testing. What they cover:
+
 - **Detection:** fixtures of environment dumps per setup (`tests/fixtures/env/*.json`: iTerm2, Terminal,
   Ghostty, kitty with and without `KITTY_LISTEN_ON`, WezTerm, tmux-in-iTerm2, herdr-in-Ghostty, VS Code), with
   invented values, plus `FakeProcessInspector` ancestor chains. `HookMetadata.gather` → expected `focus` JSON.
@@ -507,52 +712,87 @@ and the help text can say "brings its terminal to the front".
 ## Task breakdown
 
 Each task is small enough for an agent in under 10 minutes. "Deps" lists task numbers that must be done first.
+Part A builds the engine with herdr only, so nothing visible changes. After it, **each target is a slice of its
+own** (part B onwards): its type, its unit tests (contract included), its integration test where possible, then
+switching it on. Slices don't depend on each other except where noted, so they can be taken in any order.
+
+**A. Engine (herdr only, no visible change)**
 
 | # | Task | Type | Files | Deps |
 | --- | --- | --- | --- | --- |
-| 1 | Add `FocusLayer`, `FocusLevel` and a `FocusTarget` protocol (types only, no callers) | refactor | `Sources/ASBCore/Focus.swift` (new) | – |
-| 2 | Add `capture(_:_:timeout:) -> String?` to `CommandRunner` and `ProcessRunner` (temp-file output, as `Herdr.run`); extend `FakeRunner` with scripted outputs | refactor | `Sources/ASBCore/Actions.swift`, `tests/ASBCoreTests/ActionsTests.swift` | – |
-| 3 | Add `FocusTools` (tool paths with `ASB_<TOOL>` overrides and fixed candidates); move `Herdr.find` logic into it | refactor | `Sources/ASBCore/Focus.swift`, `Sources/ASBCore/Inputs.swift` | 1 |
-| 4 | Test `FocusTools` lookups and overrides | test | `tests/ASBCoreTests/FocusTests.swift` (new) | 3 |
-| 5 | Implement the herdr target (detect, level, focus) with today's behavior | refactor | `Sources/ASBCore/FocusHerdr.swift` (new) | 1, 3 |
-| 6 | Make `Actions.focus` run the layer loop; build layers from `herdrPane`/`termBundleId` when `focus` is absent; existing focus tests stay green | refactor | `Sources/ASBCore/Actions.swift`, `Sources/ASBCore/StateFile.swift` | 2, 5 |
-| 7 | Parse `focus` in `StateFile` (tty, layers; reader rules 1, 2, 4) | feature | `Sources/ASBCore/StateFile.swift` | 1 |
-| 8 | Tests for `focus` parsing: unknown kinds, unsafe values, missing field | test | `tests/ASBCoreTests/StateFileTests.swift` | 7 |
-| 9 | Document `focus` and its reader rules in the state file schema | docs | `doc/state-file-schema.md` | 7 |
-| 10 | Add `e_tdev`-based `tty` to `ProcessRecord` / the Darwin inspector (and the fake) | feature | `Sources/ASBCore/Processes.swift`, `Sources/ASBCore/ProcessesDarwin.swift` | – |
-| 11 | Extend the ancestor walk past claude (cap 12) and expose the chain to detection | feature | `Sources/ASBCore/HookMetadata.swift` | 10 |
-| 12 | Record `focus` (tty + detected layers, `inherited` flag) in `HookMetadata.apply`; keep old fields | feature | `Sources/ASBCore/HookMetadata.swift` | 1, 5, 11 |
-| 13 | Environment fixtures (invented values) for each setup | test | `tests/fixtures/env/*.json`, `tests/fixtures/README.md` | – |
-| 14 | Detection tests from the fixtures and fake ancestor chains | test | `tests/ASBCoreTests/HookMetadataTests.swift` | 12, 13 |
-| 15 | Run `tests/bench.sh` with a multi-layer environment; keep the hook under 10 ms | test | `tests/bench.sh` | 12 |
-| 16 | Add `focus {level, via}` to `Snapshot.Session`; set `focusable` from it | feature | `Sources/ASBCore/Snapshot.swift`, `Sources/ASBCore/MenuModel.swift` | 5, 7 |
-| 17 | Snapshot tests and conformance cases for `focus` | test | `tests/ASBCoreTests/MenuModelTests.swift`, `tests/conformance/` | 16 |
-| 18 | Document `focus` in the snapshot schema | docs | `doc/snapshot-schema.md` | 16 |
-| 19 | Generic `app` target: resolve the app live (pid → bundle) and raise with `open -b`; `app` level for any `bundleId` | feature | `Sources/ASBCore/FocusApp.swift` (new) | 6 |
-| 20 | Tests: `app` level, live bundle preferred over an inherited one | test | `tests/ASBCoreTests/FocusTests.swift` | 19 |
-| 21 | tmux target: detect from `TMUX`/`TMUX_PANE` with a tmux ancestor | feature | `Sources/ASBCore/FocusTmux.swift` (new) | 12 |
-| 22 | tmux focus: `list-clients`, pick the most active, `switch-client -c -t`; return the client | feature | `Sources/ASBCore/FocusTmux.swift` | 2, 21 |
-| 23 | Chain resolution: from a multiplexer client (pid, tty, environment) to the next layer | feature | `Sources/ASBCore/Actions.swift`, `Sources/ASBCore/Focus.swift` | 19, 22 |
-| 24 | Tests: tmux alone, tmux with no client, tmux in herdr, tmux whose client sits in another app | test | `tests/ASBCoreTests/FocusTests.swift` | 23 |
-| 25 | WezTerm target (detect, `cli activate-pane` with the socket in the environment) | feature | `Sources/ASBCore/FocusWezTerm.swift` (new) | 6, 12 |
-| 26 | kitty target (detect, `kitten @ --to … focus-window --match id:N`; level `app` without a socket) | feature | `Sources/ASBCore/FocusKitty.swift` (new) | 6, 12 |
-| 27 | Tests for WezTerm and kitty commands and safety checks | test | `tests/ASBCoreTests/FocusTests.swift` | 25, 26 |
-| 28 | Add the Apple Events entitlement and `NSAppleEventsUsageDescription` | feature | `App/project.yml`, new `App/Resources/AgenticStatusBar.entitlements` | – |
-| 29 | `osascript` helper: scripts as constants, IDs only as `argv`; tests that no ID reaches the script text | feature | `Sources/ASBCore/AppleScript.swift` (new), tests | 2, 3 |
-| 30 | Terminal.app target: select the tab with a given tty and raise its window | feature | `Sources/ASBCore/FocusTerminalApp.swift` (new) | 23, 29 |
-| 31 | iTerm2 target: select the session by `id`, else by `tty`, then tab and window | feature | `Sources/ASBCore/FocusITerm.swift` (new) | 23, 29 |
-| 32 | Tests for Terminal.app and iTerm2 command lines, including tmux-in-iTerm2 by client tty | test | `tests/ASBCoreTests/FocusTests.swift` | 30, 31 |
-| 33 | App: Automation permission check (`AEDeterminePermissionToAutomateTarget`); no timeout while undetermined | feature | `App/Sources/AutomationPermission.swift` (new), `App/Sources/SessionStore.swift` | 28 |
-| 34 | App: one-line explainer before the first prompt; "Allow tab focus…" item when denied | feature | `App/Sources/SessionRow.swift`, `App/Sources/PopoverView.swift` | 33 |
-| 35 | Settings › Focus: detected targets, their state, kitty setup lines | feature | `App/Sources/SettingsView.swift` | 16, 33 |
-| 36 | VS Code / Cursor window target: workspace folder from the IDE lock file; never open a guessed folder | feature | `Sources/ASBCore/FocusVSCode.swift` (new) | 19 |
-| 37 | Claude panel sessions (`kind` ide): raise the window, then `vscode://anthropic.claude-code/open?session=` | feature | `Sources/ASBCore/FocusVSCode.swift` | 36 |
-| 38 | Tests for VS Code: lock file fixtures, missing folder → `app` level only | test | `tests/ASBCoreTests/FocusTests.swift`, `tests/fixtures/ide/` | 36, 37 |
-| 39 | Ghostty target: match terminals by working directory, then title; unique match only | feature | `Sources/ASBCore/FocusGhostty.swift` (new) | 29 |
-| 40 | Zellij target: detect; `focus-pane-id` when supported, else `app` | feature | `Sources/ASBCore/FocusZellij.swift` (new) | 23 |
-| 41 | Tests for Ghostty and Zellij | test | `tests/ASBCoreTests/FocusTests.swift` | 39, 40 |
-| 42 | Update README, Help and the PRD (U4, Focus on click) for the new targets and permissions | docs | `README.md`, `App/Sources/HelpView.swift`, `doc/PRD.md` | 24, 32 |
-| 43 | Manual test checklist per target and nesting case | docs | `doc/RELEASING.md` | 42 |
+| 1 | Focus types: `FocusLayer`, `FocusLevel`, `FocusResult`, `FocusClient`, `DetectionContext`, `FocusContext` | refactor | `Sources/ASBCore/Focus/FocusTypes.swift` | – |
+| 2 | The `FocusTarget` protocol | refactor | `Sources/ASBCore/Focus/FocusTarget.swift` | 1 |
+| 3 | `capture(_:_:timeout:) -> String?` on `CommandRunner` and `ProcessRunner` (temp-file output, as `Herdr.run`); `FakeRunner` with scripted outputs | refactor | `Sources/ASBCore/Actions.swift`, `tests/ASBCoreTests/ActionsTests.swift` | – |
+| 4 | `FocusTools` (tool paths, `ASB_<TOOL>` overrides, fixed candidates); move `Herdr.find` into it; tests | refactor | `Sources/ASBCore/Focus/FocusTools.swift`, `tests/ASBCoreTests/Focus/FocusToolsTests.swift` | 1 |
+| 5 | `FocusTargetContract`: the shared checks every target's tests run | test | `tests/ASBCoreTests/Focus/FocusTargetContract.swift` | 2, 3, 4 |
+| 6 | `AppTarget`: raise by bundle ID with `open -b`, resolved live from the process when known; unit tests and contract | feature | `Sources/ASBCore/Focus/Targets/AppTarget.swift`, `tests/ASBCoreTests/Focus/AppTargetTests.swift` | 5 |
+| 7 | `HerdrTarget`: today's behavior moved behind the protocol; unit tests and contract | refactor | `Sources/ASBCore/Focus/Targets/HerdrTarget.swift`, `tests/ASBCoreTests/Focus/HerdrTargetTests.swift` | 5 |
+| 8 | `FocusRegistry` with the `focus_targets` setting (on/off per kind); tests | feature | `Sources/ASBCore/Focus/FocusRegistry.swift`, `Sources/ASBCore/Config.swift`, tests | 6, 7 |
+| 9 | Add `tty` (from `e_tdev`) to `ProcessRecord`, the Darwin inspector and the fake | feature | `Sources/ASBCore/Processes.swift`, `Sources/ASBCore/ProcessesDarwin.swift` | – |
+| 10 | Extend the ancestor walk past claude (cap 12) and expose it as `DetectionContext.ancestors` | feature | `Sources/ASBCore/HookMetadata.swift` | 1, 9 |
+| 11 | `FocusDetector`: run the targets, the ancestor rule, order, `inherited`; tests with fake targets | feature | `Sources/ASBCore/Focus/FocusDetector.swift`, `tests/ASBCoreTests/Focus/FocusDetectorTests.swift` | 8, 10 |
+| 12 | Record `focus` (tty and layers) in `HookMetadata.apply`; keep `herdrPane` and `termBundleId` | feature | `Sources/ASBCore/HookMetadata.swift` | 11 |
+| 13 | Parse `focus` in `StateFile` (reader rules 1, 2, 4); build layers from the old fields when it's absent; tests | feature | `Sources/ASBCore/StateFile.swift`, `tests/ASBCoreTests/StateFileTests.swift` | 1 |
+| 14 | `FocusChain`: innermost first, `resolve` the next layer from a client, fallbacks, deadline; tests with fake targets | feature | `Sources/ASBCore/Focus/FocusChain.swift`, `tests/ASBCoreTests/Focus/FocusChainTests.swift` | 8 |
+| 15 | `Actions.focus` runs `FocusChain`; existing focus tests stay green | refactor | `Sources/ASBCore/Actions.swift` | 13, 14 |
+| 16 | Snapshot `focus {level, via}`; `focusable` from it; conformance cases for old and new state files | feature | `Sources/ASBCore/Snapshot.swift`, `Sources/ASBCore/MenuModel.swift`, `tests/conformance/` | 13, 8 |
+| 17 | Document `focus` in both schemas | docs | `doc/state-file-schema.md`, `doc/snapshot-schema.md` | 12, 16 |
+| 18 | Environment fixtures (invented values) for each setup; detection tests from them | test | `tests/fixtures/env/`, `tests/ASBCoreTests/Focus/FocusDetectorTests.swift` | 11 |
+| 19 | Keep the hook under 10 ms with a multi-layer environment (`tests/bench.sh`) | test | `tests/bench.sh` | 12 |
+| 20 | Integration test setup: the `.integration` tag, `ASB_INTEGRATION=1`, skipping when a tool is missing; a CI job | infra | `tests/Integration/`, `Package.swift`, `.github/workflows/ci.yml` | – |
+| 21 | Coverage report for `Sources/ASBCore/Focus/` (`swift test --enable-code-coverage`), 90% lines | infra | `tests/swift.sh` | 14 |
+
+**B. App raise for every terminal** (the `app` level; no permission)
+
+| # | Task | Type | Files | Deps |
+| --- | --- | --- | --- | --- |
+| 22 | `AppTarget.resolve`: the live app above a multiplexer client; turn `app` on; rows clickable at `app` level | feature | `Sources/ASBCore/Focus/Targets/AppTarget.swift`, tests | 15, 16 |
+
+**C. tmux**
+
+| # | Task | Type | Files | Deps |
+| --- | --- | --- | --- | --- |
+| 23 | `TmuxTarget.detect` and `level` (`TMUX`, `TMUX_PANE`, a tmux ancestor); unit tests, contract | feature | `Sources/ASBCore/Focus/Targets/TmuxTarget.swift`, `tests/ASBCoreTests/Focus/TmuxTargetTests.swift` | 15 |
+| 24 | `TmuxTarget.focus`: `list-clients`, pick the most recently active, `switch-client -c -t`; return the client; tests from real output samples | feature | same | 23 |
+| 25 | Integration test against a private tmux server | test | `tests/Integration/Focus/TmuxIntegrationTests.swift` | 20, 24 |
+| 26 | Chain tests: tmux alone, no client, in herdr, client in another app; turn tmux on | test | `tests/ASBCoreTests/Focus/FocusChainTests.swift` | 22, 24 |
+
+**D. WezTerm** and **E. kitty** (no permission)
+
+| # | Task | Type | Files | Deps |
+| --- | --- | --- | --- | --- |
+| 27 | `WezTermTarget` (detect, level, `cli activate-pane` with the socket); unit tests, contract | feature | `Targets/WezTermTarget.swift`, `WezTermTargetTests.swift` | 15 |
+| 28 | WezTerm integration test with the mux server, if it runs headless | test | `tests/Integration/Focus/` | 20, 27 |
+| 29 | `KittyTarget` (detect, `kitten @ --to … focus-window --match id:N`, `app` level without a socket); unit tests, contract | feature | `Targets/KittyTarget.swift`, `KittyTargetTests.swift` | 15 |
+| 30 | Help and Settings: the two kitty config lines | docs | `App/Sources/HelpView.swift` | 29 |
+
+**F. Apple Events groundwork, then G. Terminal.app and H. iTerm2**
+
+| # | Task | Type | Files | Deps |
+| --- | --- | --- | --- | --- |
+| 31 | `AppleScriptRunner`: constant scripts, IDs only as arguments; contract check that no ID reaches the script text | feature | `Sources/ASBCore/Focus/AppleScriptRunner.swift`, tests | 3 |
+| 32 | Apple Events entitlement and `NSAppleEventsUsageDescription` | feature | `App/project.yml`, `App/Resources/AgenticStatusBar.entitlements` | – |
+| 33 | App: `AutomationPermission` check; no timeout while undetermined; the one-line explainer; "Allow tab focus…" when denied | feature | `App/Sources/AutomationPermission.swift`, `SessionRow.swift`, `PopoverView.swift` | 32 |
+| 34 | `TerminalAppTarget`: the tab with the session's tty; unit tests, contract | feature | `Targets/TerminalAppTarget.swift`, tests | 14, 31 |
+| 35 | `ITerm2Target`: session by `id`, else by tty; unit tests, contract (including tmux-in-iTerm2 by client tty) | feature | `Targets/ITerm2Target.swift`, tests | 14, 31 |
+
+**I. VS Code and Cursor**, **J. Ghostty**, **K. Zellij and screen**
+
+| # | Task | Type | Files | Deps |
+| --- | --- | --- | --- | --- |
+| 36 | `VSCodeTarget`, window: workspace folder from the IDE lock file, never a guessed folder; unit tests with lock file fixtures | feature | `Targets/VSCodeTarget.swift`, tests, `tests/fixtures/ide/` | 15 |
+| 37 | `VSCodeTarget`, Claude panel sessions: raise the window, then the `open?session=` URL; tests | feature | same | 36 |
+| 38 | `GhosttyTarget`: unique match by working directory, then title; unit tests, contract | feature | `Targets/GhosttyTarget.swift`, tests | 31 |
+| 39 | `ZellijTarget` (`focus-pane-id` when the version has it, else `app`); unit tests; integration test with a detached session | feature | `Targets/ZellijTarget.swift`, tests | 14, 20 |
+| 40 | `ScreenTarget` (window, not region); unit tests | feature | `Targets/ScreenTarget.swift`, tests | 14 |
+
+**L. Finishing**
+
+| # | Task | Type | Files | Deps |
+| --- | --- | --- | --- | --- |
+| 41 | Settings › Focus: the detected targets, their state (works, needs permission, needs setup, off) | feature | `App/Sources/SettingsView.swift` | 8, 33 |
+| 42 | README, Help and PRD for the targets that are on | docs | `README.md`, `App/Sources/HelpView.swift`, `doc/PRD.md` | 26 |
+| 43 | The manual checklist per target and nesting case | docs | `doc/RELEASING.md` | 42 |
 
 ## Open questions
 
