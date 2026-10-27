@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 118,
+    "next_id": 121,
     "workflow": {
       "type": "direct"
     },
@@ -4469,17 +4469,27 @@
       "description": "Research and write a detailed proposal, doc/design/agent-providers.md, for showing sessions of other coding agents next to Claude Code. No code changes. (1) Today: map every place ASBCore and the app depend on Claude Code: the hooks and their payloads (HookEvents, Installer and ~/.claude/settings.json), the state file schema (doc/state-file-schema.md), transcripts (Transcript, checks C3/C4), Claude Code's session registry (C2), process detection (pid walk to `claude`, kind detection, C1), notifications' reasons (permission, question), names and paths in the UI and docs. (2) Research each agent from its current official docs and source (cite links and versions): OpenAI Codex CLI, Gemini CLI, Cursor (agent/CLI and the IDE), opencode, Aider, Amp, GitHub Copilot CLI, and any other widely used terminal agent found. For each: hook or event mechanisms (lifecycle hooks, notify commands, plugins, MCP), session and transcript files, process names, how to tell busy, waiting on a permission or question, and idle, and what can't be told. (3) Proposal: a provider abstraction (what a provider supplies: install/uninstall of its hooks, event mapping into the state file, process and kind detection, checks, labels and icons), state file schema changes (e.g. an agent field, version bump or optional field) and the reader rules, how the UI shows the agent, a feasibility table (agent x signal: busy/waiting/idle/subagents/focus) with a recommended order, risks, a migration plan that keeps Claude Code behavior and the conformance suite unchanged, and a task breakdown ready for atm (tasks under 10 minutes each, with dependencies). Send the task to review for the user (atm review) instead of marking it done.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "in_review",
       "dependencies": [],
       "files": [
         "doc/design/agent-providers.md"
       ],
       "created_at": "2026-10-27T06:37:58Z",
-      "updated_at": "2026-10-27T06:52:29Z",
+      "updated_at": "2026-10-27T07:08:35Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T06:52:29Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "f853cf5f53a4f6ccef5cf5252464efbe7af27a34",
+      "review_requested_at": "2026-10-27T07:08:35Z",
+      "notes": [
+        {
+          "at": "2026-10-27T07:08:35Z",
+          "kind": "review",
+          "text": "Proposal in doc/design/agent-providers.md: 25 Claude Code assumptions mapped; Codex, Copilot CLI, opencode, Gemini CLI, Cursor, Amp, Aider and others researched; provider abstraction, optional agent field (no schema bump, conformance unchanged), feasibility table, order (Cursor guard, abstraction, Codex, Copilot, opencode, ...), 38 tasks, 7 open questions for the user.",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-116",
@@ -4540,6 +4550,88 @@
           "by": "claude:c631bc24"
         }
       ]
+    },
+    {
+      "id": "T-118",
+      "name": "Debug option: log raw hook payloads",
+      "phase": 6,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "hook"
+      ],
+      "description": "A config switch that makes `asb hook` append every payload it receives to a log, for capturing what Claude Code sends (the spike that follows needs it).\n\n## Change\n- New config key `debug_hook_log` (`0` or `1`, default `0`) in `Sources/ASBCore/Config.swift`; add it to the keys and to `doc/state-file-schema.md` › Config file.\n- When it is `1`, `asb hook` appends one JSON line per call to `<state dir>/hook-payloads.jsonl`: the time, the raw stdin payload, and the environment variables the hook reads (`CLAUDE_CODE_ENTRYPOINT`, `HERDR_PANE_ID`, `__CFBundleIdentifier`), plus the parent pid.\n- Keep the hook's rules: silent, always exit 0, no effect on the state file; when the switch is off, no extra file reads beyond the config already loaded.\n- Cap the log (e.g. stop appending past 5 MB) so a forgotten switch can't fill the disk.\n- Not shown in the app's Settings; README › Troubleshooting mentions it.\n\n## Tests\n- `tests/ASBCoreTests`: off writes nothing; on appends a line with the payload; the cap stops appending.\n- `swift test`, `tests/app.sh --test`, `tests/lint.sh` pass.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "Sources/ASBCore/Config.swift",
+        "Sources/asb/Hook.swift",
+        "doc/state-file-schema.md",
+        "README.md",
+        "tests/ASBCoreTests/HookLogTests.swift"
+      ],
+      "created_at": "2026-10-27T07:16:40Z",
+      "updated_at": "2026-10-27T07:16:40Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-119",
+      "name": "Spike: capture hook payloads when a subagent asks for permission",
+      "phase": 6,
+      "type": "test",
+      "priority": "P1",
+      "labels": [
+        "hook"
+      ],
+      "description": "Find out exactly what Claude Code sends while a **subagent** waits on a permission prompt and other agents keep working. The fix that follows is designed from this.\n\n## Steps\n1. Make sure the installed hook binary has `debug_hook_log` (a dev build updates the stable `asb` copy), and turn it on in the config.\n2. With the user, run a session where the parent starts two subagents: one hits a permission prompt (e.g. a Bash command not on the allow list) while the other keeps running tools; let the prompt wait a while, then approve it. Repeat once with a denial, and once with the parent finishing its turn while the subagent waits.\n3. Turn `debug_hook_log` off and delete the log once the payloads are copied.\n\n## Record\n- For `PreToolUse`, `PostToolUse`, `PermissionRequest`, `Notification`, `SubagentStart`, `SubagentStop`, `Stop`: whether `agent_id` / `agent_type` are present (the docs say tool events inside subagents carry them; `Notification` is undocumented), and the order of events.\n- The `claude` process's children while the subagent waits (`ps -o pid,ppid,lstart,comm`), for check C4.\n- What the transcript shows for an approval and a denial by a subagent.\n\n## Output\n- Sanitized payloads in `tests/fixtures/payloads/` (made-up IDs, paths and prompts), e.g. `Notification-permission_prompt-subagent.json`, `PermissionRequest-subagent.json`, `PreToolUse-subagent.json`.\n- Findings in `tests/fixtures/README.md`, and a short design note for the fix as this task's note.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-118"
+      ],
+      "files": [
+        "tests/fixtures/README.md",
+        "tests/fixtures/payloads/"
+      ],
+      "created_at": "2026-10-27T07:16:40Z",
+      "updated_at": "2026-10-27T07:16:40Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-120",
+      "name": "Fix: a subagent waiting on input shows as waiting",
+      "phase": 6,
+      "type": "bugfix",
+      "priority": "P1",
+      "labels": [
+        "hook"
+      ],
+      "description": "When a subagent waits on a permission prompt or a question while the parent keeps working (or waits on its subagents), the menu bar shows the parent's state, not that you are needed.\n\n## Why\nThe parent and its subagents share one state file with one `state`:\n- any later `PreToolUse` / `PostToolUse` from the parent or another subagent sets it back to `busy`;\n- the parent's `Stop` sets it to `idle`;\n- check C4 turns `waiting` into `busy` when any new child of the `claude` process starts, which other subagents do all the time.\n\n## Change (adjust to the spike's findings)\n- Install `PermissionRequest` (`HookSettings.events`) if it identifies the waiting agent.\n- Record waiting per agent: e.g. `subagents[agent_id].waiting` with `reason` and `since`, or a map of pending prompts; clear it only with events of the same agent (its `PostToolUse`, its `SubagentStop`, or a denial seen in the transcript).\n- A session is shown as `waiting` while any of its agents waits: header, row word and reason, notifications, and the mute break-through. C4 and the subagents check don't override it.\n- `doc/state-file-schema.md`: the new optional fields and rules (no version bump); `doc/snapshot-schema.md` if the snapshot changes.\n\n## Tests\n- `HookEventsTests` for each event order the spike recorded.\n- New conformance cases in `tests/conformance/` (subagent waiting while the parent is busy, waits on subagents, or has stopped); every existing case unchanged.\n- `swift test`, `tests/app.sh --test`, `tests/lint.sh` pass; check it live in the dev build with the user.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-119"
+      ],
+      "files": [
+        "Sources/ASBCore/HookEvents.swift",
+        "Sources/ASBCore/Settings.swift",
+        "Sources/ASBCore/Checks.swift",
+        "Sources/ASBCore/Engine.swift",
+        "doc/state-file-schema.md",
+        "doc/snapshot-schema.md",
+        "tests/ASBCoreTests/HookEventsTests.swift",
+        "tests/conformance/"
+      ],
+      "created_at": "2026-10-27T07:16:40Z",
+      "updated_at": "2026-10-27T07:16:40Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
     }
   ]
 }
