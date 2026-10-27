@@ -1,9 +1,9 @@
 {
   "meta": {
-    "project": "swiftbar-claudecode-minimal",
+    "project": "asb (agentic-status-bar)",
     "id": "fbc92785",
     "created": "2026-10-25",
-    "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
+    "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
     "next_id": 115,
     "workflow": {
       "type": "direct"
