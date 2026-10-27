@@ -4147,18 +4147,31 @@
       "description": "The user transfers hakanserce/agentic-status-bar to the GitHub organization solo-swe (repository › Settings › General › Danger Zone › Transfer ownership, or gh api repos/hakanserce/agentic-status-bar/transfer -f new_owner=solo-swe). Before: check solo-swe › Settings › Actions › General allows Actions and lets workflows request contents: write, and that solo-swe has no repository named agentic-status-bar. An agent can't do the transfer: block this task on the user, and mark it done once gh repo view solo-swe/agentic-status-bar works. Never create a repository or fork named hakanserce/agentic-status-bar afterwards: it would end GitHub's redirect for old links.",
       "requirements": [],
       "use_cases": [],
-      "status": "blocked",
+      "status": "done",
       "dependencies": [],
       "files": [],
       "created_at": "2026-10-27T05:14:16Z",
-      "updated_at": "2026-10-27T05:14:25Z",
+      "updated_at": "2026-10-27T05:30:42Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
-      "waiting_on": "user",
-      "questions": [
-        "Transfer hakanserce/agentic-status-bar to solo-swe (Settings › General › Danger Zone › Transfer ownership). Done?"
+      "notes": [
+        {
+          "at": "2026-10-27T05:30:20Z",
+          "kind": "answer",
+          "text": "Transfer hakanserce/agentic-status-bar to solo-swe (Settings › General › Danger Zone › Transfer ownership). Done? → 2026-10-27: user transferred the repository; gh repo view solo-swe/agentic-status-bar works. Author email stays hakanserce@gmail.com (user's choice).",
+          "by": "claude:c631bc24"
+        },
+        {
+          "at": "2026-10-27T05:30:42Z",
+          "kind": "outcome",
+          "text": "Repository is now solo-swe/agentic-status-bar (private); 6 secrets moved; SPARKLE_PUBLIC_KEY was re-set (the user's copy had a stray '<', fixed to match generate_keys -p).",
+          "by": "claude:c631bc24"
+        }
       ],
-      "blocked_at": "2026-10-27T05:14:25Z"
+      "started_at": "2026-10-27T05:30:25Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-27T05:30:42Z",
+      "completed_by": "claude:c631bc24"
     },
     {
       "id": "T-108",
@@ -4172,15 +4185,17 @@
       "description": "After the transfer: git remote set-url origin git@github.com:solo-swe/agentic-status-bar.git and git fetch. Check gh secret list shows DEVELOPER_ID_CERT_P12, DEVELOPER_ID_CERT_PASSWORD, NOTARY_API_KEY_P8, NOTARY_API_KEY_ID, NOTARY_API_ISSUER_ID and SPARKLE_ED_PRIVATE_KEY, and gh variable get SPARKLE_PUBLIC_KEY prints exactly the key from generate_keys -p (re-set it if it's missing; block on the user for any missing secret). Re-run the latest CI run on main (gh run rerun) and check it passes under the organization.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-107"
       ],
       "files": [],
       "created_at": "2026-10-27T05:14:16Z",
-      "updated_at": "2026-10-27T05:14:16Z",
+      "updated_at": "2026-10-27T05:30:43Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T05:30:43Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-109",
