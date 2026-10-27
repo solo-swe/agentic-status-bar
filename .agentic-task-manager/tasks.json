@@ -4668,7 +4668,7 @@
       "description": "With one of the app's windows open, **Help › Agentic Status Bar Help** shows macOS's alert \"Help isn't available for Agentic Status Bar\" instead of opening our Help window.\n\n## Cause\nOur `MainMenuActions` method is named `showHelp(_:)`: the same selector as `NSApplication.showHelp(_:)`, AppKit's Help Book action, which shows that alert when the app has no Help Book.\n\n## Change\n- Rename the action to a selector AppKit doesn't own, e.g. `openHelpWindow(_:)`, in `App/Sources/MainMenu.swift`, `App/Sources/AppDelegate.swift` and `App/Tests/MainMenuTests.swift`.\n- Check the other menu actions (`showAbout`, `showSettings`, `showSessions`, `checkForUpdates`) against `NSApplication` and `NSResponder` selectors, and rename any that collide.\n\n## Done when\n- `tests/app.sh --test` passes.\n- The user opens Help from the Help menu in the dev build.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_review",
+      "status": "done",
       "dependencies": [],
       "files": [
         "App/Sources/MainMenu.swift",
@@ -4676,7 +4676,7 @@
         "App/Tests/MainMenuTests.swift"
       ],
       "created_at": "2026-10-27T07:43:57Z",
-      "updated_at": "2026-10-27T07:52:05Z",
+      "updated_at": "2026-10-27T08:17:02Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -4697,18 +4697,36 @@
           "kind": "review",
           "text": "Now started the AppKit way (`App/Sources/main.swift`) instead of a SwiftUI `App`, so SwiftUI can't replace the main menu with its default Help item. User: Help › Agentic Status Bar Help with the Help window in front, and with Settings in front.",
           "by": "claude:c631bc24"
+        },
+        {
+          "at": "2026-10-27T07:58:06Z",
+          "kind": "note",
+          "text": "Popover drifted mid-screen after the AppKit switch: it resized from the top as rows loaded. Fixed with `sizingOptions = [.preferredContentSize]` on its hosting controller; `main.swift` uses `NSApplicationMain`. Checked by window position (y 31, centered on the icon) and a screenshot. Dev flag `-ShowSessionsOnLaunch YES` added.",
+          "by": "claude:c631bc24"
+        },
+        {
+          "at": "2026-10-27T08:17:02Z",
+          "kind": "outcome",
+          "text": "User confirmed in the dev build: Help menu opens our Help window (also with Help in front), and the session popover opens under the menu-bar icon.",
+          "by": "claude:c631bc24"
         }
       ],
       "reviews": [
         {
           "from": "2026-10-27T07:45:52Z",
           "to": "2026-10-27T07:51:24Z"
+        },
+        {
+          "from": "2026-10-27T07:52:05Z",
+          "to": "2026-10-27T08:17:02Z"
         }
       ],
       "started_at": "2026-10-27T07:51:25Z",
       "started_by": "claude:c631bc24",
-      "commit": "29fe4aab6a4c3372316db052f6c72fd4a22d8704",
-      "review_requested_at": "2026-10-27T07:52:05Z"
+      "commit": "c238526662d2d96b21d6423416b085923457d7ff",
+      "review_requested_at": "2026-10-27T07:52:05Z",
+      "completed_at": "2026-10-27T08:17:02Z",
+      "completed_by": "claude:c631bc24"
     }
   ]
 }
