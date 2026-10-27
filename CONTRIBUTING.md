@@ -70,7 +70,30 @@ added.
 
 ## Releases
 
-Push a tag such as `v0.2.0`: `.github/workflows/release.yml` builds, signs and notarizes the app and attaches
-`agentic-status-bar-<version>.zip` and `.dmg` to a draft GitHub release, which you publish. The one-time signing
-setup and the secrets it needs are in [scripts/notarize.md](scripts/notarize.md). `scripts/package.sh 0.0.0` makes
-an unsigned dry run locally.
+1. Set the version in `Sources/ASBCore/Version.swift` (`ASBVersion.current`): it is the version of `asb`, of the app
+   and of the tag. A signed build refuses a tag that doesn't match it.
+2. Commit, then push a tag: `git tag -a v0.2.0 -m v0.2.0 && git push origin v0.2.0`.
+3. `.github/workflows/release.yml` builds, signs and notarizes the app, signs the update with the Sparkle key, and
+   attaches `agentic-status-bar-<version>.zip`, `.dmg` and `appcast.xml` to a draft GitHub release.
+4. Check the draft (`scripts/notarize.md` › Checking a release), edit its notes, and publish it. Installed apps find
+   the update in the appcast of the latest published release, so publishing is what offers it.
+
+`scripts/package.sh 0.0.0` makes an unsigned dry run locally; builds without `SPARKLE_PUBLIC_KEY` don't update
+themselves.
+
+### One-time setup
+
+- The Developer ID certificate and the notarization key: [scripts/notarize.md](scripts/notarize.md).
+- The Sparkle update key, an EdDSA pair. Build the app once (`scripts/package.sh 0.0.0`) so Sparkle's tools are
+  downloaded, then:
+
+  ```sh
+  .build/release-xcode/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_keys      # prints the public key
+  .build/release-xcode/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_keys -x sparkle.key
+  gh secret set SPARKLE_ED_PRIVATE_KEY < sparkle.key
+  gh variable set SPARKLE_PUBLIC_KEY --body "<the public key>"
+  rm sparkle.key
+  ```
+
+  `generate_keys` keeps the private key in your login keychain; back it up. Losing it means installed copies can't
+  update to a release signed with a new key.

@@ -13,13 +13,15 @@ final class SettingsWindow {
     private let hooks: HookInstaller
     private let login: LoginItem
     private let notifier: Notifier
+    private let updater: Updater
     private var window: NSWindow?
 
-    init(store: SessionStore, hooks: HookInstaller, login: LoginItem, notifier: Notifier) {
+    init(store: SessionStore, hooks: HookInstaller, login: LoginItem, notifier: Notifier, updater: Updater) {
         self.store = store
         self.hooks = hooks
         self.login = login
         self.notifier = notifier
+        self.updater = updater
     }
 
     /// Opens the window, or brings it to the front; a menu-bar app has to activate itself first.
@@ -34,7 +36,7 @@ final class SettingsWindow {
     private func make() -> NSWindow {
         let tabs = NSTabViewController()
         tabs.tabStyle = .toolbar
-        tabs.addTabViewItem(Self.tab("General", "gearshape", GeneralSettings(store: store, hooks: hooks, login: login)))
+        tabs.addTabViewItem(Self.tab("General", "gearshape", GeneralSettings(store: store, hooks: hooks, login: login, updater: updater)))
         tabs.addTabViewItem(Self.tab("Appearance", "paintpalette", AppearanceSettings(store: store)))
         tabs.addTabViewItem(Self.tab("Notifications", "bell", NotificationSettings(store: store, notifier: notifier)))
 

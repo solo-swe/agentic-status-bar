@@ -99,8 +99,8 @@ Everything stays on your machine. Hooks run async and always exit 0, so they can
 
 ## Install
 
-Signed downloads will be on the [Releases](https://github.com/hakanserce/agentic-status-bar/releases) page. Until
-the first one, build the app yourself:
+Download the DMG from the [Releases](https://github.com/hakanserce/agentic-status-bar/releases) page: it is signed
+and notarized by Apple. Builds run on Apple silicon Macs. Or build the app yourself:
 
 ```sh
 git clone https://github.com/hakanserce/agentic-status-bar.git ~/code/agentic-status-bar
@@ -125,15 +125,23 @@ that were already running fill in their details then).
 
 **Settings › General › Start at login** opens the app when you log in.
 
+## Updates
+
+The app checks for updates once a day and offers new versions as they are released; **Check for Updates…** in the
+app menu, or **Check for Updates** in Settings › General, checks right away. Turn off **Check for updates automatically**
+in Settings › General to check only by hand. Updates are downloaded from this repository's GitHub releases and are
+signed: the app installs only an update signed with the project's key. Builds you make yourself don't update.
+
 ## Settings
 
 The gear at the bottom of the list opens Settings:
 
-- **General:** start at login; install or remove the Claude Code hooks; which session types to show (interactive,
-  headless `claude -p`, IDE and desktop, subagents); when a quiet session counts as "no activity" (10, 30 or 60
-  minutes, or never); Claude Code's session registry; prompt previews as row titles; the config file.
-- **Appearance:** the theme (default, monochrome or high contrast), and each state's symbol (click it to type an SF
-  Symbol name) and its colors in a light and a dark menu bar.
+- **General:** start at login; updates; install or remove the Claude Code hooks; which session types to show
+  (interactive, headless `claude -p`, IDE and desktop, subagents); when a quiet session counts as "no activity" (10,
+  30 or 60 minutes, or never); Claude Code's session registry; prompt previews as row titles; the config file.
+- **Appearance:** the theme (default, monochrome or high contrast), and each state's symbol and color, picked from a
+  set (each color has a shade for a light and a dark menu bar). Other SF Symbols and colors can be set in the config
+  file.
 - **Notifications:** see above.
 
 Settings are stored in `~/.config/agentic-status-bar/config` (`key=value`), which `asb` reads too:
@@ -200,8 +208,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 1. **Done:** hooks, state files, menu bar and session list, accuracy checks, herdr focus, filters, mutes, themes
 2. **Done:** the move from shell and jq to Swift (`asb`), and from a SwiftBar plugin to a standalone app with
    notifications
-3. **Next:** signed releases with automatic updates
-4. **Later:** atm integration, Homebrew, focus support for VS Code and other terminals
+3. **Done:** signed, notarized releases with automatic updates
+4. **Next:** in-app help, Homebrew
+5. **Later:** atm integration, focus support for VS Code and other terminals
 
 ## License
 

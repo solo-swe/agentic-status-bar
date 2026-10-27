@@ -8,6 +8,7 @@ private final class RecordingActions: NSObject, MainMenuActions {
     func showAbout(_ sender: Any?) { called.append("about") }
     func showSettings(_ sender: Any?) { called.append("settings") }
     func showSessions(_ sender: Any?) { called.append("sessions") }
+    func checkForUpdates(_ sender: Any?) { called.append("updates") }
 }
 
 @MainActor
@@ -19,7 +20,7 @@ final class MainMenuTests: XCTestCase {
         let app = try XCTUnwrap(menu.items.first?.submenu)
         let titles = app.items.filter { !$0.isSeparatorItem }.map(\.title)
         XCTAssertEqual(titles, [
-            "About Agentic Status Bar", "Settings…", "Show Sessions", "Hide Agentic Status Bar", "Hide Others",
+            "About Agentic Status Bar", "Check for Updates…", "Settings…", "Show Sessions", "Hide Agentic Status Bar", "Hide Others",
             "Show All", "Quit Agentic Status Bar",
         ])
         XCTAssertEqual(app.item(withTitle: "Settings…")?.keyEquivalent, ",")
@@ -29,11 +30,11 @@ final class MainMenuTests: XCTestCase {
     func testTheOwnItemsReachTheActions() throws {
         let actions = RecordingActions()
         let app = try XCTUnwrap(MainMenu.make(actions: actions).items.first?.submenu)
-        for title in ["About Agentic Status Bar", "Settings…", "Show Sessions"] {
+        for title in ["About Agentic Status Bar", "Check for Updates…", "Settings…", "Show Sessions"] {
             let item = try XCTUnwrap(app.item(withTitle: title))
             XCTAssertTrue(NSApp.sendAction(try XCTUnwrap(item.action), to: item.target, from: item))
         }
-        XCTAssertEqual(actions.called, ["about", "settings", "sessions"])
+        XCTAssertEqual(actions.called, ["about", "updates", "settings", "sessions"])
     }
 
     func testOnlyMainCapableWindowsKeepTheAppRegular() {

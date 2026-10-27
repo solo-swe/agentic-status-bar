@@ -7,11 +7,24 @@
 # IDENTITY: the signing identity, default "-" (ad-hoc: no notarization, for a local dry run).
 # With a Developer ID identity, notarization needs NOTARY_KEY (path of the .p8 API key),
 # NOTARY_KEY_ID and NOTARY_ISSUER. See scripts/notarize.md.
+# SPARKLE_PUBLIC_KEY: the EdDSA public key built into the app, so it can update itself (empty: no updates).
 set -eu
 cd "$(dirname "$0")/.."
 
 version="${1:?usage: scripts/package.sh <version>}"
 identity="${IDENTITY:--}"
+
+# One version for the app, asb and the tag: ASBVersion.current. A signed release must match it.
+source_version="$(sed -n 's/.*current = "\(.*\)".*/\1/p' Sources/ASBCore/Version.swift)"
+if [ "$identity" != "-" ] && [ "$version" != "$source_version" ]; then
+  echo "Version $version doesn't match ASBVersion.current ($source_version) in Sources/ASBCore/Version.swift" >&2
+  exit 1
+fi
+# A signed release updates itself: it needs both halves of the Sparkle key.
+if [ "$identity" != "-" ] && { [ -z "${SPARKLE_PUBLIC_KEY:-}" ] || [ ! -s "${SPARKLE_KEY_FILE:-}" ]; }; then
+  echo "A signed release needs SPARKLE_PUBLIC_KEY and SPARKLE_KEY_FILE (CONTRIBUTING.md › Releases)" >&2
+  exit 1
+fi
 name="agentic-status-bar-$version"
 dist="dist"
 derived=".build/release-xcode"
@@ -23,15 +36,28 @@ xcodebuild -project App/AgenticStatusBar.xcodeproj -scheme AgenticStatusBar -con
   -destination "generic/platform=macOS" -derivedDataPath "$derived" \
   MARKETING_VERSION="$version" CURRENT_PROJECT_VERSION="${BUILD_NUMBER:-1}" CODE_SIGN_IDENTITY=- \
   -quiet build
+if [ -n "${SPARKLE_PUBLIC_KEY:-}" ]; then
+  plutil -replace SUPublicEDKey -string "$SPARKLE_PUBLIC_KEY" "$app/Contents/Info.plist"
+fi
 
+# Extra codesign options (--preserve-metadata=...) come after the path.
 sign() {
+  path="$1"
+  shift
   if [ "$identity" = "-" ]; then
-    codesign --force --sign - "$1"
+    codesign --force --sign - "$@" "$path"
   else
-    codesign --force --options runtime --timestamp --sign "$identity" "$1"
+    codesign --force --options runtime --timestamp --sign "$identity" "$@" "$path"
   fi
 }
 
+# Inside out: Sparkle's helpers, the framework, asb, then the app (Sparkle's documented order).
+sparkle="$app/Contents/Frameworks/Sparkle.framework/Versions/B"
+sign "$sparkle/XPCServices/Installer.xpc"
+sign "$sparkle/XPCServices/Downloader.xpc" --preserve-metadata=entitlements
+sign "$sparkle/Autoupdate"
+sign "$sparkle/Updater.app"
+sign "$app/Contents/Frameworks/Sparkle.framework"
 sign "$app/Contents/Helpers/asb"
 sign "$app"
 codesign --verify --strict --deep --verbose=1 "$app"
@@ -70,3 +96,9 @@ if [ "$identity" != "-" ]; then
 fi
 
 echo "Packaged $dist/$name.zip and $dist/$name.dmg"
+
+# The appcast, when there's a key to sign the update with.
+if [ -n "${SPARKLE_KEY_FILE:-}" ]; then
+  scripts/appcast.sh "$version" "${BUILD_NUMBER:-1}" "$dist/$name.zip" > "$dist/appcast.xml"
+  echo "Wrote $dist/appcast.xml"
+fi

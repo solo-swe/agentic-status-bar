@@ -37,10 +37,13 @@ jobs:
           security list-keychains -d user -s "$keychain" login.keychain-db
           rm "$RUNNER_TEMP/cert.p12"
 
-      - name: Write the notary API key
+      - name: Write the notary API key and the Sparkle signing key
         env:
           NOTARY_KEY_P8: ${{ secrets.NOTARY_API_KEY_P8 }}
-        run: printf '%s' "$NOTARY_KEY_P8" | base64 --decode > "$RUNNER_TEMP/notary.p8"
+          SPARKLE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: |
+          printf '%s' "$NOTARY_KEY_P8" | base64 --decode > "$RUNNER_TEMP/notary.p8"
+          printf '%s' "$SPARKLE_KEY" > "$RUNNER_TEMP/sparkle.key"
 
       - name: Build, sign, notarize and package
         env:
@@ -49,9 +52,12 @@ jobs:
           NOTARY_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
           NOTARY_ISSUER: ${{ secrets.NOTARY_API_ISSUER_ID }}
           BUILD_NUMBER: ${{ github.run_number }}
+          # The public half of SPARKLE_ED_PRIVATE_KEY; the app checks updates against it.
+          SPARKLE_PUBLIC_KEY: ${{ vars.SPARKLE_PUBLIC_KEY }}
+          SPARKLE_KEY_FILE: ${{ runner.temp }}/sparkle.key
         run: scripts/package.sh "${GITHUB_REF_NAME#v}"
 
       - name: Draft the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" dist/*.zip dist/*.dmg --draft --generate-notes --title "Agentic Status Bar ${GITHUB_REF_NAME#v}"
+        run: gh release create "$GITHUB_REF_NAME" dist/*.zip dist/*.dmg dist/appcast.xml --draft --generate-notes --title "Agentic Status Bar ${GITHUB_REF_NAME#v}"

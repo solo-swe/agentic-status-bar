@@ -46,7 +46,9 @@ struct GeneralSettings: View {
     let store: SessionStore
     let hooks: HookInstaller
     let login: LoginItem
+    let updater: Updater
     @State private var confirmingRemove = false
+    @State private var autoUpdate = false
 
     var body: some View {
         Form {
@@ -61,6 +63,16 @@ struct GeneralSettings: View {
                 if let failure = login.failure { Text(failure).foregroundStyle(.red) }
             }
             .onAppear { login.refresh() }
+            Section {
+                LabeledContent("Version \(Self.version)") {
+                    Button("Check for Updates") { updater.checkForUpdates() }
+                        .disabled(!updater.canCheck)
+                }
+                Toggle("Check for updates automatically", isOn: Binding(
+                    get: { autoUpdate },
+                    set: { autoUpdate = $0; updater.automaticallyChecks = $0 }))
+            }
+            .onAppear { autoUpdate = updater.automaticallyChecks }
             Section {
                 LabeledContent {
                     if hooks.installed {
@@ -113,6 +125,10 @@ struct GeneralSettings: View {
 
     private func toggle(_ title: String, _ key: String, _ value: KeyPath<Config, Bool>) -> some View {
         Toggle(title, isOn: Binding(get: { store.config[keyPath: value] }, set: { store.set(key, $0) }))
+    }
+
+    static var version: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
     }
 }
 

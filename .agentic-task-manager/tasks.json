@@ -3510,7 +3510,7 @@
       "description": "Add Sparkle 2 via Swift Package Manager, an EdDSA key pair (public key in Info.plist, private key as a secret provided by the user), a 'Check for Updates…' item, and release.yml steps that upload the zip and DMG to the GitHub Release at .../releases/download/v<version>/agentic-status-bar-<version>.zip and publish an updated appcast.xml. App, CLI and tag versions must match (one source of truth). Document the release steps in CONTRIBUTING.md and add an Updates section to README.md (T-093 wrote the rest of the README first).",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-090"
       ],
@@ -3522,9 +3522,11 @@
         "README.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T06:26:17Z",
+      "updated_at": "2026-10-27T00:48:18Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T00:48:18Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-092",

@@ -10,6 +10,9 @@ options:
 packages:
   AgenticStatusBarCore:
     path: ..
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.6.4"
 
 settings:
   base:
@@ -48,6 +51,8 @@ targets:
     dependencies:
       - package: AgenticStatusBarCore
         product: ASBCore
+      - package: Sparkle
+        product: Sparkle
     info:
       path: Generated/Info.plist
       properties:
@@ -58,6 +63,12 @@ targets:
         LSUIElement: true
         LSMinimumSystemVersion: "14.0"
         NSHumanReadableCopyright: "© 2026 Hakan Serce. MIT License."
+        # Sparkle: the feed is the appcast attached to the latest published release (scripts/appcast.sh).
+        SUFeedURL: https://github.com/hakanserce/agentic-status-bar/releases/latest/download/appcast.xml
+        # The EdDSA public key: empty here, so local builds don't update themselves; scripts/package.sh
+        # writes SPARKLE_PUBLIC_KEY into release builds (CONTRIBUTING.md › Releases).
+        SUPublicEDKey: ""
+        SUEnableAutomaticChecks: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.hakanserce.agentic-status-bar

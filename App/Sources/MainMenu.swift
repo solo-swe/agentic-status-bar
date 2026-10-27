@@ -6,6 +6,7 @@ import AppKit
     func showAbout(_ sender: Any?)
     func showSettings(_ sender: Any?)
     func showSessions(_ sender: Any?)
+    func checkForUpdates(_ sender: Any?)
 }
 
 /// The menu bar's menus while one of the app's windows is open. A menu-bar app normally has none: while it
@@ -20,6 +21,7 @@ enum MainMenu {
 
         let app = NSMenu(title: appName)
         app.addItem(item("About \(appName)", #selector(MainMenuActions.showAbout(_:)), "", actions))
+        app.addItem(item("Check for Updates…", #selector(MainMenuActions.checkForUpdates(_:)), "", actions))
         app.addItem(.separator())
         app.addItem(item("Settings…", #selector(MainMenuActions.showSettings(_:)), ",", actions))
         app.addItem(item("Show Sessions", #selector(MainMenuActions.showSessions(_:)), "", actions))
