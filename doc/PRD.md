@@ -296,8 +296,8 @@ removes a session wins for that session.
 ## Installation and configuration
 
 **Distribution:** a signed, notarized app in a DMG and a zip on GitHub Releases, built by `.github/workflows/release.yml`
-from a tag (see `scripts/notarize.md`); automatic updates come next. Until the first release, `scripts/package.sh`
-builds it locally.
+from a tag, and a Homebrew cask in `solo-swe/homebrew-tap`. The app updates itself with Sparkle from the latest
+release. See [RELEASING.md](RELEASING.md).
 
 **Install:** the app's first run installs the hooks (as `asb install` does):
 

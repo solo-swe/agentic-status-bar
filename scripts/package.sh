@@ -6,7 +6,7 @@
 #
 # IDENTITY: the signing identity, default "-" (ad-hoc: no notarization, for a local dry run).
 # With a Developer ID identity, notarization needs NOTARY_KEY (path of the .p8 API key),
-# NOTARY_KEY_ID and NOTARY_ISSUER. See scripts/notarize.md.
+# NOTARY_KEY_ID and NOTARY_ISSUER. See doc/RELEASING.md.
 # SPARKLE_PUBLIC_KEY: the EdDSA public key built into the app, so it can update itself (empty: no updates).
 set -eu
 cd "$(dirname "$0")/.."

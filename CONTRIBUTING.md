@@ -31,8 +31,9 @@ The hook runs on every tool call of every session; run `tests/bench.sh` after ch
 | `tests/ASBCoreTests/` | Swift Testing tests for `ASBCore` |
 | `tests/conformance/` | The snapshot engine's behavior as data: input files and the expected snapshot (see its README) |
 | `tests/fixtures/` | Captured Claude Code hook payloads and transcripts (see its README) |
-| `scripts/package.sh` | Builds, signs, notarizes and packages a release (see `scripts/notarize.md`) |
+| `scripts/package.sh`, `appcast.sh`, `homebrew-cask.sh` | Build, sign, notarize and package a release; its update feed; its Homebrew cask (see `doc/RELEASING.md`) |
 | `doc/PRD.md` | Product requirements |
+| `doc/RELEASING.md` | How releases are built, signed, published and delivered |
 | `doc/state-file-schema.md`, `doc/snapshot-schema.md` | The file and snapshot formats |
 | `doc/design/future-architecture.md` | The design behind the move to Swift and the app |
 
@@ -70,39 +71,9 @@ added.
 
 ## Releases
 
-1. Set the version in `Sources/ASBCore/Version.swift` (`ASBVersion.current`): it is the version of `asb`, of the app
-   and of the tag. A signed build refuses a tag that doesn't match it. Set `MARKETING_VERSION` in `App/project.yml`
-   to the same, for builds made in Xcode.
-2. Commit, then push a tag: `git tag -a v0.2.0 -m v0.2.0 && git push origin v0.2.0`.
-3. `.github/workflows/release.yml` builds, signs and notarizes the app, signs the update with the Sparkle key, and
-   attaches `agentic-status-bar-<version>.zip`, `.dmg` and `appcast.xml` to a draft GitHub release.
-4. Check the draft (`scripts/notarize.md` › Checking a release), edit its notes, and publish it as the latest release
-   (not a pre-release). Installed apps find the update in the appcast of the latest published release, so publishing
-   is what offers it.
-5. Publishing also runs `.github/workflows/homebrew.yml`, which points the cask in
-   [solo-swe/homebrew-tap](https://github.com/solo-swe/homebrew-tap) at the new zip (`scripts/homebrew-cask.sh`), pushing
-   with the deploy key in `HOMEBREW_TAP_DEPLOY_KEY`. To redo it for a release, run the workflow by hand with its tag.
+In short: set `ASBVersion.current` (and `MARKETING_VERSION`), push a `v<version>` tag, check the draft release the
+workflow makes, and publish it as the latest release. Publishing offers the update to installed apps and updates the
+Homebrew tap. [doc/RELEASING.md](doc/RELEASING.md) has the whole process: how it flows, the one-time setup with every
+secret, a checklist, how to check a release, what to do when a step fails, and replacing keys.
 
-`scripts/package.sh 0.0.0` makes an unsigned dry run locally; builds without `SPARKLE_PUBLIC_KEY` don't update
-themselves.
-
-### One-time setup
-
-- The Developer ID certificate and the notarization key: [scripts/notarize.md](scripts/notarize.md).
-- The Sparkle update key, an EdDSA pair. Build the app once (`scripts/package.sh 0.0.0`) so Sparkle's tools are
-  downloaded, then:
-
-  ```sh
-  bin=.build/release-xcode/SourcePackages/artifacts/sparkle/Sparkle/bin
-  $bin/generate_keys                     # creates the key pair in your login keychain
-  $bin/generate_keys -x sparkle.key
-  gh secret set SPARKLE_ED_PRIVATE_KEY < sparkle.key
-  gh variable set SPARKLE_PUBLIC_KEY --body "$($bin/generate_keys -p)"
-  rm sparkle.key
-  ```
-
-  Set the variable from `generate_keys -p`, which prints only the key: the first command prints it inside an
-  Info.plist snippet, and a stray `<string>` character breaks the release's key check.
-
-  `generate_keys` keeps the private key in your login keychain; back it up. Losing it means installed copies can't
-  update to a release signed with a new key.
+`scripts/package.sh 0.0.0` makes an unsigned dry run locally.

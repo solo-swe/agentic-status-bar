@@ -216,7 +216,7 @@ quit the app (**Quit** at the bottom of the session list), and move it to the Tr
 
 ## Development
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md), and [doc/RELEASING.md](doc/RELEASING.md) for how releases are made.
 
 ## Roadmap
 

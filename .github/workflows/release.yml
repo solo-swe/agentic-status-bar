@@ -1,7 +1,7 @@
 name: Release
 
 # Push a tag like v0.2.0 to build, sign, notarize and attach the app to a draft GitHub release.
-# Needs the secrets listed in scripts/notarize.md.
+# Needs the secrets and the variable listed in doc/RELEASING.md.
 on:
   push:
     tags: ["v*"]
