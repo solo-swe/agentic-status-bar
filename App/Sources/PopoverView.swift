@@ -45,6 +45,14 @@ struct PopoverView: View {
                 Spacer()
                 Button {
                     close()
+                    AboutPanel.show()
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+                .buttonStyle(.borderless)
+                .help("About Agentic Status Bar")
+                Button {
+                    close()
                     openSettings()
                 } label: {
                     Image(systemName: "gearshape")

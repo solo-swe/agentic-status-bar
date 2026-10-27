@@ -3891,7 +3891,7 @@
       "description": "The app is LSUIElement, with no app menu, so there's no About dialog. Add an About entry (an \"About Agentic Status Bar\" button in the Settings General tab footer, and/or an item next to Quit and the gear in the popover's bottom row) that activates the app and opens the standard panel with NSApp.orderFrontStandardAboutPanel(options:): the app icon, the name, version (CFBundleShortVersionString) and build (CFBundleVersion), a copyright line (NSHumanReadableCopyright in the Info.plist via project.yml) and credits with a link to https://github.com/hakanserce/agentic-status-bar. The popover closes before the panel opens. Add an app test for the options passed if practical; the user checks it visually before it's marked done.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-100"
       ],
@@ -3902,9 +3902,11 @@
         "App/project.yml"
       ],
       "created_at": "2026-10-27T00:07:46Z",
-      "updated_at": "2026-10-27T00:07:46Z",
+      "updated_at": "2026-10-27T00:29:16Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T00:29:16Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-102",
