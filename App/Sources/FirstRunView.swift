@@ -72,6 +72,7 @@ final class FirstRunWindow {
         window.isReleasedWhenClosed = false
         window.center()
         self.window = window
+        ActivationPolicy.windowWillShow()
         NSApp.activate()
         window.makeKeyAndOrderFront(nil)
     }

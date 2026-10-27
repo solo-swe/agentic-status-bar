@@ -3931,7 +3931,7 @@
       "description": "The Settings window (App/Sources/SettingsView.swift, SettingsWindow.swift) looks rough, and the General tab shows a vertical scrollbar right away in its fixed 520x580 frame. Make it look like a native macOS settings window: toolbar-style tabs (a window toolbar with the General / Appearance / Notifications icons, title following the selected tab, e.g. an NSTabViewController with .toolbar style hosting each SwiftUI tab, or the SwiftUI equivalent), consistent grouped sections with short headers, footers kept short, controls right-aligned, no redundant labels. Every tab must fit without a scrollbar: size each tab to its content (the earlier crash came from resizing a SwiftUI window on tab switch inside a single NSHostingController; an NSTabViewController animates per-tab sizes safely), or trim/reorganise content (e.g. move the hooks and config file rows into their own compact section). Keep every existing setting and the app tests passing. Run the dev build and let the user check it visually before marking done.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "App/Sources/SettingsView.swift",
@@ -3939,11 +3939,22 @@
         "App/Tests/SettingsTests.swift"
       ],
       "created_at": "2026-10-27T00:28:06Z",
-      "updated_at": "2026-10-27T00:30:05Z",
+      "updated_at": "2026-10-27T00:33:22Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T00:30:05Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "e53b06469432fe3c4970f30c378a2cc1b4d273fa",
+      "completed_at": "2026-10-27T00:33:22Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-27T00:33:22Z",
+          "kind": "outcome",
+          "text": "NSTabViewController toolbar tabs (title follows the tab), each SwiftUI tab sized to its content at 500pt wide with scrolling off; General shows hook status with an icon, shorter footers. Screenshots of all three tabs checked; no scrollbars.",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-103",
@@ -3957,7 +3968,7 @@
       "description": "The app is LSUIElement (.accessory), so when the Settings or first-run window is frontmost the menu bar still shows the previous app's menus. While one of our windows is open, switch to NSApp.setActivationPolicy(.regular) and give the app a main menu; switch back to .accessory when the last window closes (a Dock icon appears meanwhile, with the new app icon). The app menu: About Agentic Status Bar (the standard about panel, see T-101), Settings… (Cmd-,), Show Sessions (opens the status item's popover), separator, Hide / Hide Others / Show All, separator, Quit Agentic Status Bar (Cmd-Q). Add the standard Edit menu (cut/copy/paste/select all, so text fields keep working) and a Window menu (Close Cmd-W, Minimize). Build it in a small MainMenu helper in AppDelegate or its own file; add an app test for the menu items and the policy switch if practical. The user checks it visually before it's marked done.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-101"
       ],
@@ -3969,9 +3980,11 @@
         "App/Sources/StatusItemController.swift"
       ],
       "created_at": "2026-10-27T00:28:06Z",
-      "updated_at": "2026-10-27T00:28:10Z",
+      "updated_at": "2026-10-27T00:33:25Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T00:33:25Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-104",

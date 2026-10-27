@@ -26,6 +26,7 @@ final class SettingsWindow {
     func show() {
         let window = self.window ?? make()
         self.window = window
+        ActivationPolicy.windowWillShow()
         NSApp.activate()
         window.makeKeyAndOrderFront(nil)
     }
