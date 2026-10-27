@@ -19,5 +19,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         notifier.start()
         store.start()
         firstRun.showIfNeeded()
+        // For checking the window during development: open -a "Agentic Status Bar" --args -ShowSettingsOnLaunch YES
+        if UserDefaults.standard.bool(forKey: "ShowSettingsOnLaunch") { settings.show() }
     }
 }

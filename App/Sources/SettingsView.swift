@@ -1,26 +1,11 @@
 import ASBCore
 import SwiftUI
 
-/// The Settings window: a General and an Appearance tab. Every control reads and writes the config
-/// file the CLI uses, so the app, `asb` and the SwiftBar plugin stay in sync.
-struct SettingsView: View {
-    let store: SessionStore
-    let hooks: HookInstaller
-    let login: LoginItem
-    let notifier: Notifier
-
-    var body: some View {
-        TabView {
-            GeneralSettings(store: store, hooks: hooks, login: login)
-                .tabItem { Label("General", systemImage: "gearshape") }
-            AppearanceSettings(store: store)
-                .tabItem { Label("Appearance", systemImage: "paintpalette") }
-            NotificationSettings(store: store, notifier: notifier)
-                .tabItem { Label("Notifications", systemImage: "bell") }
-        }
-        // One size for both tabs: resizing the window on a tab switch looped AppKit's layout and crashed.
-        .frame(width: 520, height: 580)
-    }
+/// What the Settings tabs share. The tabs themselves (General, Appearance, Notifications) are hosted by
+/// `SettingsWindow`; every control reads and writes the config file the CLI uses, so the app and `asb` agree.
+enum SettingsView {
+    /// The width of every tab; each tab's height follows its content.
+    static let width: CGFloat = 500
 
     /// The stale threshold choices; the same values `asb action set stale_minutes` accepts.
     static let staleChoices: [(minutes: Int, label: String)] = [
@@ -56,8 +41,8 @@ struct SettingsView: View {
     }
 }
 
-/// Which sessions to show, and when a quiet one counts as uncertain.
-private struct GeneralSettings: View {
+/// Starting at login, the hooks, which sessions to show, and when a quiet one counts as uncertain.
+struct GeneralSettings: View {
     let store: SessionStore
     let hooks: HookInstaller
     let login: LoginItem
@@ -67,39 +52,33 @@ private struct GeneralSettings: View {
         Form {
             Section {
                 Toggle("Start at login", isOn: Binding(get: { login.enabled }, set: { login.set($0) }))
-            } footer: {
-                if login.needsApproval || login.failure != nil {
-                    VStack(alignment: .leading, spacing: 4) {
-                        if login.needsApproval {
-                            HStack(spacing: 4) {
-                                Text("Allow it in System Settings › General › Login Items.")
-                                Button("Open Login Items") { login.openSystemSettings() }
-                                    .buttonStyle(.link)
-                            }
-                        }
-                        if let failure = login.failure { Text(failure).foregroundStyle(.red) }
+                if login.needsApproval {
+                    LabeledContent("Needs your approval in Login Items") {
+                        Button("Open Login Items") { login.openSystemSettings() }
                     }
-                    .font(.caption)
                     .foregroundStyle(.secondary)
                 }
+                if let failure = login.failure { Text(failure).foregroundStyle(.red) }
             }
             .onAppear { login.refresh() }
             Section {
-                LabeledContent("Claude Code hooks") {
+                LabeledContent {
                     if hooks.installed {
-                        Button("Remove Hooks…") { confirmingRemove = true }
+                        Button("Remove…") { confirmingRemove = true }
                     } else {
-                        Button("Install Hooks") { hooks.install() }
+                        Button("Install") { hooks.install() }
+                    }
+                } label: {
+                    Label {
+                        Text("Claude Code hooks")
+                        Text(hooks.installed ? "Installed in \(FirstRunView.tilde(hooks.settingsFile))"
+                             : "Not installed: no sessions will show up")
+                    } icon: {
+                        Image(systemName: hooks.installed ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                            .foregroundStyle(hooks.installed ? .green : .orange)
                     }
                 }
-            } footer: {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(hooks.installed ? "Installed in \(FirstRunView.tilde(hooks.settingsFile)). \(FirstRunView.restartNote)"
-                         : "Not installed: no sessions will show up.")
-                    if let failure = hooks.failure { Text(failure).foregroundStyle(.red) }
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                if let failure = hooks.failure { Text(failure).foregroundStyle(.red) }
             }
             .confirmationDialog("Remove the hooks?", isPresented: $confirmingRemove) {
                 Button("Remove Hooks", role: .destructive) { hooks.uninstall() }
@@ -129,6 +108,7 @@ private struct GeneralSettings: View {
             }
         }
         .formStyle(.grouped)
+        .scrollDisabled(true)
     }
 
     private func toggle(_ title: String, _ key: String, _ value: KeyPath<Config, Bool>) -> some View {
@@ -137,7 +117,7 @@ private struct GeneralSettings: View {
 }
 
 /// When the app notifies, and a test button.
-private struct NotificationSettings: View {
+struct NotificationSettings: View {
     let store: SessionStore
     let notifier: Notifier
 
@@ -146,7 +126,7 @@ private struct NotificationSettings: View {
             Section {
                 toggle("When a session is waiting on you", "notify_waiting", \.notifyWaiting)
                 toggle("When a session finishes and goes idle", "notify_idle", \.notifyIdle)
-                Picker("After", selection: Binding(
+                Picker("Notify after", selection: Binding(
                     get: { store.config.notifyDelaySeconds },
                     set: { store.set("notify_delay_seconds", String($0)) })
                 ) {
@@ -154,21 +134,21 @@ private struct NotificationSettings: View {
                 }
                 toggle("Play a sound", "notify_sound", \.notifySound)
             } footer: {
-                Text("Waiting notifications also come from muted projects, as the menu bar turns red for them; idle ones don't.")
+                Text("Waiting notifications also come from muted projects; idle ones don't.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             Section {
-                LabeledContent("Check that notifications reach you") {
-                    Button("Send Test Notification") { notifier.sendTest() }
+                LabeledContent {
+                    Button("Send Test") { notifier.sendTest() }
+                } label: {
+                    Text("Test notification")
+                    Text("None arriving? Check System Settings › Notifications")
                 }
-            } footer: {
-                Text("If nothing appears, allow Agentic Status Bar in System Settings › Notifications.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)
+        .scrollDisabled(true)
     }
 
     private func toggle(_ title: String, _ key: String, _ value: KeyPath<Config, Bool>) -> some View {
@@ -177,14 +157,16 @@ private struct NotificationSettings: View {
 }
 
 /// The theme, and each state's symbol and colors.
-private struct AppearanceSettings: View {
+struct AppearanceSettings: View {
     let store: SessionStore
 
     var body: some View {
         let theme = Theme.resolve(store.config)
         Form {
-            Picker("Theme", selection: Binding(get: { store.config.theme }, set: { store.set("theme", $0) })) {
-                ForEach(SettingsView.themes, id: \.self) { Text(SettingsView.themeName($0)).tag($0) }
+            Section {
+                Picker("Theme", selection: Binding(get: { store.config.theme }, set: { store.set("theme", $0) })) {
+                    ForEach(SettingsView.themes, id: \.self) { Text(SettingsView.themeName($0)).tag($0) }
+                }
             }
             Section {
                 Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 6) {
@@ -205,6 +187,8 @@ private struct AppearanceSettings: View {
                             set: { key, value in store.set("\(key)_\(state)", value) })
                     }
                 }
+            } header: {
+                Text("Menu bar symbols")
             } footer: {
                 Text("Click a symbol to change it. ↩︎ goes back to the theme's symbol and colors.")
                     .font(.caption)
@@ -212,6 +196,7 @@ private struct AppearanceSettings: View {
             }
         }
         .formStyle(.grouped)
+        .scrollDisabled(true)
     }
 }
 

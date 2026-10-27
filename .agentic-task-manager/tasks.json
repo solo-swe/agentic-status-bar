@@ -3891,7 +3891,7 @@
       "description": "The app is LSUIElement, with no app menu, so there's no About dialog. Add an About entry (an \"About Agentic Status Bar\" button in the Settings General tab footer, and/or an item next to Quit and the gear in the popover's bottom row) that activates the app and opens the standard panel with NSApp.orderFrontStandardAboutPanel(options:): the app icon, the name, version (CFBundleShortVersionString) and build (CFBundleVersion), a copyright line (NSHumanReadableCopyright in the Info.plist via project.yml) and credits with a link to https://github.com/hakanserce/agentic-status-bar. The popover closes before the panel opens. Add an app test for the options passed if practical; the user checks it visually before it's marked done.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-100"
       ],
@@ -3902,11 +3902,22 @@
         "App/project.yml"
       ],
       "created_at": "2026-10-27T00:07:46Z",
-      "updated_at": "2026-10-27T00:29:16Z",
+      "updated_at": "2026-10-27T00:30:03Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T00:29:16Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "ee530e30e0eb9efa1102059d8d8c63aa528e60a4",
+      "completed_at": "2026-10-27T00:30:03Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-27T00:30:03Z",
+          "kind": "outcome",
+          "text": "AboutPanel.show() opens the standard About panel (icon, name, version, build, copyright, credits with the repo link); info button next to the gear in the popover; app tests added. User checks visually at the end of the loop.",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-102",
@@ -3920,7 +3931,7 @@
       "description": "The Settings window (App/Sources/SettingsView.swift, SettingsWindow.swift) looks rough, and the General tab shows a vertical scrollbar right away in its fixed 520x580 frame. Make it look like a native macOS settings window: toolbar-style tabs (a window toolbar with the General / Appearance / Notifications icons, title following the selected tab, e.g. an NSTabViewController with .toolbar style hosting each SwiftUI tab, or the SwiftUI equivalent), consistent grouped sections with short headers, footers kept short, controls right-aligned, no redundant labels. Every tab must fit without a scrollbar: size each tab to its content (the earlier crash came from resizing a SwiftUI window on tab switch inside a single NSHostingController; an NSTabViewController animates per-tab sizes safely), or trim/reorganise content (e.g. move the hooks and config file rows into their own compact section). Keep every existing setting and the app tests passing. Run the dev build and let the user check it visually before marking done.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "App/Sources/SettingsView.swift",
@@ -3928,9 +3939,11 @@
         "App/Tests/SettingsTests.swift"
       ],
       "created_at": "2026-10-27T00:28:06Z",
-      "updated_at": "2026-10-27T00:28:06Z",
+      "updated_at": "2026-10-27T00:30:05Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T00:30:05Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-103",
