@@ -4220,7 +4220,7 @@
       "description": "Replace github.com/hakanserce/agentic-status-bar with github.com/solo-swe/agentic-status-bar everywhere it is written (git grep hakanserce): SUFeedURL in App/project.yml, the repo URL in scripts/appcast.sh, AboutPanel.projectURL and the credits text plus App/Tests/AboutPanelTests.swift, the README link in App/Sources/HelpView.swift, README.md (Releases link, git clone), doc/PRD.md. Keep the bundle ID com.hakanserce.agentic-status-bar (and the tests bundle ID, tests/app.sh, bundleIdPrefix) unchanged: changing it would reset settings, the login item and notification permission and break updates. Ask the user whether the About copyright stays \"© 2026 Hakan Serce\" or becomes Solo SWE. Run swift test, tests/app.sh --test and tests/lint.sh.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-108"
       ],
@@ -4234,11 +4234,22 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-10-27T05:14:16Z",
-      "updated_at": "2026-10-27T05:33:47Z",
+      "updated_at": "2026-10-27T05:33:48Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T05:33:47Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "5697a870a576f79d9d90c353bf98015dcd623981",
+      "completed_at": "2026-10-27T05:33:48Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-27T05:33:48Z",
+          "kind": "outcome",
+          "text": "All links point at solo-swe/agentic-status-bar (About, Help, SUFeedURL, appcast.sh, README, PRD); bundle ID and the Hakan Serce copyright unchanged; core, app tests and lint pass.",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-110",
@@ -4284,16 +4295,21 @@
       "description": "The user makes solo-swe/agentic-status-bar public (Settings › General › Danger Zone › Change visibility), once the history scan is clean and the URLs point at solo-swe. Hard to undo: copies made while it is public stay out there. An agent can't do this: block the task on the user, and mark it done once gh repo view solo-swe/agentic-status-bar --json visibility says PUBLIC.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "blocked",
       "dependencies": [
         "T-109",
         "T-110"
       ],
       "files": [],
       "created_at": "2026-10-27T05:14:16Z",
-      "updated_at": "2026-10-27T05:14:16Z",
+      "updated_at": "2026-10-27T05:33:52Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "waiting_on": "user",
+      "questions": [
+        "Make solo-swe/agentic-status-bar public (Settings › General › Danger Zone › Change visibility). Done?"
+      ],
+      "blocked_at": "2026-10-27T05:33:52Z"
     },
     {
       "id": "T-112",
