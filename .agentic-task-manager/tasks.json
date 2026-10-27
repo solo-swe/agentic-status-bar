@@ -50,7 +50,7 @@
       "name": "Scaffold repo layout, LICENSE and .gitignore",
       "phase": 0,
       "type": "infra",
-      "description": "Create the repo layout from doc/PRD.md 'Repo layout': directories .claude-plugin/, hooks/, swiftbar/, lib/, tests/, tests/fixtures/. Add an MIT LICENSE (copyright holder: the repo owner, year 2026) and a .gitignore that ignores .DS_Store, tests/tmp/ and *.log. Add a placeholder .gitkeep where a directory would otherwise be empty. Do not create any scripts yet.",
+      "description": "Create the repo layout from `doc/PRD.md` 'Repo layout'.\n\n## Details\n- Directories: `.claude-plugin/`, `hooks/`, `swiftbar/`, `lib/`, `tests/`, `tests/fixtures/`.\n- Add an MIT `LICENSE` (copyright holder: the repo owner, year 2026) and a `.gitignore` that ignores `.DS_Store`, `tests/tmp/` and `*.log`.\n- Add a placeholder `.gitkeep` where a directory would otherwise be empty.\n- Do not create any scripts yet.\n",
       "requirements": [
         "M1"
       ],
@@ -67,7 +67,7 @@
         "tests/fixtures/.gitkeep"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:29:22Z",
+      "updated_at": "2026-10-27T07:18:11Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T06:28:07Z",
       "started_by": "claude:c631bc24",
@@ -88,7 +88,7 @@
       "name": "Set up bats test harness",
       "phase": 0,
       "type": "infra",
-      "description": "Add tests/run.sh that runs all tests/*.bats with bats-core (print an install hint and exit 1 if `bats` is not on PATH). Add tests/test_helper.bash that, per test, creates a temp dir under tests/tmp/ and exports HOME, CLAUDE_AGENTS_STATE_DIR (state files), CLAUDE_AGENTS_CONFIG (config file path) and CLAUDE_AGENTS_REGISTRY_DIR (stand-in for ~/.claude/sessions) into it, and removes it in teardown. Include a helper to put a fake-command dir first on PATH so tests can stub `ps`, `herdr` and `open`. Add one smoke test (tests/smoke.bats) proving the helper works.",
+      "description": "Add `tests/run.sh` that runs all `tests/*.bats` with bats-core (print an install hint and exit 1 if `bats` is not on `PATH`).\n\n## Details\n- Add `tests/test_helper.bash` that, per test, creates a temp dir under `tests/tmp/` and exports `HOME`, `CLAUDE_AGENTS_STATE_DIR` (state files), `CLAUDE_AGENTS_CONFIG` (config file path) and `CLAUDE_AGENTS_REGISTRY_DIR` (stand-in for `~/.claude/sessions`) into it, and removes it in teardown.\n- Include a helper to put a fake-command dir first on `PATH` so tests can stub `ps`, `herdr` and `open`.\n- Add one smoke test (`tests/smoke.bats`) proving the helper works.\n",
       "requirements": [
         "NFR-Testability"
       ],
@@ -103,7 +103,7 @@
         "tests/smoke.bats"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:32:43Z",
+      "updated_at": "2026-10-27T07:18:26Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T06:29:39Z",
       "started_by": "claude:c631bc24",
@@ -124,7 +124,7 @@
       "name": "Capture real hook payloads and environment (spike)",
       "phase": 0,
       "type": "infra",
-      "description": "Register a temporary capture hook (project-local .claude/settings.local.json, not committed) that appends stdin plus selected env vars (CLAUDE_CODE_ENTRYPOINT, HERDR_PANE_ID, __CFBundleIdentifier, TERM_PROGRAM, PPID) to a scratch file for SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Notification, Stop, SubagentStart, SubagentStop and SessionEnd. Trigger each: a permission prompt, an AskUserQuestion/elicitation, a 60 s idle notification, an Esc interrupt, a subagent run. Save one sanitized payload per event/notification type to tests/fixtures/payloads/<event>[-<type>].json (replace real paths, project names and IDs with made-up values). Record the exact user-interrupt marker text found in the transcript. Check whether `herdr agent focus` takes a pane ID or agent ID and whether it raises the host terminal. Update the 'Open questions' checklist in doc/PRD.md with the answers, then remove the capture hook.",
+      "description": "Register a temporary capture hook to record real hook payloads and environment, then remove it.\n\n## Capture hook\nRegister it in project-local `.claude/settings.local.json` (not committed). It appends stdin plus selected env vars (`CLAUDE_CODE_ENTRYPOINT`, `HERDR_PANE_ID`, `__CFBundleIdentifier`, `TERM_PROGRAM`, `PPID`) to a scratch file for:\n- `SessionStart`\n- `UserPromptSubmit`\n- `PreToolUse`\n- `PostToolUse`\n- `Notification`\n- `Stop`\n- `SubagentStart`\n- `SubagentStop`\n- `SessionEnd`\n\n## Trigger each\n- a permission prompt\n- an `AskUserQuestion`/elicitation\n- a 60 s idle notification\n- an Esc interrupt\n- a subagent run\n\n## Record\n- Save one sanitized payload per event/notification type to `tests/fixtures/payloads/<event>[-<type>].json` (replace real paths, project names and IDs with made-up values).\n- Record the exact user-interrupt marker text found in the transcript.\n- Check whether `herdr agent focus` takes a pane ID or agent ID and whether it raises the host terminal.\n\n## Done when\nUpdate the 'Open questions' checklist in `doc/PRD.md` with the answers, then remove the capture hook.\n",
       "requirements": [
         "PRD-OpenQuestions",
         "C3"
@@ -139,7 +139,7 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:50:54Z",
+      "updated_at": "2026-10-27T07:18:26Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T06:32:43Z",
       "started_by": "claude:c631bc24",
@@ -160,7 +160,7 @@
       "name": "Shared shell library: config, time, atomic writes",
       "phase": 0,
       "type": "feature",
-      "description": "Create lib/common.sh (POSIX sh, sourced by hook and plugin). Provide: (1) load_config — reads ${CLAUDE_AGENTS_CONFIG:-~/.config/claude-agents/config} as key=value lines (ignore comments/unknown keys, never eval arbitrary content) with defaults show_interactive=1 show_headless=1 show_subagents=1 show_ide=1 stale_minutes=30 use_registry=1 instant_refresh=1 icon=sparkle store_prompt_preview=1 state_dir=${CLAUDE_AGENTS_STATE_DIR:-~/.claude/swiftbar-agents}; (2) set_config KEY VALUE — rewrites one key atomically; (3) now_ms — epoch milliseconds using stock macOS tools (e.g. perl -MTime::HiRes); (4) atomic_write FILE — reads stdin, writes FILE.tmp.$$ in the same dir, then mv; (5) find_jq — /usr/bin/jq, then /opt/homebrew/bin/jq, /usr/local/bin/jq, else empty; (6) log_once KEY MSG — appends to $state_dir/plugin.log only if KEY not logged before.",
+      "description": "Create `lib/common.sh` (POSIX sh, sourced by hook and plugin).\n\n## Provide\n1. `load_config` — reads `${CLAUDE_AGENTS_CONFIG:-~/.config/claude-agents/config}` as `key=value` lines (ignore comments/unknown keys, never eval arbitrary content) with defaults `show_interactive=1` `show_headless=1` `show_subagents=1` `show_ide=1` `stale_minutes=30` `use_registry=1` `instant_refresh=1` `icon=sparkle` `store_prompt_preview=1` `state_dir=${CLAUDE_AGENTS_STATE_DIR:-~/.claude/swiftbar-agents}`;\n2. `set_config KEY VALUE` — rewrites one key atomically;\n3. `now_ms` — epoch milliseconds using stock macOS tools (e.g. `perl -MTime::HiRes`);\n4. `atomic_write FILE` — reads stdin, writes `FILE.tmp.$$` in the same dir, then `mv`;\n5. `find_jq` — `/usr/bin/jq`, then `/opt/homebrew/bin/jq`, `/usr/local/bin/jq`, else empty;\n6. `log_once KEY MSG` — appends to `$state_dir/plugin.log` only if `KEY` not logged before.\n",
       "requirements": [
         "NFR-Portability",
         "NFR-Reliability",
@@ -175,7 +175,7 @@
         "lib/common.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:52:20Z",
+      "updated_at": "2026-10-27T07:18:27Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T06:51:03Z",
       "started_by": "claude:c631bc24",
@@ -196,7 +196,7 @@
       "name": "Tests for lib/common.sh",
       "phase": 0,
       "type": "test",
-      "description": "Add tests/common.bats covering: defaults when no config file; overrides from a config file; unknown keys and malicious lines (e.g. `x=$(touch pwned)`) are ignored and not executed; set_config changes one key and keeps others; now_ms returns a 13-digit number; atomic_write leaves no .tmp file and produces exact content; find_jq returns a path when jq exists; log_once writes a key only once.",
+      "description": "Add `tests/common.bats` covering the cases below.\n\n## Tests\n- defaults when no config file;\n- overrides from a config file;\n- unknown keys and malicious lines (e.g. `x=$(touch pwned)`) are ignored and not executed;\n- `set_config` changes one key and keeps others;\n- `now_ms` returns a 13-digit number;\n- `atomic_write` leaves no `.tmp` file and produces exact content;\n- `find_jq` returns a path when `jq` exists;\n- `log_once` writes a key only once.\n",
       "requirements": [
         "NFR-Testability"
       ],
@@ -210,7 +210,7 @@
         "tests/common.bats"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T06:52:45Z",
+      "updated_at": "2026-10-27T07:18:27Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T06:52:20Z",
       "started_by": "claude:c631bc24",
@@ -231,7 +231,7 @@
       "name": "CI: shellcheck and bats on macOS",
       "phase": 0,
       "type": "infra",
-      "description": "Add .github/workflows/ci.yml running on push and pull_request on macos-latest: install bats-core and shellcheck via Homebrew, run `shellcheck -s sh` on hooks/*.sh, swiftbar/*.sh, lib/*.sh, install.sh, uninstall.sh (skip files that don't exist yet), then run tests/run.sh.",
+      "description": "Add `.github/workflows/ci.yml` running on `push` and `pull_request` on `macos-latest`.\n\n## Steps\n1. Install bats-core and shellcheck via Homebrew.\n2. Run `shellcheck -s sh` on `hooks/*.sh`, `swiftbar/*.sh`, `lib/*.sh`, `install.sh`, `uninstall.sh` (skip files that don't exist yet).\n3. Then run `tests/run.sh`.\n",
       "requirements": [
         "NFR-Testability"
       ],
@@ -244,7 +244,7 @@
         ".github/workflows/ci.yml"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:00:41Z",
+      "updated_at": "2026-10-27T07:18:28Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T06:52:45Z",
       "started_by": "claude:c631bc24",
@@ -265,7 +265,7 @@
       "name": "state-hook.sh skeleton and event dispatch",
       "phase": 1,
       "type": "feature",
-      "description": "Create hooks/state-hook.sh (POSIX sh, executable). It resolves its own directory (following symlinks) to source ../lib/common.sh, reads the full hook JSON from stdin, extracts hook_event_name and session_id with jq, and dispatches to one function per event (stubs for now). Hard rules from the PRD: never `set -e`; trap and swallow all errors; always exit 0; print nothing to stdout or stderr; exit early if jq is missing or session_id is empty. Provide write_state helper that merges a jq object into $state_dir/<session_id>.json (creating it with \"v\":1 if absent), sets updatedAt=now_ms, sets stateSince=now_ms only when `state` actually changes, and writes atomically.",
+      "description": "Create `hooks/state-hook.sh` (POSIX sh, executable).\n\n## Details\nIt resolves its own directory (following symlinks) to source `../lib/common.sh`, reads the full hook JSON from stdin, extracts `hook_event_name` and `session_id` with `jq`, and dispatches to one function per event (stubs for now).\n\n## Hard rules from the PRD\n- never `set -e`;\n- trap and swallow all errors;\n- always exit 0;\n- print nothing to stdout or stderr;\n- exit early if `jq` is missing or `session_id` is empty.\n\n## `write_state` helper\nProvide `write_state` helper that:\n- merges a `jq` object into `$state_dir/<session_id>.json` (creating it with `\"v\":1` if absent),\n- sets `updatedAt=now_ms`,\n- sets `stateSince=now_ms` only when `state` actually changes,\n- and writes atomically.\n",
       "requirements": [
         "Architecture-Components",
         "NFR-Reliability"
@@ -279,7 +279,7 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:03:03Z",
+      "updated_at": "2026-10-27T07:18:28Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:00:41Z",
       "started_by": "claude:c631bc24",
@@ -300,7 +300,7 @@
       "name": "SessionStart handler: PID walk and session metadata",
       "phase": 1,
       "type": "feature",
-      "description": "Implement the SessionStart handler in hooks/state-hook.sh. Walk up parent processes from $PPID (ps -o ppid=,comm=) to the first ancestor whose command basename is `claude` (or a known IDE/desktop host binary per T-003 findings); record its pid and `ps -o lstart= -p <pid>` as procStart. If none found, omit pid/procStart. Also record cwd and transcript_path from the payload, herdrPane from $HERDR_PANE_ID, termBundleId from $__CFBundleIdentifier, and kind from $CLAUDE_CODE_ENTRYPOINT (cli→interactive, sdk-* or a -p/--print flag in the parent's args→headless, IDE values→ide, desktop→desktop; unknown→interactive). Write state=idle.",
+      "description": "Implement the `SessionStart` handler in `hooks/state-hook.sh`.\n\n## PID walk\nWalk up parent processes from `$PPID` (`ps -o ppid=,comm=`) to the first ancestor whose command basename is `claude` (or a known IDE/desktop host binary per T-003 findings); record its `pid` and `ps -o lstart= -p <pid>` as `procStart`. If none found, omit `pid`/`procStart`.\n\n## Session metadata\nAlso record `cwd` and `transcript_path` from the payload, `herdrPane` from `$HERDR_PANE_ID`, `termBundleId` from `$__CFBundleIdentifier`, and `kind` from `$CLAUDE_CODE_ENTRYPOINT`:\n- `cli` → `interactive`\n- `sdk-*` or a `-p`/`--print` flag in the parent's args → `headless`\n- IDE values → `ide`\n- `desktop` → `desktop`\n- unknown → `interactive`\n\nWrite `state=idle`.\n",
       "requirements": [
         "StateModel-SessionStart",
         "C1",
@@ -318,7 +318,7 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:08:14Z",
+      "updated_at": "2026-10-27T07:18:29Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:03:04Z",
       "started_by": "claude:c631bc24",
@@ -339,7 +339,7 @@
       "name": "Busy handlers: UserPromptSubmit, PreToolUse, PostToolUse",
       "phase": 1,
       "type": "feature",
-      "description": "Implement in hooks/state-hook.sh: UserPromptSubmit → state=busy and, if store_prompt_preview=1, promptPreview = first 80 characters of the prompt with newlines collapsed (omit the field otherwise). Prompts starting with '<task-notification>' are background-task results (see tests/fixtures/payloads/UserPromptSubmit-task-notification.json): set busy but keep the existing promptPreview. PreToolUse → state=busy, lastTool=tool_name; PostToolUse → state=busy. Clear reason and message on every busy write.",
+      "description": "Implement the busy handlers in `hooks/state-hook.sh`.\n\n## Handlers\n- `UserPromptSubmit` → `state=busy` and, if `store_prompt_preview=1`, `promptPreview` = first 80 characters of the prompt with newlines collapsed (omit the field otherwise). Prompts starting with `<task-notification>` are background-task results (see `tests/fixtures/payloads/UserPromptSubmit-task-notification.json`): set busy but keep the existing `promptPreview`.\n- `PreToolUse` → `state=busy`, `lastTool=tool_name`;\n- `PostToolUse` → `state=busy`.\n\nClear `reason` and `message` on every busy write.\n",
       "requirements": [
         "StateModel-Busy",
         "NFR-Privacy"
@@ -355,7 +355,7 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:08:45Z",
+      "updated_at": "2026-10-27T07:18:29Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:08:14Z",
       "started_by": "claude:c631bc24",
@@ -376,7 +376,7 @@
       "name": "Notification and Stop handlers",
       "phase": 1,
       "type": "feature",
-      "description": "Implement in hooks/state-hook.sh using tests/fixtures/payloads/: Notification with notification_type=permission_prompt → state=waiting, message=<message>, reason=question if the session's lastTool is AskUserQuestion, else reason=permission; notification_type=elicitation_dialog → state=waiting, reason=question; notification_type=idle_prompt → state=idle. If notification_type is missing, fall back to the message text ('needs your permission' → permission, 'waiting for your input' → idle). Stop → state=idle, clear reason/message. PermissionRequest needs no handling (the Notification follows it).",
+      "description": "Implement in `hooks/state-hook.sh` using `tests/fixtures/payloads/`.\n\n## Notification\n- `notification_type=permission_prompt` → `state=waiting`, `message=<message>`, `reason=question` if the session's `lastTool` is `AskUserQuestion`, else `reason=permission`;\n- `notification_type=elicitation_dialog` → `state=waiting`, `reason=question`;\n- `notification_type=idle_prompt` → `state=idle`.\n- If `notification_type` is missing, fall back to the message text ('needs your permission' → `permission`, 'waiting for your input' → `idle`).\n\n## Stop\n`Stop` → `state=idle`, clear `reason`/`message`.\n\n`PermissionRequest` needs no handling (the `Notification` follows it).\n",
       "requirements": [
         "StateModel-Notification",
         "StateModel-Stop"
@@ -394,7 +394,7 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:09:16Z",
+      "updated_at": "2026-10-27T07:18:30Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:08:46Z",
       "started_by": "claude:c631bc24",
