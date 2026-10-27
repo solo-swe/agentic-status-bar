@@ -4512,18 +4512,29 @@
       "description": "The README's Install section shows only `brew install --cask solo-swe/tap/agentic-status-bar` and describes Homebrew's tap trust in words. Show the commands, each with a one-line comment: `brew tap solo-swe/tap` (adds the tap), `brew install --cask solo-swe/tap/agentic-status-bar` (installing by the full name trusts this cask), and, for using the short name (`brew install --cask agentic-status-bar`, `brew info`, `brew upgrade --greedy`), `brew trust --cask solo-swe/tap/agentic-status-bar`, or `brew trust solo-swe/tap` to trust the whole tap. Check each command against the installed Homebrew (brew help tap, brew help trust, a --dry-run install) before writing it. Keep doc/RELEASING.md's Homebrew lines consistent.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "README.md",
         "doc/RELEASING.md"
       ],
       "created_at": "2026-10-27T06:39:03Z",
-      "updated_at": "2026-10-27T06:39:06Z",
+      "updated_at": "2026-10-27T06:39:33Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T06:39:06Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "73c7c1db52f5e2df21efc98e27517ecea897256a",
+      "completed_at": "2026-10-27T06:39:33Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-27T06:39:33Z",
+          "kind": "outcome",
+          "text": "README Install shows brew tap, the full-name install (trusts the cask), and brew trust --cask / brew trust for the short name; checked with brew help trust and brew info; RELEASING.md notes the trust for brew info.",
+          "by": "claude:c631bc24"
+        }
+      ]
     }
   ]
 }
