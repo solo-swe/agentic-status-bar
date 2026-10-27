@@ -4777,7 +4777,7 @@
       "description": "Release v0.2.2 following `doc/RELEASING.md` › Each release: the Help menu and popover fixes (T-121), Esc to close (T-122) and the `debug_hook_log` option (T-118).\n\n## Steps\n1. Set `ASBVersion.current` and `MARKETING_VERSION` to `0.2.2`, and the README's build example.\n2. Checks, commit, push, CI.\n3. Tag `v0.2.2`, watch the release run.\n4. Check the draft (Gatekeeper, signatures, `SUFeedURL`, `SUPublicEDKey`, the appcast signature).\n5. The user publishes it as the latest release.\n6. Check the downloads without a login and the Homebrew workflow; an installed v0.2.1 should offer the update.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/Version.swift",
@@ -4785,11 +4785,28 @@
         "README.md"
       ],
       "created_at": "2026-10-27T08:24:35Z",
-      "updated_at": "2026-10-27T08:24:43Z",
+      "updated_at": "2026-10-27T08:34:21Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T08:24:43Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "58f00ee48e3e01f1ac956ca4baf558b36167d669",
+      "notes": [
+        {
+          "at": "2026-10-27T08:27:52Z",
+          "kind": "note",
+          "text": "Draft v0.2.2 checked (run 40473332523): DMG and app notarized, signatures valid, version 0.2.2 build 4 (above 0.2.1's build 3), solo-swe feed, matching key, appcast signature valid. Waiting for the user to publish.",
+          "by": "claude:c631bc24"
+        },
+        {
+          "at": "2026-10-27T08:34:21Z",
+          "kind": "outcome",
+          "text": "v0.2.2 published as latest: appcast and zip download anonymously; homebrew.yml (run 40474307660) pushed the 0.2.2 cask to the tap on its own, sha256 matches. Self-update from 0.2.1 left for the user to try.",
+          "by": "claude:c631bc24"
+        }
+      ],
+      "completed_at": "2026-10-27T08:34:21Z",
+      "completed_by": "claude:c631bc24"
     }
   ]
 }
