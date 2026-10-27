@@ -4118,7 +4118,7 @@
       "description": "Distribute the app with Homebrew: brew install --cask solo-swe/tap/agentic-status-bar. Ready: the public repository solo-swe/homebrew-tap exists, with a write deploy key whose private key is the secret HOMEBREW_TAP_DEPLOY_KEY in solo-swe/agentic-status-bar (push over SSH: git@github.com:solo-swe/homebrew-tap.git). Write Casks/agentic-status-bar.rb (version, sha256 of the release zip, url https://github.com/solo-swe/agentic-status-bar/releases/download/v#{version}/agentic-status-bar-#{version}.zip, name, desc, homepage, depends_on macos: \">= :sonoma\", depends_on arch: :arm64 while builds are arm64-only, app \"Agentic Status Bar.app\", auto_updates true (Sparkle), uninstall quit: \"com.hakanserce.agentic-status-bar\", zap trash: the config dir, the state dir and the app's preferences), checked with brew audit --cask and brew style, and install-tested from the tap. Add a workflow on release: published (releases start as drafts) that computes the zip's sha256 and pushes the updated cask to the tap with the deploy key; publish the cask for v0.2.1 now. Check what Homebrew's tap trust (brew trust) asks of users of a third-party tap and say it in the README install instructions (brew first, DMG second); add the release steps to CONTRIBUTING.md. The official homebrew/cask needs 225 stars, 90 forks or 90 watchers for a self-submission and a repository at least 30 days old: not now.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-091",
         "T-112"
@@ -4131,11 +4131,22 @@
         "scripts/homebrew-cask.rb"
       ],
       "created_at": "2026-10-27T00:47:57Z",
-      "updated_at": "2026-10-27T06:05:22Z",
+      "updated_at": "2026-10-27T06:08:47Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T06:05:22Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "fb4eae400a69b8bf1f7ef24587a97c2cda4eb405",
+      "completed_at": "2026-10-27T06:08:47Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-27T06:08:47Z",
+          "kind": "outcome",
+          "text": "Cask live in solo-swe/homebrew-tap (0.2.1): brew style, audit --online, fetch (sha256) and livecheck pass; a fully qualified brew install trusts the cask itself. homebrew.yml updates it on release: published (tested by hand: deploy key clone works, no change). brew uninstall's hook removal untested (it would remove the live hooks).",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-107",
