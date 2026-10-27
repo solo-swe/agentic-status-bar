@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 105,
+    "next_id": 107,
     "workflow": {
       "type": "direct"
     },
@@ -4035,6 +4035,60 @@
           "by": "claude:c631bc24"
         }
       ]
+    },
+    {
+      "id": "T-105",
+      "name": "App: in-app Help",
+      "phase": 6,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "app"
+      ],
+      "description": "Add a Help window (SwiftUI in an app-owned NSWindow, like SettingsWindow, so it switches the app to .regular via ActivationPolicy). Open it from a Help menu in MainMenu (\"Agentic Status Bar Help\", Cmd-?) and from a ? button in the popover's bottom row next to the info and gear buttons. Content, short and scannable, in sections: Getting started (install the hooks; sessions appear when Claude Code runs); The menu bar (a live legend built from Theme.resolve(store.config): each state's symbol in its color with what it means, using SettingsView.stateName, plus the count and which state wins: waiting > idle > no activity > working); The session list (row parts: state, project and title, time in state, subagents indented; clicking focuses the terminal via herdr; the ... menu actions; mute for an hour or today, unmute all); Notifications (waiting and idle, delay, muted projects); Troubleshooting (no sessions: hooks not installed or sessions started before the install; the warning symbol: unreadable state files; notifications not arriving; where the config file is). Add an app test that the legend lists every state in Config.themeStates. Run the dev build and let the user check it visually.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "App/Sources/HelpView.swift",
+        "App/Sources/MainMenu.swift",
+        "App/Sources/PopoverView.swift",
+        "App/Sources/AppDelegate.swift",
+        "App/Tests/HelpTests.swift"
+      ],
+      "created_at": "2026-10-27T00:47:57Z",
+      "updated_at": "2026-10-27T00:47:57Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-106",
+      "name": "Release: Homebrew cask in a tap",
+      "phase": 6,
+      "type": "infra",
+      "priority": "P2",
+      "labels": [
+        "release"
+      ],
+      "description": "Distribute the app with Homebrew: brew install --cask hakanserce/tap/agentic-status-bar. Needs the user to create the public repository hakanserce/homebrew-tap and a fine-grained token with contents write access to it, stored as the secret HOMEBREW_TAP_TOKEN in this repository: if either is missing, block this task on the user naming exactly those. Write Casks/agentic-status-bar.rb (version, sha256 of the release zip, url https://github.com/hakanserce/agentic-status-bar/releases/download/v#{version}/agentic-status-bar-#{version}.zip, name, desc, homepage, depends_on macos: \">= :sonoma\", depends_on arch: :arm64 while builds are arm64-only, app \"Agentic Status Bar.app\", auto_updates true once Sparkle (T-091) ships, uninstall quit: \"com.hakanserce.agentic-status-bar\", zap trash: the config dir, the state dir and the app's preferences), checked with brew audit --cask --new and brew style. Extend .github/workflows/release.yml: after the release is published (or in a separate workflow on release: published, since releases start as drafts), compute the zip's sha256 and push the updated cask to the tap. Add README install instructions (brew first, DMG second) and the release steps to CONTRIBUTING.md.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-091"
+      ],
+      "files": [
+        ".github/workflows/release.yml",
+        ".github/workflows/homebrew.yml",
+        "README.md",
+        "CONTRIBUTING.md",
+        "scripts/homebrew-cask.rb"
+      ],
+      "created_at": "2026-10-27T00:47:57Z",
+      "updated_at": "2026-10-27T00:47:57Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
     }
   ]
 }
