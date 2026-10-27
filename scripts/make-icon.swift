@@ -2,7 +2,7 @@
 //
 //   swift scripts/make-icon.swift App/Resources/Assets.xcassets/AppIcon.appiconset
 //
-// Flat, layered shapes on a dark rounded square: an orange status light sending out signal arcs. Each size is
+// Flat, layered shapes on a white rounded square with a thin black edge: an orange status light sending out signal arcs. Each size is
 // drawn from the vector shapes rather than scaled down.
 import AppKit
 
@@ -45,7 +45,7 @@ func drawBeacon(_ ctx: CGContext) {
     shadow.addLine(to: CGPoint(x: center.x + 85, y: center.y - 85))
     shadow.closeSubpath()
     ctx.addPath(shadow)
-    ctx.setFillColor(color(0x000000, 0.22))
+    ctx.setFillColor(color(0x000000, 0.07))
     ctx.fillPath()
 
     // Signal arcs above the light, fading outwards.
@@ -70,11 +70,11 @@ func drawBeacon(_ ctx: CGContext) {
 
 /// Draws the icon on a 1024-point canvas (the context is scaled to the output size).
 func draw(_ ctx: CGContext) {
-    // A soft shadow under the body.
+    // A shadow under the body, lifting it off the desktop.
     ctx.saveGState()
-    ctx.setShadow(offset: CGSize(width: 0, height: -10), blur: 24, color: color(0x000000, 0.35))
+    ctx.setShadow(offset: CGSize(width: 0, height: -14), blur: 30, color: color(0x000000, 0.4))
     ctx.addPath(shape)
-    ctx.setFillColor(color(0x263238))
+    ctx.setFillColor(color(0xFFFFFF))
     ctx.fillPath()
     ctx.restoreGState()
 
@@ -82,11 +82,17 @@ func draw(_ ctx: CGContext) {
     ctx.addPath(shape)
     ctx.clip()
     let background = CGGradient(
-        colorsSpace: space, colors: [color(0x37474F), color(0x1C262B)] as CFArray, locations: [0, 1])!
+        colorsSpace: space, colors: [color(0xFFFFFF), color(0xEEF1F3)] as CFArray, locations: [0, 1])!
     ctx.drawLinearGradient(
         background, start: CGPoint(x: 512, y: body.maxY), end: CGPoint(x: 512, y: body.minY), options: [])
     drawBeacon(ctx)
     ctx.restoreGState()
+
+    // A thin black edge around the body.
+    ctx.addPath(shape)
+    ctx.setStrokeColor(color(0x000000, 0.85))
+    ctx.setLineWidth(5)
+    ctx.strokePath()
 }
 
 func png(pixels: Int) -> Data {
