@@ -4668,7 +4668,7 @@
       "description": "With one of the app's windows open, **Help › Agentic Status Bar Help** shows macOS's alert \"Help isn't available for Agentic Status Bar\" instead of opening our Help window.\n\n## Cause\nOur `MainMenuActions` method is named `showHelp(_:)`: the same selector as `NSApplication.showHelp(_:)`, AppKit's Help Book action, which shows that alert when the app has no Help Book.\n\n## Change\n- Rename the action to a selector AppKit doesn't own, e.g. `openHelpWindow(_:)`, in `App/Sources/MainMenu.swift`, `App/Sources/AppDelegate.swift` and `App/Tests/MainMenuTests.swift`.\n- Check the other menu actions (`showAbout`, `showSettings`, `showSessions`, `checkForUpdates`) against `NSApplication` and `NSResponder` selectors, and rename any that collide.\n\n## Done when\n- `tests/app.sh --test` passes.\n- The user opens Help from the Help menu in the dev build.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "in_review",
       "dependencies": [],
       "files": [
         "App/Sources/MainMenu.swift",
@@ -4676,7 +4676,7 @@
         "App/Tests/MainMenuTests.swift"
       ],
       "created_at": "2026-10-27T07:43:57Z",
-      "updated_at": "2026-10-27T07:51:25Z",
+      "updated_at": "2026-10-27T07:52:05Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -4691,6 +4691,12 @@
           "kind": "rejection",
           "text": "Still shows the alert while the Help window is key: the SwiftUI App lifecycle rebuilds the main menu with its default Help item (showHelp:) when a SwiftUI-hosted window is key. Fix: start the app with AppKit (main.swift) instead of a SwiftUI App, so our MainMenu is the only menu.",
           "by": "claude:c631bc24"
+        },
+        {
+          "at": "2026-10-27T07:52:05Z",
+          "kind": "review",
+          "text": "Now started the AppKit way (`App/Sources/main.swift`) instead of a SwiftUI `App`, so SwiftUI can't replace the main menu with its default Help item. User: Help › Agentic Status Bar Help with the Help window in front, and with Settings in front.",
+          "by": "claude:c631bc24"
         }
       ],
       "reviews": [
@@ -4700,7 +4706,9 @@
         }
       ],
       "started_at": "2026-10-27T07:51:25Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "29fe4aab6a4c3372316db052f6c72fd4a22d8704",
+      "review_requested_at": "2026-10-27T07:52:05Z"
     }
   ]
 }

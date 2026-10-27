@@ -19,10 +19,14 @@ final class StatusItemController {
         // Closes on a click outside it.
         popover.behavior = .transient
         popover.animates = false
-        popover.contentViewController = NSHostingController(
+        let content = NSHostingController(
             rootView: PopoverView(
                 store: store, close: { [weak popover] in popover?.performClose(nil) }, openSettings: openSettings,
                 openHelp: openHelp))
+        // The popover follows the list's size as rows come and go, keeping its arrow at the status item;
+        // without this it can resize from the top and drift down the screen.
+        content.sizingOptions = [.preferredContentSize]
+        popover.contentViewController = content
         item.button?.target = self
         item.button?.action = #selector(togglePopover)
         update()

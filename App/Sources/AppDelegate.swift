@@ -31,6 +31,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MainMenuActions {
         // (or -ShowHelpOnLaunch YES).
         if UserDefaults.standard.bool(forKey: "ShowSettingsOnLaunch") { settings.show() }
         if UserDefaults.standard.bool(forKey: "ShowHelpOnLaunch") { help.show() }
+        if UserDefaults.standard.bool(forKey: "ShowSessionsOnLaunch") {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in self?.statusItem?.showPopover() }
+        }
     }
 
     func showAbout(_ sender: Any?) { AboutPanel.show() }
