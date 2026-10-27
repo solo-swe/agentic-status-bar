@@ -4072,7 +4072,7 @@
       "description": "Add a Help window (SwiftUI in an app-owned NSWindow, like SettingsWindow, so it switches the app to .regular via ActivationPolicy). Open it from a Help menu in MainMenu (\"Agentic Status Bar Help\", Cmd-?) and from a ? button in the popover's bottom row next to the info and gear buttons. Content, short and scannable, in sections: Getting started (install the hooks; sessions appear when Claude Code runs); The menu bar (a live legend built from Theme.resolve(store.config): each state's symbol in its color with what it means, using SettingsView.stateName, plus the count and which state wins: waiting > idle > no activity > working); The session list (row parts: state, project and title, time in state, subagents indented; clicking focuses the terminal via herdr; the ... menu actions; mute for an hour or today, unmute all); Notifications (waiting and idle, delay, muted projects); Troubleshooting (no sessions: hooks not installed or sessions started before the install; the warning symbol: unreadable state files; notifications not arriving; where the config file is). Add an app test that the legend lists every state in Config.themeStates. Run the dev build and let the user check it visually.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "in_review",
       "dependencies": [],
       "files": [
         "App/Sources/HelpView.swift",
@@ -4082,11 +4082,21 @@
         "App/Tests/HelpTests.swift"
       ],
       "created_at": "2026-10-27T00:47:57Z",
-      "updated_at": "2026-10-27T04:55:36Z",
+      "updated_at": "2026-10-27T04:59:19Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T04:55:36Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "756c94d01ee01e7dea75437c1bc16b99c4e18208",
+      "review_requested_at": "2026-10-27T04:59:19Z",
+      "notes": [
+        {
+          "at": "2026-10-27T04:59:19Z",
+          "kind": "review",
+          "text": "Help window (Help menu ⌘?, ? in the popover) with a live legend from the theme in use; opens at the top. User to check the content and layout in the dev build.",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-106",
