@@ -4469,15 +4469,17 @@
       "description": "Research and write a detailed proposal, doc/design/agent-providers.md, for showing sessions of other coding agents next to Claude Code. No code changes. (1) Today: map every place ASBCore and the app depend on Claude Code: the hooks and their payloads (HookEvents, Installer and ~/.claude/settings.json), the state file schema (doc/state-file-schema.md), transcripts (Transcript, checks C3/C4), Claude Code's session registry (C2), process detection (pid walk to `claude`, kind detection, C1), notifications' reasons (permission, question), names and paths in the UI and docs. (2) Research each agent from its current official docs and source (cite links and versions): OpenAI Codex CLI, Gemini CLI, Cursor (agent/CLI and the IDE), opencode, Aider, Amp, GitHub Copilot CLI, and any other widely used terminal agent found. For each: hook or event mechanisms (lifecycle hooks, notify commands, plugins, MCP), session and transcript files, process names, how to tell busy, waiting on a permission or question, and idle, and what can't be told. (3) Proposal: a provider abstraction (what a provider supplies: install/uninstall of its hooks, event mapping into the state file, process and kind detection, checks, labels and icons), state file schema changes (e.g. an agent field, version bump or optional field) and the reader rules, how the UI shows the agent, a feasibility table (agent x signal: busy/waiting/idle/subagents/focus) with a recommended order, risks, a migration plan that keeps Claude Code behavior and the conformance suite unchanged, and a task breakdown ready for atm (tasks under 10 minutes each, with dependencies). Send the task to review for the user (atm review) instead of marking it done.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "doc/design/agent-providers.md"
       ],
       "created_at": "2026-10-27T06:37:58Z",
-      "updated_at": "2026-10-27T06:37:58Z",
+      "updated_at": "2026-10-27T06:52:29Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T06:52:29Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-116",
@@ -4491,15 +4493,17 @@
       "description": "Research and write a detailed proposal, doc/design/focus-targets.md, for jumping to a session in more terminals and apps than herdr. No code changes. (1) Today: how focus works now: what the hook records (herdrPane from HERDR_PANE_ID, termBundleId from __CFBundleIdentifier), Actions focus (herdr CLI, then raising the terminal app), the focusable flag in the snapshot, and the README's statement that other tools are planned. (2) Research each target from its current docs and source (cite links and versions): tmux, WezTerm, iTerm2, Ghostty, Kitty, Terminal.app, Alacritty, Warp, Zellij, VS Code and Cursor (integrated terminal), JetBrains IDEs, and screen if relevant. For each: how a hook running inside it can identify its window/tab/pane (environment variables such as TMUX/TMUX_PANE, WEZTERM_PANE, ITERM_SESSION_ID, TERM_SESSION_ID, KITTY_WINDOW_ID, ZELLIJ_SESSION_NAME, TERM_PROGRAM; tty), how an outside app can switch to exactly that pane (CLI such as tmux select-pane/switch-client and wezterm cli activate-pane, AppleScript, URL schemes, remote control sockets, extensions), what it needs (Accessibility or Automation permission, a setting such as kitty's allow_remote_control, an extension), and nesting (tmux inside a terminal app, herdr inside tmux). (3) Proposal: a focus target abstraction (detect at hook time, record in the state file, act at click time, raise the outer app), state file schema additions, how nested targets chain, a feasibility table (target x identify/switch/permission) with a recommended order, privacy and permission prompts, test strategy (stubbed commands like ASB_HERDR), and a task breakdown ready for atm (tasks under 10 minutes each, with dependencies). Send the task to review for the user (atm review) instead of marking it done.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "doc/design/focus-targets.md"
       ],
       "created_at": "2026-10-27T06:37:58Z",
-      "updated_at": "2026-10-27T06:37:58Z",
+      "updated_at": "2026-10-27T06:52:30Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T06:52:30Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-117",
