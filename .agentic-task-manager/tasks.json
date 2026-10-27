@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 102,
+    "next_id": 105,
     "workflow": {
       "type": "direct"
     },
@@ -3852,7 +3852,7 @@
       "description": "The app has no icon: Finder, the DMG, the Settings and first-run windows, notifications and the About panel show the generic app icon. Design an app icon that fits the idea (a menu-bar status light for Claude Code sessions, in the macOS Big Sur+ rounded-square style) and keep it reproducible: a small script (scripts/make-icon.swift or similar, drawing with CoreGraphics/AppKit) renders every macOS size (16, 32, 128, 256, 512 at 1x and 2x) into App/Resources/Assets.xcassets/AppIcon.appiconset with its Contents.json. Add the asset catalog to the app target in App/project.yml (ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon), regenerate the Xcode project, and check the built app's Contents/Resources has AppIcon.icns / Assets.car and that Finder shows the icon. Show the user the icon for approval before marking done.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "App/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json",
@@ -3862,12 +3862,22 @@
         "App/AgenticStatusBar.xcodeproj/project.pbxproj"
       ],
       "created_at": "2026-10-27T00:07:46Z",
-      "updated_at": "2026-10-27T00:21:44Z",
+      "updated_at": "2026-10-27T00:27:41Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T00:09:24Z",
       "started_by": "claude:c631bc24",
-      "commit": "7de97183ca3969dde5081592a10ad4dabe416a71"
+      "commit": "15780648936fe05c2e84bd993aa94c7e8628965f",
+      "completed_at": "2026-10-27T00:27:41Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-27T00:27:41Z",
+          "kind": "outcome",
+          "text": "Beacon icon (orange status light with signal arcs) on a white rounded square with a thin black edge and drop shadow; rendered by scripts/make-icon.swift into App/Resources/Assets.xcassets; user approved it in the dev build.",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-101",
@@ -3893,6 +3903,84 @@
       ],
       "created_at": "2026-10-27T00:07:46Z",
       "updated_at": "2026-10-27T00:07:46Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-102",
+      "name": "App: tidy the Settings window and fit each tab without scrolling",
+      "phase": 6,
+      "type": "polish",
+      "priority": "P1",
+      "labels": [
+        "app"
+      ],
+      "description": "The Settings window (App/Sources/SettingsView.swift, SettingsWindow.swift) looks rough, and the General tab shows a vertical scrollbar right away in its fixed 520x580 frame. Make it look like a native macOS settings window: toolbar-style tabs (a window toolbar with the General / Appearance / Notifications icons, title following the selected tab, e.g. an NSTabViewController with .toolbar style hosting each SwiftUI tab, or the SwiftUI equivalent), consistent grouped sections with short headers, footers kept short, controls right-aligned, no redundant labels. Every tab must fit without a scrollbar: size each tab to its content (the earlier crash came from resizing a SwiftUI window on tab switch inside a single NSHostingController; an NSTabViewController animates per-tab sizes safely), or trim/reorganise content (e.g. move the hooks and config file rows into their own compact section). Keep every existing setting and the app tests passing. Run the dev build and let the user check it visually before marking done.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "App/Sources/SettingsView.swift",
+        "App/Sources/SettingsWindow.swift",
+        "App/Tests/SettingsTests.swift"
+      ],
+      "created_at": "2026-10-27T00:28:06Z",
+      "updated_at": "2026-10-27T00:28:06Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-103",
+      "name": "App: app menu while a window is open",
+      "phase": 6,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "app"
+      ],
+      "description": "The app is LSUIElement (.accessory), so when the Settings or first-run window is frontmost the menu bar still shows the previous app's menus. While one of our windows is open, switch to NSApp.setActivationPolicy(.regular) and give the app a main menu; switch back to .accessory when the last window closes (a Dock icon appears meanwhile, with the new app icon). The app menu: About Agentic Status Bar (the standard about panel, see T-101), Settings… (Cmd-,), Show Sessions (opens the status item's popover), separator, Hide / Hide Others / Show All, separator, Quit Agentic Status Bar (Cmd-Q). Add the standard Edit menu (cut/copy/paste/select all, so text fields keep working) and a Window menu (Close Cmd-W, Minimize). Build it in a small MainMenu helper in AppDelegate or its own file; add an app test for the menu items and the policy switch if practical. The user checks it visually before it's marked done.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-101"
+      ],
+      "files": [
+        "App/Sources/AppDelegate.swift",
+        "App/Sources/SettingsWindow.swift",
+        "App/Sources/FirstRunView.swift",
+        "App/Sources/MainMenu.swift",
+        "App/Sources/StatusItemController.swift"
+      ],
+      "created_at": "2026-10-27T00:28:06Z",
+      "updated_at": "2026-10-27T00:28:10Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "claude:c631bc24"
+    },
+    {
+      "id": "T-104",
+      "name": "App: pick symbols and colors from a set instead of typing",
+      "phase": 6,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "app"
+      ],
+      "description": "The Appearance tab's symbol editor (a text field for an SF Symbol name) isn't usable. Replace it with a picker: clicking a state's symbol opens a popover with a grid of curated SF Symbols suited to menu-bar status (the ones the built-in themes use plus a few dozen fitting alternatives, e.g. circle/dot/exclamation/bell/moon/zzz/hourglass/bolt/sparkle/sparkles/star/flame/checkmark/questionmark variants, filled and outlined), each shown in the state's color, the current one selected; clicking applies it (icon_<state>) and closes the popover. Replace the two free ColorPickers with a palette of swatches (system colors that read well in the menu bar: red, orange, yellow, green, mint, teal, blue, indigo, purple, pink, gray, primary/label), each swatch setting a light,dark pair (e.g. the system color's light and dark variants) as color_<state>; keep reset to the theme. Every symbol in the set must exist (app test with NSImage(systemSymbolName:)) and every swatch must produce a valid color setting (Config.isValid). Keep values written to the config file the same format. The user checks it visually before it's marked done.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-102"
+      ],
+      "files": [
+        "App/Sources/SettingsView.swift",
+        "App/Sources/SymbolPicker.swift",
+        "App/Tests/SettingsTests.swift"
+      ],
+      "created_at": "2026-10-27T00:28:06Z",
+      "updated_at": "2026-10-27T00:28:06Z",
       "created_by": "Hakan Serce",
       "updated_by": "Hakan Serce"
     }
