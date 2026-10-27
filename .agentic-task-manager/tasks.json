@@ -3852,7 +3852,7 @@
       "description": "The app has no icon: Finder, the DMG, the Settings and first-run windows, notifications and the About panel show the generic app icon. Design an app icon that fits the idea (a menu-bar status light for Claude Code sessions, in the macOS Big Sur+ rounded-square style) and keep it reproducible: a small script (scripts/make-icon.swift or similar, drawing with CoreGraphics/AppKit) renders every macOS size (16, 32, 128, 256, 512 at 1x and 2x) into App/Resources/Assets.xcassets/AppIcon.appiconset with its Contents.json. Add the asset catalog to the app target in App/project.yml (ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon), regenerate the Xcode project, and check the built app's Contents/Resources has AppIcon.icns / Assets.car and that Finder shows the icon. Show the user the icon for approval before marking done.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "App/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json",
@@ -3862,9 +3862,11 @@
         "App/AgenticStatusBar.xcodeproj/project.pbxproj"
       ],
       "created_at": "2026-10-27T00:07:46Z",
-      "updated_at": "2026-10-27T00:07:46Z",
+      "updated_at": "2026-10-27T00:09:24Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T00:09:24Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-101",
