@@ -71,7 +71,8 @@ added.
 ## Releases
 
 1. Set the version in `Sources/ASBCore/Version.swift` (`ASBVersion.current`): it is the version of `asb`, of the app
-   and of the tag. A signed build refuses a tag that doesn't match it.
+   and of the tag. A signed build refuses a tag that doesn't match it. Set `MARKETING_VERSION` in `App/project.yml`
+   to the same, for builds made in Xcode.
 2. Commit, then push a tag: `git tag -a v0.2.0 -m v0.2.0 && git push origin v0.2.0`.
 3. `.github/workflows/release.yml` builds, signs and notarizes the app, signs the update with the Sparkle key, and
    attaches `agentic-status-bar-<version>.zip`, `.dmg` and `appcast.xml` to a draft GitHub release.

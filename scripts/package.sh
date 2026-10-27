@@ -25,6 +25,9 @@ if [ "$identity" != "-" ] && { [ -z "${SPARKLE_PUBLIC_KEY:-}" ] || [ ! -s "${SPA
   echo "A signed release needs SPARKLE_PUBLIC_KEY and SPARKLE_KEY_FILE (CONTRIBUTING.md › Releases)" >&2
   exit 1
 fi
+if [ -n "${SPARKLE_PUBLIC_KEY:-}" ] && [ -s "${SPARKLE_KEY_FILE:-}" ]; then
+  swift scripts/check-sparkle-key.swift "$SPARKLE_KEY_FILE" "$SPARKLE_PUBLIC_KEY"
+fi
 name="agentic-status-bar-$version"
 dist="dist"
 derived=".build/release-xcode"

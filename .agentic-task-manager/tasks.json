@@ -3510,7 +3510,7 @@
       "description": "Add Sparkle 2 via Swift Package Manager, an EdDSA key pair (public key in Info.plist, private key as a secret provided by the user), a 'Check for Updates…' item, and release.yml steps that upload the zip and DMG to the GitHub Release at .../releases/download/v<version>/agentic-status-bar-<version>.zip and publish an updated appcast.xml. App, CLI and tag versions must match (one source of truth). Document the release steps in CONTRIBUTING.md and add an Updates section to README.md (T-093 wrote the rest of the README first).",
       "requirements": [],
       "use_cases": [],
-      "status": "blocked",
+      "status": "in_progress",
       "dependencies": [
         "T-090"
       ],
@@ -3522,7 +3522,7 @@
         "README.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-27T04:24:22Z",
+      "updated_at": "2026-10-27T04:49:34Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -3530,13 +3530,16 @@
           "at": "2026-10-27T04:24:22Z",
           "kind": "failure",
           "text": "lease expired (claude:c631bc24)"
+        },
+        {
+          "at": "2026-10-27T04:49:33Z",
+          "kind": "answer",
+          "text": "Create the Sparkle update key (CONTRIBUTING.md › Releases › One-time setup): run generate_keys, set the secret SPARKLE_ED_PRIVATE_KEY and the repository variable SPARKLE_PUBLIC_KEY. Done? Then I bump the version to 0.2.0 and tag a test release. → 2026-10-27: user set SPARKLE_ED_PRIVATE_KEY and SPARKLE_PUBLIC_KEY (the variable first held the plist key name; fixed to the key from generate_keys -p). Version bumped to 0.2.0; next: tag v0.2.0 and verify the release.",
+          "by": "claude:c631bc24"
         }
       ],
-      "waiting_on": "user",
-      "questions": [
-        "Create the Sparkle update key (CONTRIBUTING.md › Releases › One-time setup): run generate_keys, set the secret SPARKLE_ED_PRIVATE_KEY and the repository variable SPARKLE_PUBLIC_KEY. Done? Then I bump the version to 0.2.0 and tag a test release."
-      ],
-      "blocked_at": "2026-10-27T04:24:22Z"
+      "started_at": "2026-10-27T04:49:34Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-092",
