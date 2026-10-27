@@ -89,12 +89,16 @@ themselves.
   downloaded, then:
 
   ```sh
-  .build/release-xcode/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_keys      # prints the public key
-  .build/release-xcode/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_keys -x sparkle.key
+  bin=.build/release-xcode/SourcePackages/artifacts/sparkle/Sparkle/bin
+  $bin/generate_keys                     # creates the key pair in your login keychain
+  $bin/generate_keys -x sparkle.key
   gh secret set SPARKLE_ED_PRIVATE_KEY < sparkle.key
-  gh variable set SPARKLE_PUBLIC_KEY --body "<the public key>"
+  gh variable set SPARKLE_PUBLIC_KEY --body "$($bin/generate_keys -p)"
   rm sparkle.key
   ```
+
+  Set the variable from `generate_keys -p`, which prints only the key: the first command prints it inside an
+  Info.plist snippet, and a stray `<string>` character breaks the release's key check.
 
   `generate_keys` keeps the private key in your login keychain; back it up. Losing it means installed copies can't
   update to a release signed with a new key.
