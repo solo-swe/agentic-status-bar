@@ -180,7 +180,7 @@ After publishing:
 curl -fsSIL https://github.com/solo-swe/agentic-status-bar/releases/latest/download/appcast.xml   # ends in 200
 curl -fsSIL https://github.com/solo-swe/agentic-status-bar/releases/download/v0.3.0/agentic-status-bar-0.3.0.zip
 gh run list --workflow homebrew.yml --limit 1
-brew update && brew info --cask solo-swe/tap/agentic-status-bar   # shows the new version
+brew update && brew info --cask solo-swe/tap/agentic-status-bar   # shows the new version (once trusted, see the README)
 ```
 
 An installed copy of the previous version offers the update under **Check for Updates…**.

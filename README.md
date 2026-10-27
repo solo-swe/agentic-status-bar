@@ -105,11 +105,20 @@ Everything stays on your machine. Hooks run async and always exit 0, so they can
 With [Homebrew](https://brew.sh):
 
 ```sh
-brew install --cask solo-swe/tap/agentic-status-bar
+brew tap solo-swe/tap                                  # add the tap (the next command would add it too)
+brew install --cask solo-swe/tap/agentic-status-bar    # install by its full name, which also trusts it
 ```
 
-Homebrew asks you to trust taps outside its own; installing by the full name, as above, trusts this one app (not the
-whole tap). The app then updates itself; `brew upgrade` leaves it alone.
+Homebrew asks you to trust taps outside its own. Installing by the full name, as above, trusts this one app; to use
+the short name (`brew info --cask agentic-status-bar`, `brew uninstall --cask agentic-status-bar`) after installing
+another way, trust it first:
+
+```sh
+brew trust --cask solo-swe/tap/agentic-status-bar      # this app only
+brew trust solo-swe/tap                                # or everything in the tap, now and later
+```
+
+The app then updates itself; `brew upgrade` leaves it alone (`brew upgrade --greedy` updates it too).
 
 Or download the DMG from the [Releases](https://github.com/solo-swe/agentic-status-bar/releases) page: it is signed
 and notarized by Apple. Builds run on Apple silicon Macs. Or build the app yourself:
