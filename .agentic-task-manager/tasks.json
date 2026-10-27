@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 114,
+    "next_id": 115,
     "workflow": {
       "type": "direct"
     },
@@ -4399,6 +4399,30 @@
       ],
       "created_at": "2026-10-27T06:05:22Z",
       "updated_at": "2026-10-27T06:05:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-114",
+      "name": "CI: move actions off Node 20",
+      "phase": 6,
+      "type": "infra",
+      "priority": "P2",
+      "labels": [
+        "release"
+      ],
+      "description": "GitHub Actions warns: \"Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4.\" Every workflow uses actions/checkout@v4 (ci.yml three times, homebrew.yml, release.yml). Check the current major release of actions/checkout (its releases page) and that it runs on Node 24, read its breaking changes for anything these workflows rely on (fetch-depth, persisted credentials: release.yml and homebrew.yml use gh with GITHUB_TOKEN), and move all five uses to it. Check no other action in .github/workflows targets Node 20. Push and confirm the CI run on main passes without the warning (gh run view --log), and run homebrew.yml by hand (gh workflow run homebrew.yml -f tag=<latest tag>) to confirm it passes without the warning too. release.yml is checked at the next release.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/homebrew.yml",
+        ".github/workflows/release.yml"
+      ],
+      "created_at": "2026-10-27T06:11:22Z",
+      "updated_at": "2026-10-27T06:11:22Z",
       "created_by": "Hakan Serce",
       "updated_by": "Hakan Serce"
     }
