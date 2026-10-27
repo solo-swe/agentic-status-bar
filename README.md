@@ -126,8 +126,8 @@ and notarized by Apple. Builds run on Apple silicon Macs. Or build the app yours
 ```sh
 git clone https://github.com/solo-swe/agentic-status-bar.git ~/code/agentic-status-bar
 cd ~/code/agentic-status-bar
-scripts/package.sh 0.2.1
-open dist/agentic-status-bar-0.2.1.dmg
+scripts/package.sh 0.2.2
+open dist/agentic-status-bar-0.2.2.dmg
 ```
 
 Drag **Agentic Status Bar** to Applications and open it. On first launch it explains what it changes and offers

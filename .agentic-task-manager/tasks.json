@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 123,
+    "next_id": 124,
     "workflow": {
       "type": "direct"
     },
@@ -4764,6 +4764,32 @@
           "by": "claude:c631bc24"
         }
       ]
+    },
+    {
+      "id": "T-123",
+      "name": "Release: v0.2.2",
+      "phase": 6,
+      "type": "infra",
+      "priority": "P1",
+      "labels": [
+        "release"
+      ],
+      "description": "Release v0.2.2 following `doc/RELEASING.md` › Each release: the Help menu and popover fixes (T-121), Esc to close (T-122) and the `debug_hook_log` option (T-118).\n\n## Steps\n1. Set `ASBVersion.current` and `MARKETING_VERSION` to `0.2.2`, and the README's build example.\n2. Checks, commit, push, CI.\n3. Tag `v0.2.2`, watch the release run.\n4. Check the draft (Gatekeeper, signatures, `SUFeedURL`, `SUPublicEDKey`, the appcast signature).\n5. The user publishes it as the latest release.\n6. Check the downloads without a login and the Homebrew workflow; an installed v0.2.1 should offer the update.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "in_progress",
+      "dependencies": [],
+      "files": [
+        "Sources/ASBCore/Version.swift",
+        "App/project.yml",
+        "README.md"
+      ],
+      "created_at": "2026-10-27T08:24:35Z",
+      "updated_at": "2026-10-27T08:24:43Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T08:24:43Z",
+      "started_by": "claude:c631bc24"
     }
   ]
 }

@@ -18,7 +18,7 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     # Release builds take the version from scripts/package.sh, which checks it against ASBVersion.current.
-    MARKETING_VERSION: "0.2.1"
+    MARKETING_VERSION: "0.2.2"
     CURRENT_PROJECT_VERSION: "1"
 
 targets:
