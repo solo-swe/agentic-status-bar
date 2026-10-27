@@ -37,9 +37,28 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(SettingsView.stateName("waiting"), "Waiting")
     }
 
+    @MainActor
     func testSymbolNamesAreChecked() {
         XCTAssertTrue(StateOverrideRow.isSymbol("zzz"))
         XCTAssertFalse(StateOverrideRow.isSymbol("no.such.symbol.xyz"))
         XCTAssertFalse(StateOverrideRow.isSymbol(""))
+    }
+
+    @MainActor
+    func testEverySymbolChoiceExistsAndCoversTheThemes() {
+        for name in SymbolChoices.symbols {
+            XCTAssertTrue(StateOverrideRow.isSymbol(name), name)
+        }
+        XCTAssertEqual(Set(SymbolChoices.symbols).count, SymbolChoices.symbols.count)
+        let themeSymbols = Set(Theme.builtIn.values.flatMap(\.icons.values))
+        XCTAssertTrue(themeSymbols.isSubset(of: Set(SymbolChoices.symbols)), "\(themeSymbols.subtracting(SymbolChoices.symbols))")
+    }
+
+    func testEveryPaletteColorIsAValidSetting() {
+        for choice in SymbolChoices.palette {
+            XCTAssertTrue(Config.isValid(choice.value, for: "color_busy"), choice.name)
+            XCTAssertNotNil(ThemeColor.halves(choice.value), choice.name)
+        }
+        XCTAssertEqual(Set(SymbolChoices.palette.map(\.value)).count, SymbolChoices.palette.count)
     }
 }

@@ -3968,7 +3968,7 @@
       "description": "The app is LSUIElement (.accessory), so when the Settings or first-run window is frontmost the menu bar still shows the previous app's menus. While one of our windows is open, switch to NSApp.setActivationPolicy(.regular) and give the app a main menu; switch back to .accessory when the last window closes (a Dock icon appears meanwhile, with the new app icon). The app menu: About Agentic Status Bar (the standard about panel, see T-101), Settings… (Cmd-,), Show Sessions (opens the status item's popover), separator, Hide / Hide Others / Show All, separator, Quit Agentic Status Bar (Cmd-Q). Add the standard Edit menu (cut/copy/paste/select all, so text fields keep working) and a Window menu (Close Cmd-W, Minimize). Build it in a small MainMenu helper in AppDelegate or its own file; add an app test for the menu items and the policy switch if practical. The user checks it visually before it's marked done.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-101"
       ],
@@ -3980,11 +3980,22 @@
         "App/Sources/StatusItemController.swift"
       ],
       "created_at": "2026-10-27T00:28:06Z",
-      "updated_at": "2026-10-27T00:33:25Z",
+      "updated_at": "2026-10-27T00:39:25Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T00:33:25Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "bda420467116c5b42ea4ea2612bc95cf65774c89",
+      "completed_at": "2026-10-27T00:39:25Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-27T00:39:25Z",
+          "kind": "outcome",
+          "text": "Settings and first-run windows switch the app to .regular (menus + Dock icon); closing the last window returns to .accessory. App menu: About, Settings… (Cmd-,), Show Sessions, Hide/Hide Others/Show All, Quit; Edit and Window menus. Verified live via System Events; app tests added.",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-104",
@@ -3998,7 +4009,7 @@
       "description": "The Appearance tab's symbol editor (a text field for an SF Symbol name) isn't usable. Replace it with a picker: clicking a state's symbol opens a popover with a grid of curated SF Symbols suited to menu-bar status (the ones the built-in themes use plus a few dozen fitting alternatives, e.g. circle/dot/exclamation/bell/moon/zzz/hourglass/bolt/sparkle/sparkles/star/flame/checkmark/questionmark variants, filled and outlined), each shown in the state's color, the current one selected; clicking applies it (icon_<state>) and closes the popover. Replace the two free ColorPickers with a palette of swatches (system colors that read well in the menu bar: red, orange, yellow, green, mint, teal, blue, indigo, purple, pink, gray, primary/label), each swatch setting a light,dark pair (e.g. the system color's light and dark variants) as color_<state>; keep reset to the theme. Every symbol in the set must exist (app test with NSImage(systemSymbolName:)) and every swatch must produce a valid color setting (Config.isValid). Keep values written to the config file the same format. The user checks it visually before it's marked done.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-102"
       ],
@@ -4008,9 +4019,11 @@
         "App/Tests/SettingsTests.swift"
       ],
       "created_at": "2026-10-27T00:28:06Z",
-      "updated_at": "2026-10-27T00:28:06Z",
+      "updated_at": "2026-10-27T00:39:27Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T00:39:27Z",
+      "started_by": "claude:c631bc24"
     }
   ]
 }

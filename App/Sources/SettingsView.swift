@@ -173,8 +173,7 @@ struct AppearanceSettings: View {
                     GridRow {
                         Text("State")
                         Text("Symbol").gridColumnAlignment(.center)
-                        Text("Light menu bar").gridColumnAlignment(.center)
-                        Text("Dark menu bar").gridColumnAlignment(.center)
+                        Text("Color").gridColumnAlignment(.center)
                         Color.clear.frame(width: 1, height: 1)
                     }
                     .font(.caption)
@@ -190,7 +189,7 @@ struct AppearanceSettings: View {
             } header: {
                 Text("Menu bar symbols")
             } footer: {
-                Text("Click a symbol to change it. ↩︎ goes back to the theme's symbol and colors.")
+                Text("Click a symbol or a color to change it; each color has a shade for a light and a dark menu bar. ↩︎ goes back to the theme.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -200,7 +199,7 @@ struct AppearanceSettings: View {
     }
 }
 
-/// One state's grid row: its symbol (click to edit the name), its light and dark colors, and reset.
+/// One state's grid row: its symbol and its color (each opens a picker), and reset.
 struct StateOverrideRow: View {
     let state: String
     let symbol: String
@@ -209,28 +208,41 @@ struct StateOverrideRow: View {
     /// Writes `icon` or `color` for this state; "" removes the override.
     let set: (String, String) -> Void
 
-    @State private var editing = false
+    @State private var pickingSymbol = false
+    @State private var pickingColor = false
 
     var body: some View {
-        let halves = ThemeColor.halves(color)
+        let tint = ThemeColor.color(color).map(Color.init(nsColor:)) ?? .primary
         GridRow {
             Text(SettingsView.stateName(state))
             Button {
-                editing = true
+                pickingSymbol = true
             } label: {
                 Image(systemName: Self.isSymbol(symbol) ? symbol : "questionmark.square.dashed")
-                    .foregroundStyle(ThemeColor.color(color).map(Color.init(nsColor:)) ?? .primary)
+                    .foregroundStyle(tint)
                     .frame(width: 28, height: 20)
             }
             .buttonStyle(.bordered)
-            .help(symbol)
-            .popover(isPresented: $editing, arrowEdge: .bottom) {
-                SymbolEditor(symbol: symbol) { set("icon", $0) }
+            .help("Change the symbol")
+            .popover(isPresented: $pickingSymbol, arrowEdge: .bottom) {
+                SymbolPicker(selected: symbol, color: tint) { name in
+                    if name != symbol { set("icon", name) }
+                    pickingSymbol = false
+                }
             }
-            ColorPicker("Light menu bar", selection: colorBinding(halves, dark: false), supportsOpacity: false)
-                .labelsHidden()
-            ColorPicker("Dark menu bar", selection: colorBinding(halves, dark: true), supportsOpacity: false)
-                .labelsHidden()
+            Button {
+                pickingColor = true
+            } label: {
+                ColorSwatch(value: color)
+            }
+            .buttonStyle(.plain)
+            .help("Change the color")
+            .popover(isPresented: $pickingColor, arrowEdge: .bottom) {
+                ColorPalette(selected: color) { value in
+                    if value != color { set("color", value) }
+                    pickingColor = false
+                }
+            }
             Button {
                 set("icon", "")
                 set("color", "")
@@ -246,49 +258,5 @@ struct StateOverrideRow: View {
 
     static func isSymbol(_ name: String) -> Bool {
         !name.isEmpty && NSImage(systemSymbolName: name, accessibilityDescription: nil) != nil
-    }
-
-    private func colorBinding(_ halves: (light: NSColor, dark: NSColor)?, dark: Bool) -> Binding<Color> {
-        Binding(
-            get: { Color(nsColor: (dark ? halves?.dark : halves?.light) ?? .labelColor) },
-            set: { picked in
-                let new = NSColor(picked)
-                let light = dark ? halves?.light ?? new : new
-                let darkColor = dark ? new : halves?.dark ?? new
-                if let value = SettingsView.colorSetting(light: light, dark: darkColor), value != color {
-                    set("color", value)
-                }
-            })
-    }
-}
-
-/// The popover for a symbol's name, with a live preview; Return applies it.
-private struct SymbolEditor: View {
-    let symbol: String
-    let apply: (String) -> Void
-    @State private var text = ""
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        let valid = StateOverrideRow.isSymbol(text)
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: valid ? text : "questionmark.square.dashed")
-                    .font(.title2)
-                    .frame(width: 32)
-                TextField("SF Symbol name", text: $text)
-                    .frame(width: 200)
-                    .onSubmit {
-                        guard valid else { return }
-                        if text != symbol { apply(text) }
-                        dismiss()
-                    }
-            }
-            Text(valid || text.isEmpty ? "Names are listed in Apple's SF Symbols app." : "No symbol with this name.")
-                .font(.caption)
-                .foregroundStyle(valid || text.isEmpty ? Color.secondary : Color.red)
-        }
-        .padding(12)
-        .onAppear { text = symbol }
     }
 }
