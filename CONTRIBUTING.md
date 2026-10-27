@@ -76,8 +76,12 @@ added.
 2. Commit, then push a tag: `git tag -a v0.2.0 -m v0.2.0 && git push origin v0.2.0`.
 3. `.github/workflows/release.yml` builds, signs and notarizes the app, signs the update with the Sparkle key, and
    attaches `agentic-status-bar-<version>.zip`, `.dmg` and `appcast.xml` to a draft GitHub release.
-4. Check the draft (`scripts/notarize.md` › Checking a release), edit its notes, and publish it. Installed apps find
-   the update in the appcast of the latest published release, so publishing is what offers it.
+4. Check the draft (`scripts/notarize.md` › Checking a release), edit its notes, and publish it as the latest release
+   (not a pre-release). Installed apps find the update in the appcast of the latest published release, so publishing
+   is what offers it.
+5. Publishing also runs `.github/workflows/homebrew.yml`, which points the cask in
+   [solo-swe/homebrew-tap](https://github.com/solo-swe/homebrew-tap) at the new zip (`scripts/homebrew-cask.sh`), pushing
+   with the deploy key in `HOMEBREW_TAP_DEPLOY_KEY`. To redo it for a release, run the workflow by hand with its tag.
 
 `scripts/package.sh 0.0.0` makes an unsigned dry run locally; builds without `SPARKLE_PUBLIC_KEY` don't update
 themselves.

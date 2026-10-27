@@ -1,0 +1,57 @@
+name: Homebrew
+
+# When a release is published (releases start as drafts), point the cask in solo-swe/homebrew-tap at it.
+# Run it by hand with a tag to publish the cask for an existing release.
+# Needs HOMEBREW_TAP_DEPLOY_KEY: the private half of a deploy key with write access to the tap.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag, e.g. v0.2.1"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  cask:
+    runs-on: ubuntu-latest
+    # Pre-releases aren't what `brew install` should get.
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checksum the release zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${TAG#v}"
+          gh release download "$TAG" --pattern "agentic-status-bar-$version.zip" --dir "$RUNNER_TEMP"
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          echo "SHA256=$(sha256sum "$RUNNER_TEMP/agentic-status-bar-$version.zip" | cut -d' ' -f1)" >> "$GITHUB_ENV"
+
+      - name: Update the cask in the tap
+        env:
+          DEPLOY_KEY: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
+        run: |
+          printf '%s\n' "$DEPLOY_KEY" > "$RUNNER_TEMP/tap-key"
+          chmod 600 "$RUNNER_TEMP/tap-key"
+          export GIT_SSH_COMMAND="ssh -i $RUNNER_TEMP/tap-key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+          git clone git@github.com:solo-swe/homebrew-tap.git "$RUNNER_TEMP/tap"
+          mkdir -p "$RUNNER_TEMP/tap/Casks"
+          scripts/homebrew-cask.sh "$VERSION" "$SHA256" > "$RUNNER_TEMP/tap/Casks/agentic-status-bar.rb"
+          cd "$RUNNER_TEMP/tap"
+          git add Casks/agentic-status-bar.rb
+          if git diff --cached --quiet; then
+            echo "The cask is already at $VERSION"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "agentic-status-bar $VERSION"
+            git push
+          fi
+          rm "$RUNNER_TEMP/tap-key"

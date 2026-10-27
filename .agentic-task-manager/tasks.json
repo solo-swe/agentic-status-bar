@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 113,
+    "next_id": 114,
     "workflow": {
       "type": "direct"
     },
@@ -4118,7 +4118,7 @@
       "description": "Distribute the app with Homebrew: brew install --cask solo-swe/tap/agentic-status-bar. Ready: the public repository solo-swe/homebrew-tap exists, with a write deploy key whose private key is the secret HOMEBREW_TAP_DEPLOY_KEY in solo-swe/agentic-status-bar (push over SSH: git@github.com:solo-swe/homebrew-tap.git). Write Casks/agentic-status-bar.rb (version, sha256 of the release zip, url https://github.com/solo-swe/agentic-status-bar/releases/download/v#{version}/agentic-status-bar-#{version}.zip, name, desc, homepage, depends_on macos: \">= :sonoma\", depends_on arch: :arm64 while builds are arm64-only, app \"Agentic Status Bar.app\", auto_updates true (Sparkle), uninstall quit: \"com.hakanserce.agentic-status-bar\", zap trash: the config dir, the state dir and the app's preferences), checked with brew audit --cask and brew style, and install-tested from the tap. Add a workflow on release: published (releases start as drafts) that computes the zip's sha256 and pushes the updated cask to the tap with the deploy key; publish the cask for v0.2.1 now. Check what Homebrew's tap trust (brew trust) asks of users of a third-party tap and say it in the README install instructions (brew first, DMG second); add the release steps to CONTRIBUTING.md. The official homebrew/cask needs 225 stars, 90 forks or 90 watchers for a self-submission and a repository at least 30 days old: not now.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-091",
         "T-112"
@@ -4131,9 +4131,11 @@
         "scripts/homebrew-cask.rb"
       ],
       "created_at": "2026-10-27T00:47:57Z",
-      "updated_at": "2026-10-27T06:03:19Z",
+      "updated_at": "2026-10-27T06:05:22Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T06:05:22Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-107",
@@ -4361,6 +4363,33 @@
           "by": "claude:c631bc24"
         }
       ]
+    },
+    {
+      "id": "T-113",
+      "name": "Docs: one release guide, doc/RELEASING.md",
+      "phase": 6,
+      "type": "docs",
+      "priority": "P1",
+      "labels": [
+        "release"
+      ],
+      "description": "Write doc/RELEASING.md, the one place for how releases work, and link it from CONTRIBUTING.md (which keeps a short summary) and the README's Development section. Sections: (1) How a release flows: tag -> .github/workflows/release.yml -> scripts/package.sh (build, sign inside out incl. Sparkle, notarize, staple, zip and DMG) -> scripts/appcast.sh -> draft release -> the maintainer publishes as the latest full release (not a pre-release: SUFeedURL reads releases/latest) -> apps update via Sparkle -> the tap workflow updates solo-swe/homebrew-tap; a small diagram. (2) One-time setup: Apple membership, Developer ID certificate and App Store Connect API key (move the content of scripts/notarize.md here and delete that file, fixing links to it), the Sparkle key pair (generate_keys, generate_keys -p for the variable), the tap and its deploy key (organization setting that allows deploy keys). One table of every secret and variable: purpose, where it comes from, how to replace it. (3) Each release: checklist from bumping ASBVersion.current and MARKETING_VERSION to checking the published release and the tap. (4) Checking a release: spctl, codesign --deep --strict, Info.plist SUFeedURL and SUPublicEDKey, the appcast signature, anonymous downloads, brew install from the tap. (5) When something fails: stray '<' in SPARKLE_PUBLIC_KEY / key-pair mismatch (the package.sh check), pre-release not latest, notarization refused (notarytool log), deploy keys disabled in the organization, version mismatch with the tag. (6) Replacing keys: what installed copies do when the Sparkle key, the certificate or the deploy key change; the Sparkle private key must be backed up. Verify every command and path against the repository.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-106"
+      ],
+      "files": [
+        "doc/RELEASING.md",
+        "CONTRIBUTING.md",
+        "README.md",
+        "scripts/notarize.md"
+      ],
+      "created_at": "2026-10-27T06:05:22Z",
+      "updated_at": "2026-10-27T06:05:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
     }
   ]
 }

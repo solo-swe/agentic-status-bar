@@ -102,7 +102,16 @@ Everything stays on your machine. Hooks run async and always exit 0, so they can
 
 ## Install
 
-Download the DMG from the [Releases](https://github.com/solo-swe/agentic-status-bar/releases) page: it is signed
+With [Homebrew](https://brew.sh):
+
+```sh
+brew install --cask solo-swe/tap/agentic-status-bar
+```
+
+Homebrew asks you to trust taps outside its own; installing by the full name, as above, trusts this one app (not the
+whole tap). The app then updates itself; `brew upgrade` leaves it alone.
+
+Or download the DMG from the [Releases](https://github.com/solo-swe/agentic-status-bar/releases) page: it is signed
 and notarized by Apple. Builds run on Apple silicon Macs. Or build the app yourself:
 
 ```sh
@@ -186,9 +195,12 @@ after `swift build -c release` in a clone.
 
 ## Uninstall
 
-**Settings › General › Remove Hooks…** (or `asb uninstall`) removes the hooks from `~/.claude/settings.json` (after a
-backup) and the copy of `asb`; state and config stay. Turn off **Start at login**, quit the app (**Quit** at the
-bottom of the session list), and move it to the Trash.
+Installed with Homebrew: `brew uninstall --cask agentic-status-bar` quits the app, removes the hooks and the app;
+state and config stay. `brew uninstall --cask --zap agentic-status-bar` also deletes them and the app's preferences.
+
+Otherwise: **Settings › General › Claude Code hooks › Remove…** (or `asb uninstall`) removes the hooks from
+`~/.claude/settings.json` (after a backup) and the copy of `asb`; state and config stay. Turn off **Start at login**,
+quit the app (**Quit** at the bottom of the session list), and move it to the Trash.
 
 ## Troubleshooting
 
@@ -212,7 +224,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 2. **Done:** the move from shell and jq to Swift (`asb`), and from a SwiftBar plugin to a standalone app with
    notifications
 3. **Done:** signed, notarized releases with automatic updates
-4. **Next:** in-app help, Homebrew
+4. **Done:** in-app help, Homebrew
 5. **Later:** atm integration, focus support for VS Code and other terminals
 
 ## License
