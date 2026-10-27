@@ -4336,7 +4336,7 @@
       "description": "Delete the unpublished drafts v0.1.0 and v0.2.0 and their tags (gh release delete <tag> --cleanup-tag --yes, after confirming with the user), so no build with the old feed URL goes out. Set ASBVersion.current and MARKETING_VERSION to 0.2.1, push, tag v0.2.1, watch the release run. Verify the draft: spctl accepts the DMG and the app (Notarized Developer ID), codesign --deep --strict passes, the app's SUFeedURL is the solo-swe one and SUPublicEDKey matches SPARKLE_PUBLIC_KEY, the appcast signature verifies against the zip. Ask the user to publish it, then check anonymous downloads (curl -fsSIL without auth) of releases/latest/download/appcast.xml and the zip, which Sparkle and Homebrew need.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-111"
       ],
@@ -4345,11 +4345,22 @@
         "App/project.yml"
       ],
       "created_at": "2026-10-27T05:14:16Z",
-      "updated_at": "2026-10-27T05:37:52Z",
+      "updated_at": "2026-10-27T05:49:11Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T05:37:52Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "2feda0817e150d37c8e6a76e8c27c4f4372596f3",
+      "completed_at": "2026-10-27T05:49:11Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-27T05:49:11Z",
+          "kind": "outcome",
+          "text": "v0.2.1 published as the latest release (run 40456432369): notarized DMG and app, solo-swe SUFeedURL, matching SUPublicEDKey, appcast signature valid; releases/latest/download/appcast.xml and the zip download anonymously (200, sizes match). Old v0.1.0/v0.2.0 releases and tags deleted.",
+          "by": "claude:c631bc24"
+        }
+      ]
     }
   ]
 }
