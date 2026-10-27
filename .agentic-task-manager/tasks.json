@@ -4573,7 +4573,7 @@
       "description": "A config switch that makes `asb hook` append every payload it receives to a log, for capturing what Claude Code sends (the spike that follows needs it).\n\n## Change\n- New config key `debug_hook_log` (`0` or `1`, default `0`) in `Sources/ASBCore/Config.swift`; add it to the keys and to `doc/state-file-schema.md` › Config file.\n- When it is `1`, `asb hook` appends one JSON line per call to `<state dir>/hook-payloads.jsonl`: the time, the raw stdin payload, and the environment variables the hook reads (`CLAUDE_CODE_ENTRYPOINT`, `HERDR_PANE_ID`, `__CFBundleIdentifier`), plus the parent pid.\n- Keep the hook's rules: silent, always exit 0, no effect on the state file; when the switch is off, no extra file reads beyond the config already loaded.\n- Cap the log (e.g. stop appending past 5 MB) so a forgotten switch can't fill the disk.\n- Not shown in the app's Settings; README › Troubleshooting mentions it.\n\n## Tests\n- `tests/ASBCoreTests`: off writes nothing; on appends a line with the payload; the cap stops appending.\n- `swift test`, `tests/app.sh --test`, `tests/lint.sh` pass.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/Config.swift",
@@ -4583,11 +4583,22 @@
         "tests/ASBCoreTests/HookLogTests.swift"
       ],
       "created_at": "2026-10-27T07:16:40Z",
-      "updated_at": "2026-10-27T07:27:04Z",
+      "updated_at": "2026-10-27T07:44:37Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T07:27:04Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "1f344aba97024844cb104b1620c100ca43750eb1",
+      "completed_at": "2026-10-27T07:44:37Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-27T07:44:37Z",
+          "kind": "outcome",
+          "text": "`debug_hook_log=1` makes `asb hook` append each raw payload (plus its env vars and parent pid) to `hook-payloads.jsonl` in the state dir, capped at 5 MB; off by default; 5 tests; checked end to end with the release binary.",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-119",
@@ -4657,7 +4668,7 @@
       "description": "With one of the app's windows open, **Help › Agentic Status Bar Help** shows macOS's alert \"Help isn't available for Agentic Status Bar\" instead of opening our Help window.\n\n## Cause\nOur `MainMenuActions` method is named `showHelp(_:)`: the same selector as `NSApplication.showHelp(_:)`, AppKit's Help Book action, which shows that alert when the app has no Help Book.\n\n## Change\n- Rename the action to a selector AppKit doesn't own, e.g. `openHelpWindow(_:)`, in `App/Sources/MainMenu.swift`, `App/Sources/AppDelegate.swift` and `App/Tests/MainMenuTests.swift`.\n- Check the other menu actions (`showAbout`, `showSettings`, `showSessions`, `checkForUpdates`) against `NSApplication` and `NSResponder` selectors, and rename any that collide.\n\n## Done when\n- `tests/app.sh --test` passes.\n- The user opens Help from the Help menu in the dev build.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "App/Sources/MainMenu.swift",
@@ -4665,9 +4676,11 @@
         "App/Tests/MainMenuTests.swift"
       ],
       "created_at": "2026-10-27T07:43:57Z",
-      "updated_at": "2026-10-27T07:43:57Z",
+      "updated_at": "2026-10-27T07:44:55Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T07:44:55Z",
+      "started_by": "claude:c631bc24"
     }
   ]
 }

@@ -7,7 +7,8 @@ import AppKit
     func showSettings(_ sender: Any?)
     func showSessions(_ sender: Any?)
     func checkForUpdates(_ sender: Any?)
-    func showHelp(_ sender: Any?)
+    /// Not `showHelp(_:)`: that is NSApplication's Help Book action, which only says "Help isn't available".
+    func openHelpWindow(_ sender: Any?)
 }
 
 /// The menu bar's menus while one of the app's windows is open. A menu-bar app normally has none: while it
@@ -56,7 +57,7 @@ enum MainMenu {
         NSApp?.windowsMenu = window
 
         let help = NSMenu(title: "Help")
-        help.addItem(item("\(appName) Help", #selector(MainMenuActions.showHelp(_:)), "?", actions))
+        help.addItem(item("\(appName) Help", #selector(MainMenuActions.openHelpWindow(_:)), "?", actions))
         add(help, to: main)
         NSApp?.helpMenu = help
 

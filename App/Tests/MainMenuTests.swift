@@ -9,7 +9,7 @@ private final class RecordingActions: NSObject, MainMenuActions {
     func showSettings(_ sender: Any?) { called.append("settings") }
     func showSessions(_ sender: Any?) { called.append("sessions") }
     func checkForUpdates(_ sender: Any?) { called.append("updates") }
-    func showHelp(_ sender: Any?) { called.append("help") }
+    func openHelpWindow(_ sender: Any?) { called.append("help") }
 }
 
 @MainActor
@@ -41,6 +41,20 @@ final class MainMenuTests: XCTestCase {
             XCTAssertTrue(NSApp.sendAction(try XCTUnwrap(item.action), to: item.target, from: item))
         }
         XCTAssertEqual(actions.called, ["about", "updates", "settings", "sessions"])
+    }
+
+    /// An action AppKit also implements can be answered by AppKit instead (as `showHelp:` was, with "Help isn't
+    /// available").
+    func testOurActionsDontReuseAppKitSelectors() throws {
+        let actions = RecordingActions()
+        let ours = MainMenu.make(actions: actions).items.compactMap(\.submenu).flatMap(\.items)
+            .filter { $0.target === actions }
+        XCTAssertEqual(ours.count, 5)
+        for item in ours {
+            let action = try XCTUnwrap(item.action)
+            XCTAssertFalse(NSApplication.instancesRespond(to: action), "\(action) is an NSApplication action")
+            XCTAssertFalse(NSWindow.instancesRespond(to: action), "\(action) is an NSWindow action")
+        }
     }
 
     func testOnlyMainCapableWindowsKeepTheAppRegular() {

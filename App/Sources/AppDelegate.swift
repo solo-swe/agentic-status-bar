@@ -37,7 +37,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MainMenuActions {
     func showSettings(_ sender: Any?) { settings.show() }
     func showSessions(_ sender: Any?) { statusItem?.showPopover() }
     func checkForUpdates(_ sender: Any?) { updater.checkForUpdates() }
-    func showHelp(_ sender: Any?) { help.show() }
+    func openHelpWindow(_ sender: Any?) { help.show() }
 
     /// Clicking the Dock icon (shown while a window is open) brings Settings back if no window is visible.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
