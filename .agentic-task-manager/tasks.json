@@ -4224,13 +4224,25 @@
       "description": "Before the repository becomes public, scan every commit for secrets and personal data: gitleaks (brew install gitleaks; gitleaks git --verbose --report-path into the scratchpad, not the repo) over the full history, plus a look for personal paths, emails and real project names (the docs must not name the user's real projects) in tracked files and .agentic-task-manager/tasks.json notes. Report every finding to the user with commit and file. Fix the current files; if a real secret is in history, the secret must be rotated (rewriting history is the user's call, never force-push without asking). Record the result (clean or what was fixed) as the task's note.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "done",
       "dependencies": [],
       "files": [],
       "created_at": "2026-10-27T05:14:16Z",
-      "updated_at": "2026-10-27T05:14:16Z",
+      "updated_at": "2026-10-27T05:27:35Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T05:25:16Z",
+      "started_by": "claude:c631bc24",
+      "completed_at": "2026-10-27T05:27:35Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-27T05:27:35Z",
+          "kind": "outcome",
+          "text": "History clean: gitleaks over 138 commits found no secrets; no home path, email in files, or names of the user's other projects in any commit. Only exposure: every commit's author email is hakanserce@gmail.com (user's call: keep, or noreply for new commits).",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-111",
