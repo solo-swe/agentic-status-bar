@@ -217,11 +217,13 @@ quit the app (**Quit** at the bottom of the session list), and move it to the Tr
   hooks were installed appears after its next event; send it a prompt, or restart it.
 - **Warning triangle:** a state file in `~/.claude/agentic-status-bar/` is corrupt or from a newer version. Delete
   the file or update; a running session writes a fresh one on its next event.
-- **No notifications:** allow Agentic Status Bar in System Settings › Notifications, then use **Send Test
-  Notification** in Settings.
+- **No notifications:** allow Agentic Status Bar in System Settings › Notifications, then use **Send Test** in
+  Settings › Notifications.
 - **Something looks wrong:** messages are logged to `~/.claude/agentic-status-bar/plugin.log`, for example when
   Claude Code's session registry changes format. `asb snapshot --json --pretty` shows exactly what the list is built
-  from.
+  from. To see what Claude Code sends the hook, add `debug_hook_log=1` to the config file: every hook call is then
+  appended to `~/.claude/agentic-status-bar/hook-payloads.jsonl` (prompts and tool input included, so remove the
+  line and delete the file when you're done).
 
 ## Development
 

@@ -8,7 +8,7 @@ public struct Config: Equatable, Sendable {
     public static let keys: [String] = [
         "show_interactive", "show_headless", "show_subagents", "show_ide", "stale_minutes", "use_registry",
         "instant_refresh", "icon", "store_prompt_preview", "state_dir", "theme",
-        "notify_waiting", "notify_idle", "notify_delay_seconds", "notify_sound",
+        "notify_waiting", "notify_idle", "notify_delay_seconds", "notify_sound", "debug_hook_log",
     ] + themeStates.map { "icon_\($0)" } + themeStates.map { "color_\($0)" }
 
     public var showInteractive = true
@@ -34,6 +34,8 @@ public struct Config: Equatable, Sendable {
     public var notifyIdle = false
     public var notifyDelaySeconds = 10
     public var notifySound = true
+    /// Debugging: `asb hook` appends every payload it receives to `HookLog.fileName` in the state dir.
+    public var debugHookLog = false
 
     public init() {}
 
@@ -94,6 +96,7 @@ public struct Config: Equatable, Sendable {
         case "notify_idle": notifyIdle = on
         case "notify_delay_seconds": if let n = Int(value), n >= 0 { notifyDelaySeconds = n }
         case "notify_sound": notifySound = on
+        case "debug_hook_log": debugHookLog = on
         default:
             if key.hasPrefix("icon_") {
                 iconOverrides[String(key.dropFirst(5))] = value.isEmpty ? nil : value

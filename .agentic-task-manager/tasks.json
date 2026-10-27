@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 121,
+    "next_id": 122,
     "workflow": {
       "type": "direct"
     },
@@ -415,7 +415,7 @@
       "name": "SessionEnd handler deletes the state file",
       "phase": 1,
       "type": "feature",
-      "description": "Implement SessionEnd in hooks/state-hook.sh: remove $state_dir/<session_id>.json if present. Must succeed silently if the file is already gone.",
+      "description": "Implement `SessionEnd` in `hooks/state-hook.sh`: remove `$state_dir/<session_id>.json` if present. Must succeed silently if the file is already gone.\n",
       "requirements": [
         "StateModel-SessionEnd"
       ],
@@ -430,7 +430,7 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:09:40Z",
+      "updated_at": "2026-10-27T07:19:23Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:09:17Z",
       "started_by": "claude:c631bc24",
@@ -451,7 +451,7 @@
       "name": "Tests for state-hook.sh",
       "phase": 1,
       "type": "test",
-      "description": "Add tests/hook.bats feeding the fixture payloads from tests/fixtures/payloads/ into hooks/state-hook.sh and asserting the resulting state file: SessionStart writes idle with v=1, cwd, kind, herdrPane/termBundleId from env; busy events set busy and lastTool/promptPreview (and no preview when store_prompt_preview=0); permission and question notifications set waiting with the right reason; idle notification and Stop set idle; stateSince changes only on state change; SessionEnd deletes the file. Also assert: exit code 0 and empty stdout/stderr for every event, including malformed JSON, empty stdin and missing jq (PATH without jq).",
+      "description": "Add `tests/hook.bats` feeding the fixture payloads from `tests/fixtures/payloads/` into `hooks/state-hook.sh` and asserting the resulting state file.\n\n## Tests\n- `SessionStart` writes `idle` with `v=1`, `cwd`, `kind`, `herdrPane`/`termBundleId` from env;\n- busy events set `busy` and `lastTool`/`promptPreview` (and no preview when `store_prompt_preview=0`);\n- permission and question notifications set `waiting` with the right `reason`;\n- idle notification and `Stop` set `idle`;\n- `stateSince` changes only on state change;\n- `SessionEnd` deletes the file.\n\n## Also assert\nExit code 0 and empty stdout/stderr for every event, including malformed JSON, empty stdin and missing `jq` (`PATH` without `jq`).\n",
       "requirements": [
         "NFR-Testability",
         "NFR-Reliability"
@@ -473,7 +473,7 @@
         "tests/hook.bats"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:10:16Z",
+      "updated_at": "2026-10-27T07:19:24Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:09:41Z",
       "started_by": "claude:c631bc24",
@@ -494,7 +494,7 @@
       "name": "Claude Code plugin manifest and hooks.json",
       "phase": 1,
       "type": "infra",
-      "description": "Add .claude-plugin/plugin.json (name claude-agents, version 0.1.0, description, MIT license, repository placeholder) and hooks/hooks.json registering ${CLAUDE_PLUGIN_ROOT}/hooks/state-hook.sh for SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Notification, Stop, SubagentStart, SubagentStop and SessionEnd, all with \"async\": true and a short timeout. Verify locally with `claude --plugin-dir .` that state files appear in ~/.claude/swiftbar-agents/ and that existing user hooks still run. Document this local dev workflow in CONTRIBUTING.md.",
+      "description": "Add `.claude-plugin/plugin.json` and `hooks/hooks.json` for the Claude Code plugin.\n\n## Change\n- `.claude-plugin/plugin.json`: name `claude-agents`, version `0.1.0`, description, MIT license, repository placeholder.\n- `hooks/hooks.json` registering `${CLAUDE_PLUGIN_ROOT}/hooks/state-hook.sh` for `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Notification`, `Stop`, `SubagentStart`, `SubagentStop` and `SessionEnd`, all with `\"async\": true` and a short timeout.\n\n## Verify\nVerify locally with `claude --plugin-dir .` that state files appear in `~/.claude/swiftbar-agents/` and that existing user hooks still run. Document this local dev workflow in `CONTRIBUTING.md`.\n",
       "requirements": [
         "Install-Plugin",
         "Coexistence"
@@ -512,7 +512,7 @@
         "CONTRIBUTING.md"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:10:57Z",
+      "updated_at": "2026-10-27T07:19:24Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:10:17Z",
       "started_by": "claude:c631bc24",
@@ -533,7 +533,7 @@
       "name": "SwiftBar plugin skeleton: load and validate state files",
       "phase": 2,
       "type": "feature",
-      "description": "Create swiftbar/claude-agents.5s.sh (POSIX sh, executable) with SwiftBar metadata headers (<xbar.title>, <xbar.version>, <xbar.author>, <xbar.desc>, <swiftbar.hideRunInTerminal>true, <swiftbar.hideLastUpdated>true, <swiftbar.hideDisappearPlugin>true). Resolve its real path (it will be symlinked) to source ../lib/common.sh. If find_jq returns nothing, print a warning menu-bar item and a dropdown line explaining how to install jq, then exit 0. Load every $state_dir/*.json in one jq invocation, skipping unparseable files and files with v>1 (count them; if any, show the warning state per PRD 'Menu-bar item' table). Output for now: a placeholder line with the session count.",
+      "description": "Create `swiftbar/claude-agents.5s.sh` (POSIX sh, executable) that loads and validates the state files.\n\n## Details\n- SwiftBar metadata headers: `<xbar.title>`, `<xbar.version>`, `<xbar.author>`, `<xbar.desc>`, `<swiftbar.hideRunInTerminal>true`, `<swiftbar.hideLastUpdated>true`, `<swiftbar.hideDisappearPlugin>true`.\n- Resolve its real path (it will be symlinked) to source `../lib/common.sh`.\n- If `find_jq` returns nothing, print a warning menu-bar item and a dropdown line explaining how to install `jq`, then exit 0.\n- Load every `$state_dir/*.json` in one `jq` invocation, skipping unparseable files and files with `v>1` (count them; if any, show the warning state per PRD 'Menu-bar item' table).\n- Output for now: a placeholder line with the session count.\n",
       "requirements": [
         "Architecture-Components",
         "NFR-ForwardCompat"
@@ -547,7 +547,7 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:12:02Z",
+      "updated_at": "2026-10-27T07:19:25Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:10:58Z",
       "started_by": "claude:c631bc24",
@@ -568,7 +568,7 @@
       "name": "Process snapshot and C1 liveness check",
       "phase": 2,
       "type": "feature",
-      "description": "In swiftbar/claude-agents.5s.sh take exactly one process snapshot per run: `ps -axo pid=,ppid=,lstart=,comm=` (keep it in a variable/temp file for later checks C4/C5). For each session with a pid: if the pid is not in the snapshot, or its lstart differs from procStart, delete the state file and drop the session. Sessions without pid are kept (rely on SessionEnd and C5). Structure the code so checks run in order C1..C5 per session and the first one that changes or removes a session wins.",
+      "description": "In `swiftbar/claude-agents.5s.sh` take exactly one process snapshot per run and add the C1 liveness check.\n\n## Details\n- Snapshot: `ps -axo pid=,ppid=,lstart=,comm=` (keep it in a variable/temp file for later checks C4/C5).\n- For each session with a `pid`: if the `pid` is not in the snapshot, or its `lstart` differs from `procStart`, delete the state file and drop the session.\n- Sessions without `pid` are kept (rely on `SessionEnd` and C5).\n- Structure the code so checks run in order C1..C5 per session and the first one that changes or removes a session wins.\n",
       "requirements": [
         "C1",
         "NFR-Performance"
@@ -584,7 +584,7 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:13:04Z",
+      "updated_at": "2026-10-27T07:19:25Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:12:03Z",
       "started_by": "claude:c631bc24",
@@ -605,7 +605,7 @@
       "name": "Menu-bar item: most urgent state and count",
       "phase": 2,
       "type": "feature",
-      "description": "Render the first output line per the PRD 'Menu-bar item' table: priority waiting > idle > uncertain > busy > none. Show the count of sessions in the winning state (for busy: total sessions; for none: no count; for uncertain: '?' + count). Use SwiftBar `sfimage=` with a distinct SF Symbol variant per state derived from the configured `icon` (e.g. sparkle, exclamationmark-badged variant for waiting) and `sfcolor=` with light,dark color pairs: red for waiting, yellow for idle, gray for uncertain, dimmed secondary for busy, faint for none. Color must never be the only signal.",
+      "description": "Render the first output line per the PRD 'Menu-bar item' table: priority `waiting` > `idle` > `uncertain` > `busy` > `none`.\n\n## Count\nShow the count of sessions in the winning state:\n- for `busy`: total sessions;\n- for `none`: no count;\n- for `uncertain`: '?' + count.\n\n## Icon and color\nUse SwiftBar `sfimage=` with a distinct SF Symbol variant per state derived from the configured `icon` (e.g. `sparkle`, exclamationmark-badged variant for waiting) and `sfcolor=` with light,dark color pairs:\n- red for waiting,\n- yellow for idle,\n- gray for uncertain,\n- dimmed secondary for busy,\n- faint for none.\n\nColor must never be the only signal.\n",
       "requirements": [
         "UX-MenuBar",
         "NFR-Accessibility"
@@ -623,7 +623,7 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:14:26Z",
+      "updated_at": "2026-10-27T07:19:26Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:13:04Z",
       "started_by": "claude:c631bc24",
@@ -644,7 +644,7 @@
       "name": "Dropdown session rows",
       "phase": 2,
       "type": "feature",
-      "description": "After `---`, render one row per session sorted waiting, idle, uncertain, busy; within a state, longest time in state (oldest stateSince) first. Label = cwd basename + ' — ' + title, where title is promptPreview for now (a title-source function so T-027 can add herdr titles), truncated to 48 characters with '…'. Right side = state word (permission, question, idle, working, no activity) + ' · ' + duration since stateSince formatted as 12s / 4m / 2h / 3d. Use a leading glyph per state (●, ○, ?) and SwiftBar params font=Menlo or `ansi`/tab alignment so the right side lines up. Escape '|' in titles so SwiftBar params aren't broken.",
+      "description": "After `---`, render one row per session sorted `waiting`, `idle`, `uncertain`, `busy`; within a state, longest time in state (oldest `stateSince`) first.\n\n## Row\n- Label = `cwd` basename + ' — ' + title, where title is `promptPreview` for now (a title-source function so T-027 can add herdr titles), truncated to 48 characters with '…'.\n- Right side = state word (permission, question, idle, working, no activity) + ' · ' + duration since `stateSince` formatted as 12s / 4m / 2h / 3d.\n- Use a leading glyph per state (●, ○, ?) and SwiftBar params `font=Menlo` or `ansi`/tab alignment so the right side lines up.\n- Escape '|' in titles so SwiftBar params aren't broken.\n",
       "requirements": [
         "UX-Dropdown"
       ],
@@ -660,7 +660,7 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:16:01Z",
+      "updated_at": "2026-10-27T07:19:26Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:14:26Z",
       "started_by": "claude:c631bc24",
@@ -681,7 +681,7 @@
       "name": "Row submenus and footer items",
       "phase": 2,
       "type": "feature",
-      "description": "Under each row add a SwiftBar submenu (`--` prefix): Copy session ID, Copy cwd (pbcopy via bash= running the plugin itself with an action argument, terminal=false), Open folder in Finder (open <cwd>), Reveal transcript (open -R <transcriptPath>, only if set). Make the plugin dispatch action arguments ($1 = copy|open|reveal) before rendering. Footer after `---`: Refresh (refresh=true). Leave placeholders for the Show and Settings items added in phase 4.",
+      "description": "Under each row add a SwiftBar submenu (`--` prefix), and add the footer items.\n\n## Submenu\n- Copy session ID\n- Copy cwd (`pbcopy` via `bash=` running the plugin itself with an action argument, `terminal=false`)\n- Open folder in Finder (`open <cwd>`)\n- Reveal transcript (`open -R <transcriptPath>`, only if set)\n\nMake the plugin dispatch action arguments (`$1` = `copy`|`open`|`reveal`) before rendering.\n\n## Footer\nAfter `---`: Refresh (`refresh=true`). Leave placeholders for the Show and Settings items added in phase 4.\n",
       "requirements": [
         "UX-Dropdown"
       ],
@@ -696,7 +696,7 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:17:19Z",
+      "updated_at": "2026-10-27T07:19:27Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:16:01Z",
       "started_by": "claude:c631bc24",
@@ -717,7 +717,7 @@
       "name": "Tests for plugin core rendering",
       "phase": 2,
       "type": "test",
-      "description": "Add tests/plugin.bats with fixture state files and a stubbed `ps`: menu bar shows waiting with red and correct count when one session waits; idle wins over busy; all-busy shows dimmed with total count; no files shows faint icon with no count; corrupt and v=2 files trigger the warning state; missing jq shows the jq hint; rows sort correctly by state then age; truncation at 48 chars; duration formatting; '|' in a title is escaped; C1 removes a session whose pid is absent or whose lstart differs and deletes its file; submenu action arguments call pbcopy/open stubs with the right values.",
+      "description": "Add `tests/plugin.bats` with fixture state files and a stubbed `ps`.\n\n## Tests\n- menu bar shows waiting with red and correct count when one session waits;\n- idle wins over busy;\n- all-busy shows dimmed with total count;\n- no files shows faint icon with no count;\n- corrupt and `v=2` files trigger the warning state;\n- missing `jq` shows the `jq` hint;\n- rows sort correctly by state then age;\n- truncation at 48 chars;\n- duration formatting;\n- '|' in a title is escaped;\n- C1 removes a session whose `pid` is absent or whose `lstart` differs and deletes its file;\n- submenu action arguments call `pbcopy`/`open` stubs with the right values.\n",
       "requirements": [
         "NFR-Testability",
         "C1",
@@ -743,7 +743,7 @@
         "tests/fixtures/states/"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:17:54Z",
+      "updated_at": "2026-10-27T07:19:27Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:17:21Z",
       "started_by": "claude:c631bc24",
@@ -764,7 +764,7 @@
       "name": "Instant refresh poke with debounce",
       "phase": 3,
       "type": "feature",
-      "description": "At the end of every state write in hooks/state-hook.sh, if instant_refresh=1, run `open -g 'swiftbar://refreshplugin?name=claude-agents'` in the background, but only if $state_dir/.last-poke is older than 500 ms (compare stored now_ms); update .last-poke atomically. Must not add measurable latency: background the open call and never wait on it.",
+      "description": "At the end of every state write in `hooks/state-hook.sh`, if `instant_refresh=1`, run `open -g 'swiftbar://refreshplugin?name=claude-agents'` in the background, but only if `$state_dir/.last-poke` is older than 500 ms (compare stored `now_ms`); update `.last-poke` atomically. Must not add measurable latency: background the `open` call and never wait on it.\n",
       "requirements": [
         "Architecture-Refresh",
         "Risk-RefreshChurn"
@@ -781,7 +781,7 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:19:21Z",
+      "updated_at": "2026-10-27T07:19:28Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:17:54Z",
       "started_by": "claude:c631bc24",
@@ -802,7 +802,7 @@
       "name": "C2 registry override (newest wins)",
       "phase": 3,
       "type": "feature",
-      "description": "In the plugin, when use_registry=1 and ${CLAUDE_AGENTS_REGISTRY_DIR:-~/.claude/sessions}/<pid>.json exists with matching sessionId and a `status` field: if its statusUpdatedAt > the hook file's updatedAt, render using its status (map busy→busy, waiting→waiting with reason from waitingFor, idle→idle; unknown values ignored). Never write the hook state file. If the registry file lacks `status`, ignore it and log_once 'registry-schema'.",
+      "description": "In the plugin, when `use_registry=1` and `${CLAUDE_AGENTS_REGISTRY_DIR:-~/.claude/sessions}/<pid>.json` exists with matching `sessionId` and a `status` field, let the newer registry status win.\n\n## Override\nIf its `statusUpdatedAt` > the hook file's `updatedAt`, render using its `status`:\n- `busy` → `busy`\n- `waiting` → `waiting` with `reason` from `waitingFor`\n- `idle` → `idle`\n- unknown values ignored.\n\n## Rules\n- Never write the hook state file.\n- If the registry file lacks `status`, ignore it and `log_once 'registry-schema'`.\n",
       "requirements": [
         "C2"
       ],
@@ -818,7 +818,7 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:20:22Z",
+      "updated_at": "2026-10-27T07:20:24Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:19:22Z",
       "started_by": "claude:c631bc24",
@@ -839,7 +839,7 @@
       "name": "C3 interrupt detection from transcript tail",
       "phase": 3,
       "type": "feature",
-      "description": "In the plugin, for sessions busy or waiting after C1/C2 with a readable transcriptPath: read only the last 8192 bytes (tail -c 8192, dropping the first partial line). Find the latest entry that is a real user prompt (type=user with string content or a text block that is not a tool_result). If after it there is a user text entry containing '[Request interrupted by user' (constant INTERRUPT_MARKER) or a type=system entry with subtype=turn_duration, render the session as idle. See tests/fixtures/transcripts/ (denied-permission → idle, completed-turn → idle, esc-before-output → no change). Do not write the state file.",
+      "description": "In the plugin, for sessions `busy` or `waiting` after C1/C2 with a readable `transcriptPath`, detect an interrupt from the transcript tail.\n\n## Details\n1. Read only the last 8192 bytes (`tail -c 8192`, dropping the first partial line).\n2. Find the latest entry that is a real user prompt (`type=user` with string content or a text block that is not a `tool_result`).\n3. If after it there is a user text entry containing '[Request interrupted by user' (constant `INTERRUPT_MARKER`) or a `type=system` entry with `subtype=turn_duration`, render the session as `idle`.\n\nSee `tests/fixtures/transcripts/`:\n- `denied-permission` → `idle`\n- `completed-turn` → `idle`\n- `esc-before-output` → no change\n\nDo not write the state file.\n",
       "requirements": [
         "C3"
       ],
@@ -855,7 +855,7 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:21:46Z",
+      "updated_at": "2026-10-27T07:20:25Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:20:23Z",
       "started_by": "claude:c631bc24",
@@ -876,7 +876,7 @@
       "name": "C4 approved-tool detection via child processes",
       "phase": 3,
       "type": "feature",
-      "description": "In the plugin, for sessions waiting with a pid: using the single ps snapshot from T-015, find child processes of the pid (ppid match) whose lstart is later than stateSince, ignoring comm 'caffeinate' (Claude Code starts one per turn). If any remain, render the session as busy (the permission was approved and a tool is running; the spike saw a /bin/zsh child). Long-lived children started before stateSince (MCP servers) must not trigger it. Convert lstart to epoch with date -j -f or perl, once per process.",
+      "description": "In the plugin, for sessions `waiting` with a `pid`, detect an approved tool from its child processes.\n\n## Details\n- Using the single `ps` snapshot from T-015, find child processes of the `pid` (`ppid` match) whose `lstart` is later than `stateSince`, ignoring `comm` `caffeinate` (Claude Code starts one per turn).\n- If any remain, render the session as `busy` (the permission was approved and a tool is running; the spike saw a `/bin/zsh` child).\n- Long-lived children started before `stateSince` (MCP servers) must not trigger it.\n- Convert `lstart` to epoch with `date -j -f` or `perl`, once per process.\n",
       "requirements": [
         "C4"
       ],
@@ -891,7 +891,7 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:23:01Z",
+      "updated_at": "2026-10-27T07:20:27Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:21:47Z",
       "started_by": "claude:c631bc24",
@@ -912,7 +912,7 @@
       "name": "C5 staleness → uncertain state",
       "phase": 3,
       "type": "feature",
-      "description": "In the plugin, when stale_minutes>0 and a session is still busy after C1–C4: if now − max(updatedAt, transcript mtime via `stat -f %m`, newest child lstart) exceeds stale_minutes, render it as uncertain ('?', state word 'no activity', duration since that latest activity). Waiting and idle sessions are never marked stale.",
+      "description": "In the plugin, when `stale_minutes>0` and a session is still `busy` after C1–C4: if now − max(`updatedAt`, transcript mtime via `stat -f %m`, newest child `lstart`) exceeds `stale_minutes`, render it as `uncertain` ('?', state word 'no activity', duration since that latest activity). Waiting and idle sessions are never marked stale.\n",
       "requirements": [
         "C5"
       ],
@@ -927,7 +927,7 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:25:59Z",
+      "updated_at": "2026-10-27T07:20:29Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:23:02Z",
       "started_by": "claude:c631bc24",
@@ -948,7 +948,7 @@
       "name": "Tests for C2–C5 and refresh poke",
       "phase": 3,
       "type": "test",
-      "description": "Extend tests (tests/checks.bats, tests/hook.bats): C2 overrides only when registry is newer, ignores mismatched sessionId and missing status, and respects use_registry=0; C3 flips busy→idle when the marker is in the tail and not when it's earlier than 8 KB; C4 flips waiting→busy for a child started after stateSince but not for an older child; C5 marks busy as uncertain past the threshold, never marks waiting/idle, and is off at stale_minutes=0; checks never modify state files; poke calls the stubbed `open` once for two writes within 500 ms and not at all when instant_refresh=0.",
+      "description": "Extend tests (`tests/checks.bats`, `tests/hook.bats`) for C2–C5 and the refresh poke.\n\n## Tests\n- C2 overrides only when registry is newer, ignores mismatched `sessionId` and missing `status`, and respects `use_registry=0`;\n- C3 flips `busy`→`idle` when the marker is in the tail and not when it's earlier than 8 KB;\n- C4 flips `waiting`→`busy` for a child started after `stateSince` but not for an older child;\n- C5 marks `busy` as `uncertain` past the threshold, never marks `waiting`/`idle`, and is off at `stale_minutes=0`;\n- checks never modify state files;\n- poke calls the stubbed `open` once for two writes within 500 ms and not at all when `instant_refresh=0`.\n",
       "requirements": [
         "NFR-Testability",
         "C2",
@@ -975,7 +975,7 @@
         "tests/hook.bats"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:26:29Z",
+      "updated_at": "2026-10-27T07:20:31Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:25:59Z",
       "started_by": "claude:c631bc24",
@@ -996,7 +996,7 @@
       "name": "Fail-safe herdr focus on row click",
       "phase": 4,
       "type": "feature",
-      "description": "Implement a single focus_session function in the plugin (the extension point for future integrations). A row gets `bash=<plugin> focus <session_id> terminal=false refresh=true` only if herdrPane is set and a herdr binary is found (PATH, then /opt/homebrew/bin, /usr/local/bin). Rows without it get no click action and a disabled 'not in herdr' submenu line. Focus runs `herdr agent focus <pane>` (use the target form confirmed in T-003), then `open -b <termBundleId>` if set. Each step is time-limited (~2 s, via a background process plus kill since macOS has no `timeout`) and errors are swallowed; never launch herdr, open new windows, or activate any other app.",
+      "description": "Implement a single `focus_session` function in the plugin (the extension point for future integrations).\n\n## Click action\n- A row gets `bash=<plugin> focus <session_id> terminal=false refresh=true` only if `herdrPane` is set and a `herdr` binary is found (`PATH`, then `/opt/homebrew/bin`, `/usr/local/bin`).\n- Rows without it get no click action and a disabled 'not in herdr' submenu line.\n\n## Focus\n1. Run `herdr agent focus <pane>` (use the target form confirmed in T-003),\n2. then `open -b <termBundleId>` if set.\n\nEach step is time-limited (~2 s, via a background process plus `kill` since macOS has no `timeout`) and errors are swallowed; never launch herdr, open new windows, or activate any other app.\n",
       "requirements": [
         "Architecture-Focus",
         "Goal-3"
@@ -1013,7 +1013,7 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:28:29Z",
+      "updated_at": "2026-10-27T07:20:34Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:26:29Z",
       "started_by": "claude:c631bc24",
@@ -1034,7 +1034,7 @@
       "name": "Row titles from herdr terminal titles",
       "phase": 4,
       "type": "feature",
-      "description": "Extend the title-source function: if herdr is available, call `herdr agent list` once per refresh (time-limited ~1 s, errors swallowed), build a map of agent_session.value (Claude session ID) → terminal_title_stripped, and use it as the first title source. Fallback order per PRD: herdr title, Claude Code session name (from the registry file's `name` if present), promptPreview.",
+      "description": "Extend the title-source function to use herdr terminal titles first.\n\n## Details\nIf herdr is available, call `herdr agent list` once per refresh (time-limited ~1 s, errors swallowed), build a map of `agent_session.value` (Claude session ID) → `terminal_title_stripped`, and use it as the first title source.\n\n## Fallback order per PRD\n1. herdr title,\n2. Claude Code session name (from the registry file's `name` if present),\n3. `promptPreview`.\n",
       "requirements": [
         "UX-Dropdown-Label"
       ],
@@ -1047,7 +1047,7 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:30:08Z",
+      "updated_at": "2026-10-27T07:20:34Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:28:30Z",
       "started_by": "claude:c631bc24",
@@ -1068,7 +1068,7 @@
       "name": "Subagent tracking in the hook",
       "phase": 4,
       "type": "feature",
-      "description": "Implement SubagentStart and SubagentStop in hooks/state-hook.sh (payloads in tests/fixtures/payloads/): on SubagentStart add subagents[agent_id] = {type: agent_type, since: now_ms} to the parent session's file; on SubagentStop delete subagents[agent_id]. Ignore SubagentStop events with an empty agent_type (one fires after every Stop with no matching start). Read-modify-write with atomic mv. Subagent events must not change the parent's state.",
+      "description": "Implement `SubagentStart` and `SubagentStop` in `hooks/state-hook.sh` (payloads in `tests/fixtures/payloads/`).\n\n## Details\n- On `SubagentStart` add `subagents[agent_id] = {type: agent_type, since: now_ms}` to the parent session's file;\n- on `SubagentStop` delete `subagents[agent_id]`.\n- Ignore `SubagentStop` events with an empty `agent_type` (one fires after every `Stop` with no matching start).\n- Read-modify-write with atomic `mv`.\n- Subagent events must not change the parent's state.\n",
       "requirements": [
         "StateModel-Subagent",
         "NFR-Concurrency"
@@ -1085,7 +1085,7 @@
         "hooks/state-hook.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:31:09Z",
+      "updated_at": "2026-10-27T07:20:35Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:30:09Z",
       "started_by": "claude:c631bc24",
@@ -1106,7 +1106,7 @@
       "name": "Render subagent rows under their parent",
       "phase": 4,
       "type": "feature",
-      "description": "In the dropdown, after each session row, render its subagents indented ('    ↳ subagent: <type>   working · <duration>') when show_subagents=1. Subagents never count toward the menu-bar state or counts and are not clickable.",
+      "description": "In the dropdown, after each session row, render its subagents indented (`    ↳ subagent: <type>   working · <duration>`) when `show_subagents=1`. Subagents never count toward the menu-bar state or counts and are not clickable.\n",
       "requirements": [
         "UX-Dropdown-Subagents"
       ],
@@ -1122,7 +1122,7 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:32:38Z",
+      "updated_at": "2026-10-27T07:20:35Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:31:10Z",
       "started_by": "claude:c631bc24",
@@ -1143,7 +1143,7 @@
       "name": "Session-kind filter toggles",
       "phase": 4,
       "type": "feature",
-      "description": "Add a 'Show' section to the footer with four checkmark items (Interactive, Headless, Subagents, IDE/Desktop) reflecting show_interactive/show_headless/show_subagents/show_ide (checked=true). Clicking runs `<plugin> toggle <key>` which flips the value via set_config, with refresh=true. Sessions whose kind is hidden are excluded from rows and from menu-bar counts. Defaults: all on.",
+      "description": "Add a 'Show' section to the footer with four checkmark items reflecting `show_interactive`/`show_headless`/`show_subagents`/`show_ide` (`checked=true`).\n\n## Items\n- Interactive\n- Headless\n- Subagents\n- IDE/Desktop\n\n## Behavior\n- Clicking runs `<plugin> toggle <key>` which flips the value via `set_config`, with `refresh=true`.\n- Sessions whose `kind` is hidden are excluded from rows and from menu-bar counts.\n- Defaults: all on.\n",
       "requirements": [
         "UX-Filters",
         "Config"
@@ -1160,7 +1160,7 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:35:16Z",
+      "updated_at": "2026-10-27T07:20:36Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:32:39Z",
       "started_by": "claude:c631bc24",
@@ -1181,7 +1181,7 @@
       "name": "Settings submenu",
       "phase": 4,
       "type": "feature",
-      "description": "Add a 'Settings…' submenu: Stale threshold (10m, 30m, 60m, Off — checkmark on current; sets stale_minutes 10/30/60/0), Instant refresh (toggle instant_refresh), Use Claude Code registry (toggle use_registry), Store prompt preview (toggle store_prompt_preview), Reveal config file (open -R, creating the file with defaults first if missing). All via `<plugin> set <key> <value>` / `toggle <key>` with refresh=true. Validate values; ignore anything not on the allowed list.",
+      "description": "Add a 'Settings…' submenu.\n\n## Items\n- Stale threshold (10m, 30m, 60m, Off — checkmark on current; sets `stale_minutes` 10/30/60/0)\n- Instant refresh (toggle `instant_refresh`)\n- Use Claude Code registry (toggle `use_registry`)\n- Store prompt preview (toggle `store_prompt_preview`)\n- Reveal config file (`open -R`, creating the file with defaults first if missing)\n\n## Details\nAll via `<plugin> set <key> <value>` / `toggle <key>` with `refresh=true`. Validate values; ignore anything not on the allowed list.\n",
       "requirements": [
         "UX-Settings",
         "Config"
@@ -1195,7 +1195,7 @@
         "swiftbar/claude-agents.5s.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:36:17Z",
+      "updated_at": "2026-10-27T07:21:25Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:35:16Z",
       "started_by": "claude:c631bc24",
@@ -1216,7 +1216,7 @@
       "name": "Tests for focus, titles, subagents, filters, settings",
       "phase": 4,
       "type": "test",
-      "description": "Add tests/reach.bats: rows with herdrPane and a stub herdr get a focus action, rows without get none and show 'not in herdr'; focus calls herdr then open -b with the right args; a failing or hanging herdr stub doesn't hang the plugin (>2 s) and calls nothing else; herdr titles are preferred over promptPreview, and a failing `herdr agent list` falls back cleanly; SubagentStart/Stop add and remove entries without touching state; subagent rows render and don't affect counts; toggles flip config and hide kinds from rows and counts; settings accept only allowed values.",
+      "description": "Add `tests/reach.bats` for focus, titles, subagents, filters and settings.\n\n## Tests\n- rows with `herdrPane` and a stub `herdr` get a focus action, rows without get none and show 'not in herdr';\n- focus calls `herdr` then `open -b` with the right args;\n- a failing or hanging `herdr` stub doesn't hang the plugin (>2 s) and calls nothing else;\n- herdr titles are preferred over `promptPreview`, and a failing `herdr agent list` falls back cleanly;\n- `SubagentStart`/`SubagentStop` add and remove entries without touching state;\n- subagent rows render and don't affect counts;\n- toggles flip config and hide kinds from rows and counts;\n- settings accept only allowed values.\n",
       "requirements": [
         "NFR-Testability",
         "Architecture-Focus"
@@ -1239,7 +1239,7 @@
         "tests/reach.bats"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:36:30Z",
+      "updated_at": "2026-10-27T07:21:26Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:36:18Z",
       "started_by": "claude:c631bc24",
@@ -1260,7 +1260,7 @@
       "name": "install.sh for non-plugin installs",
       "phase": 5,
       "type": "infra",
-      "description": "Create install.sh: require jq (find_jq); back up ~/.claude/settings.json to settings.json.bak-claude-agents-<timestamp>; for each event in hooks/hooks.json, append a hook entry pointing at the absolute path of hooks/state-hook.sh with async=true and a marker field or command suffix (e.g. `# claude-agents`) so uninstall can find it; never replace or reorder existing entries; skip if already installed (idempotent). Then symlink swiftbar/claude-agents.5s.sh into `defaults read com.ameba.SwiftBar PluginDirectory`, or prompt for a folder if unset. Print what was done.",
+      "description": "Create `install.sh` for non-plugin installs.\n\n## Steps\n1. Require `jq` (`find_jq`).\n2. Back up `~/.claude/settings.json` to `settings.json.bak-claude-agents-<timestamp>`.\n3. For each event in `hooks/hooks.json`, append a hook entry pointing at the absolute path of `hooks/state-hook.sh` with `async=true` and a marker field or command suffix (e.g. `# claude-agents`) so uninstall can find it; never replace or reorder existing entries; skip if already installed (idempotent).\n4. Then symlink `swiftbar/claude-agents.5s.sh` into `defaults read com.ameba.SwiftBar PluginDirectory`, or prompt for a folder if unset.\n5. Print what was done.\n",
       "requirements": [
         "Install-Script",
         "Coexistence"
@@ -1277,7 +1277,7 @@
         "install.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:37:28Z",
+      "updated_at": "2026-10-27T07:21:26Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:36:30Z",
       "started_by": "claude:c631bc24",
@@ -1298,7 +1298,7 @@
       "name": "uninstall.sh",
       "phase": 5,
       "type": "infra",
-      "description": "Create uninstall.sh: back up settings.json, remove only hook entries carrying the claude-agents marker (dropping event arrays/matcher groups left empty by the removal, but nothing else), remove the SwiftBar symlink if it points at this repo, and offer (y/N) to delete ~/.claude/swiftbar-agents and ~/.config/claude-agents. Idempotent.",
+      "description": "Create `uninstall.sh`. Idempotent.\n\n## Steps\n1. Back up `settings.json`.\n2. Remove only hook entries carrying the `claude-agents` marker (dropping event arrays/matcher groups left empty by the removal, but nothing else).\n3. Remove the SwiftBar symlink if it points at this repo.\n4. Offer (y/N) to delete `~/.claude/swiftbar-agents` and `~/.config/claude-agents`.\n",
       "requirements": [
         "Install-Script"
       ],
@@ -1313,7 +1313,7 @@
         "uninstall.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:38:25Z",
+      "updated_at": "2026-10-27T07:21:27Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:37:29Z",
       "started_by": "claude:c631bc24",
@@ -1334,7 +1334,7 @@
       "name": "Tests for install and uninstall",
       "phase": 5,
       "type": "test",
-      "description": "Add tests/install.bats using a temp HOME with a fixture settings.json that already has unrelated hooks (a SessionStart hook with a matcher and an async PostToolUse audit hook) and a stubbed `defaults`: install adds our entries, keeps existing ones byte-identical and in order, creates a backup, links the plugin; running install twice adds nothing; uninstall removes exactly our entries and the symlink and leaves the rest identical to the original.",
+      "description": "Add `tests/install.bats` using a temp `HOME` with a fixture `settings.json` that already has unrelated hooks (a `SessionStart` hook with a matcher and an async `PostToolUse` audit hook) and a stubbed `defaults`.\n\n## Tests\n- install adds our entries, keeps existing ones byte-identical and in order, creates a backup, links the plugin;\n- running install twice adds nothing;\n- uninstall removes exactly our entries and the symlink and leaves the rest identical to the original.\n",
       "requirements": [
         "NFR-Testability",
         "Coexistence"
@@ -1353,7 +1353,7 @@
         "tests/fixtures/settings.json"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:38:36Z",
+      "updated_at": "2026-10-27T07:21:27Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:38:26Z",
       "started_by": "claude:c631bc24",
@@ -1374,7 +1374,7 @@
       "name": "Marketplace packaging for /plugin install",
       "phase": 5,
       "type": "infra",
-      "description": "Add .claude-plugin/marketplace.json listing the claude-agents plugin from this repo so users can `/plugin marketplace add <owner>/<repo>` then `/plugin install claude-agents`. Bump plugin.json version to 1.0.0-rc.1. Verify the install flow end to end in a clean Claude Code profile and note the exact commands for the README.",
+      "description": "Add `.claude-plugin/marketplace.json` listing the `claude-agents` plugin from this repo so users can `/plugin marketplace add <owner>/<repo>` then `/plugin install claude-agents`. Bump `plugin.json` version to `1.0.0-rc.1`. Verify the install flow end to end in a clean Claude Code profile and note the exact commands for the README.\n",
       "requirements": [
         "Install-Plugin"
       ],
@@ -1390,7 +1390,7 @@
         ".claude-plugin/plugin.json"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:39:02Z",
+      "updated_at": "2026-10-27T07:21:28Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:38:37Z",
       "started_by": "claude:c631bc24",
@@ -1411,7 +1411,7 @@
       "name": "Performance benchmark for plugin and hook",
       "phase": 5,
       "type": "test",
-      "description": "Add tests/bench.sh that generates 10 realistic state files (mixed states, transcripts, registry files) in a temp dir, runs the plugin 20 times and the hook 50 times, and reports median/p95 wall time. Fail (exit 1) if plugin median > 150 ms or hook median > 20 ms, per PRD success criteria. Fix any hot spots found (e.g. per-session jq calls).",
+      "description": "Add `tests/bench.sh` that generates 10 realistic state files (mixed states, transcripts, registry files) in a temp dir, runs the plugin 20 times and the hook 50 times, and reports median/p95 wall time.\n\n## Done when\n- Fail (exit 1) if plugin median > 150 ms or hook median > 20 ms, per PRD success criteria.\n- Fix any hot spots found (e.g. per-session `jq` calls).\n",
       "requirements": [
         "NFR-Performance",
         "SuccessCriteria"
@@ -1426,7 +1426,7 @@
         "tests/bench.sh"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:47:54Z",
+      "updated_at": "2026-10-27T07:21:28Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:39:02Z",
       "started_by": "claude:c631bc24",
@@ -1447,7 +1447,7 @@
       "name": "Finalize README for release",
       "phase": 5,
       "type": "docs",
-      "description": "Update README.md: remove the 'design phase' notice, replace planned install steps with the verified commands from T-033 and T-036, add the state_dir key to the config table, add a troubleshooting section (jq missing, SwiftBar folder unset, warning icon meaning, where plugin.log lives), and add screenshot placeholders (doc/screenshots/*.png) for each menu-bar state. Keep all examples using made-up project names.",
+      "description": "Update `README.md` for release.\n\n## Change\n- remove the 'design phase' notice;\n- replace planned install steps with the verified commands from T-033 and T-036;\n- add the `state_dir` key to the config table;\n- add a troubleshooting section (`jq` missing, SwiftBar folder unset, warning icon meaning, where `plugin.log` lives);\n- and add screenshot placeholders (`doc/screenshots/*.png`) for each menu-bar state.\n\nKeep all examples using made-up project names.\n",
       "requirements": [
         "M4"
       ],
@@ -1463,7 +1463,7 @@
         "README.md"
       ],
       "created_at": "2026-10-25T06:21:40Z",
-      "updated_at": "2026-10-25T07:48:43Z",
+      "updated_at": "2026-10-27T07:21:29Z",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T07:47:55Z",
       "started_by": "claude:c631bc24",
@@ -1484,7 +1484,7 @@
       "name": "Use a zzz icon for idle and add an icon legend to the README",
       "phase": 4,
       "type": "polish",
-      "description": "Replace the idle menu-bar symbol checkmark.circle with the SF Symbol zzz (same idle color) and update the tests that check it. Expand the README 'What it shows' table into an icon legend: icon, color, what the number counts and meaning, in priority order; note that only the most urgent state is shown and icons never animate.",
+      "description": "Replace the idle menu-bar symbol `checkmark.circle` with the SF Symbol `zzz` (same idle color) and update the tests that check it. Expand the README 'What it shows' table into an icon legend: icon, color, what the number counts and meaning, in priority order; note that only the most urgent state is shown and icons never animate.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -1498,7 +1498,7 @@
         "README.md"
       ],
       "created_at": "2026-10-25T20:29:36Z",
-      "updated_at": "2026-10-25T20:29:40Z",
+      "updated_at": "2026-10-27T07:21:30Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T20:29:39Z",
@@ -1511,7 +1511,7 @@
       "name": "Show the state icon on each dropdown row",
       "phase": 4,
       "type": "polish",
-      "description": "Replace the text glyph (● ○ ?) at the start of each session row with the same SF Symbol and color the menu bar uses for that state (waiting exclamationmark.circle.fill red, idle zzz orange, uncertain questionmark.circle gray, busy the configured icon dimmed), so rows can be matched to the menu-bar icon. Update tests and the README dropdown example.",
+      "description": "Replace the text glyph (● ○ ?) at the start of each session row with the same SF Symbol and color the menu bar uses for that state (waiting `exclamationmark.circle.fill` red, idle `zzz` orange, uncertain `questionmark.circle` gray, busy the configured icon dimmed), so rows can be matched to the menu-bar icon. Update tests and the README dropdown example.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -1522,7 +1522,7 @@
         "README.md"
       ],
       "created_at": "2026-10-25T20:30:57Z",
-      "updated_at": "2026-10-25T20:34:36Z",
+      "updated_at": "2026-10-27T07:21:30Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T20:30:58Z",
@@ -1535,7 +1535,7 @@
       "name": "Mute a project for an hour or for today from its row",
       "phase": 4,
       "type": "feature",
-      "description": "Each session row's submenu gets 'Mute project for 1 hour' and 'Mute project for today' (until local midnight), or 'Unmute project' when muted. Mutes are per project (cwd), stored in the state dir outside the session files, and expire on their own. A muted session that is idle, stale or busy shows a gray bell.slash icon, sorts to the bottom with 'muted until HH:MM', and doesn't count in the menu bar; a waiting session still breaks through. When every shown session is muted the menu bar shows a gray bell.slash with no number. Sending a prompt in a muted project unmutes it (hook records promptAt; the plugin drops mutes older than a newer prompt). 'Unmute all' appears in the footer while anything is muted. Tests, README and PRD.",
+      "description": "Each session row's submenu gets 'Mute project for 1 hour' and 'Mute project for today' (until local midnight), or 'Unmute project' when muted.\n\n## Mutes\n- Mutes are per project (`cwd`), stored in the state dir outside the session files, and expire on their own.\n- Sending a prompt in a muted project unmutes it (hook records `promptAt`; the plugin drops mutes older than a newer prompt).\n\n## Display\n- A muted session that is idle, stale or busy shows a gray `bell.slash` icon, sorts to the bottom with 'muted until HH:MM', and doesn't count in the menu bar; a waiting session still breaks through.\n- When every shown session is muted the menu bar shows a gray `bell.slash` with no number.\n- 'Unmute all' appears in the footer while anything is muted.\n\n## Done when\nTests, README and PRD.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -1549,7 +1549,7 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-10-25T20:38:47Z",
-      "updated_at": "2026-10-25T20:43:30Z",
+      "updated_at": "2026-10-27T07:22:27Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T20:38:47Z",
@@ -1562,7 +1562,7 @@
       "name": "Show state symbols in color in the menu bar and rows",
       "phase": 5,
       "type": "bugfix",
-      "description": "The zzz, exclamation, question-mark and bell.slash symbols render without their state color in the menu bar (and possibly in rows), although the plugin sends sfcolor. Find out how SwiftBar 2.x colors SF Symbols (sfcolor vs sfconfig with renderingMode Palette/Hierarchical, template images in the status item), make every state symbol show its light/dark color in both the menu bar and the dropdown rows, verify live in light and dark mode, and update tests and the README icon legend.",
+      "description": "The `zzz`, exclamation, question-mark and `bell.slash` symbols render without their state color in the menu bar (and possibly in rows), although the plugin sends `sfcolor`.\n\n## Change\n- Find out how SwiftBar 2.x colors SF Symbols (`sfcolor` vs `sfconfig` with `renderingMode` Palette/Hierarchical, template images in the status item),\n- make every state symbol show its light/dark color in both the menu bar and the dropdown rows,\n- verify live in light and dark mode,\n- and update tests and the README icon legend.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -1573,7 +1573,7 @@
         "README.md"
       ],
       "created_at": "2026-10-25T21:22:51Z",
-      "updated_at": "2026-10-25T21:42:59Z",
+      "updated_at": "2026-10-27T07:22:27Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T21:36:54Z",
@@ -1595,7 +1595,7 @@
       "name": "Settings: start automatically, and themes for icons and colors",
       "phase": 5,
       "type": "feature",
-      "description": "Extend the dropdown's Settings submenu: (1) a 'Start automatically' toggle that makes the status bar launch at login (find out what is possible from a plugin: SwiftBar's own launch-at-login setting, a LaunchAgent, or opening System Settings > Login Items; fail safe and say which it controls); (2) a Theme submenu to pick the icon and color for each state (waiting, idle, uncertain, busy, muted, none), with a few built-in themes (e.g. default, monochrome, high contrast) plus per-state overrides stored in the config file (validated: SF Symbol names and #RRGGBB or light,dark pairs only). Menu bar and rows use the chosen theme. Tests, README config table and PRD.",
+      "description": "Extend the dropdown's Settings submenu with a start-at-login toggle and themes.\n\n## Change\n1. A 'Start automatically' toggle that makes the status bar launch at login (find out what is possible from a plugin: SwiftBar's own launch-at-login setting, a LaunchAgent, or opening System Settings > Login Items; fail safe and say which it controls);\n2. a Theme submenu to pick the icon and color for each state (waiting, idle, uncertain, busy, muted, none), with a few built-in themes (e.g. default, monochrome, high contrast) plus per-state overrides stored in the config file (validated: SF Symbol names and `#RRGGBB` or light,dark pairs only).\n\nMenu bar and rows use the chosen theme.\n\n## Done when\nTests, README config table and PRD.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -1610,7 +1610,7 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-10-25T21:22:52Z",
-      "updated_at": "2026-10-25T21:55:57Z",
+      "updated_at": "2026-10-27T07:22:28Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T21:43:02Z",
@@ -1632,7 +1632,7 @@
       "name": "Design: SwiftBar plugin vs standalone app vs atm integration",
       "phase": 5,
       "type": "docs",
-      "description": "Write doc/design/future-architecture.md comparing three directions for the product: (a) stay a SwiftBar plugin, (b) a standalone macOS menu-bar app (e.g. Swift/SwiftUI MenuBarExtra: native colors, notifications, launch at login, no SwiftBar dependency, signing and distribution cost), (c) integrating with atm (agentic-task-manager): showing tasks and loop progress next to sessions, or atm's dashboard consuming this project's state files. For each: what it enables, cost, risks, what of today's hooks and state files carries over, and migration path. End with a recommendation and the open questions for the user. Docs only; no code changes.",
+      "description": "Write `doc/design/future-architecture.md` comparing three directions for the product. Docs only; no code changes.\n\n## Options\n- (a) stay a SwiftBar plugin,\n- (b) a standalone macOS menu-bar app (e.g. Swift/SwiftUI `MenuBarExtra`: native colors, notifications, launch at login, no SwiftBar dependency, signing and distribution cost),\n- (c) integrating with atm (agentic-task-manager): showing tasks and loop progress next to sessions, or atm's dashboard consuming this project's state files.\n\n## For each\n- what it enables,\n- cost,\n- risks,\n- what of today's hooks and state files carries over,\n- and migration path.\n\nEnd with a recommendation and the open questions for the user.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -1641,7 +1641,7 @@
         "doc/design/future-architecture.md"
       ],
       "created_at": "2026-10-25T21:22:52Z",
-      "updated_at": "2026-10-25T21:57:03Z",
+      "updated_at": "2026-10-27T07:22:28Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T21:56:01Z",
@@ -1663,7 +1663,7 @@
       "name": "Don't show idle while subagents are still working",
       "phase": 5,
       "type": "bugfix",
-      "description": "When a session's subagents are still running and the parent agent is waiting for them, the row and the menu bar show idle (zzz), although work is going on. Show it as working, or a distinct 'waiting on subagents' state with its own symbol. DISCUSS WITH THE USER BEFORE IMPLEMENTING: which state or symbol to use, whether it counts in the menu bar like busy, and how to detect it reliably (subagents map from SubagentStart/SubagentStop vs Stop ordering, background agents vs foreground ones, stale subagent entries when SubagentStop is missed).",
+      "description": "When a session's subagents are still running and the parent agent is waiting for them, the row and the menu bar show idle (`zzz`), although work is going on.\n\n## Change\nShow it as working, or a distinct 'waiting on subagents' state with its own symbol.\n\n## Discuss first\n**DISCUSS WITH THE USER BEFORE IMPLEMENTING:**\n- which state or symbol to use,\n- whether it counts in the menu bar like busy,\n- and how to detect it reliably (`subagents` map from `SubagentStart`/`SubagentStop` vs `Stop` ordering, background agents vs foreground ones, stale subagent entries when `SubagentStop` is missed).\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -1675,7 +1675,7 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-10-25T21:41:09Z",
-      "updated_at": "2026-10-25T22:10:30Z",
+      "updated_at": "2026-10-27T07:22:29Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -1703,7 +1703,7 @@
       "name": "Deepen the future architecture doc: tech options for B and C",
       "phase": 5,
       "type": "docs",
-      "description": "Extend doc/design/future-architecture.md with a detailed analysis of option B (standalone app) and C (atm integration): concrete tech options (Swift/SwiftUI MenuBarExtra vs AppKit NSStatusItem vs Tauri/Electron/Go), how the hooks and checks move (shell+jq vs a Swift core), whether shell is maintainable by humans, and an intermediate option that eases moving to B or C later (e.g. a Swift core CLI behind the SwiftBar plugin). Record the user's answers: no user base yet, not targeting SwiftBar users (standalone preferred), Apple Developer account is fine, calling atm from outside is fine, notifications are in scope. Update the recommendation and open questions.",
+      "description": "Extend `doc/design/future-architecture.md` with a detailed analysis of option B (standalone app) and C (atm integration).\n\n## Cover\n- concrete tech options (Swift/SwiftUI `MenuBarExtra` vs AppKit `NSStatusItem` vs Tauri/Electron/Go),\n- how the hooks and checks move (shell+`jq` vs a Swift core),\n- whether shell is maintainable by humans,\n- and an intermediate option that eases moving to B or C later (e.g. a Swift core CLI behind the SwiftBar plugin).\n\n## Record the user's answers\n- no user base yet,\n- not targeting SwiftBar users (standalone preferred),\n- Apple Developer account is fine,\n- calling atm from outside is fine,\n- notifications are in scope.\n\nUpdate the recommendation and open questions.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -1712,7 +1712,7 @@
         "doc/design/future-architecture.md"
       ],
       "created_at": "2026-10-25T22:17:03Z",
-      "updated_at": "2026-10-25T22:19:00Z",
+      "updated_at": "2026-10-27T07:22:29Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T22:17:04Z",
@@ -1734,7 +1734,7 @@
       "name": "Update the future architecture doc with the user's decisions",
       "phase": 5,
       "type": "docs",
-      "description": "Record in doc/design/future-architecture.md: app name agentic-status-bar, short form and CLI name asb; minimum macOS 14; the hook moves to Swift (no shell left); the SwiftBar plugin is removed once the Swift migration is complete; atm's JSON becomes a stable contract at some point, and we live with drift until then. Add a detailed Homebrew section: from the start vs later (own tap vs homebrew/cask, cask vs formula for the CLI, notability rules, auto_updates with Sparkle, release automation), with 'later' as the recommendation. Update the recommendation and open questions.",
+      "description": "Record the user's decisions in `doc/design/future-architecture.md` and add a detailed Homebrew section.\n\n## Record\n- app name `agentic-status-bar`, short form and CLI name `asb`;\n- minimum macOS 14;\n- the hook moves to Swift (no shell left);\n- the SwiftBar plugin is removed once the Swift migration is complete;\n- atm's JSON becomes a stable contract at some point, and we live with drift until then.\n\n## Homebrew section\nFrom the start vs later (own tap vs homebrew/cask, cask vs formula for the CLI, notability rules, `auto_updates` with Sparkle, release automation), with 'later' as the recommendation.\n\nUpdate the recommendation and open questions.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -1743,7 +1743,7 @@
         "doc/design/future-architecture.md"
       ],
       "created_at": "2026-10-25T23:28:36Z",
-      "updated_at": "2026-10-25T23:30:23Z",
+      "updated_at": "2026-10-27T07:22:30Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T23:28:36Z",
@@ -1765,7 +1765,7 @@
       "name": "Doc: Swift vs alternatives and the cross-platform question",
       "phase": 5,
       "type": "docs",
-      "description": "Add a section to doc/design/future-architecture.md answering: can Swift do everything for the macOS app or does any part need another language; alternatives (Objective-C, Rust/Tauri, Go, .NET/Avalonia, Electron, Kotlin Compose, Flutter) and reasons to prefer any of them; can Rust/Tauri give one implementation for macOS, Windows and Linux (tray differences, GNOME tray, WSL, process checks, terminal focus, notifications), and at what effort; and a phased path that solidifies on Swift first and moves to a cross-platform stack later, with what to do now to keep that cheap. Update the recommendation and open questions.",
+      "description": "Add a section to `doc/design/future-architecture.md` on Swift vs alternatives and the cross-platform question.\n\n## Answer\n- can Swift do everything for the macOS app or does any part need another language;\n- alternatives (Objective-C, Rust/Tauri, Go, .NET/Avalonia, Electron, Kotlin Compose, Flutter) and reasons to prefer any of them;\n- can Rust/Tauri give one implementation for macOS, Windows and Linux (tray differences, GNOME tray, WSL, process checks, terminal focus, notifications), and at what effort;\n- and a phased path that solidifies on Swift first and moves to a cross-platform stack later, with what to do now to keep that cheap.\n\nUpdate the recommendation and open questions.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -1774,7 +1774,7 @@
         "doc/design/future-architecture.md"
       ],
       "created_at": "2026-10-25T23:42:09Z",
-      "updated_at": "2026-10-25T23:43:17Z",
+      "updated_at": "2026-10-27T07:22:30Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-25T23:42:09Z",
@@ -1800,7 +1800,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Create Package.swift at the repo root (swift-tools-version 6.0, platforms macOS 14) with a library target ASBCore (Sources/ASBCore, Foundation only: no AppKit or SwiftUI, see doc/design/future-architecture.md 'What to do now to keep the cross-platform door open'), an executable target asb (Sources/asb) and a test target ASBCoreTests (Tests/ASBCoreTests, Swift Testing). asb uses swift-argument-parser and for now has only `asb --version` (prints the version from a single constant in ASBCore, e.g. 0.1.0). Add .build/ and .swiftpm/ to .gitignore. Verify with `swift build` and `swift test`. Don't touch the shell code.",
+      "description": "Create `Package.swift` at the repo root (swift-tools-version 6.0, platforms macOS 14).\n\n## Targets\n- a library target `ASBCore` (`Sources/ASBCore`, Foundation only: no AppKit or SwiftUI, see `doc/design/future-architecture.md` 'What to do now to keep the cross-platform door open'),\n- an executable target `asb` (`Sources/asb`)\n- and a test target `ASBCoreTests` (`Tests/ASBCoreTests`, Swift Testing).\n\n## Details\n- `asb` uses `swift-argument-parser` and for now has only `asb --version` (prints the version from a single constant in `ASBCore`, e.g. `0.1.0`).\n- Add `.build/` and `.swiftpm/` to `.gitignore`.\n- Don't touch the shell code.\n\n## Done when\nVerify with `swift build` and `swift test`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -1813,7 +1813,7 @@
         ".gitignore"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:02:19Z",
+      "updated_at": "2026-10-27T07:22:31Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:01:13Z",
@@ -1839,7 +1839,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Add a `swift` job to .github/workflows/ci.yml on macos-latest that runs `swift build` and `swift test` (select the newest Xcode available on the runner if needed). Keep the existing lint and bats job unchanged. Add a tests/swift.sh wrapper (`swift build && swift test`) mirroring tests/run.sh, and mention both in CONTRIBUTING.md.",
+      "description": "Add a `swift` job to `.github/workflows/ci.yml` on `macos-latest` that runs `swift build` and `swift test` (select the newest Xcode available on the runner if needed).\n\n## Details\n- Keep the existing lint and bats job unchanged.\n- Add a `tests/swift.sh` wrapper (`swift build && swift test`) mirroring `tests/run.sh`, and mention both in `CONTRIBUTING.md`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -1852,7 +1852,7 @@
         "CONTRIBUTING.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:02:50Z",
+      "updated_at": "2026-10-27T07:22:31Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:02:21Z",
@@ -1878,7 +1878,7 @@
       "labels": [
         "migration"
       ],
-      "description": "Write doc/state-file-schema.md: the per-session state file (schema v: 1) field by field (types, optional or not, who writes it, meaning), taken from doc/PRD.md and hooks/state-hook.sh: v, sessionId, state, reason, message, updatedAt, stateSince, pid, procStart, cwd, kind, termBundleId, herdrPane, transcriptPath, lastTool, promptPreview, promptAt, subagents{agent_id:{type,since}}. Also the writer rules (newer event wins via updatedAt, atomic temp+rename, per-session lock, SessionEnd deletes), the mutes file ({cwd:{until,at,today}}), and the config file keys with validation rules (from lib/common.sh). State that readers must ignore unknown fields and reject v > 1. Link it from the PRD.",
+      "description": "Write `doc/state-file-schema.md` and link it from the PRD.\n\n## State file\nThe per-session state file (schema `v: 1`) field by field (types, optional or not, who writes it, meaning), taken from `doc/PRD.md` and `hooks/state-hook.sh`: `v`, `sessionId`, `state`, `reason`, `message`, `updatedAt`, `stateSince`, `pid`, `procStart`, `cwd`, `kind`, `termBundleId`, `herdrPane`, `transcriptPath`, `lastTool`, `promptPreview`, `promptAt`, `subagents{agent_id:{type,since}}`.\n\n## Also\n- the writer rules (newer event wins via `updatedAt`, atomic temp+rename, per-session lock, `SessionEnd` deletes),\n- the mutes file (`{cwd:{until,at,today}}`),\n- and the config file keys with validation rules (from `lib/common.sh`).\n\nState that readers must ignore unknown fields and reject `v > 1`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -1888,7 +1888,7 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:03:49Z",
+      "updated_at": "2026-10-27T07:23:30Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:02:51Z",
@@ -1914,7 +1914,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Define what every front end reads: write doc/snapshot-schema.md and Sources/ASBCore/Snapshot.swift (Codable, sorted keys when encoded). Snapshot v1: version, generatedAt (ms), invalidFiles (count), activeMutes (count), header {state: waiting|idle|uncertain|busy|muted|none|warning, symbol, color (light,dark), count (number or null)}, sessions [ {sessionId, project, title, cwd, kind, shown (waiting|idle|uncertain|busy|subagents), reason, since (ms), label (fitted row label), word (state word), muted, muteUntil, muteToday, herdrPane, termBundleId, transcriptPath, symbol, color, subagents [{id, type, since}]} ] in display order. Mirror the shell plugin's behavior (swiftbar/swiftbar-claudecode-minimal.5s.sh HEADER_JQ and ROWS_JQ). Unit test: encoding round-trips and key order is stable.",
+      "description": "Define what every front end reads: write `doc/snapshot-schema.md` and `Sources/ASBCore/Snapshot.swift` (Codable, sorted keys when encoded).\n\n## Snapshot v1\n- `version`\n- `generatedAt` (ms)\n- `invalidFiles` (count)\n- `activeMutes` (count)\n- `header` `{state: waiting|idle|uncertain|busy|muted|none|warning, symbol, color (light,dark), count (number or null)}`\n- `sessions` in display order (fields below)\n\n## Session fields\n`sessionId`, `project`, `title`, `cwd`, `kind`, `shown` (`waiting`|`idle`|`uncertain`|`busy`|`subagents`), `reason`, `since` (ms), `label` (fitted row label), `word` (state word), `muted`, `muteUntil`, `muteToday`, `herdrPane`, `termBundleId`, `transcriptPath`, `symbol`, `color`, `subagents` `[{id, type, since}]`.\n\n## Details\nMirror the shell plugin's behavior (`swiftbar/swiftbar-claudecode-minimal.5s.sh` `HEADER_JQ` and `ROWS_JQ`).\n\n## Tests\nUnit test: encoding round-trips and key order is stable.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -1928,7 +1928,7 @@
         "Tests/ASBCoreTests/SnapshotTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:04:52Z",
+      "updated_at": "2026-10-27T07:23:31Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:03:51Z",
@@ -1954,7 +1954,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Create tests/conformance/README.md defining a language-neutral case: a directory with input/ (state/*.json, registry/*.json, transcripts/*.jsonl, processes.json [{pid, ppid, start (epoch s), comm}], herdr.json (agent list output, optional), config (optional), mutes (optional), clock.json {now_ms, tz}) and expected.json (the snapshot). Add a Swift test (Tests/ASBCoreTests/ConformanceTests.swift) that loads every case, runs the core with a fake clock, fake process inspector and fake herdr, and compares JSON semantically (key order ignored), printing a readable diff on failure. Add one case: no-sessions. The runner should skip core pieces not yet implemented only via an explicit 'pending' marker file, never silently.",
+      "description": "Create `tests/conformance/README.md` defining a language-neutral case, plus a Swift runner.\n\n## Case format\nA directory with `input/` and `expected.json` (the snapshot). `input/` holds:\n- `state/*.json`\n- `registry/*.json`\n- `transcripts/*.jsonl`\n- `processes.json` `[{pid, ppid, start (epoch s), comm}]`\n- `herdr.json` (agent list output, optional)\n- `config` (optional)\n- `mutes` (optional)\n- `clock.json` `{now_ms, tz}`\n\n## Runner\n- Add a Swift test (`Tests/ASBCoreTests/ConformanceTests.swift`) that loads every case, runs the core with a fake clock, fake process inspector and fake herdr, and compares JSON semantically (key order ignored), printing a readable diff on failure.\n- Add one case: `no-sessions`.\n- The runner should skip core pieces not yet implemented only via an explicit 'pending' marker file, never silently.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -1968,7 +1968,7 @@
         "Tests/ASBCoreTests/ConformanceTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:13:49Z",
+      "updated_at": "2026-10-27T07:23:31Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:04:52Z",
@@ -1994,7 +1994,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Port lib/common.sh config handling to Sources/ASBCore/Config.swift: the key whitelist (show_*, stale_minutes, use_registry, instant_refresh, icon, store_prompt_preview, state_dir, theme, icon_<state>, color_<state> for waiting idle uncertain busy subagents muted none warning), defaults, value validation (plain words/paths; colors #RRGGBB or a light,dark pair), comments and unknown keys ignored, ~ expansion, and setConfig(key, value) that keeps other lines and writes atomically. Paths come from a Paths struct with environment overrides (for now CLAUDE_STATUSBAR_CONFIG and CLAUDE_STATUSBAR_STATE_DIR, renamed later). Port tests/common.bats cases to Tests/ASBCoreTests/ConfigTests.swift.",
+      "description": "Port `lib/common.sh` config handling to `Sources/ASBCore/Config.swift`.\n\n## Port\n- the key whitelist (`show_*`, `stale_minutes`, `use_registry`, `instant_refresh`, `icon`, `store_prompt_preview`, `state_dir`, `theme`, `icon_<state>`, `color_<state>` for waiting idle uncertain busy subagents muted none warning),\n- defaults,\n- value validation (plain words/paths; colors `#RRGGBB` or a light,dark pair),\n- comments and unknown keys ignored,\n- `~` expansion,\n- and `setConfig(key, value)` that keeps other lines and writes atomically.\n\n## Paths\nPaths come from a `Paths` struct with environment overrides (for now `CLAUDE_STATUSBAR_CONFIG` and `CLAUDE_STATUSBAR_STATE_DIR`, renamed later).\n\n## Tests\nPort `tests/common.bats` cases to `Tests/ASBCoreTests/ConfigTests.swift`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2007,7 +2007,7 @@
         "Tests/ASBCoreTests/ConfigTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:14:49Z",
+      "updated_at": "2026-10-27T07:23:32Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:13:49Z",
@@ -2033,7 +2033,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Sources/ASBCore/StateFile.swift: a Codable StateFile matching doc/state-file-schema.md (unknown fields ignored, all but v and sessionId optional) and a loader that reads *.json in the state dir (skipping *.tmp.* and *.lock), counting files that don't parse, aren't objects or have v outside 1...1 as invalid. Return [StateFile with its path] plus invalidCount. Tests port the plugin.bats cases 'plugin loads valid state files', 'corrupt and future-version files', 'temp and lock files are ignored'.",
+      "description": "`Sources/ASBCore/StateFile.swift`: a Codable `StateFile` matching `doc/state-file-schema.md` and a lenient loader.\n\n## Details\n- `StateFile`: unknown fields ignored, all but `v` and `sessionId` optional.\n- Loader reads `*.json` in the state dir (skipping `*.tmp.*` and `*.lock`), counting files that don't parse, aren't objects or have `v` outside `1...1` as invalid.\n- Return `[StateFile with its path]` plus `invalidCount`.\n\n## Tests\nPort the `plugin.bats` cases 'plugin loads valid state files', 'corrupt and future-version files', 'temp and lock files are ignored'.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2046,7 +2046,7 @@
         "Tests/ASBCoreTests/StateFileTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:15:38Z",
+      "updated_at": "2026-10-27T07:23:32Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:14:49Z",
@@ -2072,7 +2072,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Sources/ASBCore/Processes.swift: protocol ProcessInspector { func snapshot() -> [Int32: ProcessInfo] } with ProcessInfo {pid, ppid, start (epoch seconds), comm, args (optional)}; a FakeProcessInspector for tests; and a macOS implementation using libproc (proc_listallpids, proc_pidinfo PROC_PIDTBSDINFO for ppid, start time and comm) in a file compiled only on macOS (#if os(macOS)) so ASBCore stays portable. Also a helper converting the shell era's procStart strings ('Mon Oct 19 09:12:03 2026', local time, extra spaces allowed) to epoch seconds. Tests: the fake; the real inspector finds the test process itself with a plausible start time and its parent.",
+      "description": "`Sources/ASBCore/Processes.swift`: a `ProcessInspector` protocol with a fake and a libproc implementation.\n\n## Change\n- `protocol ProcessInspector { func snapshot() -> [Int32: ProcessInfo] }` with `ProcessInfo {pid, ppid, start (epoch seconds), comm, args (optional)}`;\n- a `FakeProcessInspector` for tests;\n- and a macOS implementation using libproc (`proc_listallpids`, `proc_pidinfo` `PROC_PIDTBSDINFO` for `ppid`, start time and `comm`) in a file compiled only on macOS (`#if os(macOS)`) so `ASBCore` stays portable.\n- Also a helper converting the shell era's `procStart` strings ('Mon Oct 19 09:12:03 2026', local time, extra spaces allowed) to epoch seconds.\n\n## Tests\n- the fake;\n- the real inspector finds the test process itself with a plausible start time and its parent.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2085,7 +2085,7 @@
         "Tests/ASBCoreTests/ProcessesTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:16:40Z",
+      "updated_at": "2026-10-27T07:23:33Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -2117,7 +2117,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Sources/ASBCore/Checks.swift, start of the reconciler: each session gets `shown = state`; sessions whose pid is gone, or whose process start time differs from procStart, are dropped and their file paths returned as dead (the caller deletes them); sessions without pid are kept. Port the C1 tests from tests/plugin.bats and add conformance cases c1-alive, c1-dead, c1-reused-pid.",
+      "description": "`Sources/ASBCore/Checks.swift`, start of the reconciler: the C1 liveness check.\n\n## Change\n- each session gets `shown = state`;\n- sessions whose `pid` is gone, or whose process start time differs from `procStart`, are dropped and their file paths returned as dead (the caller deletes them);\n- sessions without `pid` are kept.\n\n## Tests\nPort the C1 tests from `tests/plugin.bats` and add conformance cases `c1-alive`, `c1-dead`, `c1-reused-pid`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2133,7 +2133,7 @@
         "tests/conformance/c1-reused-pid/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:18:09Z",
+      "updated_at": "2026-10-27T07:23:33Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:16:40Z",
@@ -2159,7 +2159,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Read Claude Code's registry (~/.claude/sessions/<pid>.json, dir overridable via CLAUDE_STATUSBAR_REGISTRY_DIR for now), match by pid and sessionId, take a user-given name (nameSource != derived) as sessionName, and when statusUpdatedAt is newer than updatedAt map status busy/idle/waiting (waitingFor containing 'permission' → reason permission, else question). An entry without a string status sets a registrySchemaIssue flag (logged once by the caller to plugin.log); unknown statuses are ignored; use_registry=0 turns it off. Port tests/checks.bats C2 cases plus the name tests from reach.bats; conformance cases c2-*.",
+      "description": "Read Claude Code's registry (`~/.claude/sessions/<pid>.json`, dir overridable via `CLAUDE_STATUSBAR_REGISTRY_DIR` for now) for check C2 and session names.\n\n## Change\n- Match by `pid` and `sessionId`, take a user-given name (`nameSource != derived`) as `sessionName`,\n- and when `statusUpdatedAt` is newer than `updatedAt` map `status` `busy`/`idle`/`waiting` (`waitingFor` containing 'permission' → `reason` `permission`, else `question`).\n- An entry without a string `status` sets a `registrySchemaIssue` flag (logged once by the caller to `plugin.log`);\n- unknown statuses are ignored;\n- `use_registry=0` turns it off.\n\n## Tests\nPort `tests/checks.bats` C2 cases plus the name tests from `reach.bats`; conformance cases `c2-*`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2173,7 +2173,7 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:19:13Z",
+      "updated_at": "2026-10-27T07:23:34Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:18:10Z",
@@ -2199,7 +2199,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Sources/ASBCore/Transcript.swift: read the last 8192 bytes of a transcript (drop the first, cut line when the file is larger), parse JSONL entries leniently, and expose mtime. C3: a busy or waiting session whose transcript, after the latest real user prompt (type user, not isMeta, text content, not starting with '[Request interrupted by user'), has the interrupt marker or a system/turn_duration entry becomes idle with shownSince = updatedAt and an interrupted flag. Use the fixtures in tests/fixtures/transcripts. Port the C3 cases from tests/checks.bats; conformance cases c3-*.",
+      "description": "`Sources/ASBCore/Transcript.swift`: read the transcript tail, and add check C3 interrupt.\n\n## Transcript\nRead the last 8192 bytes of a transcript (drop the first, cut line when the file is larger), parse JSONL entries leniently, and expose mtime.\n\n## C3\nA `busy` or `waiting` session whose transcript, after the latest real user prompt (`type` `user`, not `isMeta`, text content, not starting with '[Request interrupted by user'), has the interrupt marker or a `system`/`turn_duration` entry becomes `idle` with `shownSince = updatedAt` and an `interrupted` flag.\n\n## Tests\nUse the fixtures in `tests/fixtures/transcripts`. Port the C3 cases from `tests/checks.bats`; conformance cases `c3-*`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2213,7 +2213,7 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:20:46Z",
+      "updated_at": "2026-10-27T07:23:34Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:19:14Z",
@@ -2239,7 +2239,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "C4: a waiting session whose claude pid has a child process (not caffeinate) started after shownSince/stateSince becomes busy with shownSince = that start. C5: a busy (or subagents) session whose latest activity (updatedAt, shownSince, transcript mtime, start of any child process) is older than stale_minutes (0 = off) becomes uncertain with shownSince = that activity. Port the C4 and C5 cases from tests/checks.bats; conformance cases c4-*, c5-*.",
+      "description": "Add checks C4 (approved tool) and C5 (staleness) to `ASBCore`.\n\n## Checks\n- **C4:** a `waiting` session whose `claude` pid has a child process (not `caffeinate`) started after `shownSince`/`stateSince` becomes `busy` with `shownSince` = that start.\n- **C5:** a `busy` (or `subagents`) session whose latest activity (`updatedAt`, `shownSince`, transcript mtime, start of any child process) is older than `stale_minutes` (0 = off) becomes `uncertain` with `shownSince` = that activity.\n\n## Tests\nPort the C4 and C5 cases from `tests/checks.bats`; conformance cases `c4-*`, `c5-*`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2253,7 +2253,7 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:21:42Z",
+      "updated_at": "2026-10-27T07:23:35Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:20:46Z",
@@ -2279,7 +2279,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Port the 'subagents' state (see doc/PRD.md 'Waiting on subagents'): with entries in subagents, not interrupted, and shown idle, or busy with lastTool Task or Agent, shown becomes subagents with shownSince = earliest subagent since; it runs before C5 and C5 applies to it. Then the filters: show_interactive/headless/ide (ide covers desktop), sessions without kind count as interactive; show_subagents only hides subagent rows. Port the subagent and filter tests from tests/reach.bats; conformance cases.",
+      "description": "Port the 'subagents' state (see `doc/PRD.md` 'Waiting on subagents'), then the session-type filters.\n\n## Subagents state\nWith entries in `subagents`, not interrupted, and shown `idle`, or `busy` with `lastTool` `Task` or `Agent`, `shown` becomes `subagents` with `shownSince` = earliest subagent `since`; it runs before C5 and C5 applies to it.\n\n## Filters\n- `show_interactive`/`headless`/`ide` (`ide` covers desktop), sessions without `kind` count as interactive;\n- `show_subagents` only hides subagent rows.\n\n## Tests\nPort the subagent and filter tests from `tests/reach.bats`; conformance cases.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2293,7 +2293,7 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:22:21Z",
+      "updated_at": "2026-10-27T07:24:33Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:21:42Z",
@@ -2319,7 +2319,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Sources/ASBCore/Mutes.swift: read the mutes file ({cwd:{until,at,today}}; corrupt → empty), compute active mutes (until > now and at >= the latest promptAt of any session in that cwd), mark sessions muteUntil/muteToday and muted (unless shown is waiting), and the mutation functions muteHour(cwd), muteToday(cwd) (until next local midnight), unmute(cwd), unmuteAll(), each dropping expired entries and writing atomically. Port tests/mute.bats logic to Tests/ASBCoreTests/MutesTests.swift with a fake clock and time zone; conformance cases mute-*.",
+      "description": "`Sources/ASBCore/Mutes.swift`: project mutes in the Swift core.\n\n## Change\n- read the mutes file (`{cwd:{until,at,today}}`; corrupt → empty),\n- compute active mutes (`until > now` and `at >=` the latest `promptAt` of any session in that `cwd`),\n- mark sessions `muteUntil`/`muteToday` and `muted` (unless `shown` is `waiting`),\n- and the mutation functions `muteHour(cwd)`, `muteToday(cwd)` (until next local midnight), `unmute(cwd)`, `unmuteAll()`, each dropping expired entries and writing atomically.\n\n## Tests\nPort `tests/mute.bats` logic to `Tests/ASBCoreTests/MutesTests.swift` with a fake clock and time zone; conformance cases `mute-*`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2333,7 +2333,7 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:23:16Z",
+      "updated_at": "2026-10-27T07:24:33Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:22:21Z",
@@ -2359,7 +2359,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Sources/ASBCore/Themes.swift: the built-in themes default, monochrome and high_contrast with symbol and light,dark color for waiting, idle, uncertain, busy, subagents, muted, none, warning (copy the THEMES JSON from swiftbar/swiftbar-claudecode-minimal.5s.sh), unknown theme → default, the legacy icon key for busy and none, and icon_<state>/color_<state> overrides on top. Tests port the theme cases from tests/reach.bats.",
+      "description": "`Sources/ASBCore/Themes.swift`: built-in themes and per-state overrides.\n\n## Change\n- the built-in themes `default`, `monochrome` and `high_contrast` with symbol and light,dark color for waiting, idle, uncertain, busy, subagents, muted, none, warning (copy the `THEMES` JSON from `swiftbar/swiftbar-claudecode-minimal.5s.sh`),\n- unknown theme → `default`,\n- the legacy `icon` key for busy and none,\n- and `icon_<state>`/`color_<state>` overrides on top.\n\n## Tests\nPort the theme cases from `tests/reach.bats`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2371,7 +2371,7 @@
         "Tests/ASBCoreTests/ThemesTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:23:46Z",
+      "updated_at": "2026-10-27T07:24:34Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:23:16Z",
@@ -2397,7 +2397,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Sources/ASBCore/MenuModel.swift builds the Snapshot from reconciled sessions: header priority (warning if invalid files, then waiting, idle, uncertain, busy count over unmuted sessions; all muted → muted symbol without count; none → none symbol), rows sorted by rank (waiting 0, idle 1, uncertain 2, busy/subagents 3, muted 5) then since, label = project (cwd basename or 'unknown') + ' — ' + title (herdr terminal title, then sessionName, then promptPreview), '|' replaced by '│', fitted to 48 characters with '…' or padded, ':name:' broken with a zero-width space; word (permission, question, idle, no activity, waiting on N subagent(s), working); durations (s, m, h, d); mute text ('muted today' or 'muted until HH:MM'); subagent rows sorted by since. Port the row tests from tests/plugin.bats; conformance cases rows-*.",
+      "description": "`Sources/ASBCore/MenuModel.swift` builds the `Snapshot` from reconciled sessions.\n\n## Header\nHeader priority: warning if invalid files, then waiting, idle, uncertain, busy count over unmuted sessions; all muted → muted symbol without count; none → none symbol.\n\n## Rows\n- sorted by rank (waiting 0, idle 1, uncertain 2, busy/subagents 3, muted 5) then `since`;\n- label = project (`cwd` basename or 'unknown') + ' — ' + title (herdr terminal title, then `sessionName`, then `promptPreview`), '|' replaced by '│', fitted to 48 characters with '…' or padded, `:name:` broken with a zero-width space;\n- word (permission, question, idle, no activity, waiting on N subagent(s), working);\n- durations (s, m, h, d);\n- mute text ('muted today' or 'muted until HH:MM');\n- subagent rows sorted by `since`.\n\n## Tests\nPort the row tests from `tests/plugin.bats`; conformance cases `rows-*`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2413,7 +2413,7 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:25:38Z",
+      "updated_at": "2026-10-27T07:24:34Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -2446,7 +2446,7 @@
         "swift-core",
         "cli"
       ],
-      "description": "Add `asb snapshot --json`: gather real inputs (state dir, registry dir, transcripts of busy/waiting sessions, libproc processes, `herdr agent list` with a 1 s timeout into a temp file, config, mutes), run the reconciler and menu model, delete dead state files, log the registry schema issue once to plugin.log, print the snapshot. Must finish under 30 ms for 10 sessions (add a small benchmark in tests/bench.sh or a Swift test). Compare by hand with the shell plugin's output on your live sessions and note any difference in the task.",
+      "description": "Add `asb snapshot --json`, running the core on real inputs.\n\n## Steps\n1. Gather real inputs (state dir, registry dir, transcripts of busy/waiting sessions, libproc processes, `herdr agent list` with a 1 s timeout into a temp file, config, mutes),\n2. run the reconciler and menu model,\n3. delete dead state files,\n4. log the registry schema issue once to `plugin.log`,\n5. print the snapshot.\n\n## Done when\n- Must finish under 30 ms for 10 sessions (add a small benchmark in `tests/bench.sh` or a Swift test).\n- Compare by hand with the shell plugin's output on your live sessions and note any difference in the task.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2460,7 +2460,7 @@
         "tests/bench.sh"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:27:24Z",
+      "updated_at": "2026-10-27T07:24:35Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -2492,7 +2492,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Turn every scenario in tests/checks.bats and tests/plugin.bats that isn't already a conformance case into one under tests/conformance/ (input files plus expected.json). Name cases after the bats test. All must pass `swift test`; any behavior difference from the shell plugin is a bug in the Swift core unless the bats test itself is wrong (then say so in a task note).",
+      "description": "Turn every scenario in `tests/checks.bats` and `tests/plugin.bats` that isn't already a conformance case into one under `tests/conformance/` (input files plus `expected.json`).\n\n## Details\n- Name cases after the bats test.\n- All must pass `swift test`; any behavior difference from the shell plugin is a bug in the Swift core unless the bats test itself is wrong (then say so in a task note).\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2504,7 +2504,7 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:35:17Z",
+      "updated_at": "2026-10-27T07:24:35Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:27:24Z",
@@ -2530,7 +2530,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Same as the previous task for tests/mute.bats and tests/reach.bats (filters, subagents, herdr titles, themes): each scenario becomes a conformance case and passes `swift test`.",
+      "description": "Same as the previous task for `tests/mute.bats` and `tests/reach.bats` (filters, subagents, herdr titles, themes): each scenario becomes a conformance case and passes `swift test`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2542,7 +2542,7 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:38:17Z",
+      "updated_at": "2026-10-27T07:24:36Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:35:17Z",
@@ -2569,7 +2569,7 @@
         "cli",
         "migration"
       ],
-      "description": "Add `asb swiftbar`, printing exactly what swiftbar/swiftbar-claudecode-minimal.5s.sh prints today, from the menu model: header with inline :symbol: and sfcolor/color, '---', invalid-files line, placeholder, rows with font=Menlo size=12 sfcolor and herdr click action, row submenus (not-in-herdr note, mute/unmute, copy id/cwd, open folder, reveal transcript), subagent rows, Unmute all, Show toggles, Settings (Start SwiftBar at login, Theme submenu, stale options, toggles, Reveal config file), Refresh. Actions call `asb action ...` via bash=<path of asb>. Golden tests: capture the shell plugin's output for a few fixture setups into Tests/ASBCoreTests/Golden/ and compare.",
+      "description": "Add `asb swiftbar`, printing exactly what `swiftbar/swiftbar-claudecode-minimal.5s.sh` prints today, from the menu model.\n\n## Output\n- header with inline `:symbol:` and `sfcolor`/`color`,\n- `---`,\n- invalid-files line,\n- placeholder,\n- rows with `font=Menlo size=12 sfcolor` and herdr click action,\n- row submenus (not-in-herdr note, mute/unmute, copy id/cwd, open folder, reveal transcript),\n- subagent rows,\n- Unmute all,\n- Show toggles,\n- Settings (Start SwiftBar at login, Theme submenu, stale options, toggles, Reveal config file),\n- Refresh.\n\nActions call `asb action ...` via `bash=<path of asb>`.\n\n## Tests\nGolden tests: capture the shell plugin's output for a few fixture setups into `Tests/ASBCoreTests/Golden/` and compare.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2582,7 +2582,7 @@
         "Tests/ASBCoreTests/SwiftBarRendererTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:40:11Z",
+      "updated_at": "2026-10-27T07:24:36Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:38:19Z",
@@ -2608,7 +2608,7 @@
       "labels": [
         "cli"
       ],
-      "description": "Add `asb action <name> [args]` for: focus ID (herdr agent focus <pane> then open -b <bundle>, 2 s timeouts, pane and bundle validated as in the shell), toggle KEY (whitelisted keys), set KEY VALUE (stale_minutes 0/10/30/60, theme default/monochrome/high_contrast only), reveal-config (writes the default config with the theme comments if missing, then open -R), copy-id, copy-cwd (pbcopy), open-folder, reveal-transcript, mute-hour, mute-today, unmute, unmute-all, login (toggle the LaunchAgent plist that opens SwiftBar at login). Session IDs must match [A-Za-z0-9_-]+. External commands go through an injectable runner so tests can record calls. Port the action tests from tests/plugin.bats, reach.bats and mute.bats.",
+      "description": "Add `asb action <name> [args]` for every menu action.\n\n## Actions\n- `focus ID` (`herdr agent focus <pane>` then `open -b <bundle>`, 2 s timeouts, pane and bundle validated as in the shell)\n- `toggle KEY` (whitelisted keys)\n- `set KEY VALUE` (`stale_minutes` 0/10/30/60, `theme` `default`/`monochrome`/`high_contrast` only)\n- `reveal-config` (writes the default config with the theme comments if missing, then `open -R`)\n- `copy-id`, `copy-cwd` (`pbcopy`)\n- `open-folder`\n- `reveal-transcript`\n- `mute-hour`, `mute-today`, `unmute`, `unmute-all`\n- `login` (toggle the LaunchAgent plist that opens SwiftBar at login)\n\n## Rules\n- Session IDs must match `[A-Za-z0-9_-]+`.\n- External commands go through an injectable runner so tests can record calls.\n\n## Tests\nPort the action tests from `tests/plugin.bats`, `reach.bats` and `mute.bats`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2622,7 +2622,7 @@
         "Tests/ASBCoreTests/ActionsTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:42:14Z",
+      "updated_at": "2026-10-27T07:24:37Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:40:13Z",
@@ -2648,7 +2648,7 @@
       "labels": [
         "migration"
       ],
-      "description": "Replace the body of swiftbar/swiftbar-claudecode-minimal.5s.sh with a few lines that exec `asb swiftbar` (and `asb action \"$@\"` when called with arguments), finding asb via CLAUDE_STATUSBAR_ASB, else the stable install path ~/Library/Application Support/agentic-status-bar/bin/asb, else .build/release/asb next to the repo; if none exists print a one-line 'run asb install' menu. Update tests/test_helper.bash so the plugin tests build and use the package's asb. All plugin, checks, mute, reach and integration bats tests must pass unchanged in behavior; fix the Swift side, not the tests, unless a test relied on jq internals.",
+      "description": "Replace the body of `swiftbar/swiftbar-claudecode-minimal.5s.sh` with a few lines that exec `asb swiftbar` (and `asb action \"$@\"` when called with arguments).\n\n## Finding asb\n1. `CLAUDE_STATUSBAR_ASB`,\n2. else the stable install path `~/Library/Application Support/agentic-status-bar/bin/asb`,\n3. else `.build/release/asb` next to the repo;\n4. if none exists print a one-line 'run asb install' menu.\n\n## Tests\n- Update `tests/test_helper.bash` so the plugin tests build and use the package's `asb`.\n- All plugin, checks, mute, reach and integration bats tests must pass unchanged in behavior; fix the Swift side, not the tests, unless a test relied on `jq` internals.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2661,7 +2661,7 @@
         "tests/test_helper.bash"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T00:52:11Z",
+      "updated_at": "2026-10-27T07:24:37Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:42:15Z",
@@ -2687,7 +2687,7 @@
       "labels": [
         "hook"
       ],
-      "description": "Add `asb hook`: read the hook payload JSON from stdin and update the session's state file exactly like hooks/state-hook.sh does for SessionStart (idle, except a compact restart keeps state), UserPromptSubmit (busy, promptPreview of 80 chars with whitespace collapsed unless it starts with <task-notification> or store_prompt_preview=0, promptAt unless task notification), PreToolUse (busy, lastTool, clear reason/message), PostToolUse (busy), Notification (permission_prompt → waiting/permission or question when lastTool is AskUserQuestion, elicitation_dialog → question, idle_prompt → idle, else decide by message text, unknown types ignored), Stop (idle, clear reason/message), SubagentStart/SubagentStop (subagents map; the empty-type stop after Stop ignored), SessionEnd (delete the file). stateSince changes only when the state changes. Never print anything and always exit 0, also on bad input or unsafe session IDs. Use the payloads in tests/fixtures/payloads in Swift tests.",
+      "description": "Add `asb hook`: read the hook payload JSON from stdin and update the session's state file exactly like `hooks/state-hook.sh` does.\n\n## Events\n- `SessionStart` (`idle`, except a compact restart keeps state),\n- `UserPromptSubmit` (`busy`, `promptPreview` of 80 chars with whitespace collapsed unless it starts with `<task-notification>` or `store_prompt_preview=0`, `promptAt` unless task notification),\n- `PreToolUse` (`busy`, `lastTool`, clear `reason`/`message`),\n- `PostToolUse` (`busy`),\n- `Notification` (`permission_prompt` → `waiting`/`permission` or `question` when `lastTool` is `AskUserQuestion`, `elicitation_dialog` → `question`, `idle_prompt` → `idle`, else decide by message text, unknown types ignored),\n- `Stop` (`idle`, clear `reason`/`message`),\n- `SubagentStart`/`SubagentStop` (`subagents` map; the empty-type stop after `Stop` ignored),\n- `SessionEnd` (delete the file).\n\n## Rules\n- `stateSince` changes only when the state changes.\n- Never print anything and always exit 0, also on bad input or unsafe session IDs.\n\n## Tests\nUse the payloads in `tests/fixtures/payloads` in Swift tests.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2701,7 +2701,7 @@
         "Tests/ASBCoreTests/HookEventsTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T01:00:32Z",
+      "updated_at": "2026-10-27T07:25:35Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:52:12Z",
@@ -2727,7 +2727,7 @@
       "labels": [
         "hook"
       ],
-      "description": "Port the metadata part of hooks/state-hook.sh: find the claude process by walking parents from CLAUDE_STATUSBAR_PARENT_PID or the parent pid (comm claude, or node with claude in its args) and record pid and procStart (in the same string format as today so old and new files compare), cwd, transcriptPath, kind (CLAUDE_CODE_ENTRYPOINT cli → interactive, sdk-* or a -p/--print flag → headless, IDE values → ide, desktop → desktop), herdrPane from HERDR_PANE_ID, termBundleId from __CFBundleIdentifier. On SessionStart also delete other state files with the same pid. Backfill once: the first non-start event of a session whose file lacks pid or cwd fills them without resetting state or stateSince; pid null when no claude ancestor. Port the corresponding tests from tests/hook.bats.",
+      "description": "Port the metadata part of `hooks/state-hook.sh` to `asb hook`.\n\n## Metadata\nFind the `claude` process by walking parents from `CLAUDE_STATUSBAR_PARENT_PID` or the parent pid (`comm` `claude`, or `node` with `claude` in its args) and record:\n- `pid` and `procStart` (in the same string format as today so old and new files compare),\n- `cwd`,\n- `transcriptPath`,\n- `kind` (`CLAUDE_CODE_ENTRYPOINT` `cli` → `interactive`, `sdk-*` or a `-p`/`--print` flag → `headless`, IDE values → `ide`, `desktop` → `desktop`),\n- `herdrPane` from `HERDR_PANE_ID`,\n- `termBundleId` from `__CFBundleIdentifier`.\n\nOn `SessionStart` also delete other state files with the same `pid`.\n\n## Backfill\nBackfill once: the first non-start event of a session whose file lacks `pid` or `cwd` fills them without resetting `state` or `stateSince`; `pid` null when no `claude` ancestor.\n\n## Tests\nPort the corresponding tests from `tests/hook.bats`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2741,7 +2741,7 @@
         "Tests/ASBCoreTests/HookMetadataTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T01:02:30Z",
+      "updated_at": "2026-10-27T07:25:36Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T01:00:33Z",
@@ -2767,7 +2767,7 @@
       "labels": [
         "hook"
       ],
-      "description": "Port the concurrency rules: a per-session lock (mkdir <file>.lock, 50 tries of 10 ms, give up quietly), skip an event older than the file's updatedAt (the event's start time is taken when the hook starts), write via temp file + rename. When the state changed and instant_refresh=1, open swiftbar://refreshplugin?name=swiftbar-claudecode-minimal in the background, debounced to once per 500 ms via a .last-poke file. Port the lock, ordering and refresh tests from tests/hook.bats.",
+      "description": "Port the concurrency rules and the refresh poke to `asb hook`.\n\n## Concurrency\n- a per-session lock (`mkdir <file>.lock`, 50 tries of 10 ms, give up quietly),\n- skip an event older than the file's `updatedAt` (the event's start time is taken when the hook starts),\n- write via temp file + rename.\n\n## Refresh poke\nWhen the state changed and `instant_refresh=1`, open `swiftbar://refreshplugin?name=swiftbar-claudecode-minimal` in the background, debounced to once per 500 ms via a `.last-poke` file.\n\n## Tests\nPort the lock, ordering and refresh tests from `tests/hook.bats`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2780,7 +2780,7 @@
         "Tests/ASBCoreTests/StateWriterTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T01:03:47Z",
+      "updated_at": "2026-10-27T07:25:36Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T01:02:32Z",
@@ -2807,7 +2807,7 @@
         "hook",
         "migration"
       ],
-      "description": "Switch run_hook in tests/test_helper.bash to call `asb hook` (built from the package) instead of hooks/state-hook.sh, and make tests/hook.bats and tests/integration.bats pass. Update tests/bench.sh to time `asb hook`: median must be at most 10 ms (today's sh hook: 19–20 ms). Record the numbers in the task note.",
+      "description": "Switch `run_hook` in `tests/test_helper.bash` to call `asb hook` (built from the package) instead of `hooks/state-hook.sh`, and make `tests/hook.bats` and `tests/integration.bats` pass.\n\n## Benchmark\nUpdate `tests/bench.sh` to time `asb hook`: median must be at most 10 ms (today's sh hook: 19–20 ms). Record the numbers in the task note.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2820,7 +2820,7 @@
         "tests/bench.sh"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T01:06:07Z",
+      "updated_at": "2026-10-27T07:25:37Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T01:03:49Z",
@@ -2847,7 +2847,7 @@
         "cli",
         "hook"
       ],
-      "description": "Port install.sh and uninstall.sh to `asb install` / `asb uninstall [--purge]`: copy the running asb to ~/Library/Application Support/agentic-status-bar/bin/asb; back up ~/.claude/settings.json (CLAUDE_STATUSBAR_SETTINGS overrides) and add one async hook per event (SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Notification, Stop, SubagentStart, SubagentStop, SessionEnd) running \"'<stable path>' hook # agentic-status-bar\", keeping all other hooks and key order; remove entries carrying the old '# swiftbar-claudecode-minimal' marker; refuse an invalid settings file; link the SwiftBar plugin while it exists (CLAUDE_STATUSBAR_SWIFTBAR_DIR or SwiftBar's PluginDirectory). Uninstall removes our hooks (and empty groups), the stable copy, the SwiftBar link and the login item; --purge also state and config, otherwise ask on a TTY. Idempotent. Port tests/install.bats to Swift tests on temp homes.",
+      "description": "Port `install.sh` and `uninstall.sh` to `asb install` / `asb uninstall [--purge]`. Idempotent.\n\n## Install\n- copy the running `asb` to `~/Library/Application Support/agentic-status-bar/bin/asb`;\n- back up `~/.claude/settings.json` (`CLAUDE_STATUSBAR_SETTINGS` overrides) and add one async hook per event (`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Notification`, `Stop`, `SubagentStart`, `SubagentStop`, `SessionEnd`) running `\"'<stable path>' hook # agentic-status-bar\"`, keeping all other hooks and key order;\n- remove entries carrying the old `# swiftbar-claudecode-minimal` marker;\n- refuse an invalid settings file;\n- link the SwiftBar plugin while it exists (`CLAUDE_STATUSBAR_SWIFTBAR_DIR` or SwiftBar's `PluginDirectory`).\n\n## Uninstall\nUninstall removes our hooks (and empty groups), the stable copy, the SwiftBar link and the login item; `--purge` also state and config, otherwise ask on a TTY.\n\n## Tests\nPort `tests/install.bats` to Swift tests on temp homes.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2860,7 +2860,7 @@
         "Tests/ASBCoreTests/InstallTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T01:12:17Z",
+      "updated_at": "2026-10-27T07:25:38Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T01:06:08Z",
@@ -2886,7 +2886,7 @@
       "labels": [
         "migration"
       ],
-      "description": "Apply the renames from doc/design/future-architecture.md 'Renames': state dir ~/.claude/agentic-status-bar/, config ~/.config/agentic-status-bar/config, environment overrides ASB_STATE_DIR, ASB_CONFIG, ASB_REGISTRY_DIR, ASB_HERDR, ASB_SETTINGS, ASB_SWIFTBAR_DIR, ASB_PARENT_PID, ASB_BIN (replacing CLAUDE_STATUSBAR_*), login item label agentic-status-bar.start-swiftbar, refresh URL name of the renamed plugin file (agentic-status-bar.5s.sh), display name 'Agentic Status Bar'. `asb install` moves an existing old state dir's mutes and config to the new paths, removes the old login item and old SwiftBar link. Update tests and helpers to the new names.",
+      "description": "Apply the renames from `doc/design/future-architecture.md` 'Renames'.\n\n## Renames\n- state dir `~/.claude/agentic-status-bar/`,\n- config `~/.config/agentic-status-bar/config`,\n- environment overrides `ASB_STATE_DIR`, `ASB_CONFIG`, `ASB_REGISTRY_DIR`, `ASB_HERDR`, `ASB_SETTINGS`, `ASB_SWIFTBAR_DIR`, `ASB_PARENT_PID`, `ASB_BIN` (replacing `CLAUDE_STATUSBAR_*`),\n- login item label `agentic-status-bar.start-swiftbar`,\n- refresh URL name of the renamed plugin file (`agentic-status-bar.5s.sh`),\n- display name 'Agentic Status Bar'.\n\n## Migration\n`asb install` moves an existing old state dir's mutes and config to the new paths, removes the old login item and old SwiftBar link.\n\n## Tests\nUpdate tests and helpers to the new names.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2900,7 +2900,7 @@
         "tests/test_helper.bash"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T04:26:04Z",
+      "updated_at": "2026-10-27T07:25:38Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -2930,7 +2930,7 @@
       "labels": [
         "migration"
       ],
-      "description": "Delete hooks/state-hook.sh, lib/common.sh, install.sh, uninstall.sh and the bats tests that only exercised shell internals (tests/common.bats); keep the bats tests that check the CLI end to end. Update .claude-plugin/plugin.json and hooks/hooks.json so the Claude Code plugin route runs the stable `asb hook` path (or drop that route and say so in the README). Update tests/lint.sh for the files left (the one-line SwiftBar plugin). README install becomes: build with `swift build -c release`, then `.build/release/asb install`. CI green.",
+      "description": "Remove the shell hook, `jq` code and install scripts.\n\n## Change\n- Delete `hooks/state-hook.sh`, `lib/common.sh`, `install.sh`, `uninstall.sh` and the bats tests that only exercised shell internals (`tests/common.bats`); keep the bats tests that check the CLI end to end.\n- Update `.claude-plugin/plugin.json` and `hooks/hooks.json` so the Claude Code plugin route runs the stable `asb hook` path (or drop that route and say so in the README).\n- Update `tests/lint.sh` for the files left (the one-line SwiftBar plugin).\n- README install becomes: build with `swift build -c release`, then `.build/release/asb install`.\n\n## Done when\nCI green.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2952,7 +2952,7 @@
         "README.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T04:30:17Z",
+      "updated_at": "2026-10-27T07:25:39Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -2984,7 +2984,7 @@
       "labels": [
         "migration"
       ],
-      "description": "Rename hakanserce/swiftbar-claudecode-minimal to hakanserce/agentic-status-bar with `gh repo rename agentic-status-bar` (decided by the user; GitHub keeps redirects), update the local remote URL, and update names, clone URLs and paths in README.md, CONTRIBUTING.md, doc/PRD.md, .claude-plugin/marketplace.json and plugin.json. Don't use real project names in examples.",
+      "description": "Rename `hakanserce/swiftbar-claudecode-minimal` to `hakanserce/agentic-status-bar` with `gh repo rename agentic-status-bar` (decided by the user; GitHub keeps redirects).\n\n## Change\n- update the local remote URL,\n- and update names, clone URLs and paths in `README.md`, `CONTRIBUTING.md`, `doc/PRD.md`, `.claude-plugin/marketplace.json` and `plugin.json`.\n\nDon't use real project names in examples.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -2999,7 +2999,7 @@
         ".claude-plugin/plugin.json"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T05:49:57Z",
+      "updated_at": "2026-10-27T07:25:40Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T05:48:55Z",
@@ -3025,7 +3025,7 @@
       "labels": [
         "app"
       ],
-      "description": "Create the app with XcodeGen (App/project.yml generating App/AgenticStatusBar.xcodeproj, which is git-ignored): bundle ID com.hakanserce.agentic-status-bar, macOS 14, LSUIElement (no Dock icon), hardened runtime, linking ASBCore from the local package and copying the asb executable into Contents/Helpers. An AppDelegate that starts and shows a placeholder status item. Add `xcodegen generate && xcodebuild build` to CI (unsigned). Document in CONTRIBUTING.md.",
+      "description": "Create the app with XcodeGen (`App/project.yml` generating `App/AgenticStatusBar.xcodeproj`, which is git-ignored).\n\n## Project\n- bundle ID `com.hakanserce.agentic-status-bar`,\n- macOS 14,\n- `LSUIElement` (no Dock icon),\n- hardened runtime,\n- linking `ASBCore` from the local package and copying the `asb` executable into `Contents/Helpers`.\n\nAn `AppDelegate` that starts and shows a placeholder status item.\n\n## CI and docs\nAdd `xcodegen generate && xcodebuild build` to CI (unsigned). Document in `CONTRIBUTING.md`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3041,7 +3041,7 @@
         "CONTRIBUTING.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T04:31:27Z",
+      "updated_at": "2026-10-27T07:25:40Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T04:30:17Z",
@@ -3067,7 +3067,7 @@
       "labels": [
         "app"
       ],
-      "description": "App/Sources/SessionStore.swift: an @Observable store that computes the ASBCore snapshot off the main thread when the state dir, registry dir, mutes file or config change (FSEvents or DispatchSource, coalesced to at most every 200 ms) and every 5 s (for process liveness and staleness), deletes dead files as the CLI does, and publishes the snapshot on the main actor. Unit test the coalescing with a fake trigger.",
+      "description": "`App/Sources/SessionStore.swift`: an `@Observable` store that computes the `ASBCore` snapshot off the main thread.\n\n## Details\n- Recompute when the state dir, registry dir, mutes file or config change (FSEvents or `DispatchSource`, coalesced to at most every 200 ms) and every 5 s (for process liveness and staleness),\n- delete dead files as the CLI does,\n- and publish the snapshot on the main actor.\n\n## Tests\nUnit test the coalescing with a fake trigger.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3079,7 +3079,7 @@
         "App/Tests/SessionStoreTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T04:33:16Z",
+      "updated_at": "2026-10-27T07:25:41Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T04:31:28Z",
@@ -3105,7 +3105,7 @@
       "labels": [
         "app"
       ],
-      "description": "App/Sources/StatusItemController.swift: an NSStatusItem whose button shows the header's SF Symbol (non-template, tinted with the theme color for the current menu-bar appearance, light or dark) and the count as an attributed title in the same color; updates on every snapshot. Check by hand in light and dark menu bars with each header state (use fixture state dirs via ASB_STATE_DIR) and note the result.",
+      "description": "`App/Sources/StatusItemController.swift`: an `NSStatusItem` whose button shows the header's SF Symbol (non-template, tinted with the theme color for the current menu-bar appearance, light or dark) and the count as an attributed title in the same color; updates on every snapshot. Check by hand in light and dark menu bars with each header state (use fixture state dirs via `ASB_STATE_DIR`) and note the result.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3116,7 +3116,7 @@
         "App/Sources/StatusItemController.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T04:36:38Z",
+      "updated_at": "2026-10-27T07:26:30Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T04:33:17Z",
@@ -3142,7 +3142,7 @@
       "labels": [
         "app"
       ],
-      "description": "Clicking the status item opens an NSPopover hosting a SwiftUI list: one row per session in snapshot order (state symbol in its color, project — title, state word, duration or mute text), subagent rows indented, muted rows last, a 'No Claude Code sessions' placeholder and an invalid-files note. Clicking a row focuses it (herdr) when it has a pane; the popover closes on outside click. Keep rows compact (menu-like height).",
+      "description": "Clicking the status item opens an `NSPopover` hosting a SwiftUI list.\n\n## List\n- one row per session in snapshot order (state symbol in its color, project — title, state word, duration or mute text),\n- subagent rows indented,\n- muted rows last,\n- a 'No Claude Code sessions' placeholder and an invalid-files note.\n\n## Behavior\n- Clicking a row focuses it (herdr) when it has a pane; the popover closes on outside click.\n- Keep rows compact (menu-like height).\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3155,7 +3155,7 @@
         "App/Sources/StatusItemController.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T04:39:27Z",
+      "updated_at": "2026-10-27T07:26:30Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T04:36:42Z",
@@ -3181,7 +3181,7 @@
       "labels": [
         "app"
       ],
-      "description": "Each row gets a context menu (and a hover '…' button): Mute project for 1 hour / for today, or Unmute project; Copy session ID; Copy working directory; Open folder in Finder; Reveal transcript; Focus (when in herdr). An 'Unmute all projects' button shows while mutes are active. Use the ASBCore action functions directly (not the CLI).",
+      "description": "Each row gets a context menu (and a hover '…' button), plus an 'Unmute all projects' button.\n\n## Row menu\n- Mute project for 1 hour / for today, or Unmute project;\n- Copy session ID;\n- Copy working directory;\n- Open folder in Finder;\n- Reveal transcript;\n- Focus (when in herdr).\n\n## Details\n- An 'Unmute all projects' button shows while mutes are active.\n- Use the `ASBCore` action functions directly (not the CLI).\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3194,7 +3194,7 @@
         "App/Sources/PopoverView.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T04:43:12Z",
+      "updated_at": "2026-10-27T07:26:31Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T04:39:33Z",
@@ -3220,7 +3220,7 @@
       "labels": [
         "app"
       ],
-      "description": "A SwiftUI Settings scene (opened from the popover's gear button): session types to show, subagent rows, stale threshold (10/30/60 min, never), theme picker plus per-state symbol (text field with SF Symbol preview) and color (ColorPicker for light and dark) overrides, use registry, instant refresh, store prompt previews, and 'Reveal config file'. Settings read and write the same config file as the CLI (the open question about a separate store stays open; the file keeps CLI and app in sync).",
+      "description": "A SwiftUI Settings scene (opened from the popover's gear button).\n\n## Settings\n- session types to show,\n- subagent rows,\n- stale threshold (10/30/60 min, never),\n- theme picker plus per-state symbol (text field with SF Symbol preview) and color (`ColorPicker` for light and dark) overrides,\n- use registry,\n- instant refresh,\n- store prompt previews,\n- and 'Reveal config file'.\n\n## Storage\nSettings read and write the same config file as the CLI (the open question about a separate store stays open; the file keeps CLI and app in sync).\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3232,7 +3232,7 @@
         "App/Sources/AgenticStatusBarApp.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T05:23:13Z",
+      "updated_at": "2026-10-27T07:26:31Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T04:43:20Z",
@@ -3258,7 +3258,7 @@
       "labels": [
         "app"
       ],
-      "description": "A 'Start at login' toggle in Settings using SMAppService.mainApp (register/unregister, status shown, a hint to System Settings › Login Items when approval is required). On first enable, remove the SwiftBar-era LaunchAgent (agentic-status-bar.start-swiftbar) if present.",
+      "description": "A 'Start at login' toggle in Settings using `SMAppService.mainApp` (register/unregister, status shown, a hint to System Settings › Login Items when approval is required). On first enable, remove the SwiftBar-era LaunchAgent (`agentic-status-bar.start-swiftbar`) if present.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3270,7 +3270,7 @@
         "App/Sources/SettingsView.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T05:53:26Z",
+      "updated_at": "2026-10-27T07:26:32Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T05:50:02Z",
@@ -3297,7 +3297,7 @@
         "app",
         "hook"
       ],
-      "description": "On launch, if the hooks aren't installed, show a short first-run window explaining what will change (hooks added to ~/.claude/settings.json, backed up) and run the bundled asb install on confirmation. On every launch, if the stable copy at ~/Library/Application Support/agentic-status-bar/bin/asb differs in version from the bundled one, replace it. Settings gets 'Remove hooks…' (asb uninstall) with a confirmation. Remind the user that running sessions pick up hooks on restart.",
+      "description": "On launch, if the hooks aren't installed, show a short first-run window explaining what will change (hooks added to `~/.claude/settings.json`, backed up) and run the bundled `asb install` on confirmation.\n\n## Details\n- On every launch, if the stable copy at `~/Library/Application Support/agentic-status-bar/bin/asb` differs in version from the bundled one, replace it.\n- Settings gets 'Remove hooks…' (`asb uninstall`) with a confirmation.\n- Remind the user that running sessions pick up hooks on restart.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3311,7 +3311,7 @@
         "App/Sources/SettingsView.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T05:48:51Z",
+      "updated_at": "2026-10-27T07:26:32Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -3344,7 +3344,7 @@
         "app",
         "notifications"
       ],
-      "description": "Use UNUserNotificationCenter (ask permission on first need). Notify once when a session has been waiting (permission or question) for 10 seconds (decided default), including in muted projects since waiting breaks through mutes; not again until it leaves waiting. Idle notifications exist but are off by default. A category with actions 'Focus' (herdr focus) and 'Mute project for 1 hour'; clicking the notification focuses too. Put the rule logic (transitions, debounce, mute handling) in a testable NotificationRules type with unit tests.",
+      "description": "Use `UNUserNotificationCenter` (ask permission on first need) to notify when a session waits on you.\n\n## Rules\n- Notify once when a session has been waiting (permission or question) for 10 seconds (decided default), including in muted projects since waiting breaks through mutes; not again until it leaves waiting.\n- Idle notifications exist but are off by default.\n\n## Actions\nA category with actions 'Focus' (herdr focus) and 'Mute project for 1 hour'; clicking the notification focuses too.\n\n## Tests\nPut the rule logic (transitions, debounce, mute handling) in a testable `NotificationRules` type with unit tests.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3357,7 +3357,7 @@
         "App/Tests/NotificationRulesTests.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T05:58:09Z",
+      "updated_at": "2026-10-27T07:26:33Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T05:53:29Z",
@@ -3384,7 +3384,7 @@
         "app",
         "notifications"
       ],
-      "description": "Settings section: notify when waiting (on), when idle (off), delay (5, 10, 30, 60 s; default 10), sound on/off, and a 'Send test notification' button. Store as new config keys (notify_waiting, notify_idle, notify_delay_seconds, notify_sound) validated in ASBCore Config; update doc/state-file-schema.md's config section.",
+      "description": "Settings section: notify when waiting (on), when idle (off), delay (5, 10, 30, 60 s; default 10), sound on/off, and a 'Send test notification' button. Store as new config keys (`notify_waiting`, `notify_idle`, `notify_delay_seconds`, `notify_sound`) validated in `ASBCore` `Config`; update `doc/state-file-schema.md`'s config section.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3398,7 +3398,7 @@
         "doc/state-file-schema.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T06:04:32Z",
+      "updated_at": "2026-10-27T07:26:33Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T05:58:10Z",
@@ -3424,7 +3424,7 @@
       "labels": [
         "app"
       ],
-      "description": "Add App tests: the status item's title and color per header state, row view models (labels, words, muted rows last), action wiring with a fake action runner, and NotificationRules edge cases (quick approval within the delay, muted waiting, session ending while waiting). Run them in CI with xcodebuild test.",
+      "description": "Add App tests: the status item's title and color per header state, row view models (labels, words, muted rows last), action wiring with a fake action runner, and `NotificationRules` edge cases (quick approval within the delay, muted waiting, session ending while waiting). Run them in CI with `xcodebuild test`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3437,7 +3437,7 @@
         ".github/workflows/ci.yml"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T06:06:15Z",
+      "updated_at": "2026-10-27T07:26:34Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T06:04:34Z",
@@ -3463,7 +3463,7 @@
       "labels": [
         "release"
       ],
-      "description": "A tag-triggered workflow (.github/workflows/release.yml): import the Developer ID Application certificate from secrets, archive the app with hardened runtime, sign the embedded asb too, notarize with notarytool (App Store Connect API key from secrets), staple, and produce agentic-status-bar-<version>.zip (only the .app) and a DMG with versioned names. Needs the user to create the certificate and API key and add the secrets: if they're missing, block this task on the user with the exact secret names needed.",
+      "description": "A tag-triggered workflow (`.github/workflows/release.yml`) that signs, notarizes and packages the app.\n\n## Steps\n1. import the Developer ID Application certificate from secrets,\n2. archive the app with hardened runtime,\n3. sign the embedded `asb` too,\n4. notarize with `notarytool` (App Store Connect API key from secrets),\n5. staple,\n6. and produce `agentic-status-bar-<version>.zip` (only the `.app`) and a DMG with versioned names.\n\n## Prerequisites\nNeeds the user to create the certificate and API key and add the secrets: if they're missing, block this task on the user with the exact secret names needed.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3475,7 +3475,7 @@
         "scripts/notarize.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T23:53:12Z",
+      "updated_at": "2026-10-27T07:26:34Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -3512,7 +3512,7 @@
       "labels": [
         "release"
       ],
-      "description": "Add Sparkle 2 via Swift Package Manager, an EdDSA key pair (public key in Info.plist, private key as a secret provided by the user), a 'Check for Updates…' item, and release.yml steps that upload the zip and DMG to the GitHub Release at .../releases/download/v<version>/agentic-status-bar-<version>.zip and publish an updated appcast.xml. App, CLI and tag versions must match (one source of truth). Document the release steps in CONTRIBUTING.md and add an Updates section to README.md (T-093 wrote the rest of the README first).",
+      "description": "Add Sparkle 2 via Swift Package Manager and publish updates through GitHub Releases.\n\n## Change\n- an EdDSA key pair (public key in `Info.plist`, private key as a secret provided by the user),\n- a 'Check for Updates…' item,\n- and `release.yml` steps that upload the zip and DMG to the GitHub Release at `.../releases/download/v<version>/agentic-status-bar-<version>.zip` and publish an updated `appcast.xml`.\n\nApp, CLI and tag versions must match (one source of truth).\n\n## Docs\nDocument the release steps in `CONTRIBUTING.md` and add an Updates section to `README.md` (T-093 wrote the rest of the README first).\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3527,7 +3527,7 @@
         "README.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-27T04:54:08Z",
+      "updated_at": "2026-10-27T07:27:28Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -3564,7 +3564,7 @@
       "labels": [
         "migration"
       ],
-      "description": "Once the app covers everything the SwiftBar plugin does (check the README feature list one by one and note it in the task), delete swiftbar/, `asb swiftbar` and its renderer, the `login` LaunchAgent action, the remaining bats tests, tests/test_helper.bash, tests/run.sh and tests/lint.sh, and the bats/shellcheck CI job. `asb install` and `asb uninstall` stop linking the SwiftBar plugin but still remove an old link. The Swift tests and the conformance suite are the only suites left.",
+      "description": "Once the app covers everything the SwiftBar plugin does (check the README feature list one by one and note it in the task), remove the SwiftBar plugin, the remaining shell and bats.\n\n## Delete\n- `swiftbar/`,\n- `asb swiftbar` and its renderer,\n- the `login` LaunchAgent action,\n- the remaining bats tests,\n- `tests/test_helper.bash`, `tests/run.sh` and `tests/lint.sh`,\n- and the bats/shellcheck CI job.\n\n## Details\n- `asb install` and `asb uninstall` stop linking the SwiftBar plugin but still remove an old link.\n- The Swift tests and the conformance suite are the only suites left.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3585,7 +3585,7 @@
         "Sources/asb/Install.swift"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T06:20:13Z",
+      "updated_at": "2026-10-27T07:27:28Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T06:09:44Z",
@@ -3617,7 +3617,7 @@
       "labels": [
         "migration"
       ],
-      "description": "Rewrite README.md for Agentic Status Bar: what it shows (icon legend for the app), install from the DMG, first run and hooks, the popover and row actions, muting, settings and themes, notifications, start at login, updates, `asb` CLI (hook, install, uninstall, snapshot), uninstall, troubleshooting. Update doc/PRD.md from SwiftBar to the app (UX, architecture, distribution) and CONTRIBUTING.md (swift build/test, xcodegen, release). Mark the migration done in doc/design/future-architecture.md. No real project names in examples.",
+      "description": "Rewrite `README.md` for Agentic Status Bar, and update the PRD, CONTRIBUTING and design doc for the app.\n\n## README\n- what it shows (icon legend for the app),\n- install from the DMG,\n- first run and hooks,\n- the popover and row actions,\n- muting,\n- settings and themes,\n- notifications,\n- start at login,\n- updates,\n- `asb` CLI (`hook`, `install`, `uninstall`, `snapshot`),\n- uninstall,\n- troubleshooting.\n\n## Other docs\n- Update `doc/PRD.md` from SwiftBar to the app (UX, architecture, distribution) and `CONTRIBUTING.md` (`swift build`/`test`, `xcodegen`, release).\n- Mark the migration done in `doc/design/future-architecture.md`.\n\nNo real project names in examples.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3633,7 +3633,7 @@
         "doc/snapshot-schema.md"
       ],
       "created_at": "2026-10-25T23:56:22Z",
-      "updated_at": "2026-10-26T06:38:30Z",
+      "updated_at": "2026-10-27T07:27:29Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T06:26:18Z",
@@ -3659,7 +3659,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Add swift build/test, tests/swift.sh, xcodegen and xcodebuild to the project allowlist in .claude/settings.json so the Swift migration loop runs without approval prompts.",
+      "description": "Add `swift build`/`test`, `tests/swift.sh`, `xcodegen` and `xcodebuild` to the project allowlist in `.claude/settings.json` so the Swift migration loop runs without approval prompts.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3668,7 +3668,7 @@
         ".claude/settings.json"
       ],
       "created_at": "2026-10-26T00:01:05Z",
-      "updated_at": "2026-10-26T00:01:06Z",
+      "updated_at": "2026-10-27T07:27:29Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T00:01:05Z",
@@ -3694,7 +3694,7 @@
       "labels": [
         "swift-core"
       ],
-      "description": "Add tests/swift.sh --summary (only failures and totals, so no pipes are needed) and allowlist read-only and repo-local commands in .claude/settings.json (.build asb, git status/mv/rm, ls, jq).",
+      "description": "Add `tests/swift.sh --summary` (only failures and totals, so no pipes are needed) and allowlist read-only and repo-local commands in `.claude/settings.json` (`.build` asb, `git status`/`mv`/`rm`, `ls`, `jq`).\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3704,7 +3704,7 @@
         ".claude/settings.json"
       ],
       "created_at": "2026-10-26T04:25:18Z",
-      "updated_at": "2026-10-26T04:25:38Z",
+      "updated_at": "2026-10-27T07:27:30Z",
       "created_by": "claude:c631bc24",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T04:25:18Z",
@@ -3730,7 +3730,7 @@
       "labels": [
         "hook"
       ],
-      "description": "The newer-wins rule compares a hook's start time with the file's updatedAt (the previous write time), so hooks that start close together drop each other: of three SubagentStart events in the same millisecond window only one or two land (a session with 3 subagents shows 2), and a Stop is dropped when a PostToolUse that started just before it writes first (the file stays busy). Fix: record the applied event's start time in a new field eventAt and compare against that (a file without it accepts the event). SubagentStart/SubagentStop older than eventAt still add or remove their subagent (the map is keyed by agent ID, so order doesn't matter) but change nothing else. Update doc/state-file-schema.md (field table, Newer wins), HookEventsTests and the bats test.",
+      "description": "The newer-wins rule compares a hook's start time with the file's `updatedAt` (the previous write time), so hooks that start close together drop each other.\n\n## Symptoms\n- of three `SubagentStart` events in the same millisecond window only one or two land (a session with 3 subagents shows 2),\n- and a `Stop` is dropped when a `PostToolUse` that started just before it writes first (the file stays busy).\n\n## Fix\n- Record the applied event's start time in a new field `eventAt` and compare against that (a file without it accepts the event).\n- `SubagentStart`/`SubagentStop` older than `eventAt` still add or remove their subagent (the map is keyed by agent ID, so order doesn't matter) but change nothing else.\n\n## Docs and tests\nUpdate `doc/state-file-schema.md` (field table, Newer wins), `HookEventsTests` and the bats test.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3742,7 +3742,7 @@
         "doc/state-file-schema.md"
       ],
       "created_at": "2026-10-26T05:12:19Z",
-      "updated_at": "2026-10-26T05:16:01Z",
+      "updated_at": "2026-10-27T07:27:31Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T05:12:57Z",
@@ -3768,7 +3768,7 @@
       "labels": [
         "checks"
       ],
-      "description": "C3 marks a busy session idle when its transcript shows the turn ended, and always sets interrupted, which keeps the subagents check from showing 'waiting on subagents' (the parent shows zzz while its subagents work). Only the interrupt marker (Esc, denied permission) can stop subagents; a normal turn end (turn_duration) means the Stop hook was missed. Set interrupted only for the marker. Add a TranscriptTests/ChecksTests case and a conformance case (busy file, ended turn, running subagents -> subagents).",
+      "description": "C3 marks a busy session idle when its transcript shows the turn ended, and always sets `interrupted`, which keeps the subagents check from showing 'waiting on subagents' (the parent shows `zzz` while its subagents work).\n\n## Fix\nOnly the interrupt marker (Esc, denied permission) can stop subagents; a normal turn end (`turn_duration`) means the `Stop` hook was missed. Set `interrupted` only for the marker.\n\n## Tests\nAdd a `TranscriptTests`/`ChecksTests` case and a conformance case (busy file, ended turn, running subagents -> `subagents`).\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3779,7 +3779,7 @@
         "tests/conformance"
       ],
       "created_at": "2026-10-26T05:12:19Z",
-      "updated_at": "2026-10-26T05:18:49Z",
+      "updated_at": "2026-10-27T07:27:31Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T05:16:07Z",
@@ -3805,7 +3805,7 @@
       "labels": [
         "hook"
       ],
-      "description": "A background subagent fires SubagentStop each time it pauses to wait on its own background work, and SubagentStart when it resumes, so the list drops agents Claude Code still shows as working. Stop and SubagentStop payloads carry background_tasks, the parent session's in-flight task registry (hooks docs › Stop input). Use it: entries of type 'subagent' (not in a finished status) are running background subagents, keyed by id (= agent_id), marked background. On Stop the subagent list becomes exactly those (no foreground subagent runs while the main agent stops). On SubagentStop, the stopping agent stays when it is still in the list (paused), other background-marked agents missing from the list are removed, foreground ones are left alone; an older SubagentStop only removes or keeps its own agent. Without background_tasks the old add/remove rules apply. Keep each agent's first since. Update doc/state-file-schema.md, HookEventsTests, a payload fixture.",
+      "description": "A background subagent fires `SubagentStop` each time it pauses to wait on its own background work, and `SubagentStart` when it resumes, so the list drops agents Claude Code still shows as working.\n\n## Why\n`Stop` and `SubagentStop` payloads carry `background_tasks`, the parent session's in-flight task registry (hooks docs › Stop input).\n\n## Change\nUse it: entries of type `subagent` (not in a finished status) are running background subagents, keyed by `id` (= `agent_id`), marked background.\n- On `Stop` the subagent list becomes exactly those (no foreground subagent runs while the main agent stops).\n- On `SubagentStop`, the stopping agent stays when it is still in the list (paused), other background-marked agents missing from the list are removed, foreground ones are left alone; an older `SubagentStop` only removes or keeps its own agent.\n- Without `background_tasks` the old add/remove rules apply.\n- Keep each agent's first `since`.\n\n## Docs and tests\nUpdate `doc/state-file-schema.md`, `HookEventsTests`, a payload fixture.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3816,7 +3816,7 @@
         "doc/state-file-schema.md"
       ],
       "created_at": "2026-10-26T05:37:35Z",
-      "updated_at": "2026-10-26T05:42:02Z",
+      "updated_at": "2026-10-27T07:27:32Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T05:37:44Z",
@@ -3842,7 +3842,7 @@
       "labels": [
         "app"
       ],
-      "description": "The app is a menu-bar-only app (LSUIElement: no Dock icon, no app menu), so it can't be quit. Add a Quit button at the bottom of the session list popover, next to the gear button, that quits the app (NSApp.terminate). Add an app test if practical. README.md already describes 'Quit at the bottom of the session list'.",
+      "description": "The app is a menu-bar-only app (`LSUIElement`: no Dock icon, no app menu), so it can't be quit.\n\n## Change\n- Add a Quit button at the bottom of the session list popover, next to the gear button, that quits the app (`NSApp.terminate`).\n- Add an app test if practical.\n\n`README.md` already describes 'Quit at the bottom of the session list'.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3852,7 +3852,7 @@
         "App/Tests/PopoverTests.swift"
       ],
       "created_at": "2026-10-26T06:32:59Z",
-      "updated_at": "2026-10-26T06:35:08Z",
+      "updated_at": "2026-10-27T07:27:32Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-26T06:33:34Z",
@@ -3878,7 +3878,7 @@
       "labels": [
         "app"
       ],
-      "description": "The app has no icon: Finder, the DMG, the Settings and first-run windows, notifications and the About panel show the generic app icon. Design an app icon that fits the idea (a menu-bar status light for Claude Code sessions, in the macOS Big Sur+ rounded-square style) and keep it reproducible: a small script (scripts/make-icon.swift or similar, drawing with CoreGraphics/AppKit) renders every macOS size (16, 32, 128, 256, 512 at 1x and 2x) into App/Resources/Assets.xcassets/AppIcon.appiconset with its Contents.json. Add the asset catalog to the app target in App/project.yml (ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon), regenerate the Xcode project, and check the built app's Contents/Resources has AppIcon.icns / Assets.car and that Finder shows the icon. Show the user the icon for approval before marking done.",
+      "description": "The app has no icon: Finder, the DMG, the Settings and first-run windows, notifications and the About panel show the generic app icon.\n\n## Design\nDesign an app icon that fits the idea (a menu-bar status light for Claude Code sessions, in the macOS Big Sur+ rounded-square style) and keep it reproducible: a small script (`scripts/make-icon.swift` or similar, drawing with CoreGraphics/AppKit) renders every macOS size (16, 32, 128, 256, 512 at 1x and 2x) into `App/Resources/Assets.xcassets/AppIcon.appiconset` with its `Contents.json`.\n\n## Wire up\n1. Add the asset catalog to the app target in `App/project.yml` (`ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon`),\n2. regenerate the Xcode project,\n3. and check the built app's `Contents/Resources` has `AppIcon.icns` / `Assets.car` and that Finder shows the icon.\n\n## Done when\nShow the user the icon for approval before marking done.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3891,7 +3891,7 @@
         "App/AgenticStatusBar.xcodeproj/project.pbxproj"
       ],
       "created_at": "2026-10-27T00:07:46Z",
-      "updated_at": "2026-10-27T00:27:41Z",
+      "updated_at": "2026-10-27T07:27:33Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T00:09:24Z",
@@ -3917,7 +3917,7 @@
       "labels": [
         "app"
       ],
-      "description": "The app is LSUIElement, with no app menu, so there's no About dialog. Add an About entry (an \"About Agentic Status Bar\" button in the Settings General tab footer, and/or an item next to Quit and the gear in the popover's bottom row) that activates the app and opens the standard panel with NSApp.orderFrontStandardAboutPanel(options:): the app icon, the name, version (CFBundleShortVersionString) and build (CFBundleVersion), a copyright line (NSHumanReadableCopyright in the Info.plist via project.yml) and credits with a link to https://github.com/hakanserce/agentic-status-bar. The popover closes before the panel opens. Add an app test for the options passed if practical; the user checks it visually before it's marked done.",
+      "description": "The app is `LSUIElement`, with no app menu, so there's no About dialog.\n\n## Change\nAdd an About entry (an \"About Agentic Status Bar\" button in the Settings General tab footer, and/or an item next to Quit and the gear in the popover's bottom row) that activates the app and opens the standard panel with `NSApp.orderFrontStandardAboutPanel(options:)`:\n- the app icon,\n- the name,\n- version (`CFBundleShortVersionString`) and build (`CFBundleVersion`),\n- a copyright line (`NSHumanReadableCopyright` in the `Info.plist` via `project.yml`)\n- and credits with a link to [https://github.com/hakanserce/agentic-status-bar](https://github.com/hakanserce/agentic-status-bar).\n\nThe popover closes before the panel opens.\n\n## Tests\nAdd an app test for the options passed if practical; the user checks it visually before it's marked done.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3931,7 +3931,7 @@
         "App/project.yml"
       ],
       "created_at": "2026-10-27T00:07:46Z",
-      "updated_at": "2026-10-27T00:30:03Z",
+      "updated_at": "2026-10-27T07:28:35Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T00:29:16Z",
@@ -3957,7 +3957,7 @@
       "labels": [
         "app"
       ],
-      "description": "The Settings window (App/Sources/SettingsView.swift, SettingsWindow.swift) looks rough, and the General tab shows a vertical scrollbar right away in its fixed 520x580 frame. Make it look like a native macOS settings window: toolbar-style tabs (a window toolbar with the General / Appearance / Notifications icons, title following the selected tab, e.g. an NSTabViewController with .toolbar style hosting each SwiftUI tab, or the SwiftUI equivalent), consistent grouped sections with short headers, footers kept short, controls right-aligned, no redundant labels. Every tab must fit without a scrollbar: size each tab to its content (the earlier crash came from resizing a SwiftUI window on tab switch inside a single NSHostingController; an NSTabViewController animates per-tab sizes safely), or trim/reorganise content (e.g. move the hooks and config file rows into their own compact section). Keep every existing setting and the app tests passing. Run the dev build and let the user check it visually before marking done.",
+      "description": "The Settings window (`App/Sources/SettingsView.swift`, `SettingsWindow.swift`) looks rough, and the General tab shows a vertical scrollbar right away in its fixed 520x580 frame.\n\n## Look\nMake it look like a native macOS settings window:\n- toolbar-style tabs (a window toolbar with the General / Appearance / Notifications icons, title following the selected tab, e.g. an `NSTabViewController` with `.toolbar` style hosting each SwiftUI tab, or the SwiftUI equivalent),\n- consistent grouped sections with short headers,\n- footers kept short,\n- controls right-aligned,\n- no redundant labels.\n\n## Fit\nEvery tab must fit without a scrollbar: size each tab to its content (the earlier crash came from resizing a SwiftUI window on tab switch inside a single `NSHostingController`; an `NSTabViewController` animates per-tab sizes safely), or trim/reorganise content (e.g. move the hooks and config file rows into their own compact section).\n\n## Done when\nKeep every existing setting and the app tests passing. Run the dev build and let the user check it visually before marking done.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -3968,7 +3968,7 @@
         "App/Tests/SettingsTests.swift"
       ],
       "created_at": "2026-10-27T00:28:06Z",
-      "updated_at": "2026-10-27T00:33:22Z",
+      "updated_at": "2026-10-27T07:28:37Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T00:30:05Z",
@@ -3994,7 +3994,7 @@
       "labels": [
         "app"
       ],
-      "description": "The app is LSUIElement (.accessory), so when the Settings or first-run window is frontmost the menu bar still shows the previous app's menus. While one of our windows is open, switch to NSApp.setActivationPolicy(.regular) and give the app a main menu; switch back to .accessory when the last window closes (a Dock icon appears meanwhile, with the new app icon). The app menu: About Agentic Status Bar (the standard about panel, see T-101), Settings… (Cmd-,), Show Sessions (opens the status item's popover), separator, Hide / Hide Others / Show All, separator, Quit Agentic Status Bar (Cmd-Q). Add the standard Edit menu (cut/copy/paste/select all, so text fields keep working) and a Window menu (Close Cmd-W, Minimize). Build it in a small MainMenu helper in AppDelegate or its own file; add an app test for the menu items and the policy switch if practical. The user checks it visually before it's marked done.",
+      "description": "The app is `LSUIElement` (`.accessory`), so when the Settings or first-run window is frontmost the menu bar still shows the previous app's menus.\n\n## Activation policy\nWhile one of our windows is open, switch to `NSApp.setActivationPolicy(.regular)` and give the app a main menu; switch back to `.accessory` when the last window closes (a Dock icon appears meanwhile, with the new app icon).\n\n## App menu\n- About Agentic Status Bar (the standard about panel, see T-101)\n- Settings… (Cmd-,)\n- Show Sessions (opens the status item's popover)\n- separator\n- Hide / Hide Others / Show All\n- separator\n- Quit Agentic Status Bar (Cmd-Q)\n\n## Other menus\nAdd the standard Edit menu (cut/copy/paste/select all, so text fields keep working) and a Window menu (Close Cmd-W, Minimize).\n\n## Details\nBuild it in a small `MainMenu` helper in `AppDelegate` or its own file; add an app test for the menu items and the policy switch if practical. The user checks it visually before it's marked done.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -4009,7 +4009,7 @@
         "App/Sources/StatusItemController.swift"
       ],
       "created_at": "2026-10-27T00:28:06Z",
-      "updated_at": "2026-10-27T00:39:25Z",
+      "updated_at": "2026-10-27T07:28:40Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T00:33:25Z",
@@ -4035,7 +4035,7 @@
       "labels": [
         "app"
       ],
-      "description": "The Appearance tab's symbol editor (a text field for an SF Symbol name) isn't usable. Replace it with a picker: clicking a state's symbol opens a popover with a grid of curated SF Symbols suited to menu-bar status (the ones the built-in themes use plus a few dozen fitting alternatives, e.g. circle/dot/exclamation/bell/moon/zzz/hourglass/bolt/sparkle/sparkles/star/flame/checkmark/questionmark variants, filled and outlined), each shown in the state's color, the current one selected; clicking applies it (icon_<state>) and closes the popover. Replace the two free ColorPickers with a palette of swatches (system colors that read well in the menu bar: red, orange, yellow, green, mint, teal, blue, indigo, purple, pink, gray, primary/label), each swatch setting a light,dark pair (e.g. the system color's light and dark variants) as color_<state>; keep reset to the theme. Every symbol in the set must exist (app test with NSImage(systemSymbolName:)) and every swatch must produce a valid color setting (Config.isValid). Keep values written to the config file the same format. The user checks it visually before it's marked done.",
+      "description": "The Appearance tab's symbol editor (a text field for an SF Symbol name) isn't usable.\n\n## Symbol picker\nReplace it with a picker: clicking a state's symbol opens a popover with a grid of curated SF Symbols suited to menu-bar status (the ones the built-in themes use plus a few dozen fitting alternatives, e.g. circle/dot/exclamation/bell/moon/zzz/hourglass/bolt/sparkle/sparkles/star/flame/checkmark/questionmark variants, filled and outlined), each shown in the state's color, the current one selected; clicking applies it (`icon_<state>`) and closes the popover.\n\n## Color palette\nReplace the two free `ColorPicker`s with a palette of swatches (system colors that read well in the menu bar: red, orange, yellow, green, mint, teal, blue, indigo, purple, pink, gray, primary/label), each swatch setting a light,dark pair (e.g. the system color's light and dark variants) as `color_<state>`; keep reset to the theme.\n\n## Tests\n- Every symbol in the set must exist (app test with `NSImage(systemSymbolName:)`)\n- and every swatch must produce a valid color setting (`Config.isValid`).\n\nKeep values written to the config file the same format. The user checks it visually before it's marked done.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -4048,7 +4048,7 @@
         "App/Tests/SettingsTests.swift"
       ],
       "created_at": "2026-10-27T00:28:06Z",
-      "updated_at": "2026-10-27T00:42:44Z",
+      "updated_at": "2026-10-27T07:28:43Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T00:39:27Z",
@@ -4074,7 +4074,7 @@
       "labels": [
         "app"
       ],
-      "description": "Add a Help window (SwiftUI in an app-owned NSWindow, like SettingsWindow, so it switches the app to .regular via ActivationPolicy). Open it from a Help menu in MainMenu (\"Agentic Status Bar Help\", Cmd-?) and from a ? button in the popover's bottom row next to the info and gear buttons. Content, short and scannable, in sections: Getting started (install the hooks; sessions appear when Claude Code runs); The menu bar (a live legend built from Theme.resolve(store.config): each state's symbol in its color with what it means, using SettingsView.stateName, plus the count and which state wins: waiting > idle > no activity > working); The session list (row parts: state, project and title, time in state, subagents indented; clicking focuses the terminal via herdr; the ... menu actions; mute for an hour or today, unmute all); Notifications (waiting and idle, delay, muted projects); Troubleshooting (no sessions: hooks not installed or sessions started before the install; the warning symbol: unreadable state files; notifications not arriving; where the config file is). Add an app test that the legend lists every state in Config.themeStates. Run the dev build and let the user check it visually.",
+      "description": "Add a Help window (SwiftUI in an app-owned `NSWindow`, like `SettingsWindow`, so it switches the app to `.regular` via `ActivationPolicy`).\n\n## Opening it\nOpen it from a Help menu in `MainMenu` (\"Agentic Status Bar Help\", Cmd-?) and from a ? button in the popover's bottom row next to the info and gear buttons.\n\n## Content\nShort and scannable, in sections:\n- **Getting started:** install the hooks; sessions appear when Claude Code runs.\n- **The menu bar:** a live legend built from `Theme.resolve(store.config)`: each state's symbol in its color with what it means, using `SettingsView.stateName`, plus the count and which state wins: waiting > idle > no activity > working.\n- **The session list:** row parts: state, project and title, time in state, subagents indented; clicking focuses the terminal via herdr; the ... menu actions; mute for an hour or today, unmute all.\n- **Notifications:** waiting and idle, delay, muted projects.\n- **Troubleshooting:** no sessions: hooks not installed or sessions started before the install; the warning symbol: unreadable state files; notifications not arriving; where the config file is.\n\n## Tests\nAdd an app test that the legend lists every state in `Config.themeStates`. Run the dev build and let the user check it visually.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -4087,7 +4087,7 @@
         "App/Tests/HelpTests.swift"
       ],
       "created_at": "2026-10-27T00:47:57Z",
-      "updated_at": "2026-10-27T05:04:55Z",
+      "updated_at": "2026-10-27T07:28:45Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T04:55:36Z",
@@ -4120,7 +4120,7 @@
       "labels": [
         "release"
       ],
-      "description": "Distribute the app with Homebrew: brew install --cask solo-swe/tap/agentic-status-bar. Ready: the public repository solo-swe/homebrew-tap exists, with a write deploy key whose private key is the secret HOMEBREW_TAP_DEPLOY_KEY in solo-swe/agentic-status-bar (push over SSH: git@github.com:solo-swe/homebrew-tap.git). Write Casks/agentic-status-bar.rb (version, sha256 of the release zip, url https://github.com/solo-swe/agentic-status-bar/releases/download/v#{version}/agentic-status-bar-#{version}.zip, name, desc, homepage, depends_on macos: \">= :sonoma\", depends_on arch: :arm64 while builds are arm64-only, app \"Agentic Status Bar.app\", auto_updates true (Sparkle), uninstall quit: \"com.hakanserce.agentic-status-bar\", zap trash: the config dir, the state dir and the app's preferences), checked with brew audit --cask and brew style, and install-tested from the tap. Add a workflow on release: published (releases start as drafts) that computes the zip's sha256 and pushes the updated cask to the tap with the deploy key; publish the cask for v0.2.1 now. Check what Homebrew's tap trust (brew trust) asks of users of a third-party tap and say it in the README install instructions (brew first, DMG second); add the release steps to CONTRIBUTING.md. The official homebrew/cask needs 225 stars, 90 forks or 90 watchers for a self-submission and a repository at least 30 days old: not now.",
+      "description": "Distribute the app with Homebrew: `brew install --cask solo-swe/tap/agentic-status-bar`.\n\n## Ready\nThe public repository `solo-swe/homebrew-tap` exists, with a write deploy key whose private key is the secret `HOMEBREW_TAP_DEPLOY_KEY` in `solo-swe/agentic-status-bar` (push over SSH: `git@github.com:solo-swe/homebrew-tap.git`).\n\n## Cask\nWrite `Casks/agentic-status-bar.rb`:\n- `version`, `sha256` of the release zip,\n- `url` `https://github.com/solo-swe/agentic-status-bar/releases/download/v#{version}/agentic-status-bar-#{version}.zip`,\n- `name`, `desc`, `homepage`,\n- `depends_on macos: \">= :sonoma\"`, `depends_on arch: :arm64` while builds are arm64-only,\n- `app \"Agentic Status Bar.app\"`,\n- `auto_updates true` (Sparkle),\n- `uninstall quit: \"com.hakanserce.agentic-status-bar\"`,\n- `zap trash:` the config dir, the state dir and the app's preferences.\n\nChecked with `brew audit --cask` and `brew style`, and install-tested from the tap.\n\n## Workflow\nAdd a workflow on `release: published` (releases start as drafts) that computes the zip's sha256 and pushes the updated cask to the tap with the deploy key; publish the cask for v0.2.1 now.\n\n## Docs\nCheck what Homebrew's tap trust (`brew trust`) asks of users of a third-party tap and say it in the README install instructions (brew first, DMG second); add the release steps to `CONTRIBUTING.md`.\n\n## Not now\nThe official homebrew/cask needs 225 stars, 90 forks or 90 watchers for a self-submission and a repository at least 30 days old: not now.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -4136,7 +4136,7 @@
         "scripts/homebrew-cask.rb"
       ],
       "created_at": "2026-10-27T00:47:57Z",
-      "updated_at": "2026-10-27T06:08:47Z",
+      "updated_at": "2026-10-27T07:28:48Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T06:05:22Z",
@@ -4162,14 +4162,14 @@
       "labels": [
         "release"
       ],
-      "description": "The user transfers hakanserce/agentic-status-bar to the GitHub organization solo-swe (repository › Settings › General › Danger Zone › Transfer ownership, or gh api repos/hakanserce/agentic-status-bar/transfer -f new_owner=solo-swe). Before: check solo-swe › Settings › Actions › General allows Actions and lets workflows request contents: write, and that solo-swe has no repository named agentic-status-bar. An agent can't do the transfer: block this task on the user, and mark it done once gh repo view solo-swe/agentic-status-bar works. Never create a repository or fork named hakanserce/agentic-status-bar afterwards: it would end GitHub's redirect for old links.",
+      "description": "The user transfers `hakanserce/agentic-status-bar` to the GitHub organization `solo-swe` (repository › Settings › General › Danger Zone › Transfer ownership, or `gh api repos/hakanserce/agentic-status-bar/transfer -f new_owner=solo-swe`).\n\n## Before\n- Check solo-swe › Settings › Actions › General allows Actions and lets workflows request `contents: write`,\n- and that `solo-swe` has no repository named `agentic-status-bar`.\n\n## Done when\nAn agent can't do the transfer: block this task on the user, and mark it done once `gh repo view solo-swe/agentic-status-bar` works.\n\n## Afterwards\nNever create a repository or fork named `hakanserce/agentic-status-bar` afterwards: it would end GitHub's redirect for old links.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
       "dependencies": [],
       "files": [],
       "created_at": "2026-10-27T05:14:16Z",
-      "updated_at": "2026-10-27T05:30:42Z",
+      "updated_at": "2026-10-27T07:28:50Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -4200,7 +4200,7 @@
       "labels": [
         "release"
       ],
-      "description": "After the transfer: git remote set-url origin git@github.com:solo-swe/agentic-status-bar.git and git fetch. Check gh secret list shows DEVELOPER_ID_CERT_P12, DEVELOPER_ID_CERT_PASSWORD, NOTARY_API_KEY_P8, NOTARY_API_KEY_ID, NOTARY_API_ISSUER_ID and SPARKLE_ED_PRIVATE_KEY, and gh variable get SPARKLE_PUBLIC_KEY prints exactly the key from generate_keys -p (re-set it if it's missing; block on the user for any missing secret). Re-run the latest CI run on main (gh run rerun) and check it passes under the organization.",
+      "description": "After the transfer, reconnect the clone and check secrets and CI.\n\n## Steps\n1. `git remote set-url origin git@github.com:solo-swe/agentic-status-bar.git` and `git fetch`.\n2. Check `gh secret list` shows `DEVELOPER_ID_CERT_P12`, `DEVELOPER_ID_CERT_PASSWORD`, `NOTARY_API_KEY_P8`, `NOTARY_API_KEY_ID`, `NOTARY_API_ISSUER_ID` and `SPARKLE_ED_PRIVATE_KEY`, and `gh variable get SPARKLE_PUBLIC_KEY` prints exactly the key from `generate_keys -p` (re-set it if it's missing; block on the user for any missing secret).\n3. Re-run the latest CI run on `main` (`gh run rerun`) and check it passes under the organization.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -4209,7 +4209,7 @@
       ],
       "files": [],
       "created_at": "2026-10-27T05:14:16Z",
-      "updated_at": "2026-10-27T05:33:46Z",
+      "updated_at": "2026-10-27T07:28:53Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T05:30:43Z",
@@ -4235,7 +4235,7 @@
       "labels": [
         "release"
       ],
-      "description": "Replace github.com/hakanserce/agentic-status-bar with github.com/solo-swe/agentic-status-bar everywhere it is written (git grep hakanserce): SUFeedURL in App/project.yml, the repo URL in scripts/appcast.sh, AboutPanel.projectURL and the credits text plus App/Tests/AboutPanelTests.swift, the README link in App/Sources/HelpView.swift, README.md (Releases link, git clone), doc/PRD.md. Keep the bundle ID com.hakanserce.agentic-status-bar (and the tests bundle ID, tests/app.sh, bundleIdPrefix) unchanged: changing it would reset settings, the login item and notification permission and break updates. Ask the user whether the About copyright stays \"© 2026 Hakan Serce\" or becomes Solo SWE. Run swift test, tests/app.sh --test and tests/lint.sh.",
+      "description": "Replace `github.com/hakanserce/agentic-status-bar` with `github.com/solo-swe/agentic-status-bar` everywhere it is written (`git grep hakanserce`).\n\n## Places\n- `SUFeedURL` in `App/project.yml`,\n- the repo URL in `scripts/appcast.sh`,\n- `AboutPanel.projectURL` and the credits text plus `App/Tests/AboutPanelTests.swift`,\n- the README link in `App/Sources/HelpView.swift`,\n- `README.md` (Releases link, `git clone`),\n- `doc/PRD.md`.\n\n## Keep\nKeep the bundle ID `com.hakanserce.agentic-status-bar` (and the tests bundle ID, `tests/app.sh`, `bundleIdPrefix`) unchanged: changing it would reset settings, the login item and notification permission and break updates.\n\n## Ask\nAsk the user whether the About copyright stays \"© 2026 Hakan Serce\" or becomes Solo SWE.\n\n## Tests\nRun `swift test`, `tests/app.sh --test` and `tests/lint.sh`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -4252,7 +4252,7 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-10-27T05:14:16Z",
-      "updated_at": "2026-10-27T05:33:48Z",
+      "updated_at": "2026-10-27T07:28:56Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T05:33:47Z",
@@ -4278,14 +4278,14 @@
       "labels": [
         "release"
       ],
-      "description": "Before the repository becomes public, scan every commit for secrets and personal data: gitleaks (brew install gitleaks; gitleaks git --verbose --report-path into the scratchpad, not the repo) over the full history, plus a look for personal paths, emails and real project names (the docs must not name the user's real projects) in tracked files and .agentic-task-manager/tasks.json notes. Report every finding to the user with commit and file. Fix the current files; if a real secret is in history, the secret must be rotated (rewriting history is the user's call, never force-push without asking). Record the result (clean or what was fixed) as the task's note.",
+      "description": "Before the repository becomes public, scan every commit for secrets and personal data.\n\n## Scan\n- `gitleaks` (`brew install gitleaks`; `gitleaks git --verbose --report-path` into the scratchpad, not the repo) over the full history,\n- plus a look for personal paths, emails and real project names (the docs must not name the user's real projects) in tracked files and `.agentic-task-manager/tasks.json` notes.\n\n## Findings\n- Report every finding to the user with commit and file.\n- Fix the current files; if a real secret is in history, the secret must be rotated (rewriting history is the user's call, never force-push without asking).\n\n## Done when\nRecord the result (clean or what was fixed) as the task's note.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
       "dependencies": [],
       "files": [],
       "created_at": "2026-10-27T05:14:16Z",
-      "updated_at": "2026-10-27T05:27:35Z",
+      "updated_at": "2026-10-27T07:29:58Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T05:25:16Z",
@@ -4310,7 +4310,7 @@
       "labels": [
         "release"
       ],
-      "description": "The user makes solo-swe/agentic-status-bar public (Settings › General › Danger Zone › Change visibility), once the history scan is clean and the URLs point at solo-swe. Hard to undo: copies made while it is public stay out there. An agent can't do this: block the task on the user, and mark it done once gh repo view solo-swe/agentic-status-bar --json visibility says PUBLIC.",
+      "description": "The user makes `solo-swe/agentic-status-bar` public (Settings › General › Danger Zone › Change visibility), once the history scan is clean and the URLs point at `solo-swe`.\n\n## Details\n- Hard to undo: copies made while it is public stay out there.\n- An agent can't do this: block the task on the user, and mark it done once `gh repo view solo-swe/agentic-status-bar --json visibility` says `PUBLIC`.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -4320,7 +4320,7 @@
       ],
       "files": [],
       "created_at": "2026-10-27T05:14:16Z",
-      "updated_at": "2026-10-27T05:37:51Z",
+      "updated_at": "2026-10-27T07:29:59Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "notes": [
@@ -4351,7 +4351,7 @@
       "labels": [
         "release"
       ],
-      "description": "Delete the unpublished drafts v0.1.0 and v0.2.0 and their tags (gh release delete <tag> --cleanup-tag --yes, after confirming with the user), so no build with the old feed URL goes out. Set ASBVersion.current and MARKETING_VERSION to 0.2.1, push, tag v0.2.1, watch the release run. Verify the draft: spctl accepts the DMG and the app (Notarized Developer ID), codesign --deep --strict passes, the app's SUFeedURL is the solo-swe one and SUPublicEDKey matches SPARKLE_PUBLIC_KEY, the appcast signature verifies against the zip. Ask the user to publish it, then check anonymous downloads (curl -fsSIL without auth) of releases/latest/download/appcast.xml and the zip, which Sparkle and Homebrew need.",
+      "description": "Ship v0.2.1 as the first public release.\n\n## Clean up\nDelete the unpublished drafts v0.1.0 and v0.2.0 and their tags (`gh release delete <tag> --cleanup-tag --yes`, after confirming with the user), so no build with the old feed URL goes out.\n\n## Release\nSet `ASBVersion.current` and `MARKETING_VERSION` to 0.2.1, push, tag `v0.2.1`, watch the release run.\n\n## Verify the draft\n- `spctl` accepts the DMG and the app (Notarized Developer ID),\n- `codesign --deep --strict` passes,\n- the app's `SUFeedURL` is the solo-swe one and `SUPublicEDKey` matches `SPARKLE_PUBLIC_KEY`,\n- the appcast signature verifies against the zip.\n\n## Publish\nAsk the user to publish it, then check anonymous downloads (`curl -fsSIL` without auth) of `releases/latest/download/appcast.xml` and the zip, which Sparkle and Homebrew need.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -4363,7 +4363,7 @@
         "App/project.yml"
       ],
       "created_at": "2026-10-27T05:14:16Z",
-      "updated_at": "2026-10-27T05:49:11Z",
+      "updated_at": "2026-10-27T07:29:59Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T05:37:52Z",
@@ -4389,7 +4389,7 @@
       "labels": [
         "release"
       ],
-      "description": "Write doc/RELEASING.md, the one place for how releases work, and link it from CONTRIBUTING.md (which keeps a short summary) and the README's Development section. Sections: (1) How a release flows: tag -> .github/workflows/release.yml -> scripts/package.sh (build, sign inside out incl. Sparkle, notarize, staple, zip and DMG) -> scripts/appcast.sh -> draft release -> the maintainer publishes as the latest full release (not a pre-release: SUFeedURL reads releases/latest) -> apps update via Sparkle -> the tap workflow updates solo-swe/homebrew-tap; a small diagram. (2) One-time setup: Apple membership, Developer ID certificate and App Store Connect API key (move the content of scripts/notarize.md here and delete that file, fixing links to it), the Sparkle key pair (generate_keys, generate_keys -p for the variable), the tap and its deploy key (organization setting that allows deploy keys). One table of every secret and variable: purpose, where it comes from, how to replace it. (3) Each release: checklist from bumping ASBVersion.current and MARKETING_VERSION to checking the published release and the tap. (4) Checking a release: spctl, codesign --deep --strict, Info.plist SUFeedURL and SUPublicEDKey, the appcast signature, anonymous downloads, brew install from the tap. (5) When something fails: stray '<' in SPARKLE_PUBLIC_KEY / key-pair mismatch (the package.sh check), pre-release not latest, notarization refused (notarytool log), deploy keys disabled in the organization, version mismatch with the tag. (6) Replacing keys: what installed copies do when the Sparkle key, the certificate or the deploy key change; the Sparkle private key must be backed up. Verify every command and path against the repository.",
+      "description": "Write `doc/RELEASING.md`, the one place for how releases work, and link it from `CONTRIBUTING.md` (which keeps a short summary) and the README's Development section.\n\n## Sections\n1. **How a release flows:** tag -> `.github/workflows/release.yml` -> `scripts/package.sh` (build, sign inside out incl. Sparkle, notarize, staple, zip and DMG) -> `scripts/appcast.sh` -> draft release -> the maintainer publishes as the latest full release (not a pre-release: `SUFeedURL` reads `releases/latest`) -> apps update via Sparkle -> the tap workflow updates `solo-swe/homebrew-tap`; a small diagram.\n2. **One-time setup:** Apple membership, Developer ID certificate and App Store Connect API key (move the content of `scripts/notarize.md` here and delete that file, fixing links to it), the Sparkle key pair (`generate_keys`, `generate_keys -p` for the variable), the tap and its deploy key (organization setting that allows deploy keys). One table of every secret and variable: purpose, where it comes from, how to replace it.\n3. **Each release:** checklist from bumping `ASBVersion.current` and `MARKETING_VERSION` to checking the published release and the tap.\n4. **Checking a release:** `spctl`, `codesign --deep --strict`, `Info.plist` `SUFeedURL` and `SUPublicEDKey`, the appcast signature, anonymous downloads, `brew install` from the tap.\n5. **When something fails:** stray '<' in `SPARKLE_PUBLIC_KEY` / key-pair mismatch (the `package.sh` check), pre-release not latest, notarization refused (`notarytool log`), deploy keys disabled in the organization, version mismatch with the tag.\n6. **Replacing keys:** what installed copies do when the Sparkle key, the certificate or the deploy key change; the Sparkle private key must be backed up.\n\n## Done when\nVerify every command and path against the repository.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -4403,7 +4403,7 @@
         "scripts/notarize.md"
       ],
       "created_at": "2026-10-27T06:05:22Z",
-      "updated_at": "2026-10-27T06:13:33Z",
+      "updated_at": "2026-10-27T07:30:00Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T06:11:46Z",
@@ -4429,7 +4429,7 @@
       "labels": [
         "release"
       ],
-      "description": "GitHub Actions warns: \"Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4.\" Every workflow uses actions/checkout@v4 (ci.yml three times, homebrew.yml, release.yml). Check the current major release of actions/checkout (its releases page) and that it runs on Node 24, read its breaking changes for anything these workflows rely on (fetch-depth, persisted credentials: release.yml and homebrew.yml use gh with GITHUB_TOKEN), and move all five uses to it. Check no other action in .github/workflows targets Node 20. Push and confirm the CI run on main passes without the warning (gh run view --log), and run homebrew.yml by hand (gh workflow run homebrew.yml -f tag=<latest tag>) to confirm it passes without the warning too. release.yml is checked at the next release.",
+      "description": "Move every workflow off Node 20 actions.\n\n## Why\nGitHub Actions warns:\n\n> Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4.\n\nEvery workflow uses `actions/checkout@v4` (`ci.yml` three times, `homebrew.yml`, `release.yml`).\n\n## Change\n1. Check the current major release of `actions/checkout` (its releases page) and that it runs on Node 24,\n2. read its breaking changes for anything these workflows rely on (`fetch-depth`, persisted credentials: `release.yml` and `homebrew.yml` use `gh` with `GITHUB_TOKEN`),\n3. and move all five uses to it.\n4. Check no other action in `.github/workflows` targets Node 20.\n\n## Done when\n- Push and confirm the CI run on `main` passes without the warning (`gh run view --log`),\n- and run `homebrew.yml` by hand (`gh workflow run homebrew.yml -f tag=<latest tag>`) to confirm it passes without the warning too.\n- `release.yml` is checked at the next release.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -4440,7 +4440,7 @@
         ".github/workflows/release.yml"
       ],
       "created_at": "2026-10-27T06:11:22Z",
-      "updated_at": "2026-10-27T06:16:27Z",
+      "updated_at": "2026-10-27T07:30:00Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T06:13:34Z",
@@ -4466,7 +4466,7 @@
       "labels": [
         "architecture"
       ],
-      "description": "Research and write a detailed proposal, doc/design/agent-providers.md, for showing sessions of other coding agents next to Claude Code. No code changes. (1) Today: map every place ASBCore and the app depend on Claude Code: the hooks and their payloads (HookEvents, Installer and ~/.claude/settings.json), the state file schema (doc/state-file-schema.md), transcripts (Transcript, checks C3/C4), Claude Code's session registry (C2), process detection (pid walk to `claude`, kind detection, C1), notifications' reasons (permission, question), names and paths in the UI and docs. (2) Research each agent from its current official docs and source (cite links and versions): OpenAI Codex CLI, Gemini CLI, Cursor (agent/CLI and the IDE), opencode, Aider, Amp, GitHub Copilot CLI, and any other widely used terminal agent found. For each: hook or event mechanisms (lifecycle hooks, notify commands, plugins, MCP), session and transcript files, process names, how to tell busy, waiting on a permission or question, and idle, and what can't be told. (3) Proposal: a provider abstraction (what a provider supplies: install/uninstall of its hooks, event mapping into the state file, process and kind detection, checks, labels and icons), state file schema changes (e.g. an agent field, version bump or optional field) and the reader rules, how the UI shows the agent, a feasibility table (agent x signal: busy/waiting/idle/subagents/focus) with a recommended order, risks, a migration plan that keeps Claude Code behavior and the conformance suite unchanged, and a task breakdown ready for atm (tasks under 10 minutes each, with dependencies). Send the task to review for the user (atm review) instead of marking it done.",
+      "description": "Research and write a detailed proposal, `doc/design/agent-providers.md`, for showing sessions of other coding agents next to Claude Code. No code changes.\n\n## 1. Today\nMap every place `ASBCore` and the app depend on Claude Code:\n- the hooks and their payloads (`HookEvents`, `Installer` and `~/.claude/settings.json`),\n- the state file schema (`doc/state-file-schema.md`),\n- transcripts (`Transcript`, checks C3/C4),\n- Claude Code's session registry (C2),\n- process detection (pid walk to `claude`, kind detection, C1),\n- notifications' reasons (`permission`, `question`),\n- names and paths in the UI and docs.\n\n## 2. Research\nResearch each agent from its current official docs and source (cite links and versions): OpenAI Codex CLI, Gemini CLI, Cursor (agent/CLI and the IDE), opencode, Aider, Amp, GitHub Copilot CLI, and any other widely used terminal agent found.\n\nFor each:\n- hook or event mechanisms (lifecycle hooks, notify commands, plugins, MCP),\n- session and transcript files,\n- process names,\n- how to tell busy, waiting on a permission or question, and idle,\n- and what can't be told.\n\n## 3. Proposal\n- a provider abstraction (what a provider supplies: install/uninstall of its hooks, event mapping into the state file, process and kind detection, checks, labels and icons),\n- state file schema changes (e.g. an `agent` field, version bump or optional field) and the reader rules,\n- how the UI shows the agent,\n- a feasibility table (agent x signal: busy/waiting/idle/subagents/focus) with a recommended order,\n- risks,\n- a migration plan that keeps Claude Code behavior and the conformance suite unchanged,\n- and a task breakdown ready for atm (tasks under 10 minutes each, with dependencies).\n\n## Done when\nSend the task to review for the user (`atm review`) instead of marking it done.\n",
       "requirements": [],
       "use_cases": [],
       "status": "in_review",
@@ -4475,7 +4475,7 @@
         "doc/design/agent-providers.md"
       ],
       "created_at": "2026-10-27T06:37:58Z",
-      "updated_at": "2026-10-27T07:08:35Z",
+      "updated_at": "2026-10-27T07:30:01Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T06:52:29Z",
@@ -4500,20 +4500,30 @@
       "labels": [
         "architecture"
       ],
-      "description": "Research and write a detailed proposal, doc/design/focus-targets.md, for jumping to a session in more terminals and apps than herdr. No code changes. (1) Today: how focus works now: what the hook records (herdrPane from HERDR_PANE_ID, termBundleId from __CFBundleIdentifier), Actions focus (herdr CLI, then raising the terminal app), the focusable flag in the snapshot, and the README's statement that other tools are planned. (2) Research each target from its current docs and source (cite links and versions): tmux, WezTerm, iTerm2, Ghostty, Kitty, Terminal.app, Alacritty, Warp, Zellij, VS Code and Cursor (integrated terminal), JetBrains IDEs, and screen if relevant. For each: how a hook running inside it can identify its window/tab/pane (environment variables such as TMUX/TMUX_PANE, WEZTERM_PANE, ITERM_SESSION_ID, TERM_SESSION_ID, KITTY_WINDOW_ID, ZELLIJ_SESSION_NAME, TERM_PROGRAM; tty), how an outside app can switch to exactly that pane (CLI such as tmux select-pane/switch-client and wezterm cli activate-pane, AppleScript, URL schemes, remote control sockets, extensions), what it needs (Accessibility or Automation permission, a setting such as kitty's allow_remote_control, an extension), and nesting (tmux inside a terminal app, herdr inside tmux). (3) Proposal: a focus target abstraction (detect at hook time, record in the state file, act at click time, raise the outer app), state file schema additions, how nested targets chain, a feasibility table (target x identify/switch/permission) with a recommended order, privacy and permission prompts, test strategy (stubbed commands like ASB_HERDR), and a task breakdown ready for atm (tasks under 10 minutes each, with dependencies). Send the task to review for the user (atm review) instead of marking it done.",
+      "description": "Research and write a detailed proposal, `doc/design/focus-targets.md`, for jumping to a session in more terminals and apps than herdr. No code changes.\n\n## 1. Today\nHow focus works now:\n- what the hook records (`herdrPane` from `HERDR_PANE_ID`, `termBundleId` from `__CFBundleIdentifier`),\n- `Actions` focus (herdr CLI, then raising the terminal app),\n- the `focusable` flag in the snapshot,\n- and the README's statement that other tools are planned.\n\n## 2. Research\nResearch each target from its current docs and source (cite links and versions): tmux, WezTerm, iTerm2, Ghostty, Kitty, Terminal.app, Alacritty, Warp, Zellij, VS Code and Cursor (integrated terminal), JetBrains IDEs, and screen if relevant.\n\nFor each:\n- how a hook running inside it can identify its window/tab/pane (environment variables such as `TMUX`/`TMUX_PANE`, `WEZTERM_PANE`, `ITERM_SESSION_ID`, `TERM_SESSION_ID`, `KITTY_WINDOW_ID`, `ZELLIJ_SESSION_NAME`, `TERM_PROGRAM`; tty),\n- how an outside app can switch to exactly that pane (CLI such as `tmux select-pane`/`switch-client` and `wezterm cli activate-pane`, AppleScript, URL schemes, remote control sockets, extensions),\n- what it needs (Accessibility or Automation permission, a setting such as kitty's `allow_remote_control`, an extension),\n- and nesting (tmux inside a terminal app, herdr inside tmux).\n\n## 3. Proposal\n- a focus target abstraction (detect at hook time, record in the state file, act at click time, raise the outer app),\n- state file schema additions,\n- how nested targets chain,\n- a feasibility table (target x identify/switch/permission) with a recommended order,\n- privacy and permission prompts,\n- test strategy (stubbed commands like `ASB_HERDR`),\n- and a task breakdown ready for atm (tasks under 10 minutes each, with dependencies).\n\n## Done when\nSend the task to review for the user (`atm review`) instead of marking it done.\n",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "in_review",
       "dependencies": [],
       "files": [
         "doc/design/focus-targets.md"
       ],
       "created_at": "2026-10-27T06:37:58Z",
-      "updated_at": "2026-10-27T06:52:30Z",
+      "updated_at": "2026-10-27T07:30:01Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T06:52:30Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "9c6464b870729ec1db880cf09c9c6dcdd03e8188",
+      "review_requested_at": "2026-10-27T07:18:47Z",
+      "notes": [
+        {
+          "at": "2026-10-27T07:18:47Z",
+          "kind": "review",
+          "text": "Proposal in `doc/design/focus-targets.md`: today's herdr-only focus mapped; 14 targets researched; a layered focus model (innermost layer at hook time, outer layers resolved at click time), an optional `focus` field (no schema bump), feasibility table, order (layer model → app raise for all → tmux → WezTerm/kitty → iTerm2/Terminal.app → VS Code/Cursor → Ghostty), 43 tasks and 7 open questions.",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-117",
@@ -4524,7 +4534,7 @@
       "labels": [
         "release"
       ],
-      "description": "The README's Install section shows only `brew install --cask solo-swe/tap/agentic-status-bar` and describes Homebrew's tap trust in words. Show the commands, each with a one-line comment: `brew tap solo-swe/tap` (adds the tap), `brew install --cask solo-swe/tap/agentic-status-bar` (installing by the full name trusts this cask), and, for using the short name (`brew install --cask agentic-status-bar`, `brew info`, `brew upgrade --greedy`), `brew trust --cask solo-swe/tap/agentic-status-bar`, or `brew trust solo-swe/tap` to trust the whole tap. Check each command against the installed Homebrew (brew help tap, brew help trust, a --dry-run install) before writing it. Keep doc/RELEASING.md's Homebrew lines consistent.",
+      "description": "The README's Install section shows only `brew install --cask solo-swe/tap/agentic-status-bar` and describes Homebrew's tap trust in words.\n\n## Change\nShow the commands, each with a one-line comment:\n- `brew tap solo-swe/tap` (adds the tap),\n- `brew install --cask solo-swe/tap/agentic-status-bar` (installing by the full name trusts this cask),\n- and, for using the short name (`brew install --cask agentic-status-bar`, `brew info`, `brew upgrade --greedy`), `brew trust --cask solo-swe/tap/agentic-status-bar`, or `brew trust solo-swe/tap` to trust the whole tap.\n\n## Checks\n- Check each command against the installed Homebrew (`brew help tap`, `brew help trust`, a `--dry-run` install) before writing it.\n- Keep `doc/RELEASING.md`'s Homebrew lines consistent.\n",
       "requirements": [],
       "use_cases": [],
       "status": "done",
@@ -4534,7 +4544,7 @@
         "doc/RELEASING.md"
       ],
       "created_at": "2026-10-27T06:39:03Z",
-      "updated_at": "2026-10-27T06:39:33Z",
+      "updated_at": "2026-10-27T07:30:02Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T06:39:06Z",
@@ -4563,7 +4573,7 @@
       "description": "A config switch that makes `asb hook` append every payload it receives to a log, for capturing what Claude Code sends (the spike that follows needs it).\n\n## Change\n- New config key `debug_hook_log` (`0` or `1`, default `0`) in `Sources/ASBCore/Config.swift`; add it to the keys and to `doc/state-file-schema.md` › Config file.\n- When it is `1`, `asb hook` appends one JSON line per call to `<state dir>/hook-payloads.jsonl`: the time, the raw stdin payload, and the environment variables the hook reads (`CLAUDE_CODE_ENTRYPOINT`, `HERDR_PANE_ID`, `__CFBundleIdentifier`), plus the parent pid.\n- Keep the hook's rules: silent, always exit 0, no effect on the state file; when the switch is off, no extra file reads beyond the config already loaded.\n- Cap the log (e.g. stop appending past 5 MB) so a forgotten switch can't fill the disk.\n- Not shown in the app's Settings; README › Troubleshooting mentions it.\n\n## Tests\n- `tests/ASBCoreTests`: off writes nothing; on appends a line with the payload; the cap stops appending.\n- `swift test`, `tests/app.sh --test`, `tests/lint.sh` pass.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/Config.swift",
@@ -4573,9 +4583,11 @@
         "tests/ASBCoreTests/HookLogTests.swift"
       ],
       "created_at": "2026-10-27T07:16:40Z",
-      "updated_at": "2026-10-27T07:16:40Z",
+      "updated_at": "2026-10-27T07:27:04Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T07:27:04Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-119",
@@ -4630,6 +4642,30 @@
       ],
       "created_at": "2026-10-27T07:16:40Z",
       "updated_at": "2026-10-27T07:16:40Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-121",
+      "name": "Fix: Help menu says Help isn't available",
+      "phase": 6,
+      "type": "bugfix",
+      "priority": "P1",
+      "labels": [
+        "app"
+      ],
+      "description": "With one of the app's windows open, **Help › Agentic Status Bar Help** shows macOS's alert \"Help isn't available for Agentic Status Bar\" instead of opening our Help window.\n\n## Cause\nOur `MainMenuActions` method is named `showHelp(_:)`: the same selector as `NSApplication.showHelp(_:)`, AppKit's Help Book action, which shows that alert when the app has no Help Book.\n\n## Change\n- Rename the action to a selector AppKit doesn't own, e.g. `openHelpWindow(_:)`, in `App/Sources/MainMenu.swift`, `App/Sources/AppDelegate.swift` and `App/Tests/MainMenuTests.swift`.\n- Check the other menu actions (`showAbout`, `showSettings`, `showSessions`, `checkForUpdates`) against `NSApplication` and `NSResponder` selectors, and rename any that collide.\n\n## Done when\n- `tests/app.sh --test` passes.\n- The user opens Help from the Help menu in the dev build.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "App/Sources/MainMenu.swift",
+        "App/Sources/AppDelegate.swift",
+        "App/Tests/MainMenuTests.swift"
+      ],
+      "created_at": "2026-10-27T07:43:57Z",
+      "updated_at": "2026-10-27T07:43:57Z",
       "created_by": "Hakan Serce",
       "updated_by": "Hakan Serce"
     }

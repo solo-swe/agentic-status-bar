@@ -162,6 +162,7 @@ otherwise the default stays. Writers change one line and keep the others.
 | `notify_idle` | `0` | `0` or `1`: the app notifies when a session goes idle (not in muted projects) |
 | `notify_delay_seconds` | `10` | a whole number: how long a session stays waiting or idle before the notification; the app offers 5, 10, 30 and 60 |
 | `notify_sound` | `1` | `0` or `1` |
+| `debug_hook_log` | `0` | `0` or `1`: `asb hook` appends every payload it receives, with the environment variables it reads and its parent pid, to `<state dir>/hook-payloads.jsonl` (one JSON object per line; nothing is appended once the file reaches 5 MB). For debugging; turn it off and delete the file afterwards |
 
 `<state>` is one of `waiting`, `idle`, `uncertain`, `busy`, `subagents`, `muted`, `none`, `warning`. All values
 other than colors may contain only letters, digits and `_ . / ~ -`.

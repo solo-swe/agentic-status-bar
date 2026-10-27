@@ -15,14 +15,23 @@ struct HookCommand: ParsableCommand {
         // overwrite a newer one.
         let started = Int64(Date().timeIntervalSince1970 * 1000)
         let input = FileHandle.standardInput.readDataToEndOfFile()
-        guard let payload = HookPayload.parse(input), !payload.event.isEmpty,
-              Actions.isSafeId(payload.sessionId)
-        else { return }
-
         let environment = ProcessInfo.processInfo.environment
         let paths = Paths.from(environment: environment)
         let config = Config.load(paths)
         let stateDir = paths.stateDir(config: config)
+
+        // Debugging: keep every payload as received, also the ones this hook ignores.
+        if config.debugHookLog {
+            try? FileManager.default.createDirectory(atPath: stateDir, withIntermediateDirectories: true)
+            HookLog.append(
+                HookLog.line(payload: input, environment: environment, parentPid: getppid(), now: started),
+                stateDir: stateDir)
+        }
+
+        guard let payload = HookPayload.parse(input), !payload.event.isEmpty,
+              Actions.isSafeId(payload.sessionId)
+        else { return }
+
         let file = (stateDir as NSString).appendingPathComponent("\(payload.sessionId).json")
         try? FileManager.default.createDirectory(atPath: stateDir, withIntermediateDirectories: true)
 
