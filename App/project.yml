@@ -65,7 +65,7 @@ targets:
         LSMinimumSystemVersion: "14.0"
         NSHumanReadableCopyright: "© 2026 Hakan Serce. MIT License."
         # Sparkle: the feed is the appcast attached to the latest published release (scripts/appcast.sh).
-        SUFeedURL: https://github.com/hakanserce/agentic-status-bar/releases/latest/download/appcast.xml
+        SUFeedURL: https://github.com/solo-swe/agentic-status-bar/releases/latest/download/appcast.xml
         # The EdDSA public key: empty here, so local builds don't update themselves; scripts/package.sh
         # writes SPARKLE_PUBLIC_KEY into release builds (CONTRIBUTING.md › Releases).
         SUPublicEDKey: ""

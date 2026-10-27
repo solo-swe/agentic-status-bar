@@ -19,7 +19,7 @@ sign_update="$(find .build/release-xcode/SourcePackages/artifacts -type f -path 
 
 # Prints: sparkle:edSignature="..." length="..."
 signature="$("$sign_update" --ed-key-file "$key" "$zip")"
-repo="https://github.com/hakanserce/agentic-status-bar"
+repo="https://github.com/solo-swe/agentic-status-bar"
 date="$(LC_ALL=C date -u '+%a, %d %b %Y %H:%M:%S +0000')"
 
 cat <<EOF

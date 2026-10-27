@@ -102,11 +102,11 @@ Everything stays on your machine. Hooks run async and always exit 0, so they can
 
 ## Install
 
-Download the DMG from the [Releases](https://github.com/hakanserce/agentic-status-bar/releases) page: it is signed
+Download the DMG from the [Releases](https://github.com/solo-swe/agentic-status-bar/releases) page: it is signed
 and notarized by Apple. Builds run on Apple silicon Macs. Or build the app yourself:
 
 ```sh
-git clone https://github.com/hakanserce/agentic-status-bar.git ~/code/agentic-status-bar
+git clone https://github.com/solo-swe/agentic-status-bar.git ~/code/agentic-status-bar
 cd ~/code/agentic-status-bar
 scripts/package.sh 0.2.0
 open dist/agentic-status-bar-0.2.0.dmg

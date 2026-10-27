@@ -18,7 +18,7 @@ tools), and shows the result. When Claude Code's own session registry is present
 state.
 
 **Name:** Agentic Status Bar, short `asb` (the CLI), bundle ID `com.hakanserce.agentic-status-bar`, repo
-`agentic-status-bar`. It started as a SwiftBar plugin, "Minimalist Claude Code Statusbar"
+`solo-swe/agentic-status-bar`. It started as a SwiftBar plugin, "Minimalist Claude Code Statusbar"
 (`swiftbar-claudecode-minimal`); [the design doc](design/future-architecture.md) records the move to Swift and to a
 standalone app.
 

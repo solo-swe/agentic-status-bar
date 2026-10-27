@@ -3,7 +3,7 @@ import AppKit
 /// The standard About panel, with the app's version and build and a link to the project.
 @MainActor
 enum AboutPanel {
-    static let projectURL = URL(string: "https://github.com/hakanserce/agentic-status-bar")!
+    static let projectURL = URL(string: "https://github.com/solo-swe/agentic-status-bar")!
 
     /// Opens the panel; a menu-bar app has to activate itself first, or the panel opens behind other windows.
     static func show() {
@@ -37,7 +37,7 @@ enum AboutPanel {
         let text = NSMutableAttributedString(string: "Your Claude Code sessions in the menu bar.\n", attributes: base)
         var link = base
         link[.link] = projectURL
-        text.append(NSAttributedString(string: "github.com/hakanserce/agentic-status-bar", attributes: link))
+        text.append(NSAttributedString(string: "github.com/solo-swe/agentic-status-bar", attributes: link))
         return text
     }
 }

@@ -89,7 +89,7 @@ struct HelpView: View {
                 bullet("**The warning symbol:** a state file in `~/.claude/agentic-status-bar` can't be read. A running session writes a fresh one on its next event; you can also delete the file.")
                 bullet("**A session looks stuck:** sessions that go quiet show as \u{201C}no activity\u{201D} after a while, and ones whose process has exited disappear on the next check.")
                 bullet("**No notifications:** allow Agentic Status Bar in **System Settings › Notifications**, then use **Send Test** in **Settings › Notifications**.")
-                bullet("**Everything else:** the settings live in `~/.config/agentic-status-bar/config` (**Settings › General › Config file**). More in the [README](https://github.com/hakanserce/agentic-status-bar#readme).")
+                bullet("**Everything else:** the settings live in `~/.config/agentic-status-bar/config` (**Settings › General › Config file**). More in the [README](https://github.com/solo-swe/agentic-status-bar#readme).")
             }
         }
         .padding(24)

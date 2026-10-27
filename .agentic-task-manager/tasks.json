@@ -4185,17 +4185,28 @@
       "description": "After the transfer: git remote set-url origin git@github.com:solo-swe/agentic-status-bar.git and git fetch. Check gh secret list shows DEVELOPER_ID_CERT_P12, DEVELOPER_ID_CERT_PASSWORD, NOTARY_API_KEY_P8, NOTARY_API_KEY_ID, NOTARY_API_ISSUER_ID and SPARKLE_ED_PRIVATE_KEY, and gh variable get SPARKLE_PUBLIC_KEY prints exactly the key from generate_keys -p (re-set it if it's missing; block on the user for any missing secret). Re-run the latest CI run on main (gh run rerun) and check it passes under the organization.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-107"
       ],
       "files": [],
       "created_at": "2026-10-27T05:14:16Z",
-      "updated_at": "2026-10-27T05:30:43Z",
+      "updated_at": "2026-10-27T05:33:46Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
       "started_at": "2026-10-27T05:30:43Z",
-      "started_by": "claude:c631bc24"
+      "started_by": "claude:c631bc24",
+      "commit": "42f34eb56b527ce4b0aaa8e2751470c005726301",
+      "completed_at": "2026-10-27T05:33:46Z",
+      "completed_by": "claude:c631bc24",
+      "notes": [
+        {
+          "at": "2026-10-27T05:33:46Z",
+          "kind": "outcome",
+          "text": "Remote is git@github.com:solo-swe/agentic-status-bar.git; 6 secrets present; SPARKLE_PUBLIC_KEY matches generate_keys -p; CI run 40455737403 on solo-swe passed; Actions enabled (workflow token default read, release.yml asks contents: write).",
+          "by": "claude:c631bc24"
+        }
+      ]
     },
     {
       "id": "T-109",
@@ -4209,7 +4220,7 @@
       "description": "Replace github.com/hakanserce/agentic-status-bar with github.com/solo-swe/agentic-status-bar everywhere it is written (git grep hakanserce): SUFeedURL in App/project.yml, the repo URL in scripts/appcast.sh, AboutPanel.projectURL and the credits text plus App/Tests/AboutPanelTests.swift, the README link in App/Sources/HelpView.swift, README.md (Releases link, git clone), doc/PRD.md. Keep the bundle ID com.hakanserce.agentic-status-bar (and the tests bundle ID, tests/app.sh, bundleIdPrefix) unchanged: changing it would reset settings, the login item and notification permission and break updates. Ask the user whether the About copyright stays \"© 2026 Hakan Serce\" or becomes Solo SWE. Run swift test, tests/app.sh --test and tests/lint.sh.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-108"
       ],
@@ -4223,9 +4234,11 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-10-27T05:14:16Z",
-      "updated_at": "2026-10-27T05:14:16Z",
+      "updated_at": "2026-10-27T05:33:47Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T05:33:47Z",
+      "started_by": "claude:c631bc24"
     },
     {
       "id": "T-110",

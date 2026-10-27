@@ -14,7 +14,7 @@ final class AboutPanelTests: XCTestCase {
 
     func testCreditsLinkToTheRepository() {
         let credits = AboutPanel.credits()
-        let range = (credits.string as NSString).range(of: "github.com/hakanserce/agentic-status-bar")
+        let range = (credits.string as NSString).range(of: "github.com/solo-swe/agentic-status-bar")
         XCTAssertNotEqual(range.location, NSNotFound)
         XCTAssertEqual(credits.attribute(.link, at: range.location, effectiveRange: nil) as? URL, AboutPanel.projectURL)
     }
