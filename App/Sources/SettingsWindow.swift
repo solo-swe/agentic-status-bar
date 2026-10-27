@@ -40,7 +40,7 @@ final class SettingsWindow {
         tabs.addTabViewItem(Self.tab("Appearance", "paintpalette", AppearanceSettings(store: store)))
         tabs.addTabViewItem(Self.tab("Notifications", "bell", NotificationSettings(store: store, notifier: notifier)))
 
-        let window = NSWindow(contentViewController: tabs)
+        let window = EscClosingWindow(contentViewController: tabs)
         window.styleMask = [.titled, .closable]
         window.toolbarStyle = .preference
         // Kept after closing, so reopening is instant and keeps its tab and place.

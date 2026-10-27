@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 122,
+    "next_id": 123,
     "workflow": {
       "type": "direct"
     },
@@ -4727,6 +4727,32 @@
       "review_requested_at": "2026-10-27T07:52:05Z",
       "completed_at": "2026-10-27T08:17:02Z",
       "completed_by": "claude:c631bc24"
+    },
+    {
+      "id": "T-122",
+      "name": "App: Esc closes the Help and Settings windows",
+      "phase": 6,
+      "type": "polish",
+      "priority": "P2",
+      "labels": [
+        "app"
+      ],
+      "description": "Pressing Esc closes the Help and Settings windows, like ⌘W.\n\n## Change\n- A small `NSWindow` subclass whose `cancelOperation(_:)` calls `performClose(_:)`; use it for `HelpWindow` and `SettingsWindow`.\n- Esc inside an open popover or menu (the symbol and color pickers) still closes only that popover or menu.\n- Closing the last window still returns the app to menu-bar only.\n\n## Tests\n- An app test that `cancelOperation` closes the window.\n- `tests/app.sh --test` passes; the user checks it in the dev build.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "in_progress",
+      "dependencies": [],
+      "files": [
+        "App/Sources/EscClosingWindow.swift",
+        "App/Sources/HelpView.swift",
+        "App/Sources/SettingsWindow.swift"
+      ],
+      "created_at": "2026-10-27T08:19:51Z",
+      "updated_at": "2026-10-27T08:19:58Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T08:19:58Z",
+      "started_by": "claude:c631bc24"
     }
   ]
 }

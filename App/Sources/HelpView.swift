@@ -131,7 +131,7 @@ final class HelpWindow {
     }
 
     private func make() -> NSWindow {
-        let window = NSWindow(contentViewController: NSHostingController(rootView: HelpView(store: store)))
+        let window = EscClosingWindow(contentViewController: NSHostingController(rootView: HelpView(store: store)))
         window.title = "Agentic Status Bar Help"
         window.styleMask = [.titled, .closable, .miniaturizable]
         window.isReleasedWhenClosed = false
