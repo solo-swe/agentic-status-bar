@@ -1,10 +1,15 @@
+<p align="center">
+  <img src="App/Resources/Assets.xcassets/AppIcon.appiconset/icon_256x256@2x.png" width="160" alt="Agentic Status Bar icon: an orange status light sending out signal arcs">
+</p>
+
 # Agentic Status Bar
 
 A macOS menu-bar app that shows, in one menu-bar item, whether any running
 [Claude Code](https://claude.com/claude-code) agent needs you, and notifies you when one has been waiting on you for
 a few seconds.
 
-> **Status: pre-release.** See the [PRD](doc/PRD.md) for the full design.
+> **Status: early releases (0.2).** Signed and notarized, and it updates itself. See the [PRD](doc/PRD.md) for the
+> full design.
 
 <!-- Screenshots: doc/screenshots/waiting.png, idle.png, popover.png, settings.png -->
 

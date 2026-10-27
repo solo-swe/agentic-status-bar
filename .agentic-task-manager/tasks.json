@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 124,
+    "next_id": 125,
     "workflow": {
       "type": "direct"
     },
@@ -4813,6 +4813,32 @@
       ],
       "completed_at": "2026-10-27T08:34:21Z",
       "completed_by": "claude:c631bc24"
+    },
+    {
+      "id": "T-124",
+      "name": "Docs: social media preview image for the repository",
+      "phase": 6,
+      "type": "docs",
+      "priority": "P2",
+      "labels": [
+        "release"
+      ],
+      "description": "A 1280×640 social preview for `solo-swe/agentic-status-bar` (shown when the repository is linked).\n\n## Change\n- `scripts/make-social-preview.swift` draws it with AppKit (like `scripts/make-icon.swift`), so it can be regenerated: the app icon, the name, a one-line tagline, a small menu bar and session list mock with made-up project names, and the Homebrew install command.\n- Output `doc/social-preview.png` (under 1 MB, as GitHub requires).\n\n## Done when\n- The user likes it and uploads it in **Settings › General › Social preview** (GitHub has no API for this).",
+      "requirements": [],
+      "use_cases": [],
+      "status": "in_progress",
+      "dependencies": [],
+      "files": [
+        "scripts/make-social-preview.swift",
+        "doc/social-preview.png",
+        "README.md"
+      ],
+      "created_at": "2026-10-27T16:26:30Z",
+      "updated_at": "2026-10-27T16:27:39Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "claude:c631bc24",
+      "started_at": "2026-10-27T16:27:11Z",
+      "started_by": "claude:c631bc24"
     }
   ]
 }
