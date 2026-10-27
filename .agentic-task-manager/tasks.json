@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 107,
+    "next_id": 113,
     "workflow": {
       "type": "direct"
     },
@@ -4115,12 +4115,13 @@
       "labels": [
         "release"
       ],
-      "description": "Distribute the app with Homebrew: brew install --cask hakanserce/tap/agentic-status-bar. Needs the user to create the public repository hakanserce/homebrew-tap and a fine-grained token with contents write access to it, stored as the secret HOMEBREW_TAP_TOKEN in this repository: if either is missing, block this task on the user naming exactly those. Write Casks/agentic-status-bar.rb (version, sha256 of the release zip, url https://github.com/hakanserce/agentic-status-bar/releases/download/v#{version}/agentic-status-bar-#{version}.zip, name, desc, homepage, depends_on macos: \">= :sonoma\", depends_on arch: :arm64 while builds are arm64-only, app \"Agentic Status Bar.app\", auto_updates true once Sparkle (T-091) ships, uninstall quit: \"com.hakanserce.agentic-status-bar\", zap trash: the config dir, the state dir and the app's preferences), checked with brew audit --cask --new and brew style. Extend .github/workflows/release.yml: after the release is published (or in a separate workflow on release: published, since releases start as drafts), compute the zip's sha256 and push the updated cask to the tap. Add README install instructions (brew first, DMG second) and the release steps to CONTRIBUTING.md.",
+      "description": "Distribute the app with Homebrew: brew install --cask solo-swe/tap/agentic-status-bar. Needs the user to create the public repository solo-swe/homebrew-tap and a fine-grained token with contents write access to it, stored as the secret HOMEBREW_TAP_TOKEN in solo-swe/agentic-status-bar: if either is missing, block this task on the user naming exactly those. Write Casks/agentic-status-bar.rb (version, sha256 of the release zip, url https://github.com/solo-swe/agentic-status-bar/releases/download/v#{version}/agentic-status-bar-#{version}.zip, name, desc, homepage, depends_on macos: \">= :sonoma\", depends_on arch: :arm64 while builds are arm64-only, app \"Agentic Status Bar.app\", auto_updates true (Sparkle), uninstall quit: \"com.hakanserce.agentic-status-bar\", zap trash: the config dir, the state dir and the app's preferences), checked with brew audit --cask and brew style. Add a workflow on release: published (releases start as drafts) that computes the zip's sha256 and pushes the updated cask to the tap. Add README install instructions (brew first, DMG second) and the release steps to CONTRIBUTING.md. The official homebrew/cask needs 225 stars, 90 forks or 90 watchers for a self-submission and a repository at least 30 days old: not now.",
       "requirements": [],
       "use_cases": [],
       "status": "todo",
       "dependencies": [
-        "T-091"
+        "T-091",
+        "T-112"
       ],
       "files": [
         ".github/workflows/release.yml",
@@ -4130,7 +4131,152 @@
         "scripts/homebrew-cask.rb"
       ],
       "created_at": "2026-10-27T00:47:57Z",
-      "updated_at": "2026-10-27T00:47:57Z",
+      "updated_at": "2026-10-27T05:14:22Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "claude:c631bc24"
+    },
+    {
+      "id": "T-107",
+      "name": "Release: transfer the repository to the solo-swe organization",
+      "phase": 6,
+      "type": "infra",
+      "priority": "P1",
+      "labels": [
+        "release"
+      ],
+      "description": "The user transfers hakanserce/agentic-status-bar to the GitHub organization solo-swe (repository › Settings › General › Danger Zone › Transfer ownership, or gh api repos/hakanserce/agentic-status-bar/transfer -f new_owner=solo-swe). Before: check solo-swe › Settings › Actions › General allows Actions and lets workflows request contents: write, and that solo-swe has no repository named agentic-status-bar. An agent can't do the transfer: block this task on the user, and mark it done once gh repo view solo-swe/agentic-status-bar works. Never create a repository or fork named hakanserce/agentic-status-bar afterwards: it would end GitHub's redirect for old links.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "blocked",
+      "dependencies": [],
+      "files": [],
+      "created_at": "2026-10-27T05:14:16Z",
+      "updated_at": "2026-10-27T05:14:25Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "claude:c631bc24",
+      "waiting_on": "user",
+      "questions": [
+        "Transfer hakanserce/agentic-status-bar to solo-swe (Settings › General › Danger Zone › Transfer ownership). Done?"
+      ],
+      "blocked_at": "2026-10-27T05:14:25Z"
+    },
+    {
+      "id": "T-108",
+      "name": "Release: reconnect the clone and check secrets and CI after the move",
+      "phase": 6,
+      "type": "infra",
+      "priority": "P1",
+      "labels": [
+        "release"
+      ],
+      "description": "After the transfer: git remote set-url origin git@github.com:solo-swe/agentic-status-bar.git and git fetch. Check gh secret list shows DEVELOPER_ID_CERT_P12, DEVELOPER_ID_CERT_PASSWORD, NOTARY_API_KEY_P8, NOTARY_API_KEY_ID, NOTARY_API_ISSUER_ID and SPARKLE_ED_PRIVATE_KEY, and gh variable get SPARKLE_PUBLIC_KEY prints exactly the key from generate_keys -p (re-set it if it's missing; block on the user for any missing secret). Re-run the latest CI run on main (gh run rerun) and check it passes under the organization.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-107"
+      ],
+      "files": [],
+      "created_at": "2026-10-27T05:14:16Z",
+      "updated_at": "2026-10-27T05:14:16Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-109",
+      "name": "Release: point the app and docs at solo-swe/agentic-status-bar",
+      "phase": 6,
+      "type": "refactor",
+      "priority": "P1",
+      "labels": [
+        "release"
+      ],
+      "description": "Replace github.com/hakanserce/agentic-status-bar with github.com/solo-swe/agentic-status-bar everywhere it is written (git grep hakanserce): SUFeedURL in App/project.yml, the repo URL in scripts/appcast.sh, AboutPanel.projectURL and the credits text plus App/Tests/AboutPanelTests.swift, the README link in App/Sources/HelpView.swift, README.md (Releases link, git clone), doc/PRD.md. Keep the bundle ID com.hakanserce.agentic-status-bar (and the tests bundle ID, tests/app.sh, bundleIdPrefix) unchanged: changing it would reset settings, the login item and notification permission and break updates. Ask the user whether the About copyright stays \"© 2026 Hakan Serce\" or becomes Solo SWE. Run swift test, tests/app.sh --test and tests/lint.sh.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-108"
+      ],
+      "files": [
+        "App/project.yml",
+        "scripts/appcast.sh",
+        "App/Sources/AboutPanel.swift",
+        "App/Tests/AboutPanelTests.swift",
+        "App/Sources/HelpView.swift",
+        "README.md",
+        "doc/PRD.md"
+      ],
+      "created_at": "2026-10-27T05:14:16Z",
+      "updated_at": "2026-10-27T05:14:16Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-110",
+      "name": "Release: scan the git history before going public",
+      "phase": 6,
+      "type": "infra",
+      "priority": "P1",
+      "labels": [
+        "release"
+      ],
+      "description": "Before the repository becomes public, scan every commit for secrets and personal data: gitleaks (brew install gitleaks; gitleaks git --verbose --report-path into the scratchpad, not the repo) over the full history, plus a look for personal paths, emails and real project names (the docs must not name the user's real projects) in tracked files and .agentic-task-manager/tasks.json notes. Report every finding to the user with commit and file. Fix the current files; if a real secret is in history, the secret must be rotated (rewriting history is the user's call, never force-push without asking). Record the result (clean or what was fixed) as the task's note.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [],
+      "created_at": "2026-10-27T05:14:16Z",
+      "updated_at": "2026-10-27T05:14:16Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-111",
+      "name": "Release: make the repository public",
+      "phase": 6,
+      "type": "infra",
+      "priority": "P1",
+      "labels": [
+        "release"
+      ],
+      "description": "The user makes solo-swe/agentic-status-bar public (Settings › General › Danger Zone › Change visibility), once the history scan is clean and the URLs point at solo-swe. Hard to undo: copies made while it is public stay out there. An agent can't do this: block the task on the user, and mark it done once gh repo view solo-swe/agentic-status-bar --json visibility says PUBLIC.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-109",
+        "T-110"
+      ],
+      "files": [],
+      "created_at": "2026-10-27T05:14:16Z",
+      "updated_at": "2026-10-27T05:14:16Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-112",
+      "name": "Release: v0.2.1, the first public release",
+      "phase": 6,
+      "type": "infra",
+      "priority": "P1",
+      "labels": [
+        "release"
+      ],
+      "description": "Delete the unpublished drafts v0.1.0 and v0.2.0 and their tags (gh release delete <tag> --cleanup-tag --yes, after confirming with the user), so no build with the old feed URL goes out. Set ASBVersion.current and MARKETING_VERSION to 0.2.1, push, tag v0.2.1, watch the release run. Verify the draft: spctl accepts the DMG and the app (Notarized Developer ID), codesign --deep --strict passes, the app's SUFeedURL is the solo-swe one and SUPublicEDKey matches SPARKLE_PUBLIC_KEY, the appcast signature verifies against the zip. Ask the user to publish it, then check anonymous downloads (curl -fsSIL without auth) of releases/latest/download/appcast.xml and the zip, which Sparkle and Homebrew need.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-111"
+      ],
+      "files": [
+        "Sources/ASBCore/Version.swift",
+        "App/project.yml"
+      ],
+      "created_at": "2026-10-27T05:14:16Z",
+      "updated_at": "2026-10-27T05:14:16Z",
       "created_by": "Hakan Serce",
       "updated_by": "Hakan Serce"
     }
