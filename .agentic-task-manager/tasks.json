@@ -41,7 +41,8 @@
         "id": 7,
         "name": "Architecture: more agents and terminals"
       }
-    ]
+    ],
+    "repository": "https://github.com/solo-swe/agentic-status-bar"
   },
   "tasks": [
     {
