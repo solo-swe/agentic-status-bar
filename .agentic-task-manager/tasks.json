@@ -4676,10 +4676,30 @@
         "App/Tests/MainMenuTests.swift"
       ],
       "created_at": "2026-10-27T07:43:57Z",
-      "updated_at": "2026-10-27T07:44:55Z",
+      "updated_at": "2026-10-27T07:51:25Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:c631bc24",
-      "started_at": "2026-10-27T07:44:55Z",
+      "notes": [
+        {
+          "at": "2026-10-27T07:45:52Z",
+          "kind": "review",
+          "text": "Renamed the Help action to `openHelpWindow(_:)` (`showHelp:` is NSApplication's Help Book action); new test guards against reusing AppKit selectors. User: open Help from the Help menu in the dev build.",
+          "by": "claude:c631bc24"
+        },
+        {
+          "at": "2026-10-27T07:51:24Z",
+          "kind": "rejection",
+          "text": "Still shows the alert while the Help window is key: the SwiftUI App lifecycle rebuilds the main menu with its default Help item (showHelp:) when a SwiftUI-hosted window is key. Fix: start the app with AppKit (main.swift) instead of a SwiftUI App, so our MainMenu is the only menu.",
+          "by": "claude:c631bc24"
+        }
+      ],
+      "reviews": [
+        {
+          "from": "2026-10-27T07:45:52Z",
+          "to": "2026-10-27T07:51:24Z"
+        }
+      ],
+      "started_at": "2026-10-27T07:51:25Z",
       "started_by": "claude:c631bc24"
     }
   ]
