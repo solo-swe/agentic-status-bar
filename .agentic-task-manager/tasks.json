@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "SwiftBar plugin that shows in one menu-bar item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks. Source: doc/PRD.md",
-    "next_id": 100,
+    "next_id": 102,
     "workflow": {
       "type": "direct"
     },
@@ -3839,6 +3839,59 @@
           "by": "claude:c631bc24"
         }
       ]
+    },
+    {
+      "id": "T-100",
+      "name": "App: app icon (logo)",
+      "phase": 6,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "app"
+      ],
+      "description": "The app has no icon: Finder, the DMG, the Settings and first-run windows, notifications and the About panel show the generic app icon. Design an app icon that fits the idea (a menu-bar status light for Claude Code sessions, in the macOS Big Sur+ rounded-square style) and keep it reproducible: a small script (scripts/make-icon.swift or similar, drawing with CoreGraphics/AppKit) renders every macOS size (16, 32, 128, 256, 512 at 1x and 2x) into App/Resources/Assets.xcassets/AppIcon.appiconset with its Contents.json. Add the asset catalog to the app target in App/project.yml (ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon), regenerate the Xcode project, and check the built app's Contents/Resources has AppIcon.icns / Assets.car and that Finder shows the icon. Show the user the icon for approval before marking done.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "App/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json",
+        "App/Resources/Assets.xcassets/Contents.json",
+        "scripts/make-icon.swift",
+        "App/project.yml",
+        "App/AgenticStatusBar.xcodeproj/project.pbxproj"
+      ],
+      "created_at": "2026-10-27T00:07:46Z",
+      "updated_at": "2026-10-27T00:07:46Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-101",
+      "name": "App: About window",
+      "phase": 6,
+      "type": "feature",
+      "priority": "P1",
+      "labels": [
+        "app"
+      ],
+      "description": "The app is LSUIElement, with no app menu, so there's no About dialog. Add an About entry (an \"About Agentic Status Bar\" button in the Settings General tab footer, and/or an item next to Quit and the gear in the popover's bottom row) that activates the app and opens the standard panel with NSApp.orderFrontStandardAboutPanel(options:): the app icon, the name, version (CFBundleShortVersionString) and build (CFBundleVersion), a copyright line (NSHumanReadableCopyright in the Info.plist via project.yml) and credits with a link to https://github.com/hakanserce/agentic-status-bar. The popover closes before the panel opens. Add an app test for the options passed if practical; the user checks it visually before it's marked done.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-100"
+      ],
+      "files": [
+        "App/Sources/PopoverView.swift",
+        "App/Sources/SettingsView.swift",
+        "App/Sources/AppDelegate.swift",
+        "App/project.yml"
+      ],
+      "created_at": "2026-10-27T00:07:46Z",
+      "updated_at": "2026-10-27T00:07:46Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
     }
   ]
 }
