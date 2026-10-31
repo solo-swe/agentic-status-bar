@@ -36,6 +36,19 @@ private let tree = FakeProcessInspector([
     #expect(HookMetadata.findClaude(from: 4300, inspector: otherNode) == nil)
 }
 
+@Test func theNativeInstallNamedAfterItsVersionIsFound() {
+    // ~/.local/bin/claude links to ~/.local/share/claude/versions/2.1.316: the process is named "2.1.316".
+    let native = FakeProcessInspector([
+        ProcessRecord(pid: 5000, ppid: 4400, start: 1, comm: "sh"),
+        ProcessRecord(pid: 4400, ppid: 1, start: 2, comm: "2.1.316", args: "claude --resume"),
+    ])
+    #expect(HookMetadata.findClaude(from: 5000, inspector: native) == 4400)
+    let pathArgv0 = FakeProcessInspector([ProcessRecord(pid: 4400, ppid: 1, start: 2, comm: "2.1.316", args: "/Users/me/.local/bin/claude")])
+    #expect(HookMetadata.findClaude(from: 4400, inspector: pathArgv0) == 4400)
+    let otherVersioned = FakeProcessInspector([ProcessRecord(pid: 4400, ppid: 1, start: 2, comm: "3.12", args: "python3 claude.py")])
+    #expect(HookMetadata.findClaude(from: 4400, inspector: otherVersioned) == nil)
+}
+
 @Test func withoutAClaudeAncestorThePidIsNil() {
     let shells = FakeProcessInspector((2...20).map { ProcessRecord(pid: Int32($0), ppid: Int32($0 - 1), start: 1, comm: "sh") })
     #expect(HookMetadata.findClaude(from: 20, inspector: shells) == nil)
@@ -104,8 +117,11 @@ private let tree = FakeProcessInspector([
     #expect(HookMetadata.needsBackfill(["state": "busy"]))
     #expect(HookMetadata.needsBackfill(["pid": 1]))
     #expect(!HookMetadata.needsBackfill(["pid": 1, "cwd": "/x"]))
-    // pid null means "looked, none found": don't look again.
+    // pid null means "looked, none found": don't look again on tool calls, only on a new prompt.
     #expect(!HookMetadata.needsBackfill(["pid": NSNull(), "cwd": "/x"]))
+    #expect(!HookMetadata.needsBackfill(["pid": NSNull(), "cwd": "/x"], event: "PreToolUse"))
+    #expect(HookMetadata.needsBackfill(["pid": NSNull(), "cwd": "/x"], event: "UserPromptSubmit"))
+    #expect(!HookMetadata.needsBackfill(["pid": 1, "cwd": "/x"], event: "UserPromptSubmit"))
 }
 
 @Test func staleFilesAreOtherSessionsOfTheSameProcess() {

@@ -36,17 +36,31 @@ public struct HookMetadata: Equatable, Sendable {
     }
 
     /// Walks up from `start` to the first `claude` process (or `node` running claude, as npm installs do).
+    /// The native install runs `~/.local/share/claude/versions/<version>` through a `claude` symlink, so
+    /// its process is named after the version; its argv[0] is still `claude`.
     public static func findClaude(from start: Int32, inspector: any ProcessInspector) -> Int32? {
         var pid = start
         for _ in 0..<maxDepth {
             guard pid > 1, let process = inspector.process(pid) else { return nil }
-            switch (process.comm as NSString).lastPathComponent {
+            let name = (process.comm as NSString).lastPathComponent
+            switch name {
             case "claude": return pid
             case "node" where inspector.arguments(pid)?.contains("claude") == true: return pid
+            case _ where isVersion(name) && argv0(inspector.arguments(pid)) == "claude": return pid
             default: pid = process.ppid
             }
         }
         return nil
+    }
+
+    /// `2.1.316`: digits and dots, starting with a digit.
+    static func isVersion(_ name: String) -> Bool {
+        name.first?.isNumber == true && name.allSatisfy { $0.isNumber || $0 == "." }
+    }
+
+    /// The last path component of a command line's first word.
+    static func argv0(_ arguments: String?) -> String? {
+        arguments?.split(separator: " ").first.map { (String($0) as NSString).lastPathComponent }
     }
 
     /// interactive, headless, ide or desktop.
@@ -76,8 +90,9 @@ public struct HookMetadata: Equatable, Sendable {
 
     /// Whether a written state still lacks the details (the session predates the hooks).
     /// A `pid` of null counts as recorded.
-    public static func needsBackfill(_ state: [String: Any]) -> Bool {
-        state["pid"] == nil || state["cwd"] == nil
+    /// A null `pid` is looked up again on each prompt: older versions missed the native install's process.
+    public static func needsBackfill(_ state: [String: Any], event: String = "") -> Bool {
+        state["pid"] == nil || state["cwd"] == nil || (event == "UserPromptSubmit" && state["pid"] is NSNull)
     }
 
     /// State files in `files` (other than `own`) recorded for `pid`: a claude process runs one session

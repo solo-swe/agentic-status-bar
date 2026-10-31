@@ -184,6 +184,14 @@ public enum HookEvents {
             guard !payload.agentId.isEmpty else { return .none }
             if !older, s["state"] == nil || s["state"] is NSNull || (s["state"] as? Bool) == false { s["state"] = "busy" }
             var agents = s["subagents"] as? [String: Any] ?? [:]
+            // A new subagent while the Agent or Task tool waited on a permission: it was approved and runs.
+            // (A resumed background subagent is already listed and leaves the state alone.)
+            if !older, agents[payload.agentId] == nil, s["state"] as? String == "waiting",
+               ["Agent", "Task"].contains(s["lastTool"] as? String ?? "") {
+                s["state"] = "busy"
+                s["reason"] = nil
+                s["message"] = nil
+            }
             // A resumed subagent keeps its entry (and first start time).
             if agents[payload.agentId] == nil {
                 agents[payload.agentId] = ["type": payload.agentType.isEmpty ? "agent" : payload.agentType, "since": now]

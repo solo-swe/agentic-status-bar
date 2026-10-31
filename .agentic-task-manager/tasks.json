@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 125,
+    "next_id": 126,
     "workflow": {
       "type": "direct"
     },
@@ -4863,6 +4863,36 @@
       ],
       "completed_at": "2026-10-27T16:30:50Z",
       "completed_by": "claude:c631bc24"
+    },
+    {
+      "id": "T-125",
+      "name": "Fix: waiting lingers after a permission is approved",
+      "phase": 6,
+      "type": "bugfix",
+      "priority": "P1",
+      "labels": [
+        "hook",
+        "checks"
+      ],
+      "description": "After the user approves a permission prompt, the session keeps showing `waiting` for 30 s to 1 min, until the approved tool finishes (`PostToolUse`). No hook fires on approval; check C4 (a new child of the `claude` process means the approved tool runs, so `busy`) is meant to bridge the gap but never ran.\n\n## Cause\n- The native Claude Code install runs `~/.local/share/claude/versions/<version>` through the `~/.local/bin/claude` symlink, so the process is named after the version (e.g. `2.1.316`). `HookMetadata.findClaude` matched only `claude` or `node`, so every session was recorded with `pid: null`, which turns off C4 (and C1 liveness).\n- An approved tool that starts no child process (an Agent or Task subagent) stays `waiting` until `PostToolUse`, even with a PID.\n\n## Change\n- `findClaude` also accepts a process whose name is a version (digits and dots) and whose argv[0] is `claude`.\n- A recorded `pid: null` is looked up again on each `UserPromptSubmit` (not on tool calls), so running sessions recover without a restart.\n- `SubagentStart` on a `waiting` session sets it `busy`: the approved Agent or Task tool is running. (T-120 later tracks waiting per agent; this covers the parent's own prompt.)\n- `doc/state-file-schema.md` › Events: the `SubagentStart` rule.\n\n## Tests\n- `findClaude`: the native install's version name, a full-path argv[0], a version-named process that isn't claude.\n- `needsBackfill`: a null pid is retried only on `UserPromptSubmit`.\n- `HookEventsTests`: `SubagentStart` moves `waiting` to `busy`; other states unchanged.\n- `tests/swift.sh` and `tests/lint.sh` pass; against the real process tree the hook records the claude PID.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "in_progress",
+      "dependencies": [],
+      "files": [
+        "Sources/ASBCore/HookMetadata.swift",
+        "Sources/asb/Hook.swift",
+        "Sources/ASBCore/HookEvents.swift",
+        "doc/state-file-schema.md",
+        "tests/ASBCoreTests/HookMetadataTests.swift",
+        "tests/ASBCoreTests/HookEventsTests.swift"
+      ],
+      "created_at": "2026-10-31T06:54:28Z",
+      "updated_at": "2026-10-31T06:54:37Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "claude:6baf63b2",
+      "started_at": "2026-10-31T06:54:37Z",
+      "started_by": "claude:6baf63b2"
     }
   ]
 }

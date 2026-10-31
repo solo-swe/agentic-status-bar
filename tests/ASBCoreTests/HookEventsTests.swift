@@ -175,6 +175,27 @@ private func has(_ state: [String: Any]?, _ key: String) -> Bool { state?[key] !
     #expect(str(try run(["SubagentStart"]).1, "state") == "busy")
 }
 
+@Test func aNewSubagentEndsAWaitOnTheAgentTool() throws {
+    let waiting: [String: Any] = ["state": "waiting", "reason": "permission", "message": "Claude needs your permission",
+                                  "lastTool": "Agent", "stateSince": 500]
+    let s = written(apply(try payload("SubagentStart"), to: waiting, at: 2000))
+    #expect(str(s, "state") == "busy" && !has(s, "reason") && !has(s, "message"))
+    #expect(num(s, "stateSince") == 2000)
+    #expect(str(written(apply(try payload("SubagentStart"), to: waiting.merging(["lastTool": "Task"]) { $1 }, at: 2000)), "state") == "busy")
+}
+
+@Test func otherSubagentStartsKeepTheWait() throws {
+    let waiting: [String: Any] = ["state": "waiting", "reason": "permission", "lastTool": "Bash"]
+    // The prompt is for another tool.
+    #expect(str(written(apply(try payload("SubagentStart"), to: waiting, at: 2000)), "state") == "waiting")
+    // A background subagent resuming is already listed.
+    let resumed = waiting.merging(["lastTool": "Agent", "subagents": ["ac2ed88ebf4ec5d02": ["type": "general-purpose", "since": 1]]]) { $1 }
+    #expect(str(written(apply(try payload("SubagentStart"), to: resumed, at: 2000)), "state") == "waiting")
+    // An older start doesn't change the state.
+    let older = waiting.merging(["lastTool": "Agent", "eventAt": 5000]) { $1 }
+    #expect(str(written(apply(try payload("SubagentStart"), to: older, at: 6000, started: 4000)), "state") == "waiting")
+}
+
 @Test func subagentStopRemovesTheSubagentAndKeepsOthers() throws {
     var other = try payload("SubagentStart")
     other.agentId = "other"

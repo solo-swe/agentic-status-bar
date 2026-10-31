@@ -55,7 +55,7 @@ struct HookCommand: ParsableCommand {
 
             // Backfill sessions that were running before the hooks were installed.
             if case .write(let state) = outcome, payload.event != "SessionStart", !payload.cwd.isEmpty,
-               HookMetadata.needsBackfill(state) {
+               HookMetadata.needsBackfill(state, event: payload.event) {
                 var filled: [String: Any] = state
                 details().apply(to: &filled, cwd: payload.cwd, transcriptPath: payload.transcriptPath)
                 outcome = .write(HookEvents.hashable(filled))
