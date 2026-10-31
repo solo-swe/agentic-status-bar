@@ -82,6 +82,15 @@ notification, also for muted projects. It is withdrawn when the session moves on
 time. **Settings › Notifications** turns them off, adds notifications for idle sessions, changes the delay (5, 10, 30
 or 60 seconds) and the sound, and sends a test notification.
 
+### Desktop companion
+
+Turn on **Settings › Companion** for a small stick figure in a corner of your screen that acts out what the menu bar
+shows: it works out while your sessions work (walking, weights, push-ups, jumping jacks and pull-ups, with rests in
+between), stops and waves with a **!** or **?** when one needs you, goes to bed when they're idle, and sits on its
+bed when there are none. It is off by default, never takes the focus or your clicks, stops moving when it can't be
+seen, slows down in Low Power Mode and holds still with Reduce Motion. Choose its corner, size (small, medium or
+large), color, and whether it stays over full-screen apps.
+
 ## How it works
 
 1. **Claude Code hooks** (`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Notification`, `Stop`,
@@ -168,6 +177,8 @@ The gear at the bottom of the list opens Settings:
 - **Appearance:** the theme (default, monochrome or high contrast), and each state's symbol and color, picked from a
   set (each color has a shade for a light and a dark menu bar). Other SF Symbols and colors can be set in the config
   file.
+- **Companion:** the desktop companion (see above): on or off, its corner, size and color, and whether it stays
+  over full-screen apps.
 - **Notifications:** see above.
 
 Settings are stored in `~/.config/agentic-status-bar/config` (`key=value`), which `asb` reads too:
@@ -184,6 +195,11 @@ Settings are stored in `~/.config/agentic-status-bar/config` (`key=value`), whic
 | `notify_waiting`, `notify_idle`                                   | `1`, `0`                                | Notify when a session waits on you, or goes idle                         |
 | `notify_delay_seconds`                                            | `10`                                    | How long before the notification                                         |
 | `notify_sound`                                                    | `1`                                     | Play a sound with notifications                                          |
+| `companion`                                                       | `0`                                     | Show the desktop companion                                               |
+| `companion_position`                                              | `bottom-right`                          | `bottom-right`, `bottom-left`, `top-right` or `top-left`                 |
+| `companion_size`                                                  | `medium`                                | `small`, `medium` or `large`                                             |
+| `companion_color`                                                 | empty (automatic)                       | `#RRGGBB` or a `light,dark` pair; empty = dark on light, light on dark   |
+| `companion_over_fullscreen`                                       | `0`                                     | Keep the companion visible over full-screen apps                         |
 | `state_dir`                                                       | `~/.claude/agentic-status-bar`          | Where hooks write state files                                            |
 
 For example, to show idle sessions as a blue moon:

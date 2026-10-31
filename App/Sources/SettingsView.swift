@@ -34,6 +34,14 @@ enum SettingsView {
         }
     }
 
+    /// The companion's corners and sizes, as `companion_position` and `companion_size` values with labels.
+    static let companionCorners: [(value: String, label: String)] = [
+        ("bottom-right", "Bottom right"), ("bottom-left", "Bottom left"), ("top-right", "Top right"), ("top-left", "Top left"),
+    ]
+    static let companionSizes: [(value: String, label: String)] = [
+        ("small", "Small"), ("medium", "Medium"), ("large", "Large"),
+    ]
+
     /// The `color_<state>` value for a light and a dark color.
     static func colorSetting(light: NSColor, dark: NSColor) -> String? {
         guard let l = ThemeColor.hexString(light), let d = ThemeColor.hexString(dark) else { return nil }
@@ -170,6 +178,75 @@ struct NotificationSettings: View {
     private func toggle(_ title: String, _ key: String, _ value: KeyPath<Config, Bool>) -> some View {
         Toggle(title, isOn: Binding(get: { store.config[keyPath: value] }, set: { store.set(key, $0) }))
     }
+}
+
+/// The desktop companion: on or off, where, how big, its color, and whether it stays over full-screen apps.
+struct CompanionSettings: View {
+    let store: SessionStore
+    @State private var pickingColor = false
+
+    var body: some View {
+        let config = store.config
+        Form {
+            Section {
+                Toggle("Show the companion", isOn: Binding(get: { config.companion }, set: { store.set("companion", $0) }))
+            } footer: {
+                Text("A small stick figure on your desktop that acts out your sessions: it works out while they work, waves when one needs you, and sleeps when they're idle.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Section {
+                Picker("Corner", selection: Binding(
+                    get: { config.companionPosition }, set: { store.set("companion_position", $0) })
+                ) {
+                    ForEach(SettingsView.companionCorners, id: \.value) { Text($0.label).tag($0.value) }
+                }
+                Picker("Size", selection: Binding(get: { config.companionSize }, set: { store.set("companion_size", $0) })) {
+                    ForEach(SettingsView.companionSizes, id: \.value) { Text($0.label).tag($0.value) }
+                }
+                .pickerStyle(.segmented)
+                LabeledContent("Color") {
+                    HStack(spacing: 8) {
+                        if config.companionColor.isEmpty {
+                            Text("Automatic").foregroundStyle(.secondary)
+                        }
+                        Button {
+                            pickingColor = true
+                        } label: {
+                            ColorSwatch(value: config.companionColor.isEmpty ? Self.automatic : config.companionColor)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Change the color")
+                        .popover(isPresented: $pickingColor, arrowEdge: .bottom) {
+                            VStack(spacing: 0) {
+                                ColorPalette(selected: config.companionColor) { value in
+                                    store.set("companion_color", value)
+                                    pickingColor = false
+                                }
+                                Button("Automatic") {
+                                    store.set("companion_color", "")
+                                    pickingColor = false
+                                }
+                                .padding(.bottom, 10)
+                            }
+                        }
+                    }
+                }
+                Toggle("Show over full-screen apps", isOn: Binding(
+                    get: { config.companionOverFullscreen }, set: { store.set("companion_over_fullscreen", $0) }))
+            } footer: {
+                Text("Automatic draws it dark on a light desktop and light on a dark one. It stops moving when it can't be seen, slows down in Low Power Mode, and holds still with Reduce Motion.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .disabled(!config.companion)
+        }
+        .formStyle(.grouped)
+        .scrollDisabled(true)
+    }
+
+    /// How the automatic color looks: dark on light, light on dark.
+    static let automatic = "#1D1D1F,#F5F5F7"
 }
 
 /// The theme, and each state's symbol and colors.

@@ -5379,7 +5379,7 @@
       "description": "Keep it cheap (`doc/design/desktop-companion.md` › Energy and etiquette).\n\n## Change\n- Pause all animation (`layer.speed = 0`) when the panel isn't visible (`didChangeOcclusionStateNotification`), when displays sleep (`NSWorkspace.screensDidSleepNotification` / `screensDidWake`), and while the screen is locked (`com.apple.screenIsLocked` / `screenIsUnlocked`).\n- Low Power Mode (`NSProcessInfoPowerStateDidChange`, then `isLowPowerModeEnabled`): longer rests, half rate.\n- Reduce Motion (`accessibilityDisplayShouldReduceMotion` and its change notification): one still pose per scene.\n- No `beginActivity`.\n\n## Tests\n- App tests with injected notifications: paused when occluded, locked or asleep; still poses under Reduce Motion.\n- Measure CPU over a minute (`top -pid`) for busy, waiting, idle and hidden on an Apple-silicon Mac; record the numbers in the design doc. Budget: under 1 % busy, about 0 % idle or hidden.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-135"
       ],
@@ -5389,7 +5389,7 @@
         "doc/design/desktop-companion.md"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T08:47:02Z",
+      "updated_at": "2026-10-31T08:47:14Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "notes": [
@@ -5398,11 +5398,19 @@
           "kind": "note",
           "text": "The halo (`shadowColor`/`shadowOpacity` on the figure and bed layers, added in T-135 review) needs an offscreen pass per frame: measure with and without it, and give it a `shadowPath` or drop it if it busts the budget.",
           "by": "claude:6baf63b2"
+        },
+        {
+          "at": "2026-10-31T08:47:14Z",
+          "kind": "outcome",
+          "text": "Stops everything when covered, displays asleep or locked and replays on return; Low Power: 6 fps, double rests; Reduce Motion: one still pose per scene. App CPU measured ~0.3% in every scene, same as with the companion off; WindowServer side handed to T-140.",
+          "by": "claude:6baf63b2"
         }
       ],
       "started_at": "2026-10-31T08:39:01Z",
       "started_by": "claude:6baf63b2",
-      "commit": "df0d9d3ae6bf8cd5037b70c9d4d4450aa34f94bb"
+      "commit": "d4d0724dbd3bf0a0a70a1a911dbb39f120272fe4",
+      "completed_at": "2026-10-31T08:47:14Z",
+      "completed_by": "claude:6baf63b2"
     },
     {
       "id": "T-138",
@@ -5452,7 +5460,7 @@
       "description": "Make it discoverable and configurable (`doc/design/desktop-companion.md` › Settings).\n\n## Change\n- Settings: a Companion section with \"Show the companion\", a corner picker (bottom right, bottom left, top right, top left), \"Show over full-screen apps\", and a **color** choice for `companion_color` (Automatic, plus a few presets and a custom color well, like the theme color overrides), written through `SessionStore.set`.\n- Help: what the companion's poses mean (one line per state).\n- README: a short paragraph and how to turn it on; the `companion*` keys in the config table.\n- The first-run window mentions it, off by default.\n\n## Tests\n- `SettingsTests`: the controls write the keys (the color too, and Automatic clears it); `HelpTests`: the companion entries.\n- `tests/app.sh --test` and `tests/lint.sh` pass.\n",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-127",
         "T-135"
@@ -5466,7 +5474,7 @@
         "App/Tests/HelpTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T08:36:43Z",
+      "updated_at": "2026-10-31T08:47:17Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "notes": [
@@ -5476,7 +5484,9 @@
           "text": "Also a size picker for `companion_size` (Small, Medium, Large; medium is the default), added during the T-135 review.",
           "by": "claude:6baf63b2"
         }
-      ]
+      ],
+      "started_at": "2026-10-31T08:47:17Z",
+      "started_by": "claude:6baf63b2"
     },
     {
       "id": "T-140",
@@ -5502,9 +5512,17 @@
         "doc/design/desktop-companion.md"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T08:47:14Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:6baf63b2",
+      "notes": [
+        {
+          "at": "2026-10-31T08:47:14Z",
+          "kind": "note",
+          "text": "From T-137: also compare WindowServer’s energy impact in Activity Monitor with the companion on and off, and with and without the halo; the app’s own CPU was measured, the render server’s wasn’t. Record it in the design doc’s Measured section.",
+          "by": "claude:6baf63b2"
+        }
+      ]
     }
   ]
 }

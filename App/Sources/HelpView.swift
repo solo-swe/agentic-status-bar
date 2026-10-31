@@ -26,6 +26,15 @@ enum HelpLegend {
         "none": "No Claude Code sessions are running. No count.",
     ]
 
+    /// What the desktop companion does in each of its scenes (the menu bar's state picks the scene).
+    static let companion: [(scene: String, meaning: String)] = [
+        ("Working", "Works out, calmly: walks, lifts weights, does push-ups, jumping jacks and pull-ups, resting in between."),
+        ("Waiting", "Stops and waves at you, with **!** for a permission or **?** for a question."),
+        ("Idle", "Goes to bed and sleeps, *z*s rising."),
+        ("No sessions or muted", "Sits on the edge of its bed."),
+        ("No activity or warning", "Stands still."),
+    ]
+
     /// The legend for the theme in use, overrides included.
     static func entries(_ theme: Theme) -> [Entry] {
         order.map { Entry(state: $0, symbol: theme.symbol($0), color: theme.color($0), meaning: meanings[$0] ?? "") }
@@ -80,6 +89,20 @@ struct HelpView: View {
             }
             section("Muting a project") {
                 Text("**Mute project for 1 hour** or **for today** hides a project's sessions from the menu bar count; they move to the bottom of the list. A muted session that waits on you still turns the menu bar red and still notifies you. Sending a prompt in the project, **Unmute project**, or **Unmute all projects** ends the mute.")
+            }
+            section("Desktop companion") {
+                Text("Turn it on in **Settings › Companion**: a small stick figure in a corner of your screen that acts out what the menu bar shows.")
+                Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 6) {
+                    ForEach(HelpLegend.companion, id: \.scene) { entry in
+                        GridRow(alignment: .firstTextBaseline) {
+                            Text(entry.scene).bold()
+                            Text(.init(entry.meaning)).foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+                Text("It never takes the focus or your clicks. It stops moving when it can't be seen, slows down in Low Power Mode, and holds still with Reduce Motion.")
+                    .foregroundStyle(.secondary)
             }
             section("Notifications") {
                 Text("When a session has waited on you for a few seconds (10 by default), the app notifies you once; **Focus** jumps to it. **Settings › Notifications** turns them off, adds notifications for idle sessions, and changes the delay and the sound.")

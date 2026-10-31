@@ -11,6 +11,14 @@ final class HelpTests: XCTestCase {
         }
     }
 
+    func testTheCompanionLegendCoversEveryScene() {
+        let scenes = HelpLegend.companion.map(\.scene).joined(separator: " ")
+        for word in ["Working", "Waiting", "Idle", "No sessions", "muted", "No activity", "warning"] {
+            XCTAssertTrue(scenes.contains(word), word)
+        }
+        XCTAssertTrue(HelpLegend.companion.allSatisfy { !$0.meaning.isEmpty })
+    }
+
     func testTheLegendUsesTheThemeInUse() {
         let config = Config.parse("theme=high_contrast\nicon_idle=moon.fill\n")
         let entries = HelpLegend.entries(Theme.resolve(config))

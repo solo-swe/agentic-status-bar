@@ -38,6 +38,7 @@ final class SettingsWindow {
         tabs.tabStyle = .toolbar
         tabs.addTabViewItem(Self.tab("General", "gearshape", GeneralSettings(store: store, hooks: hooks, login: login, updater: updater)))
         tabs.addTabViewItem(Self.tab("Appearance", "paintpalette", AppearanceSettings(store: store)))
+        tabs.addTabViewItem(Self.tab("Companion", "figure.walk", CompanionSettings(store: store)))
         tabs.addTabViewItem(Self.tab("Notifications", "bell", NotificationSettings(store: store, notifier: notifier)))
 
         let window = EscClosingWindow(contentViewController: tabs)

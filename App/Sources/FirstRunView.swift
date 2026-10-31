@@ -15,6 +15,7 @@ struct FirstRunView: View {
             if hooks.installed {
                 Text("The hooks are installed.")
                 Text(Self.restartNote).foregroundStyle(.secondary)
+                Text(Self.companionNote).foregroundStyle(.secondary)
                 HStack {
                     Spacer()
                     Button("Done", action: close).keyboardShortcut(.defaultAction)
@@ -42,6 +43,7 @@ struct FirstRunView: View {
     }
 
     static let restartNote = "Claude Code sessions that are already running pick up the hooks when they restart."
+    static let companionNote = "Want a little stick figure on your desktop that acts out your sessions? Turn it on in Settings › Companion."
 
     /// A path with the home folder written as ~.
     static func tilde(_ path: String) -> String {

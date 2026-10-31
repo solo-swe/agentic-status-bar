@@ -30,6 +30,38 @@ final class SettingsTests: XCTestCase {
         XCTAssertTrue(SettingsView.delayChoices.allSatisfy { Config.isValid(String($0), for: "notify_delay_seconds") })
     }
 
+    func testTheCompanionChoicesAreValidSettings() {
+        XCTAssertEqual(SettingsView.companionCorners.map(\.value), Config.companionPositions)
+        XCTAssertEqual(SettingsView.companionSizes.map(\.value), Config.companionSizes)
+        XCTAssertTrue(SettingsView.companionCorners.contains { $0.value == Config().companionPosition })
+        XCTAssertTrue(SettingsView.companionSizes.contains { $0.value == Config().companionSize })
+        // The palette's colors and Automatic ("") are all valid companion colors.
+        for choice in SymbolChoices.palette { XCTAssertTrue(Config.isValid(choice.value, for: "companion_color"), choice.name) }
+        XCTAssertTrue(Config.isValid("", for: "companion_color"))
+        XCTAssertNotNil(ThemeColor.halves(CompanionSettings.automatic))
+    }
+
+    @MainActor
+    func testTheCompanionControlsWriteTheConfig() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("asb-settings-\(UUID().uuidString)")
+        let config = dir.appendingPathComponent("config").path
+        let store = SessionStore(environment: ["ASB_CONFIG": config, "HOME": dir.path, "ASB_STATE_DIR": dir.path])
+        store.set("companion", true)
+        store.set("companion_position", "top-left")
+        store.set("companion_size", "large")
+        store.set("companion_color", "#D70015,#FF453A")
+        store.set("companion_over_fullscreen", true)
+        XCTAssertTrue(store.config.companion && store.config.companionOverFullscreen)
+        XCTAssertEqual(store.config.companionPosition, "top-left")
+        XCTAssertEqual(store.config.companionSize, "large")
+        XCTAssertEqual(store.config.companionColor, "#D70015,#FF453A")
+        // Automatic clears the color.
+        store.set("companion_color", "")
+        XCTAssertEqual(store.config.companionColor, "")
+        let text = try String(contentsOfFile: config, encoding: .utf8)
+        XCTAssertTrue(text.contains("companion_size=large"))
+    }
+
     func testNames() {
         XCTAssertEqual(SettingsView.themeName("high_contrast"), "High contrast")
         XCTAssertEqual(SettingsView.themeName("monochrome"), "Monochrome")
