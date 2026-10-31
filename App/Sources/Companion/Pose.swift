@@ -120,12 +120,25 @@ struct Skeleton: Equatable, Sendable {
         var p = pose
         let neck = points(pose).neck
         let chest = -pose.body - pose.lean
-        let front = Self.solve(from: neck, to: hand, upper: upperArm, lower: forearm, parent: chest, behind: elbowsBehind)
-        let back = Self.solve(
+        (p.shoulderFront, p.elbowFront) = Self.solve(
+            from: neck, to: hand, upper: upperArm, lower: forearm, parent: chest, behind: elbowsBehind)
+        (p.shoulderBack, p.elbowBack) = Self.solve(
             from: neck, to: CGPoint(x: hand.x - backOffset, y: hand.y), upper: upperArm, lower: forearm, parent: chest,
             behind: elbowsBehind)
-        (p.shoulderFront, p.elbowFront) = front
-        (p.shoulderBack, p.elbowBack) = back
+        return p
+    }
+
+    /// Each arm reaching for its own target, with the elbows out to the sides: seen from the front, the front
+    /// arm is on the screen's right and its elbow bends clockwise of the line from the shoulder to the hand,
+    /// the back arm's counterclockwise.
+    func reachingOut(_ pose: Pose, front: CGPoint, back: CGPoint) -> Pose {
+        var p = pose
+        let neck = points(pose).neck
+        let chest = -pose.body - pose.lean
+        (p.shoulderFront, p.elbowFront) = Self.solve(
+            from: neck, to: front, upper: upperArm, lower: forearm, parent: chest, clockwise: true)
+        (p.shoulderBack, p.elbowBack) = Self.solve(
+            from: neck, to: back, upper: upperArm, lower: forearm, parent: chest, clockwise: false)
         return p
     }
 
@@ -134,18 +147,33 @@ struct Skeleton: Equatable, Sendable {
     static func solve(
         from origin: CGPoint, to target: CGPoint, upper: CGFloat, lower: CGFloat, parent: CGFloat, behind: Bool
     ) -> (CGFloat, CGFloat) {
+        let (ccw, cw) = solutions(from: origin, to: target, upper: upper, lower: lower)
+        let middleX = { (angle: CGFloat) in origin.x + sin(angle) * upper }
+        let first = behind == (middleX(ccw.0) < middleX(cw.0)) ? ccw : cw
+        return (first.0 - parent, first.1)
+    }
+
+    /// The same, with the middle joint clockwise or counterclockwise of the line from `origin` to `target`.
+    static func solve(
+        from origin: CGPoint, to target: CGPoint, upper: CGFloat, lower: CGFloat, parent: CGFloat, clockwise: Bool
+    ) -> (CGFloat, CGFloat) {
+        let (ccw, cw) = solutions(from: origin, to: target, upper: upper, lower: lower)
+        let first = clockwise ? cw : ccw
+        return (first.0 - parent, first.1)
+    }
+
+    /// Both solutions as (upper bone's world angle, lower bone's angle relative to it): the middle joint
+    /// counterclockwise of the line to the target, then clockwise.
+    private static func solutions(
+        from origin: CGPoint, to target: CGPoint, upper: CGFloat, lower: CGFloat
+    ) -> ((CGFloat, CGFloat), (CGFloat, CGFloat)) {
         let dx = target.x - origin.x, dy = target.y - origin.y
         let d = min(max(hypot(dx, dy), abs(upper - lower) + 0.001), upper + lower - 0.001)
         // World angle of the target in the limbs' convention: 0 = straight down, counterclockwise.
         let theta = atan2(dx, -dy)
         let alpha = acos(min(max((upper * upper + d * d - lower * lower) / (2 * upper * d), -1), 1))
         let beta = acos(min(max((upper * upper + lower * lower - d * d) / (2 * upper * lower), -1), 1))
-        // Of the two solutions, pick the one with the middle joint on the asked side.
-        let a = (theta + alpha, -(.pi - beta))
-        let b = (theta - alpha, .pi - beta)
-        let middleX = { (angle: CGFloat) in origin.x + sin(angle) * upper }
-        let first = behind == (middleX(a.0) < middleX(b.0)) ? a : b
-        return (first.0 - parent, first.1)
+        return ((theta + alpha, -(.pi - beta)), (theta - alpha, .pi - beta))
     }
 
     /// (0, 1) and (0, −1) turned counterclockwise by `angle`.

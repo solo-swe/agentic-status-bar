@@ -195,7 +195,7 @@ final class StickFigureTests: XCTestCase {
     }
 
     func testActivitiesFlowFromIntroThroughLoopToStanding() {
-        for activity in [Moves.weightLifting(), Moves.pushUps()] {
+        for activity in [Moves.weightLifting(), Moves.pushUps(), Moves.jumpingJacks(), Moves.pullUps()] {
             XCTAssertEqual(activity.loop.first, activity.loop.last, activity.name)
             XCTAssertEqual(activity.intro.last, activity.loop.first, activity.name)
             XCTAssertEqual(activity.outro.last, .standing, activity.name)
@@ -207,6 +207,47 @@ final class StickFigureTests: XCTestCase {
         }
         XCTAssertEqual(Moves.weightLifting().prop, .barbell)
         XCTAssertNil(Moves.pushUps().prop)
+    }
+
+    func testJumpingJacksHopBetweenClosedAndOpen() {
+        let loop = Moves.jumpingJacks().loop
+        let (closed, air, open) = (s.points(loop[0]), s.points(loop[1]), s.points(loop[2]))
+        XCTAssertEqual(min(closed.footBack.y, closed.footFront.y), 0, accuracy: 0.01)
+        XCTAssertEqual(min(open.footBack.y, open.footFront.y), 0, accuracy: 0.01)
+        XCTAssertGreaterThan(min(air.footBack.y, air.footFront.y), 2, "both feet off the floor mid-hop")
+        XCTAssertGreaterThan(open.footFront.x - open.footBack.x, closed.footFront.x - closed.footBack.x + 8, "legs apart")
+        XCTAssertGreaterThan(open.handFront.y, open.neck.y, "arms up")
+        XCTAssertGreaterThan(open.handBack.y, open.neck.y)
+    }
+
+    func testPullUpsHoldTheBarAndFitTheStrip() {
+        let pull = Moves.pullUps()
+        let top = CompanionWindow.size.height - CompanionWindow.floorY
+        for pose in pull.loop {
+            let p = s.points(pose)
+            XCTAssertEqual(p.handFront.y, Moves.barHeight, accuracy: 0.01)
+            XCTAssertEqual(p.handBack.y, Moves.barHeight, accuracy: 0.01)
+            XCTAssertGreaterThan(p.handFront.x, 0)
+            XCTAssertLessThan(p.handBack.x, 0)
+            // Elbows out: right of the line from the neck up to the front hand, left of the one to the back hand.
+            func side(_ hand: CGPoint, _ elbow: CGPoint) -> CGFloat {
+                (hand.x - p.neck.x) * (elbow.y - p.neck.y) - (hand.y - p.neck.y) * (elbow.x - p.neck.x)
+            }
+            XCTAssertLessThan(side(p.handFront, p.elbowFront), 0, "front elbow out")
+            XCTAssertGreaterThan(side(p.handBack, p.elbowBack), 0, "back elbow out")
+            XCTAssertLessThanOrEqual(p.head.y + s.headRadius, top, "the head stays in the strip")
+        }
+        XCTAssertGreaterThanOrEqual(s.points(pull.loop[1]).neck.y, Moves.barHeight, "the chin over the bar")
+        XCTAssertLessThan(Moves.barHeight, top)
+        XCTAssertEqual(pull.prop, .pullUpBar)
+    }
+
+    func testTheBarStandsBehindTheFigureWhileShown() {
+        let figure = StickFigure()
+        figure.show(.pullUpBar)
+        XCTAssertTrue(figure.layer.sublayers?.first === figure.props[.pullUpBar])
+        figure.hide(.pullUpBar)
+        XCTAssertFalse(figure.layer.sublayers?.contains { $0 is CAShapeLayer } ?? false)
     }
 
     func testTheBarbellIsInTheHandsOnlyWhileShown() {

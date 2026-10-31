@@ -50,6 +50,42 @@ enum Moves {
         return Activity(name: "push-ups", intro: [crouch, up], loop: [up, down, up], rep: 1.6, outro: [crouch, .standing], prop: nil)
     }
 
+    /// Jumping jacks, seen from the front: hop, landing with legs apart and arms up, hop back together.
+    static func jumpingJacks(_ s: Skeleton = .standard) -> Activity {
+        let closed = grounded(Pose(shoulderBack: -0.12, elbowBack: 0.1, shoulderFront: 0.12, elbowFront: -0.1), s)
+        let open = grounded(Pose(
+            shoulderBack: -(.pi - 0.5), elbowBack: 0.15, shoulderFront: .pi - 0.5, elbowFront: -0.15,
+            hipBack: -0.32, hipFront: 0.32), s)
+        let air = grounded(Pose.blend(closed, open, 0.5), s, lift: 3)
+        return Activity(
+            name: "jumping jacks", intro: [closed], loop: [closed, air, open, air, closed], rep: 0.8,
+            outro: [.standing], prop: nil)
+    }
+
+    /// The pull-up bar's height above the floor, and its posts' distance from the middle.
+    static let barHeight: CGFloat = 45
+    static let barHalfWidth: CGFloat = 14
+
+    /// Pull-ups on a bar, seen from the front: reach up and hang, pull until the chin is over the bar, lower.
+    static func pullUps(_ s: Skeleton = .standard) -> Activity {
+        let grip: CGFloat = 6
+        func holding(_ p: Pose) -> Pose {
+            s.reachingOut(p, front: CGPoint(x: grip, y: barHeight), back: CGPoint(x: -grip, y: barHeight))
+        }
+        let legs = Pose(hipBack: -0.06, kneeBack: -0.35, hipFront: 0.06, kneeFront: -0.35)
+        let reach = holding(grounded(Pose(), s))
+        var hangBase = legs
+        hangBase.hipY = 1.5
+        let hang = holding(hangBase)
+        var upBase = legs
+        // The chin over the bar.
+        upBase.hipY = barHeight + 1 - (s.legLength + s.torso)
+        let up = holding(upBase)
+        return Activity(
+            name: "pull-ups", intro: [.standing, reach, hang], loop: [hang, up, up, hang], rep: 2, outro: [reach, .standing],
+            prop: .pullUpBar)
+    }
+
     // MARK: Walk
 
     /// Seconds per walk cycle (two steps).

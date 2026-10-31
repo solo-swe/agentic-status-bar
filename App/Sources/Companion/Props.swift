@@ -5,6 +5,8 @@ import QuartzCore
 enum Prop: Hashable {
     /// A barbell seen from the side: a weight plate in the hands.
     case barbell
+    /// A pull-up bar on two posts around the figure, seen from the front.
+    case pullUpBar
 }
 
 extension StickFigure {
@@ -15,6 +17,8 @@ extension StickFigure {
         withoutActions {
             switch prop {
             case .barbell: bones[.forearmFront]?.addSublayer(layer)
+            // Behind the figure, standing on the floor around it.
+            case .pullUpBar: self.layer.insertSublayer(layer, at: 0)
             }
         }
         props[prop] = layer
@@ -38,6 +42,18 @@ extension StickFigure {
             plate.path = CGPath(ellipseIn: CGRect(x: -r, y: -skeleton.forearm - r, width: 2 * r, height: 2 * r), transform: nil)
             style(plate, filled: true)
             return plate
+        case .pullUpBar:
+            let (h, w) = (Moves.barHeight, Moves.barHalfWidth)
+            let path = CGMutablePath()
+            path.move(to: CGPoint(x: -w, y: 0))
+            path.addLine(to: CGPoint(x: -w, y: h))
+            path.addLine(to: CGPoint(x: w, y: h))
+            path.addLine(to: CGPoint(x: w, y: 0))
+            let bar = CAShapeLayer()
+            bar.path = path
+            style(bar)
+            bar.lineWidth = skeleton.lineWidth * 0.75
+            return bar
         }
     }
 }
