@@ -170,8 +170,8 @@ The app's CPU over 60 s (`top -l 2 -s 60 -pid <pid>`, CPU time used in the minut
 
 The companion adds no measurable CPU to the app: the render server plays the keyframes, and the controller only
 runs code when a scene or activity changes. The baseline is the app's own refresh (every 5 s). The render server's
-work (WindowServer) isn't in these numbers; Activity Monitor showed no change in its energy impact with the
-companion on, but that is hard to separate from other windows. The halo stays: no cost showed up.
+work (WindowServer) isn't in these numbers and wasn't measured; that includes the halo's shadow pass. Still to do:
+compare WindowServer's energy impact in Activity Monitor with the companion on and off, with and without the halo.
 
 Etiquette: **off by default** (Settings and the first-run window offer it). It's click-through except on the figure
 itself, never covers more than its strip, can be hidden from the app menu in one click, and never steals focus or

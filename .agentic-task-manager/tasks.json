@@ -5389,7 +5389,7 @@
         "doc/design/desktop-companion.md"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T08:39:01Z",
+      "updated_at": "2026-10-31T08:47:02Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "notes": [
@@ -5401,7 +5401,8 @@
         }
       ],
       "started_at": "2026-10-31T08:39:01Z",
-      "started_by": "claude:6baf63b2"
+      "started_by": "claude:6baf63b2",
+      "commit": "df0d9d3ae6bf8cd5037b70c9d4d4450aa34f94bb"
     },
     {
       "id": "T-138",
