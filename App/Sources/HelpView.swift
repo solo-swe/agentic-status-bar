@@ -28,11 +28,13 @@ enum HelpLegend {
 
     /// What the desktop companion does in each of its scenes (the menu bar's state picks the scene).
     static let companion: [(scene: String, meaning: String)] = [
-        ("Working", "Works out, calmly: walks, lifts weights, does push-ups, jumping jacks and pull-ups, resting in between."),
+        ("Working", "Works out, calmly: walks, lifts weights, does push-ups, jumping jacks and pull-ups, resting in between. A tiny follower trails it for each running subagent."),
         ("Waiting", "Stops and waves at you, with **!** for a permission or **?** for a question."),
         ("Idle", "Goes to bed and sleeps, *z*s rising."),
-        ("No sessions or muted", "Sits on the edge of its bed."),
-        ("No activity or warning", "Stands still."),
+        ("No activity", "Scratches its head, puzzled."),
+        ("Warning", "Holds up a little sign with a wrench."),
+        ("Muted", "Sits on its bed and reads a book."),
+        ("No sessions", "Sits on the edge of its bed."),
     ]
 
     /// The legend for the theme in use, overrides included.

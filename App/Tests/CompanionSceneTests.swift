@@ -45,6 +45,14 @@ final class CompanionSceneTests: XCTestCase {
             .busy(subagents: 3))
     }
 
+    func testOneFollowerPerSubagentWhileWorking() {
+        XCTAssertEqual(CompanionController.followers(.busy(subagents: 0)), 0)
+        XCTAssertEqual(CompanionController.followers(.busy(subagents: 2)), 2)
+        XCTAssertEqual(CompanionController.followers(.busy(subagents: 7)), 3, "capped")
+        XCTAssertEqual(CompanionController.followers(.idle), 0)
+        XCTAssertEqual(CompanionController.followers(.waiting(reason: nil)), 0)
+    }
+
     func testANewSubagentDoesNotRestartTheRoutine() {
         XCTAssertTrue(CompanionScene.busy(subagents: 0).sameMoves(as: .busy(subagents: 2)))
         XCTAssertFalse(CompanionScene.busy(subagents: 0).sameMoves(as: .idle))

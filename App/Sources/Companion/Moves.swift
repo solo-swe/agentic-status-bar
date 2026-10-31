@@ -121,6 +121,60 @@ enum Moves {
         return [.standing, inhale, .standing]
     }
 
+    // MARK: Other states
+
+    /// Seconds per keyframe of the head scratch, the reading and the sign loops.
+    static let idleStep: CFTimeInterval = 0.25
+
+    /// No activity: puzzled, a hand scratching the side of the head, head tilted; one loop with a pause.
+    static func scratching(_ s: Skeleton = .standard) -> [Pose] {
+        var rest = grounded(Pose.standing, s)
+        rest.neck = 0.18
+        let head = s.points(rest).head
+        // The fingers at the side of the head, just outside its circle.
+        func scratch(_ dy: CGFloat) -> Pose {
+            s.reachingFront(rest, hand: CGPoint(x: head.x + s.headRadius + 1.5, y: head.y + dy), elbowBehind: false)
+        }
+        let (up, down) = (scratch(1.5), scratch(-1))
+        let pause = Array(repeating: rest, count: Int(1.5 / idleStep))
+        return [rest, up, down, up, down, up, down, up] + pause + [rest]
+    }
+
+    /// Only muted sessions: sitting on the bed reading a book held in front, a page turned now and then.
+    static func reading(_ s: Skeleton = .standard) -> [Pose] {
+        var sit = sittingOnBed(s)
+        sit.neck = 0.5
+        let neck = s.points(sit).neck
+        // The book on the lap, out in front, the head bent over it.
+        let read = s.reaching(sit, hand: CGPoint(x: neck.x + 9, y: neck.y - 10), elbowsBehind: false, backOffset: 2)
+        // The back hand sweeps across to turn the page.
+        var turn = read
+        (turn.shoulderBack, turn.elbowBack) = Skeleton.solve(
+            from: neck, to: CGPoint(x: neck.x + 11, y: neck.y - 6), upper: s.upperArm, lower: s.forearm,
+            parent: -sit.body - sit.lean, behind: false)
+        return Array(repeating: read, count: 24) + [turn, turn, read]
+    }
+
+    /// A warning: standing, holding a little sign with a wrench up in front, upper arm level and forearm
+    /// upright (the sign fits under the strip's top that way), swaying a bit; one loop.
+    static func holdingSign(_ s: Skeleton = .standard) -> [Pose] {
+        func hold(_ sway: CGFloat) -> Pose {
+            // The forearm's world angle is shoulder + elbow − lean; π points it straight up.
+            let shoulder: CGFloat = 1.6
+            return grounded(Pose(
+                lean: sway, shoulderBack: -0.12, elbowBack: 0.1, shoulderFront: shoulder,
+                elbowFront: .pi - shoulder + sway), s)
+        }
+        return [hold(-0.04), hold(0.04), hold(-0.04)]
+    }
+
+    /// The sign's stick and board, up from the hand.
+    static let signStick: CGFloat = 4
+    static let signBoard = CGSize(width: 16, height: 9)
+
+    /// The bubble's glyph when a session has gone quiet.
+    static let puzzledGlyph = "•••"
+
     // MARK: Bed
 
     /// Seconds per breath asleep, and per rising *z*.
@@ -258,6 +312,42 @@ extension StickFigure {
         say(glyph, color: color)
         after(Moves.transitionStep) { [weak self] in
             self?.animate(loop, duration: Moves.waveStep * Double(loop.count - 1), repeats: true)
+        }
+    }
+
+    /// Scratches its head, puzzled, with a **…** bubble in `color`, until stopped.
+    func scratchHead(color: CGColor) {
+        let loop = Moves.scratching(skeleton)
+        say(Moves.puzzledGlyph, color: color)
+        animate([presentedPose(), loop[0]], duration: Moves.transitionStep)
+        after(Moves.transitionStep) { [weak self] in
+            self?.animate(loop, duration: Moves.idleStep * Double(loop.count - 1), repeats: true)
+        }
+    }
+
+    /// Holds up a sign with a wrench, swaying a little, until stopped.
+    func holdSign() {
+        let loop = Moves.holdingSign(skeleton)
+        animate([presentedPose(), loop[0]], duration: Moves.transitionStep)
+        after(Moves.transitionStep) { [weak self] in
+            guard let self else { return }
+            show(.sign)
+            animate(loop, duration: 3, repeats: true, smooth: true)
+        }
+    }
+
+    /// Walks to the bed at `x`, sits on its edge facing `facing` and reads a book, until stopped.
+    func read(at x: CGFloat, facing bedFacing: Facing) {
+        walk(to: x) { [weak self] in
+            guard let self else { return }
+            facing = bedFacing
+            let loop = Moves.reading(skeleton)
+            animate([presentedPose(), Moves.sittingOnBed(skeleton), loop[0]], duration: 2 * Moves.transitionStep)
+            after(2 * Moves.transitionStep) { [weak self] in
+                guard let self else { return }
+                show(.book)
+                animate(loop, duration: Moves.idleStep * Double(loop.count - 1), repeats: true)
+            }
         }
     }
 

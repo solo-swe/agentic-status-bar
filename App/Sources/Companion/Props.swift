@@ -11,6 +11,10 @@ enum Prop: Hashable {
     case bubble
     /// *z*s rising from the sleeping head.
     case zzz
+    /// An open book in the hands, seen from the side.
+    case book
+    /// A little sign with a wrench, held up on a stick.
+    case sign
 }
 
 /// Where things go in the companion's strip: the bed at the end toward the middle of the screen (its
@@ -56,7 +60,7 @@ extension StickFigure {
         let layer = makeLayer(prop)
         withoutActions {
             switch prop {
-            case .barbell: bones[.forearmFront]?.addSublayer(layer)
+            case .barbell, .book, .sign: bones[.forearmFront]?.addSublayer(layer)
             // Behind the figure, standing on the floor around it.
             case .pullUpBar: self.layer.insertSublayer(layer, at: 0)
             case .bubble, .zzz: self.layer.addSublayer(layer)
@@ -99,6 +103,49 @@ extension StickFigure {
             return makeBubble()
         case .zzz:
             return makeZzz()
+        case .book:
+            // An open book, its spine at the hand, the pages fanning up and forward (in the forearm's frame,
+            // which points down from the elbow: the hand is at y = -forearm).
+            let hand = CGPoint(x: 0, y: -skeleton.forearm)
+            let path = CGMutablePath()
+            path.move(to: CGPoint(x: hand.x - 4, y: hand.y + 3))
+            path.addLine(to: hand)
+            path.addLine(to: CGPoint(x: hand.x + 4, y: hand.y + 3))
+            let book = CAShapeLayer()
+            book.path = path
+            style(book)
+            return book
+        case .sign:
+            // A stick up from the hand (the raised forearm points up, its tip is the hand), a board on top
+            // with a wrench drawn on it.
+            let container = CALayer()
+            let hand = CGPoint(x: 0, y: -skeleton.forearm)
+            let stickTop = CGPoint(x: hand.x, y: hand.y - Moves.signStick)
+            let stick = CAShapeLayer()
+            let stickPath = CGMutablePath()
+            stickPath.move(to: hand)
+            stickPath.addLine(to: stickTop)
+            stick.path = stickPath
+            style(stick)
+            let board = CAShapeLayer()
+            let size = Moves.signBoard
+            let rect = CGRect(x: stickTop.x - size.width / 2, y: stickTop.y - size.height, width: size.width, height: size.height)
+            board.path = CGPath(roundedRect: rect, cornerWidth: 2, cornerHeight: 2, transform: nil)
+            style(board)
+            board.lineWidth = skeleton.lineWidth * 0.75
+            let wrench = CAShapeLayer()
+            let w = CGMutablePath()
+            let c = CGPoint(x: rect.midX, y: rect.midY)
+            w.move(to: CGPoint(x: c.x - 3.5, y: c.y + 3))
+            w.addLine(to: CGPoint(x: c.x + 1.5, y: c.y - 2))
+            w.addArc(center: CGPoint(x: c.x + 2.5, y: c.y - 3), radius: 2, startAngle: .pi * 0.75, endAngle: .pi * 2.25, clockwise: true)
+            wrench.path = w
+            style(wrench)
+            wrench.lineWidth = skeleton.lineWidth * 0.7
+            container.addSublayer(stick)
+            container.addSublayer(board)
+            container.addSublayer(wrench)
+            return container
         }
     }
 

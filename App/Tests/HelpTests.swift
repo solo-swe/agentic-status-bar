@@ -13,7 +13,7 @@ final class HelpTests: XCTestCase {
 
     func testTheCompanionLegendCoversEveryScene() {
         let scenes = HelpLegend.companion.map(\.scene).joined(separator: " ")
-        for word in ["Working", "Waiting", "Idle", "No sessions", "muted", "No activity", "warning"] {
+        for word in ["Working", "Waiting", "Idle", "No sessions", "Muted", "No activity", "Warning"] {
             XCTAssertTrue(scenes.contains(word), word)
         }
         XCTAssertTrue(HelpLegend.companion.allSatisfy { !$0.meaning.isEmpty })

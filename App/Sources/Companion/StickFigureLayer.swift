@@ -46,6 +46,38 @@ final class StickFigure {
                 if shape.fillColor != nil { shape.fillColor = color }
             }
             for z in props[.zzz]?.sublayers ?? [] { (z as? CATextLayer)?.foregroundColor = color }
+            for follower in followers { follower.color = color }
+        }
+    }
+
+    // MARK: Followers
+
+    /// Tiny figures behind this one, one per running subagent: they move with it (they are part of its
+    /// layer) and copy its moves a moment later.
+    private(set) var followers: [StickFigure] = []
+    static let maxFollowers = 3
+    static let followerScale: CGFloat = 0.55
+    /// How far behind each follower walks, and how much later it copies a move.
+    static let followerSpacing: CGFloat = 13
+    static let followerDelay: CFTimeInterval = 0.18
+
+    /// Shows `count` followers (at most `maxFollowers`), standing in the current pose until the next move.
+    func setFollowers(_ count: Int) {
+        let count = min(max(count, 0), Self.maxFollowers)
+        guard count != followers.count else { return }
+        withoutActions {
+            while followers.count > count { followers.removeLast().layer.removeFromSuperlayer() }
+            while followers.count < count {
+                let follower = StickFigure(skeleton: skeleton)
+                follower.color = color
+                let k = Self.followerScale
+                follower.layer.transform = CATransform3DMakeScale(k, k, 1)
+                follower.layer.position = CGPoint(x: -Self.followerSpacing * CGFloat(followers.count + 1) - 6, y: 0)
+                follower.apply(pose)
+                // Behind the figure.
+                layer.insertSublayer(follower.layer, at: 0)
+                followers.append(follower)
+            }
         }
     }
 
@@ -139,6 +171,7 @@ final class StickFigure {
     func apply(_ p: Pose) {
         stop()
         withoutActions { setModel(p) }
+        for follower in followers { follower.apply(p) }
     }
 
     private func setModel(_ p: Pose) {
@@ -151,16 +184,28 @@ final class StickFigure {
 
     /// Still frames a second moves are cut into: a hand-drawn look, and less work for the render server.
     /// 12 normally, 6 in Low Power Mode.
-    var frameRate: Double = 12
+    var frameRate: Double = 12 {
+        didSet { for follower in followers { follower.frameRate = frameRate } }
+    }
 
     /// Plays `keyframes`, evenly spaced over `duration` seconds and eased between each pair. For a loop
     /// (`repeats`), end with the first pose again. The move is cut into `frameRate` still frames a
-    /// second, unless `smooth` (slow moves such as breathing, where steps would show).
+    /// second, unless `smooth` (slow moves such as breathing, where steps would show). It starts after
+    /// `delay` seconds, holding its first pose until then. Followers copy it, each a moment later.
     /// The figure keeps the last pose afterwards, or the first one when a loop is stopped.
-    func animate(_ keyframes: [Pose], duration: CFTimeInterval, repeats: Bool = false, smooth: Bool = false) {
+    func animate(
+        _ keyframes: [Pose], duration: CFTimeInterval, repeats: Bool = false, smooth: Bool = false,
+        delay: CFTimeInterval = 0
+    ) {
         guard let first = keyframes.first, let last = keyframes.last else { return }
         stop()
         withoutActions { setModel(repeats ? first : last) }
+        for (i, follower) in followers.enumerated() {
+            follower.animate(
+                keyframes, duration: duration, repeats: repeats, smooth: smooth,
+                delay: delay + Self.followerDelay * Double(i + 1))
+        }
+        let begin = delay > 0 ? layer.convertTime(CACurrentMediaTime(), from: nil) + delay : 0
         let fps: Double? = smooth ? nil : frameRate
         let frames: [Pose]
         let keyTimes: [NSNumber]
@@ -179,6 +224,10 @@ final class StickFigure {
             a.keyTimes = keyTimes
             a.duration = duration
             a.repeatCount = repeats ? .infinity : 1
+            if begin > 0 {
+                a.beginTime = begin
+                a.fillMode = .backwards
+            }
             if fps != nil {
                 a.calculationMode = .discrete
             } else {
@@ -205,6 +254,7 @@ final class StickFigure {
             withoutActions { layer.position.x = x }
             layer.removeAnimation(forKey: Self.travelKey)
         }
+        for follower in followers { follower.stop() }
     }
 
     /// Counts `stop` calls, so a callback can tell that its move was replaced.

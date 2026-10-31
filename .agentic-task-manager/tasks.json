@@ -5351,7 +5351,7 @@
       "description": "The remaining states (`doc/design/desktop-companion.md` › State → animation).\n\n## Change\n- **Subagents:** the busy routine plus one tiny follower figure per running subagent (up to 3) that copies the main figure at a delay.\n- **Uncertain:** stands and scratches its head, with a **…** bubble.\n- **Muted** (only muted sessions): sits on the bed reading a small book; an occasional page turn.\n- **Warning** (hooks missing): holds up a small sign with a wrench.\n\n## Tests\n- App tests: `CompanionScene` mapping for each state; follower count capped at 3.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-135"
       ],
@@ -5362,9 +5362,19 @@
         "App/Tests/CompanionSceneTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T08:48:56Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:6baf63b2",
+      "notes": [
+        {
+          "at": "2026-10-31T08:48:54Z",
+          "kind": "note",
+          "text": "Update `HelpLegend.companion` in `App/Sources/HelpView.swift` (the \"No activity or warning\" and \"muted\" lines) and the README’s Desktop companion paragraph to the new poses.",
+          "by": "claude:6baf63b2"
+        }
+      ],
+      "started_at": "2026-10-31T08:48:56Z",
+      "started_by": "claude:6baf63b2"
     },
     {
       "id": "T-137",
@@ -5460,7 +5470,7 @@
       "description": "Make it discoverable and configurable (`doc/design/desktop-companion.md` › Settings).\n\n## Change\n- Settings: a Companion section with \"Show the companion\", a corner picker (bottom right, bottom left, top right, top left), \"Show over full-screen apps\", and a **color** choice for `companion_color` (Automatic, plus a few presets and a custom color well, like the theme color overrides), written through `SessionStore.set`.\n- Help: what the companion's poses mean (one line per state).\n- README: a short paragraph and how to turn it on; the `companion*` keys in the config table.\n- The first-run window mentions it, off by default.\n\n## Tests\n- `SettingsTests`: the controls write the keys (the color too, and Automatic clears it); `HelpTests`: the companion entries.\n- `tests/app.sh --test` and `tests/lint.sh` pass.\n",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-127",
         "T-135"
@@ -5474,7 +5484,7 @@
         "App/Tests/HelpTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T08:47:17Z",
+      "updated_at": "2026-10-31T08:48:55Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "notes": [
@@ -5483,10 +5493,19 @@
           "kind": "note",
           "text": "Also a size picker for `companion_size` (Small, Medium, Large; medium is the default), added during the T-135 review.",
           "by": "claude:6baf63b2"
+        },
+        {
+          "at": "2026-10-31T08:48:55Z",
+          "kind": "outcome",
+          "text": "Settings › Companion tab (on/off, corner, size, palette color with Automatic, over full-screen apps), a Help section with what each scene means, a README paragraph and config rows, and a first-run mention.",
+          "by": "claude:6baf63b2"
         }
       ],
       "started_at": "2026-10-31T08:47:17Z",
-      "started_by": "claude:6baf63b2"
+      "started_by": "claude:6baf63b2",
+      "commit": "7464d5f79a5918dcab9ae114f4bccc50253df535",
+      "completed_at": "2026-10-31T08:48:55Z",
+      "completed_by": "claude:6baf63b2"
     },
     {
       "id": "T-140",

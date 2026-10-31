@@ -128,6 +128,15 @@ struct Skeleton: Equatable, Sendable {
         return p
     }
 
+    /// `pose` with only the front arm reaching for `hand`; the back arm stays as it is.
+    func reachingFront(_ pose: Pose, hand: CGPoint, elbowBehind: Bool) -> Pose {
+        var p = pose
+        (p.shoulderFront, p.elbowFront) = Self.solve(
+            from: points(pose).neck, to: hand, upper: upperArm, lower: forearm, parent: -pose.body - pose.lean,
+            behind: elbowBehind)
+        return p
+    }
+
     /// Each arm reaching for its own target, with the elbows out to the sides: seen from the front, the front
     /// arm is on the screen's right and its elbow bends clockwise of the line from the shoulder to the hand,
     /// the back arm's counterclockwise.

@@ -65,6 +65,7 @@ final class CompanionController {
             return
         }
         let next = CompanionScene.from(store.snapshot)
+        figure.setFollowers(Self.followers(next))
         if let scene, scene.sameMoves(as: next), playedLayout == layout {
             self.scene = next
             return
@@ -100,12 +101,26 @@ final class CompanionController {
             place(layout.restX, facing: layout.bedFacing)
             figure.apply(Moves.lying(figure.skeleton))
             figure.showStillZzz()
-        case .none, .muted:
+        case .none:
             place(layout.restX, facing: layout.bedFacing)
             figure.apply(Moves.sittingOnBed(figure.skeleton))
-        case .uncertain, .warning:
-            figure.apply(.standing)
+        case .muted:
+            place(layout.restX, facing: layout.bedFacing)
+            figure.apply(Moves.reading(figure.skeleton)[0])
+            figure.show(.book)
+        case .uncertain:
+            figure.apply(Moves.scratching(figure.skeleton)[1])
+            figure.say(Moves.puzzledGlyph, color: headerColor())
+        case .warning:
+            figure.apply(Moves.holdingSign(figure.skeleton)[0])
+            figure.show(.sign)
         }
+    }
+
+    /// One follower per running subagent while working, up to `StickFigure.maxFollowers`.
+    static func followers(_ scene: CompanionScene) -> Int {
+        if case .busy(let subagents) = scene { return min(subagents, StickFigure.maxFollowers) }
+        return 0
     }
 
     private func play(_ scene: CompanionScene) {
@@ -117,10 +132,14 @@ final class CompanionController {
             figure.wave(Moves.bubbleGlyph(reason: reason), color: waitingColor())
         case .idle:
             figure.sleep(at: layout.restX, facing: layout.bedFacing)
-        case .none, .muted:
+        case .none:
             figure.sit(at: layout.restX, facing: layout.bedFacing)
-        case .uncertain, .warning:
-            figure.apply(.standing)
+        case .muted:
+            figure.read(at: layout.restX, facing: layout.bedFacing)
+        case .uncertain:
+            figure.scratchHead(color: headerColor())
+        case .warning:
+            figure.holdSign()
         }
     }
 
@@ -152,5 +171,10 @@ final class CompanionController {
         let header = store.snapshot?.header
         let spec = header?.state == .waiting ? header?.color : nil
         return window.resolve(spec.flatMap(ThemeColor.color) ?? .systemRed)
+    }
+
+    /// The menu bar's color for its current state (the bubble matches the menu bar), in the current appearance.
+    private func headerColor() -> CGColor {
+        window.resolve(store.snapshot.flatMap { ThemeColor.color($0.header.color) } ?? .systemGray)
     }
 }

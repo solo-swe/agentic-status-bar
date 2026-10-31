@@ -379,6 +379,70 @@ final class StickFigureTests: XCTestCase {
         XCTAssertEqual(right.position.x, 260 - StripLayout.edgeMargin - StripLayout.bedWidth / 2)
     }
 
+    // MARK: Other states
+
+    func testFollowersCopyTheMovesALittleLater() {
+        let figure = StickFigure()
+        figure.setFollowers(5)
+        XCTAssertEqual(figure.followers.count, StickFigure.maxFollowers, "at most three")
+        XCTAssertTrue(figure.followers.allSatisfy { $0.layer.superlayer === figure.layer }, "they move and turn with it")
+        XCTAssertTrue(figure.followers.allSatisfy { $0.layer.position.x < 0 }, "behind it")
+        figure.animate(Moves.walk(), duration: 1, repeats: true)
+        let begins = figure.followers.map {
+            ($0.bones[.torso]?.animation(forKey: StickFigure.moveKey)?.beginTime ?? 0)
+        }
+        XCTAssertTrue(begins.allSatisfy { $0 > 0 })
+        XCTAssertEqual(begins, begins.sorted(), "each a moment after the one before")
+        figure.frameRate = 6
+        XCTAssertTrue(figure.followers.allSatisfy { $0.frameRate == 6 })
+        figure.stop()
+        XCTAssertTrue(figure.followers.allSatisfy { !$0.isAnimating })
+        figure.setFollowers(1)
+        XCTAssertEqual(figure.followers.count, 1)
+        XCTAssertEqual(figure.layer.sublayers?.filter { layer in figure.followers.contains { $0.layer === layer } }.count, 1)
+        figure.setFollowers(0)
+        XCTAssertTrue(figure.followers.isEmpty)
+    }
+
+    func testScratchingReachesTheSideOfTheHead() {
+        let loop = Moves.scratching()
+        XCTAssertEqual(loop.first, loop.last)
+        // Poses 1 to 7 scratch: up, down, up, down, ...
+        for pose in loop[1...7] {
+            let p = s.points(pose)
+            let distance = hypot(p.handFront.x - p.head.x, p.handFront.y - p.head.y)
+            XCTAssertGreaterThan(distance, s.headRadius, "outside the head")
+            XCTAssertLessThan(distance, s.headRadius + 3, "at its side")
+        }
+        XCTAssertNotEqual(loop[1], loop[2], "the hand moves")
+    }
+
+    func testReadingHoldsTheBookInTheLap() {
+        let loop = Moves.reading()
+        XCTAssertEqual(loop.first, loop.last)
+        let p = s.points(loop[0])
+        XCTAssertEqual(p.hips.y, StripLayout.mattressHeight, accuracy: 0.01, "on the bed")
+        XCTAssertLessThan(p.handFront.y, p.neck.y - 6, "below the chest, not at the face")
+        XCTAssertGreaterThan(p.handFront.x, p.neck.x + 4, "out in front")
+        XCTAssertTrue(loop.contains { $0.shoulderBack != loop[0].shoulderBack }, "a page turn")
+    }
+
+    func testTheSignIsHeldUpAndFitsTheStrip() {
+        let figure = StickFigure()
+        figure.apply(Moves.holdingSign()[0])
+        let p = s.points(Moves.holdingSign()[0])
+        XCTAssertGreaterThan(p.handFront.y, p.neck.y + 4, "held up")
+        XCTAssertEqual(p.handFront.x, p.elbowFront.x, accuracy: 1, "forearm upright, so the sign stands straight")
+        figure.show(.sign)
+        XCTAssertNotNil(figure.props[.sign])
+        // The sign's top: the hand plus the stick and the board.
+        let top = p.handFront.y + Moves.signStick + Moves.signBoard.height
+        XCTAssertLessThanOrEqual(top, CompanionWindow.size.height - CompanionWindow.floorY)
+        figure.show(.book)
+        figure.hideProps()
+        XCTAssertTrue(figure.props.isEmpty)
+    }
+
     func testTheBarbellIsInTheHandsOnlyWhileShown() {
         let figure = StickFigure()
         figure.show(.barbell)
