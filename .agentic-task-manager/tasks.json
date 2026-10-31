@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 126,
+    "next_id": 127,
     "workflow": {
       "type": "direct"
     },
@@ -40,6 +40,10 @@
       {
         "id": 7,
         "name": "Architecture: more agents and terminals"
+      },
+      {
+        "id": 8,
+        "name": "Desktop companion"
       }
     ],
     "repository": "https://github.com/solo-swe/agentic-status-bar"
@@ -4877,7 +4881,7 @@
       "description": "After the user approves a permission prompt, the session keeps showing `waiting` for 30 s to 1 min, until the approved tool finishes (`PostToolUse`). No hook fires on approval; check C4 (a new child of the `claude` process means the approved tool runs, so `busy`) is meant to bridge the gap but never ran.\n\n## Cause\n- The native Claude Code install runs `~/.local/share/claude/versions/<version>` through the `~/.local/bin/claude` symlink, so the process is named after the version (e.g. `2.1.316`). `HookMetadata.findClaude` matched only `claude` or `node`, so every session was recorded with `pid: null`, which turns off C4 (and C1 liveness).\n- An approved tool that starts no child process (an Agent or Task subagent) stays `waiting` until `PostToolUse`, even with a PID.\n\n## Change\n- `findClaude` also accepts a process whose name is a version (digits and dots) and whose argv[0] is `claude`.\n- A recorded `pid: null` is looked up again on each `UserPromptSubmit` (not on tool calls), so running sessions recover without a restart.\n- `SubagentStart` on a `waiting` session sets it `busy`: the approved Agent or Task tool is running. (T-120 later tracks waiting per agent; this covers the parent's own prompt.)\n- `doc/state-file-schema.md` › Events: the `SubagentStart` rule.\n\n## Tests\n- `findClaude`: the native install's version name, a full-path argv[0], a version-named process that isn't claude.\n- `needsBackfill`: a null pid is retried only on `UserPromptSubmit`.\n- `HookEventsTests`: `SubagentStart` moves `waiting` to `busy`; other states unchanged.\n- `tests/swift.sh` and `tests/lint.sh` pass; against the real process tree the hook records the claude PID.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/HookMetadata.swift",
@@ -4888,10 +4892,46 @@
         "tests/ASBCoreTests/HookEventsTests.swift"
       ],
       "created_at": "2026-10-31T06:54:28Z",
-      "updated_at": "2026-10-31T06:54:37Z",
+      "updated_at": "2026-10-31T06:55:16Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "started_at": "2026-10-31T06:54:37Z",
+      "started_by": "claude:6baf63b2",
+      "commit": "cfc342c5c4f80627cd935b683f86846602d0bdc8",
+      "completed_at": "2026-10-31T06:55:16Z",
+      "completed_by": "claude:6baf63b2",
+      "notes": [
+        {
+          "at": "2026-10-31T06:55:16Z",
+          "kind": "outcome",
+          "text": "Native install’s version-named `claude` process is now found (C4 works again); null pids retried on each prompt; a new subagent ends a wait on the `Agent`/`Task` tool.",
+          "by": "claude:6baf63b2"
+        }
+      ]
+    },
+    {
+      "id": "T-126",
+      "name": "Proposal: an animated desktop companion outside the menu bar",
+      "phase": 8,
+      "type": "docs",
+      "priority": "P2",
+      "labels": [
+        "app",
+        "companion"
+      ],
+      "description": "Research and write a proposal, `doc/design/desktop-companion.md`, for a small animated character that lives on the desktop, outside the menu bar, and acts out the sessions' state. No code changes.\n\n## The idea (from the user)\n- A small stick person that walks around while everything is fine (busy).\n- When a session needs attention (waiting), it waves, pauses, and waves again.\n- When idle, it sleeps on a tiny drawn bed with *zzz* rising from it.\n- More states as they fit: subagents, uncertain, muted, no sessions.\n\n## 1. Today\nWhere the companion would get its state: `SessionStore`'s snapshot (`Snapshot.Header`, the per-session rows), how `StatusItemController` observes it, and the theme states (`Config.themeStates`).\n\n## 2. Research\nFrom current Apple docs and other primary sources (cite links):\n- **The window**: a borderless, transparent, always-on-top window that doesn't take focus — `NSPanel` vs `NSWindow`, window levels, `collectionBehavior` (all Spaces, full-screen apps, Mission Control), click-through vs clickable, multiple displays, where it sits (above the Dock, a screen corner, along the bottom).\n- **Rendering**, compared on effort, look, file size and CPU/GPU cost: SwiftUI `Canvas` + `TimelineView` (a procedural stick figure), Core Animation layers and keyframes, SpriteKit with sprite sheets, and animation runtimes with state machines (Rive, Lottie) and their licenses and package size.\n- **The character**: how to draw and pose a stick figure (skeleton with joint angles, keyframed poses, easing), the walk cycle, the wave loop, the bed and *zzz* particles; who makes the art if it's not procedural.\n- **Cost and etiquette**: frame rate, pausing when hidden, occluded or on another Space, battery and Low Power Mode, Reduce Motion, App Nap, screen recording and screenshots, accessibility.\n- **Prior art**: desktop pets and menu-bar animations on macOS, for what users like and dislike (cite, don't copy).\n\n## 3. Proposal\n- The recommended rendering approach, with a short prototype sketch (pseudo-code, not committed code).\n- A state → animation table (busy, waiting with permission or question, idle, subagents, uncertain, muted, none, warning) and transitions between them.\n- Several sessions: one character for the most urgent state, or one per session.\n- Interaction: click to open the session list or focus the waiting session, drag to move, hide.\n- Settings: on/off (off by default?), size, position, which states animate.\n- Energy budget and how it's measured.\n- Risks and open questions.\n- A task breakdown ready for atm (tasks under 10 minutes each, with dependencies).\n\n## Done when\nSend the task to review for the user (`atm review`) instead of marking it done.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "in_progress",
+      "dependencies": [],
+      "files": [
+        "doc/design/desktop-companion.md"
+      ],
+      "created_at": "2026-10-31T07:19:10Z",
+      "updated_at": "2026-10-31T07:19:10Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "claude:6baf63b2",
+      "started_at": "2026-10-31T07:19:10Z",
       "started_by": "claude:6baf63b2"
     }
   ]
