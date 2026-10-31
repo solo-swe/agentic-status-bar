@@ -76,7 +76,7 @@ struct Skeleton: Equatable, Sendable {
     var forearm: CGFloat = 8
     var thigh: CGFloat = 10
     var shin: CGFloat = 10
-    var lineWidth: CGFloat = 2
+    var lineWidth: CGFloat = 3
 
     static let standard = Skeleton()
 

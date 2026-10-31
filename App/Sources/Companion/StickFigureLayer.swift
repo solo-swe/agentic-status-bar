@@ -34,7 +34,7 @@ final class StickFigure {
                 layer.transform = CATransform3DMakeScale(facing == .left ? -1 : 1, 1, 1)
                 // Text in the bubble and the z's are flipped back.
                 props[.bubble]?.transform = layer.transform
-                props[.zzz]?.transform = layer.transform
+                for z in props[.zzz]?.sublayers ?? [] { z.transform = layer.transform }
             }
         }
     }
@@ -47,6 +47,19 @@ final class StickFigure {
             }
             for z in props[.zzz]?.sublayers ?? [] { (z as? CATextLayer)?.foregroundColor = color }
         }
+    }
+
+    /// A soft glow around the figure and its props in a contrasting color, so it shows on any wallpaper;
+    /// nil = none.
+    var halo: CGColor? {
+        didSet { withoutActions { Self.applyHalo(halo, to: layer) } }
+    }
+
+    static func applyHalo(_ color: CGColor?, to layer: CALayer) {
+        layer.shadowColor = color
+        layer.shadowOpacity = color == nil ? 0 : 0.9
+        layer.shadowRadius = 1.5
+        layer.shadowOffset = .zero
     }
 
     init(skeleton: Skeleton = .standard) {

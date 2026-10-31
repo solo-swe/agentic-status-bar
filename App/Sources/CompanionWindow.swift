@@ -65,11 +65,26 @@ final class CompanionWindow {
         return panel
     }
 
-    /// Strokes in the label color of the current appearance: dark on a light desktop, light on a dark one.
+    /// Strokes in `companion_color`, or the label color of the current appearance (dark on a light desktop,
+    /// light on a dark one), with a halo in the opposite brightness around the figure and the bed.
     private func updateColors(_ view: NSView) {
-        var color = NSColor.labelColor.cgColor
-        view.effectiveAppearance.performAsCurrentDrawingAppearance { color = NSColor.labelColor.cgColor }
-        figure.withoutActions { figure.color = color }
+        let chosen = ThemeColor.color(store.config.companionColor) ?? .labelColor
+        var color = chosen.cgColor
+        view.effectiveAppearance.performAsCurrentDrawingAppearance { color = chosen.cgColor }
+        let halo = Self.halo(for: color)
+        figure.withoutActions {
+            figure.color = color
+            figure.halo = halo
+            if let bed { StickFigure.applyHalo(halo, to: bed) }
+        }
+    }
+
+    /// White around a dark color, black around a light one.
+    static func halo(for color: CGColor) -> CGColor {
+        let rgb = color.converted(to: CGColorSpace(name: CGColorSpace.sRGB)!, intent: .defaultIntent, options: nil)
+        let c = rgb?.components ?? [0, 0, 0]
+        let luminance = c.count >= 3 ? 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2] : c.first ?? 0
+        return luminance < 0.5 ? CGColor(gray: 1, alpha: 1) : CGColor(gray: 0, alpha: 1)
     }
 
     private func observe() {
@@ -94,6 +109,7 @@ final class CompanionWindow {
         panel.level = Self.level(overFullscreen: config.companionOverFullscreen)
         panel.setFrame(Self.frame(position: config.companionPosition, in: screen.visibleFrame), display: false)
         placeBed(StripLayout(width: Self.size.width, position: config.companionPosition))
+        if let view = panel.contentView { updateColors(view) }
         panel.orderFrontRegardless()
     }
 
@@ -114,6 +130,7 @@ final class CompanionWindow {
             bed?.removeFromSuperlayer()
             let layer = figure.makeBed(new)
             layer.position.y += Self.floorY
+            StickFigure.applyHalo(figure.halo, to: layer)
             contentLayer.insertSublayer(layer, at: 0)
             bed = layer
         }

@@ -334,6 +334,30 @@ final class StickFigureTests: XCTestCase {
         XCTAssertTrue(idle.contains { $0.neck > 0.2 }, "a tilt of the head now and then")
     }
 
+    func testTheHaloContrastsWithTheColorAndCoversProps() {
+        XCTAssertEqual(CompanionWindow.halo(for: CGColor(gray: 0.1, alpha: 1)), CGColor(gray: 1, alpha: 1))
+        XCTAssertEqual(CompanionWindow.halo(for: CGColor(gray: 0.9, alpha: 1)), CGColor(gray: 0, alpha: 1))
+        XCTAssertEqual(CompanionWindow.halo(for: CGColor(red: 1, green: 0.85, blue: 0, alpha: 1)), CGColor(gray: 0, alpha: 1))
+        let figure = StickFigure()
+        figure.halo = CGColor(gray: 1, alpha: 1)
+        XCTAssertEqual(figure.layer.shadowColor, CGColor(gray: 1, alpha: 1))
+        XCTAssertGreaterThan(figure.layer.shadowOpacity, 0.5)
+        figure.halo = nil
+        XCTAssertEqual(figure.layer.shadowOpacity, 0)
+    }
+
+    func testTheZsAreBigAndStayInTheStrip() {
+        let figure = StickFigure()
+        figure.show(.zzz)
+        let container = figure.props[.zzz]
+        let sizes = container?.sublayers?.compactMap { ($0 as? CATextLayer)?.fontSize } ?? []
+        XCTAssertGreaterThanOrEqual(sizes.min() ?? 0, 10)
+        let top = (container?.position.y ?? 0) + StickFigure.zzzSize.height
+        XCTAssertLessThanOrEqual(top, CompanionWindow.size.height - CompanionWindow.floorY)
+        figure.facing = .left
+        XCTAssertTrue(container?.sublayers?.allSatisfy { $0.transform.m11 == -1 } ?? false, "letters read right")
+    }
+
     func testTheZsRiseOnlyWhileShown() {
         let figure = StickFigure()
         figure.show(.zzz)

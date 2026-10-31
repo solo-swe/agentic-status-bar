@@ -9,7 +9,7 @@ public struct Config: Equatable, Sendable {
         "show_interactive", "show_headless", "show_subagents", "show_ide", "stale_minutes", "use_registry",
         "instant_refresh", "icon", "store_prompt_preview", "state_dir", "theme",
         "notify_waiting", "notify_idle", "notify_delay_seconds", "notify_sound", "debug_hook_log",
-        "companion", "companion_position", "companion_over_fullscreen",
+        "companion", "companion_position", "companion_over_fullscreen", "companion_color",
     ] + themeStates.map { "icon_\($0)" } + themeStates.map { "color_\($0)" }
 
     /// The screen corners the desktop companion can sit in (doc/design/desktop-companion.md).
@@ -44,6 +44,8 @@ public struct Config: Equatable, Sendable {
     public var companion = false
     public var companionPosition = "bottom-right"
     public var companionOverFullscreen = false
+    /// The companion's color: `#RRGGBB` or a light,dark pair; "" = the label color (dark or light).
+    public var companionColor = ""
 
     public init() {}
 
@@ -69,10 +71,10 @@ public struct Config: Equatable, Sendable {
 
     public static func isKey(_ key: String) -> Bool { keys.contains(key) }
 
-    /// Values are plain words or paths: letters, digits and `_ . / ~ -`. Colors (`color_*`) are `#RRGGBB`,
-    /// a `#RRGGBB,#RRGGBB` light,dark pair, or empty.
+    /// Values are plain words or paths: letters, digits and `_ . / ~ -`. Colors (`color_*`,
+    /// `companion_color`) are `#RRGGBB`, a `#RRGGBB,#RRGGBB` light,dark pair, or empty.
     public static func isValid(_ value: String, for key: String) -> Bool {
-        if key.hasPrefix("color_") {
+        if key.hasPrefix("color_") || key == "companion_color" {
             if value.isEmpty { return true }
             let parts = value.split(separator: ",", omittingEmptySubsequences: false)
             return (1...2).contains(parts.count) && parts.allSatisfy(isHexColor)
@@ -109,6 +111,7 @@ public struct Config: Equatable, Sendable {
         case "companion": companion = on
         case "companion_position": companionPosition = value
         case "companion_over_fullscreen": companionOverFullscreen = on
+        case "companion_color": companionColor = value
         default:
             if key.hasPrefix("icon_") {
                 iconOverrides[String(key.dropFirst(5))] = value.isEmpty ? nil : value

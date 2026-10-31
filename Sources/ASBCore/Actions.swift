@@ -198,10 +198,12 @@ public struct Actions {
             notify_sound=\(flag(c.notifySound))
 
             # Desktop companion: shown, its corner (bottom-right, bottom-left, top-right, top-left),
-            # and whether it stays visible over full-screen apps.
+            # whether it stays visible over full-screen apps, and its color (#RRGGBB or a light,dark
+            # pair; empty = dark on light, light on dark).
             companion=\(flag(c.companion))
             companion_position=\(c.companionPosition)
             companion_over_fullscreen=\(flag(c.companionOverFullscreen))
+            companion_color=\(c.companionColor)
 
             # Theme: default, monochrome or high_contrast.
             theme=\(c.theme)

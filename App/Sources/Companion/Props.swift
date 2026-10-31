@@ -133,26 +133,32 @@ extension StickFigure {
         return container
     }
 
+    /// The area the *z*s rise through, from above the sleeping head.
+    static let zzzSize = CGSize(width: 34, height: 32)
+
     /// Three *z*s rising and fading from above the head of a figure lying down, one after another.
     private func makeZzz() -> CALayer {
+        // From just above the head, up and away from the headboard, growing as they rise.
         let container = CALayer()
-        container.bounds = CGRect(x: 0, y: 0, width: 16, height: 16)
+        container.bounds = CGRect(origin: .zero, size: Self.zzzSize)
+        container.anchorPoint = .zero
         let head = skeleton.points(Moves.lying(skeleton)).head
-        container.position = CGPoint(x: head.x + 4, y: head.y + skeleton.headRadius + 8)
-        container.transform = layer.transform
+        container.position = CGPoint(x: head.x - 2, y: head.y + skeleton.headRadius)
         for i in 0..<3 {
             let z = CATextLayer()
+            // Each letter reads the right way round when the figure faces left; `facing` keeps this up.
+            z.transform = layer.transform
             z.string = "z"
-            z.fontSize = CGFloat(6 + 2 * i)
+            z.fontSize = CGFloat(10 + 3 * i)
             z.font = "Helvetica-Bold" as CFString
             z.alignmentMode = .center
             z.foregroundColor = color
             z.contentsScale = 2
-            z.frame = CGRect(x: 0, y: 0, width: 10, height: 10)
+            z.frame = CGRect(x: 0, y: 0, width: 18, height: 18)
             z.opacity = 0
             let rise = CABasicAnimation(keyPath: "position")
-            rise.fromValue = NSValue(point: CGPoint(x: 4, y: 2))
-            rise.toValue = NSValue(point: CGPoint(x: 12, y: 14))
+            rise.fromValue = NSValue(point: CGPoint(x: 6, y: 6))
+            rise.toValue = NSValue(point: CGPoint(x: Self.zzzSize.width - 9, y: Self.zzzSize.height - 9))
             let fade = CAKeyframeAnimation(keyPath: "opacity")
             fade.values = [0, 1, 1, 0]
             fade.keyTimes = [0, 0.2, 0.7, 1]
