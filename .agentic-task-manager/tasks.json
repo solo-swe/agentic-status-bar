@@ -4976,7 +4976,7 @@
       "description": "Add the companion's settings to the config file the CLI shares (`doc/design/desktop-companion.md` › Settings).\n\n## Change\n- `Config`: `companion` (bool, default off), `companion_position` (`bottom-right` default, `bottom-left`, `top-right`, `top-left`), `companion_over_fullscreen` (bool, default off). Unknown positions are rejected like other invalid values.\n- The config template in `Actions` lists them with a one-line comment.\n- `asb config` accepts them.\n\n## Tests\n- `ConfigTests`: defaults, parsing, setting each key, rejecting a bad position.\n- `tests/swift.sh` passes.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/Config.swift",
@@ -4984,11 +4984,22 @@
         "tests/ASBCoreTests/ConfigTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T07:49:57Z",
+      "updated_at": "2026-10-31T07:50:55Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "started_at": "2026-10-31T07:49:57Z",
-      "started_by": "claude:6baf63b2"
+      "started_by": "claude:6baf63b2",
+      "commit": "813dd00e86b7a5cbf912d3720878f47c2c36d246",
+      "completed_at": "2026-10-31T07:50:55Z",
+      "completed_by": "claude:6baf63b2",
+      "notes": [
+        {
+          "at": "2026-10-31T07:50:55Z",
+          "kind": "outcome",
+          "text": "Config keys `companion`, `companion_position` (four corners, others rejected), `companion_over_fullscreen`; in the config template and the schema doc.",
+          "by": "claude:6baf63b2"
+        }
+      ]
     },
     {
       "id": "T-128",
@@ -5003,7 +5014,7 @@
       "description": "A transparent, non-activating panel for the character (`doc/design/desktop-companion.md` › The window).\n\n## Change\n- `App/Sources/CompanionWindow.swift`: an `NSPanel` (`.borderless`, `.nonactivatingPanel`), `isFloatingPanel`, `hidesOnDeactivate = false`, clear background, no shadow, `ignoresMouseEvents = true`, collection behavior `[.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]`, level `.floating` (`.screenSaver` with `companion_over_fullscreen`), shown with `orderFrontRegardless()`.\n- A static frame function: a 260×60 pt strip in the main screen's `visibleFrame` corner given by `companion_position` (bottom corners sit just above the Dock, top ones just under the menu bar).\n- Re-places itself on `NSApplication.didChangeScreenParametersNotification` and on config changes; shown only while `companion` is on. `AppDelegate` owns it.\n- An empty content view for now.\n\n## Tests\n- App test: the frame for each corner on two made-up screen layouts (Dock at the bottom, Dock on the left).\n- `tests/app.sh --test` passes.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-127"
       ],
@@ -5013,9 +5024,11 @@
         "App/Tests/CompanionWindowTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:50:58Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:6baf63b2",
+      "started_at": "2026-10-31T07:50:58Z",
+      "started_by": "claude:6baf63b2"
     },
     {
       "id": "T-129",
