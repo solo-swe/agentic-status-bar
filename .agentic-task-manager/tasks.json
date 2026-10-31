@@ -4922,13 +4922,13 @@
       "description": "Research and write a proposal, `doc/design/desktop-companion.md`, for a small animated character that lives on the desktop, outside the menu bar, and acts out the sessions' state. No code changes.\n\n## The idea (from the user)\n- A small stick person that walks around while everything is fine (busy).\n- When a session needs attention (waiting), it waves, pauses, and waves again.\n- When idle, it sleeps on a tiny drawn bed with *zzz* rising from it.\n- More states as they fit: subagents, uncertain, muted, no sessions.\n\n## 1. Today\nWhere the companion would get its state: `SessionStore`'s snapshot (`Snapshot.Header`, the per-session rows), how `StatusItemController` observes it, and the theme states (`Config.themeStates`).\n\n## 2. Research\nFrom current Apple docs and other primary sources (cite links):\n- **The window**: a borderless, transparent, always-on-top window that doesn't take focus — `NSPanel` vs `NSWindow`, window levels, `collectionBehavior` (all Spaces, full-screen apps, Mission Control), click-through vs clickable, multiple displays, where it sits (above the Dock, a screen corner, along the bottom).\n- **Rendering**, compared on effort, look, file size and CPU/GPU cost: SwiftUI `Canvas` + `TimelineView` (a procedural stick figure), Core Animation layers and keyframes, SpriteKit with sprite sheets, and animation runtimes with state machines (Rive, Lottie) and their licenses and package size.\n- **The character**: how to draw and pose a stick figure (skeleton with joint angles, keyframed poses, easing), the walk cycle, the wave loop, the bed and *zzz* particles; who makes the art if it's not procedural.\n- **Cost and etiquette**: frame rate, pausing when hidden, occluded or on another Space, battery and Low Power Mode, Reduce Motion, App Nap, screen recording and screenshots, accessibility.\n- **Prior art**: desktop pets and menu-bar animations on macOS, for what users like and dislike (cite, don't copy).\n\n## 3. Proposal\n- The recommended rendering approach, with a short prototype sketch (pseudo-code, not committed code).\n- A state → animation table (busy, waiting with permission or question, idle, subagents, uncertain, muted, none, warning) and transitions between them.\n- Several sessions: one character for the most urgent state, or one per session.\n- Interaction: click to open the session list or focus the waiting session, drag to move, hide.\n- Settings: on/off (off by default?), size, position, which states animate.\n- Energy budget and how it's measured.\n- Risks and open questions.\n- A task breakdown ready for atm (tasks under 10 minutes each, with dependencies).\n\n## Done when\nSend the task to review for the user (`atm review`) instead of marking it done.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "doc/design/desktop-companion.md"
       ],
       "created_at": "2026-10-31T07:19:10Z",
-      "updated_at": "2026-10-31T07:37:40Z",
+      "updated_at": "2026-10-31T07:39:36Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "notes": [
@@ -4943,6 +4943,12 @@
           "kind": "rejection",
           "text": "Approved with decisions (placement setting, calmer busy with exercises, one character, sit on bed); continuing with the doc update and task breakdown",
           "by": "claude:6baf63b2"
+        },
+        {
+          "at": "2026-10-31T07:39:36Z",
+          "kind": "outcome",
+          "text": "Approved with decisions: corner placement setting, calm busy routine with workouts, one character, sits on its bed with no sessions; tasks T-127–T-140 added.",
+          "by": "claude:6baf63b2"
         }
       ],
       "reviews": [
@@ -4952,7 +4958,10 @@
         }
       ],
       "started_at": "2026-10-31T07:37:40Z",
-      "started_by": "claude:6baf63b2"
+      "started_by": "claude:6baf63b2",
+      "commit": "4474ca8b8f98509617a8c32034f14f83b475dcff",
+      "completed_at": "2026-10-31T07:39:36Z",
+      "completed_by": "claude:6baf63b2"
     },
     {
       "id": "T-127",
