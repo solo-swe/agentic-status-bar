@@ -130,8 +130,9 @@ state's theme color.
 | `warning` (hooks missing) | Holds up a small sign with a wrench; a click opens Settings |
 | `none` (no sessions) | Sits on the edge of its bed |
 
-**Several sessions.** One character acts out the header state: the most urgent wins, as in the menu bar. So
-"waiting" beats "busy", and a busy session keeps it awake while others are idle. One character per session would
+**Several sessions.** One character acts out the menu bar's header state, so the two always agree: waiting,
+then idle, then uncertain, then busy. Two idle sessions and a busy one sleep, as the menu bar shows *zzz*. One
+character per session would
 be fun but crowded and costly. That could come later, as small followers.
 
 ## Energy and etiquette

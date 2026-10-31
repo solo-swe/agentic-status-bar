@@ -30,17 +30,18 @@ final class CompanionSceneTests: XCTestCase {
         XCTAssertEqual(CompanionScene.from(snapshot(.muted, [session(.busy, muted: true)])), .muted)
     }
 
-    func testAWorkingSessionKeepsItAwakeAndWaitingWins() {
-        // The menu bar says idle (idle outranks busy there); the companion keeps working.
-        XCTAssertEqual(CompanionScene.from(snapshot(.idle, [session(.idle), session(.busy)])), .busy(subagents: 0))
-        XCTAssertEqual(CompanionScene.from(snapshot(.uncertain, [session(.uncertain), session(.idle)])), .uncertain)
+    func testItFollowsTheMenuBarWithSeveralSessions() {
+        // Idle outranks busy in the menu bar, and so here: two idle sessions and a busy one sleep.
+        XCTAssertEqual(CompanionScene.from(snapshot(.idle, [session(.idle), session(.idle), session(.busy)])), .idle)
+        XCTAssertEqual(CompanionScene.from(snapshot(.uncertain, [session(.uncertain), session(.busy)])), .uncertain)
         XCTAssertEqual(
-            CompanionScene.from(snapshot(.waiting, [session(.waiting), session(.busy, subagents: 1)])), .waiting(reason: nil))
-        // Muted sessions don't count, except that only-muted sessions sit.
-        XCTAssertEqual(CompanionScene.from(snapshot(.idle, [session(.idle), session(.busy, muted: true)])), .idle)
-        // Subagents of all working sessions count.
+            CompanionScene.from(snapshot(.waiting, [session(.waiting, reason: "question"), session(.idle)])),
+            .waiting(reason: "question"))
+        // Muted sessions don't count toward subagents; subagents of all working sessions do.
         XCTAssertEqual(
-            CompanionScene.from(snapshot(.busy, [session(.busy, subagents: 1), session(.subagents, subagents: 2)])),
+            CompanionScene.from(snapshot(.busy, [
+                session(.busy, subagents: 1), session(.subagents, subagents: 2), session(.busy, muted: true, subagents: 4),
+            ])),
             .busy(subagents: 3))
     }
 

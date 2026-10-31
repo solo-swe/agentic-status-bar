@@ -1,9 +1,8 @@
 import ASBCore
 import Foundation
 
-/// What the companion acts out (doc/design/desktop-companion.md › State → animation). Unlike the menu
-/// bar, a working session keeps the companion awake while others are idle: waiting, then busy, then
-/// uncertain, then idle, over the sessions that aren't muted.
+/// What the companion acts out (doc/design/desktop-companion.md › State → animation): the menu bar's
+/// header state, so the two always agree (idle outranks busy there too).
 enum CompanionScene: Equatable {
     case warning
     /// A session waits on you: `permission` or `question`.
@@ -19,15 +18,20 @@ enum CompanionScene: Equatable {
 
     static func from(_ snapshot: Snapshot?) -> CompanionScene {
         guard let snapshot else { return .none }
-        if snapshot.header.state == .warning { return .warning }
-        // Rows come most urgent first; a waiting session is never muted (it breaks through).
         let loud = snapshot.sessions.filter { !$0.muted }
-        if let waiting = loud.first(where: { $0.shown == .waiting }) { return .waiting(reason: waiting.reason) }
-        let working = loud.filter { $0.shown == .busy || $0.shown == .subagents }
-        if !working.isEmpty { return .busy(subagents: working.reduce(0) { $0 + $1.subagents.count }) }
-        if loud.contains(where: { $0.shown == .uncertain }) { return .uncertain }
-        if loud.contains(where: { $0.shown == .idle }) { return .idle }
-        return snapshot.sessions.isEmpty ? .none : .muted
+        switch snapshot.header.state {
+        case .warning: return .warning
+        case .waiting:
+            // Rows come most urgent first; the reason of the first session waiting on you.
+            return .waiting(reason: loud.first { $0.shown == .waiting }?.reason)
+        case .idle: return .idle
+        case .uncertain: return .uncertain
+        case .busy:
+            let working = loud.filter { $0.shown == .busy || $0.shown == .subagents }
+            return .busy(subagents: working.reduce(0) { $0 + $1.subagents.count })
+        case .muted: return .muted
+        case .none: return .none
+        }
     }
 
     /// Scenes that play the same moves: a new subagent doesn't restart the routine.

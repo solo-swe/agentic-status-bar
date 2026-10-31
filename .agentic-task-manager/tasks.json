@@ -5293,7 +5293,7 @@
       "description": "Drive the character from the sessions' state (`doc/design/desktop-companion.md` › State → animation, Busy routine).\n\n## Change\n- `CompanionScene`: a pure function from `Snapshot` (header state, the waiting session's reason) to a scene: `busy`, `waiting(reason)`, `idle`, `none`, and placeholders for the states T-136 adds.\n- `CompanionController` observes `SessionStore.snapshot` like `StatusItemController` and changes the scene only when it changes; every change blends through `standing` in about 0.3 s.\n- **Busy routine:** one activity (walk, weight lifting, push-ups, jumping jacks, pull-ups) for 8–15 s, a 4–8 s rest (stand, slow breath), then a different random one; never the same twice in a row. The random source is injectable for tests.\n\n## Tests\n- App tests: the mapping for every header state; the routine never repeats an activity and keeps its durations in range.\n- **Milestone:** check it live with the user in the dev build (enable `companion`).",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "in_review",
       "dependencies": [
         "T-130",
         "T-131",
@@ -5308,11 +5308,21 @@
         "App/Tests/CompanionSceneTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T08:13:52Z",
+      "updated_at": "2026-10-31T08:16:54Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "started_at": "2026-10-31T08:13:52Z",
-      "started_by": "claude:6baf63b2"
+      "started_by": "claude:6baf63b2",
+      "commit": "5103a24c855245445a1b64c6bcd50bdcbb3efee5",
+      "review_requested_at": "2026-10-31T08:16:54Z",
+      "notes": [
+        {
+          "at": "2026-10-31T08:16:54Z",
+          "kind": "review",
+          "text": "Live check in the dev build with `companion=1`: busy runs the calm routine (walk, lift, push-ups, jumping jacks, pull-ups with rests), waiting waves with **!**/**?**, idle sleeps in bed, no sessions sits on the bed. Also check the corner switch moves bed and figure.",
+          "by": "claude:6baf63b2"
+        }
+      ]
     },
     {
       "id": "T-136",
