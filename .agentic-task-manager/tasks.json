@@ -5014,7 +5014,7 @@
       "description": "A transparent, non-activating panel for the character (`doc/design/desktop-companion.md` › The window).\n\n## Change\n- `App/Sources/CompanionWindow.swift`: an `NSPanel` (`.borderless`, `.nonactivatingPanel`), `isFloatingPanel`, `hidesOnDeactivate = false`, clear background, no shadow, `ignoresMouseEvents = true`, collection behavior `[.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]`, level `.floating` (`.screenSaver` with `companion_over_fullscreen`), shown with `orderFrontRegardless()`.\n- A static frame function: a 260×60 pt strip in the main screen's `visibleFrame` corner given by `companion_position` (bottom corners sit just above the Dock, top ones just under the menu bar).\n- Re-places itself on `NSApplication.didChangeScreenParametersNotification` and on config changes; shown only while `companion` is on. `AppDelegate` owns it.\n- An empty content view for now.\n\n## Tests\n- App test: the frame for each corner on two made-up screen layouts (Dock at the bottom, Dock on the left).\n- `tests/app.sh --test` passes.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-127"
       ],
@@ -5024,11 +5024,22 @@
         "App/Tests/CompanionWindowTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T07:50:58Z",
+      "updated_at": "2026-10-31T07:52:49Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "started_at": "2026-10-31T07:50:58Z",
-      "started_by": "claude:6baf63b2"
+      "started_by": "claude:6baf63b2",
+      "commit": "c072e318350f501edc841056644a9640e597ee9d",
+      "completed_at": "2026-10-31T07:52:49Z",
+      "completed_by": "claude:6baf63b2",
+      "notes": [
+        {
+          "at": "2026-10-31T07:52:49Z",
+          "kind": "outcome",
+          "text": "Non-activating, click-through `NSPanel` (260×60 strip) in the configured corner of the main screen’s `visibleFrame`; follows config and screen changes; `.screenSaver` level only with `companion_over_fullscreen`.",
+          "by": "claude:6baf63b2"
+        }
+      ]
     },
     {
       "id": "T-129",
@@ -5043,7 +5054,7 @@
       "description": "The character as a Core Animation skeleton (`doc/design/desktop-companion.md` › The character › Rig).\n\n## Change\n- `App/Sources/Companion/StickFigureLayer.swift`: a `CALayer` tree of 10 bones (torso at the hips as root, head circle, upper arms, forearms, thighs, shins), each a `CAShapeLayer` line with its `anchorPoint` at its joint. Stroke in the label color, updated on appearance change.\n- `Pose`: hip height plus one angle per joint; `apply(_ pose:)` sets them without animation; a few named poses (`standing`, `sitting`).\n- `animate(_ poses: [Pose], duration:, repeat:)`: one `CAKeyframeAnimation` per joint on `transform.rotation.z` (and the hips' `position.y`), shared `keyTimes`, `calculationMode` discrete at 12 steps/s by default.\n- Show the standing figure in the panel.\n\n## Tests\n- App test: joint end positions for `standing` (feet on the floor, head on top) and that `apply` sets every bone.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-128"
       ],
@@ -5053,9 +5064,11 @@
         "App/Tests/StickFigureTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:53:59Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:6baf63b2",
+      "started_at": "2026-10-31T07:53:59Z",
+      "started_by": "claude:6baf63b2"
     },
     {
       "id": "T-130",

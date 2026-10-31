@@ -11,9 +11,13 @@ final class CompanionWindow {
     /// Distance from the screen's left or right edge.
     static let sideMargin: CGFloat = 16
 
+    /// The floor line props and the figure's feet stand on, from the strip's bottom.
+    static let floorY: CGFloat = 4
+
     let panel: NSPanel
     /// The layer the character draws into.
     var contentLayer: CALayer { panel.contentView!.layer! }
+    let figure = StickFigure()
 
     private let store: SessionStore
     private var screenObserver: NSObjectProtocol?
@@ -21,6 +25,12 @@ final class CompanionWindow {
     init(store: SessionStore) {
         self.store = store
         panel = Self.makePanel()
+        figure.layer.position = CGPoint(x: Self.size.width / 2, y: Self.floorY)
+        contentLayer.addSublayer(figure.layer)
+        if let view = panel.contentView as? CompanionView {
+            view.appearanceChanged = { [weak self] view in self?.updateColors(view) }
+            updateColors(view)
+        }
         screenObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
         ) { [weak self] _ in
@@ -44,10 +54,17 @@ final class CompanionWindow {
         panel.ignoresMouseEvents = true
         panel.animationBehavior = .none
         panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
-        let view = NSView(frame: NSRect(origin: .zero, size: size))
+        let view = CompanionView(frame: NSRect(origin: .zero, size: size))
         view.wantsLayer = true
         panel.contentView = view
         return panel
+    }
+
+    /// Strokes in the label color of the current appearance: dark on a light desktop, light on a dark one.
+    private func updateColors(_ view: NSView) {
+        var color = NSColor.labelColor.cgColor
+        view.effectiveAppearance.performAsCurrentDrawingAppearance { color = NSColor.labelColor.cgColor }
+        figure.withoutActions { figure.color = color }
     }
 
     private func observe() {
@@ -86,5 +103,15 @@ final class CompanionWindow {
         let x = left ? visibleFrame.minX + sideMargin : visibleFrame.maxX - sideMargin - size.width
         let y = top ? visibleFrame.maxY - size.height : visibleFrame.minY
         return NSRect(x: x, y: y, width: size.width, height: size.height)
+    }
+}
+
+/// The panel's content view: tells the companion when light or dark mode changes.
+final class CompanionView: NSView {
+    var appearanceChanged: ((NSView) -> Void)?
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        appearanceChanged?(self)
     }
 }
