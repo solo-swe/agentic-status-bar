@@ -5094,7 +5094,7 @@
       "description": "Walking along the strip (`doc/design/desktop-companion.md` › Animations › Walk).\n\n## Change\n- The 8 poses: contact, down, passing, up, then mirrored; hips lowest at down, highest at up; about 1 s per cycle.\n- Horizontal travel matched to stride × cadence so feet don't slide; turns around (flips) at the strip's ends.\n- A `walk(to x:)` and a `stroll(for seconds:)` the scene controller can call.\n\n## Tests\n- App test: the poses' feet stay on the floor line at contact; travel per cycle equals two strides.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-129"
       ],
@@ -5103,11 +5103,22 @@
         "App/Tests/StickFigureTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T07:56:51Z",
+      "updated_at": "2026-10-31T07:58:59Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "started_at": "2026-10-31T07:56:51Z",
-      "started_by": "claude:6baf63b2"
+      "started_by": "claude:6baf63b2",
+      "commit": "f4426bab410513dacf8f44420419d435356cd8bd",
+      "completed_at": "2026-10-31T07:58:59Z",
+      "completed_by": "claude:6baf63b2",
+      "notes": [
+        {
+          "at": "2026-10-31T07:58:59Z",
+          "kind": "outcome",
+          "text": "Eight-pose walk (contact, down, passing, up, mirrored) with grounded hips; travel speed = two strides per cycle; `walk(to:)` turns and stops cleanly, `stroll` wanders the strip with calm pauses.",
+          "by": "claude:6baf63b2"
+        }
+      ]
     },
     {
       "id": "T-131",
@@ -5122,7 +5133,7 @@
       "description": "Two busy activities (`doc/design/desktop-companion.md` › Animations › Workouts).\n\n## Change\n- **Weight lifting:** a barbell prop (a line and two small plates) shown only during it; squat, lift overhead, hold, lower; about 3 s per rep.\n- **Push-ups:** lie face down (plank), arms bend and straighten; about 1.5 s per rep.\n- Each is a pose loop for `StickFigureLayer.animate`, with a way in from and out to `standing`.\n\n## Tests\n- App test: each loop starts and ends in a pose that blends to `standing`; the barbell is hidden afterwards.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-129"
       ],
@@ -5132,9 +5143,11 @@
         "App/Tests/StickFigureTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:59:00Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:6baf63b2",
+      "started_at": "2026-10-31T07:59:00Z",
+      "started_by": "claude:6baf63b2"
     },
     {
       "id": "T-132",

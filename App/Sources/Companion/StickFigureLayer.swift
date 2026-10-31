@@ -18,6 +18,8 @@ final class StickFigure {
     let layer = CALayer()
     private(set) var bones: [Bone: CALayer] = [:]
     private var shapes: [CAShapeLayer] = []
+    /// Props on show (Props.swift).
+    var props: [Prop: CALayer] = [:]
     /// The pose the model layers hold (the last one applied, or where the last animation ends).
     private(set) var pose = Pose.standing
 
@@ -31,7 +33,12 @@ final class StickFigure {
     }
 
     var color: CGColor = NSColor.labelColor.cgColor {
-        didSet { for shape in shapes { shape.strokeColor = color } }
+        didSet {
+            for shape in shapes {
+                shape.strokeColor = color
+                if shape.fillColor != nil { shape.fillColor = color }
+            }
+        }
     }
 
     init(skeleton: Skeleton = .standard) {
@@ -77,9 +84,10 @@ final class StickFigure {
         _ = bone(.shinFront, in: thighFront, at: CGPoint(x: 0, y: -s.thigh), line: -s.shin)
     }
 
-    private func style(_ shape: CAShapeLayer, back: Bool) {
+    /// Draws `shape` like the figure, in its color from now on (props too); `filled` fills it as well.
+    func style(_ shape: CAShapeLayer, back: Bool = false, filled: Bool = false) {
         shape.strokeColor = color
-        shape.fillColor = nil
+        shape.fillColor = filled ? color : nil
         shape.lineWidth = skeleton.lineWidth
         shape.lineCap = .round
         shape.lineJoin = .round

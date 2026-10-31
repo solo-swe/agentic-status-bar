@@ -114,6 +114,40 @@ struct Skeleton: Equatable, Sendable {
             kneeBack: kb, footBack: fb, kneeFront: kf, footFront: ff)
     }
 
+    /// `pose` with both arms reaching for `hand` (the back hand `backOffset` further back), elbows bent
+    /// out behind (`elbowsBehind`) or in front. Out-of-reach targets get a straight arm pointing at them.
+    func reaching(_ pose: Pose, hand: CGPoint, elbowsBehind: Bool, backOffset: CGFloat = 1) -> Pose {
+        var p = pose
+        let neck = points(pose).neck
+        let chest = -pose.body - pose.lean
+        let front = Self.solve(from: neck, to: hand, upper: upperArm, lower: forearm, parent: chest, behind: elbowsBehind)
+        let back = Self.solve(
+            from: neck, to: CGPoint(x: hand.x - backOffset, y: hand.y), upper: upperArm, lower: forearm, parent: chest,
+            behind: elbowsBehind)
+        (p.shoulderFront, p.elbowFront) = front
+        (p.shoulderBack, p.elbowBack) = back
+        return p
+    }
+
+    /// Two-bone inverse kinematics: the joint angles (relative to a parent turned `parent`) that put the end
+    /// of a chain from `origin` at `target`, with the middle joint behind (smaller x) or in front.
+    static func solve(
+        from origin: CGPoint, to target: CGPoint, upper: CGFloat, lower: CGFloat, parent: CGFloat, behind: Bool
+    ) -> (CGFloat, CGFloat) {
+        let dx = target.x - origin.x, dy = target.y - origin.y
+        let d = min(max(hypot(dx, dy), abs(upper - lower) + 0.001), upper + lower - 0.001)
+        // World angle of the target in the limbs' convention: 0 = straight down, counterclockwise.
+        let theta = atan2(dx, -dy)
+        let alpha = acos(min(max((upper * upper + d * d - lower * lower) / (2 * upper * d), -1), 1))
+        let beta = acos(min(max((upper * upper + lower * lower - d * d) / (2 * upper * lower), -1), 1))
+        // Of the two solutions, pick the one with the middle joint on the asked side.
+        let a = (theta + alpha, -(.pi - beta))
+        let b = (theta - alpha, .pi - beta)
+        let middleX = { (angle: CGFloat) in origin.x + sin(angle) * upper }
+        let first = behind == (middleX(a.0) < middleX(b.0)) ? a : b
+        return (first.0 - parent, first.1)
+    }
+
     /// (0, 1) and (0, −1) turned counterclockwise by `angle`.
     static func up(_ angle: CGFloat) -> CGPoint { CGPoint(x: -sin(angle), y: cos(angle)) }
     static func down(_ angle: CGFloat) -> CGPoint { CGPoint(x: sin(angle), y: -cos(angle)) }

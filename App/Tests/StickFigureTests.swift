@@ -161,6 +161,64 @@ final class StickFigureTests: XCTestCase {
         }
     }
 
+    // MARK: Workouts
+
+    func testReachingPutsTheHandsOnTheTarget() {
+        let neck = s.points(.standing).neck
+        for target in [CGPoint(x: neck.x + 7, y: neck.y - 3), CGPoint(x: neck.x + 4, y: neck.y + 10), CGPoint(x: neck.x + 8, y: neck.y - 11)] {
+            for behind in [true, false] {
+                let p = s.points(s.reaching(.standing, hand: target, elbowsBehind: behind, backOffset: 0))
+                XCTAssertEqual(p.handFront.x, target.x, accuracy: 0.01)
+                XCTAssertEqual(p.handFront.y, target.y, accuracy: 0.01)
+                XCTAssertEqual(p.handBack.x, target.x, accuracy: 0.01)
+                // The elbow ends up on the asked side of the line from the shoulder to the hand.
+                let side = (target.x - neck.x) * (p.elbowFront.y - neck.y) - (target.y - neck.y) * (p.elbowFront.x - neck.x)
+                let other = s.points(s.reaching(.standing, hand: target, elbowsBehind: !behind, backOffset: 0)).elbowFront
+                XCTAssertEqual(behind, p.elbowFront.x <= other.x + 0.001, "side \(side)")
+            }
+        }
+    }
+
+    func testPushUpsKeepHandsAndFeetPlanted() {
+        let push = Moves.pushUps()
+        let planks = push.loop
+        let first = s.points(planks[0])
+        for pose in planks {
+            let p = s.points(pose)
+            XCTAssertEqual(p.footBack.y, 0, accuracy: 0.01)
+            XCTAssertEqual(p.footFront.x, first.footFront.x, accuracy: 0.01)
+            XCTAssertEqual(p.handFront.y, 0, accuracy: 0.01)
+            XCTAssertEqual(p.handFront.x, first.handFront.x, accuracy: 0.01)
+            XCTAssertGreaterThan(p.head.y - s.headRadius, -0.01, "the head stays above the floor")
+        }
+        XCTAssertLessThan(s.points(planks[1]).neck.y, first.neck.y, "down is lower")
+    }
+
+    func testActivitiesFlowFromIntroThroughLoopToStanding() {
+        for activity in [Moves.weightLifting(), Moves.pushUps()] {
+            XCTAssertEqual(activity.loop.first, activity.loop.last, activity.name)
+            XCTAssertEqual(activity.intro.last, activity.loop.first, activity.name)
+            XCTAssertEqual(activity.outro.last, .standing, activity.name)
+            XCTAssertEqual(activity.duration(reps: 2), activity.introDuration + 2 * activity.rep + activity.outroDuration)
+            for pose in activity.intro + activity.loop + activity.outro {
+                let p = s.points(pose)
+                XCTAssertGreaterThan(min(p.footBack.y, p.footFront.y), -0.01, "\(activity.name): feet not under the floor")
+            }
+        }
+        XCTAssertEqual(Moves.weightLifting().prop, .barbell)
+        XCTAssertNil(Moves.pushUps().prop)
+    }
+
+    func testTheBarbellIsInTheHandsOnlyWhileShown() {
+        let figure = StickFigure()
+        figure.show(.barbell)
+        figure.show(.barbell)
+        XCTAssertEqual(figure.bones[.forearmFront]?.sublayers?.filter { figure.props[.barbell] === $0 }.count, 1)
+        figure.hideProps()
+        XCTAssertNil(figure.props[.barbell])
+        XCTAssertFalse(figure.bones[.forearmFront]?.sublayers?.contains { $0 is CAShapeLayer && ($0 as? CAShapeLayer)?.fillColor != nil } ?? false)
+    }
+
     func testFacingLeftFlipsTheFigure() {
         let figure = StickFigure()
         figure.facing = .left

@@ -1,0 +1,43 @@
+import QuartzCore
+
+/// Things the figure uses, drawn in its color and shown only while in use
+/// (doc/design/desktop-companion.md › Animations).
+enum Prop: Hashable {
+    /// A barbell seen from the side: a weight plate in the hands.
+    case barbell
+}
+
+extension StickFigure {
+    /// Shows `prop` (once; showing it again does nothing).
+    func show(_ prop: Prop) {
+        guard props[prop] == nil else { return }
+        let layer = makeLayer(prop)
+        withoutActions {
+            switch prop {
+            case .barbell: bones[.forearmFront]?.addSublayer(layer)
+            }
+        }
+        props[prop] = layer
+    }
+
+    func hide(_ prop: Prop) {
+        withoutActions { props[prop]?.removeFromSuperlayer() }
+        props[prop] = nil
+    }
+
+    func hideProps() {
+        for prop in Array(props.keys) { hide(prop) }
+    }
+
+    private func makeLayer(_ prop: Prop) -> CALayer {
+        switch prop {
+        case .barbell:
+            // At the hand: the tip of the front forearm.
+            let r: CGFloat = 3
+            let plate = CAShapeLayer()
+            plate.path = CGPath(ellipseIn: CGRect(x: -r, y: -skeleton.forearm - r, width: 2 * r, height: 2 * r), transform: nil)
+            style(plate, filled: true)
+            return plate
+        }
+    }
+}

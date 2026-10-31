@@ -4,6 +4,52 @@ import QuartzCore
 /// The figure's moves: pose loops and how long they take (doc/design/desktop-companion.md › Animations).
 /// Loops end with their first pose, as `StickFigure.animate` expects.
 enum Moves {
+    // MARK: Workouts
+
+    /// Seconds per keyframe step in an activity's intro and outro.
+    static let transitionStep: CFTimeInterval = 0.5
+
+    /// Squat, clean the barbell to the shoulders, then push presses: dip, press overhead, hold, lower.
+    static func weightLifting(_ s: Skeleton = .standard) -> Activity {
+        func rack(_ p: Pose) -> Pose {
+            let neck = s.points(p).neck
+            // In front of the chest, clear of the head.
+            return s.reaching(p, hand: CGPoint(x: neck.x + 7, y: neck.y - 3), elbowsBehind: false)
+        }
+        let standing = grounded(Pose(), s)
+        let held = rack(standing)
+        let dip = rack(grounded(Pose(hipBack: 0.35, kneeBack: -0.7, hipFront: 0.35, kneeFront: -0.7), s))
+        let overhead: Pose = {
+            let neck = s.points(standing).neck
+            // Straight up, a little in front of the head.
+            return s.reaching(standing, hand: CGPoint(x: neck.x + 4, y: neck.y + s.upperArm + s.forearm - 1.5), elbowsBehind: false)
+        }()
+        let squat: Pose = {
+            let p = grounded(Pose(lean: 0.7, hipBack: 1.3, kneeBack: -2.3, hipFront: 1.3, kneeFront: -2.3), s)
+            return s.reaching(p, hand: CGPoint(x: s.points(p).neck.x + 2, y: 4), elbowsBehind: false)
+        }()
+        return Activity(
+            name: "weight lifting", intro: [squat, held], loop: [held, dip, overhead, overhead, held], rep: 3,
+            outro: [squat, .standing], prop: .barbell)
+    }
+
+    /// Down into a plank, then push-ups: feet and hands stay planted while the body lowers and rises.
+    static func pushUps(_ s: Skeleton = .standard) -> Activity {
+        let feetX: CGFloat = -18
+        // The body in one line from the feet, `angle` above the floor.
+        func plank(_ angle: CGFloat) -> Pose {
+            Pose(hipY: s.legLength * sin(angle) - s.legLength, hipX: feetX + s.legLength * cos(angle), body: .pi / 2 - angle)
+        }
+        let handX = s.points(plank(0.5)).neck.x + 1
+        let up = s.reaching(plank(0.5), hand: CGPoint(x: handX, y: 0), elbowsBehind: true)
+        let down = s.reaching(plank(0.2), hand: CGPoint(x: handX, y: 0), elbowsBehind: true)
+        let crouch: Pose = {
+            let p = grounded(Pose(lean: 0.9, hipBack: 1.4, kneeBack: -2.4, hipFront: 1.4, kneeFront: -2.4), s)
+            return s.reaching(p, hand: CGPoint(x: s.points(p).neck.x + 6, y: 0), elbowsBehind: true)
+        }()
+        return Activity(name: "push-ups", intro: [crouch, up], loop: [up, down, up], rep: 1.6, outro: [crouch, .standing], prop: nil)
+    }
+
     // MARK: Walk
 
     /// Seconds per walk cycle (two steps).
@@ -51,7 +97,52 @@ enum Moves {
     }
 }
 
+/// A workout or other repeated move: into it, reps of a loop, and back to standing.
+struct Activity {
+    var name: String
+    /// Keyframes from wherever the figure is into the loop's first pose (the last one).
+    var intro: [Pose]
+    /// One rep, ending with its first pose.
+    var loop: [Pose]
+    /// Seconds per rep.
+    var rep: CFTimeInterval
+    /// Keyframes from the loop back to standing.
+    var outro: [Pose]
+    /// Shown from the end of the intro's first step to the start of the outro's last one.
+    var prop: Prop?
+
+    var introDuration: CFTimeInterval { Moves.transitionStep * Double(intro.count) }
+    var outroDuration: CFTimeInterval { Moves.transitionStep * Double(outro.count) }
+
+    /// How long `reps` reps take, intro and outro included.
+    func duration(reps: Int) -> CFTimeInterval { introDuration + rep * Double(reps) + outroDuration }
+}
+
 extension StickFigure {
+    /// Plays `activity` for `reps` reps, then stands and runs `done` (unless stopped).
+    func perform(_ activity: Activity, reps: Int, done: @escaping @MainActor () -> Void = {}) {
+        let step = Moves.transitionStep
+        animate([presentedPose()] + activity.intro, duration: activity.introDuration)
+        if let prop = activity.prop {
+            after(activity.intro.count > 1 ? step : 0) { [weak self] in self?.show(prop) }
+        }
+        after(activity.introDuration) { [weak self] in
+            guard let self else { return }
+            animate(activity.loop, duration: activity.rep, repeats: true)
+            after(activity.rep * Double(max(1, reps))) { [weak self] in
+                guard let self else { return }
+                animate([presentedPose()] + activity.outro, duration: activity.outroDuration)
+                after(max(0, activity.outroDuration - step)) { [weak self] in
+                    self?.hideProps()
+                    self?.after(step) { [weak self] in
+                        self?.apply(.standing)
+                        done()
+                    }
+                }
+            }
+        }
+    }
+
     /// Walks to `x` along the strip, turning to face the way, then stands and runs `done` (unless stopped).
     func walk(to x: CGFloat, done: @escaping @MainActor () -> Void = {}) {
         let from = presentedX
