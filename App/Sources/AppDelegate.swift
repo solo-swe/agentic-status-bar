@@ -7,7 +7,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MainMenuActions {
     private let hooks = HookInstaller()
     private lazy var login = LoginItem()
     private var statusItem: StatusItemController?
-    private var companion: CompanionWindow?
+    private var companion: CompanionController?
     private lazy var updater = Updater()
     private lazy var settings = SettingsWindow(
         store: store, hooks: hooks, login: login, notifier: notifier, updater: updater)
@@ -27,7 +27,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MainMenuActions {
             openHelp: { [weak self] in self?.help.show() })
         notifier.start()
         store.start()
-        companion = CompanionWindow(store: store)
+        companion = CompanionController(store: store)
         firstRun.showIfNeeded()
         // For checking windows during development: open -a "Agentic Status Bar" --args -ShowSettingsOnLaunch YES
         // (or -ShowHelpOnLaunch YES).

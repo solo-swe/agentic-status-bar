@@ -5253,7 +5253,7 @@
       "description": "Rest states (`doc/design/desktop-companion.md` › Animations › Sleep, State → animation).\n\n## Change\n- A tiny bed prop at the strip's inner end (frame, mattress, pillow), always drawn.\n- **Sleep (idle):** walk to the bed, lie down, breathe (slow torso scale, about 4 s per breath); three *z* glyphs rise, drift and fade in a slow loop.\n- **Sit (no sessions):** sit on the bed's edge, legs dangling, an occasional blink-length head tilt.\n\n## Tests\n- App test: the *zzz* layers exist only while sleeping; sitting places the hips on the mattress line.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-129"
       ],
@@ -5263,11 +5263,22 @@
         "App/Tests/StickFigureTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T08:09:38Z",
+      "updated_at": "2026-10-31T08:13:52Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "started_at": "2026-10-31T08:09:38Z",
-      "started_by": "claude:6baf63b2"
+      "started_by": "claude:6baf63b2",
+      "commit": "daf5349aece19ba11d3a226b54de89342618004f",
+      "completed_at": "2026-10-31T08:13:52Z",
+      "completed_by": "claude:6baf63b2",
+      "notes": [
+        {
+          "at": "2026-10-31T08:13:52Z",
+          "kind": "outcome",
+          "text": "Bed at the strip’s inner end (headboard outward, `StripLayout` gives bed, rest spot and walk range per corner); `sleep(at:)` sits then lies down, breathes and shows rising z’s; `sit(at:)` sits on the edge with an occasional head tilt.",
+          "by": "claude:6baf63b2"
+        }
+      ]
     },
     {
       "id": "T-135",
@@ -5282,7 +5293,7 @@
       "description": "Drive the character from the sessions' state (`doc/design/desktop-companion.md` › State → animation, Busy routine).\n\n## Change\n- `CompanionScene`: a pure function from `Snapshot` (header state, the waiting session's reason) to a scene: `busy`, `waiting(reason)`, `idle`, `none`, and placeholders for the states T-136 adds.\n- `CompanionController` observes `SessionStore.snapshot` like `StatusItemController` and changes the scene only when it changes; every change blends through `standing` in about 0.3 s.\n- **Busy routine:** one activity (walk, weight lifting, push-ups, jumping jacks, pull-ups) for 8–15 s, a 4–8 s rest (stand, slow breath), then a different random one; never the same twice in a row. The random source is injectable for tests.\n\n## Tests\n- App tests: the mapping for every header state; the routine never repeats an activity and keeps its durations in range.\n- **Milestone:** check it live with the user in the dev build (enable `companion`).",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-130",
         "T-131",
@@ -5297,9 +5308,11 @@
         "App/Tests/CompanionSceneTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T08:13:52Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:6baf63b2",
+      "started_at": "2026-10-31T08:13:52Z",
+      "started_by": "claude:6baf63b2"
     },
     {
       "id": "T-136",

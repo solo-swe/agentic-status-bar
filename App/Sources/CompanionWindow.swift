@@ -21,6 +21,8 @@ final class CompanionWindow {
     /// Where the bed is and where the figure may walk, for the current corner.
     private(set) var layout = StripLayout(width: size.width, position: "bottom-right")
     private var bed: CALayer?
+    /// Called after the panel was shown, hidden or moved.
+    var onChange: (() -> Void)?
 
     private let store: SessionStore
     private var screenObserver: NSObjectProtocol?
@@ -84,6 +86,7 @@ final class CompanionWindow {
     /// Shows, places or hides the panel for the current config and screens.
     func update() {
         let config = store.config
+        defer { onChange?() }
         guard config.companion, let screen = NSScreen.main else {
             panel.orderOut(nil)
             return
@@ -92,6 +95,15 @@ final class CompanionWindow {
         panel.setFrame(Self.frame(position: config.companionPosition, in: screen.visibleFrame), display: false)
         placeBed(StripLayout(width: Self.size.width, position: config.companionPosition))
         panel.orderFrontRegardless()
+    }
+
+    /// `color` as it looks in the panel's appearance (light or dark).
+    func resolve(_ color: NSColor) -> CGColor {
+        var resolved = color.cgColor
+        (panel.contentView?.effectiveAppearance ?? NSApp.effectiveAppearance).performAsCurrentDrawingAppearance {
+            resolved = color.cgColor
+        }
+        return resolved
     }
 
     /// Draws the bed at the strip's inner end (again when the corner changes).

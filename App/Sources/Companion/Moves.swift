@@ -112,6 +112,15 @@ enum Moves {
         reason == "question" ? "?" : "!"
     }
 
+    /// Standing, catching its breath between activities; one breath.
+    static func resting(_ s: Skeleton = .standard) -> [Pose] {
+        var inhale = Pose.standing
+        inhale.lean = -0.04
+        inhale.shoulderBack -= 0.06
+        inhale.shoulderFront += 0.06
+        return [.standing, inhale, .standing]
+    }
+
     // MARK: Bed
 
     /// Seconds per breath asleep, and per rising *z*.
