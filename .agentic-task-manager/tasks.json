@@ -5054,7 +5054,7 @@
       "description": "The character as a Core Animation skeleton (`doc/design/desktop-companion.md` › The character › Rig).\n\n## Change\n- `App/Sources/Companion/StickFigureLayer.swift`: a `CALayer` tree of 10 bones (torso at the hips as root, head circle, upper arms, forearms, thighs, shins), each a `CAShapeLayer` line with its `anchorPoint` at its joint. Stroke in the label color, updated on appearance change.\n- `Pose`: hip height plus one angle per joint; `apply(_ pose:)` sets them without animation; a few named poses (`standing`, `sitting`).\n- `animate(_ poses: [Pose], duration:, repeat:)`: one `CAKeyframeAnimation` per joint on `transform.rotation.z` (and the hips' `position.y`), shared `keyTimes`, `calculationMode` discrete at 12 steps/s by default.\n- Show the standing figure in the panel.\n\n## Tests\n- App test: joint end positions for `standing` (feet on the floor, head on top) and that `apply` sets every bone.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-128"
       ],
@@ -5064,11 +5064,22 @@
         "App/Tests/StickFigureTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T07:53:59Z",
+      "updated_at": "2026-10-31T07:56:17Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "started_at": "2026-10-31T07:53:59Z",
-      "started_by": "claude:6baf63b2"
+      "started_by": "claude:6baf63b2",
+      "commit": "22a0c6727423177de5791330426f934a20c98026",
+      "completed_at": "2026-10-31T07:56:17Z",
+      "completed_by": "claude:6baf63b2",
+      "notes": [
+        {
+          "at": "2026-10-31T07:56:17Z",
+          "kind": "outcome",
+          "text": "Zero-size joint layers (11 bones) with `Pose` joint angles; `Skeleton.points` does the same forward kinematics for tests; `animate` plays per-joint keyframes, discrete at 12 fps by default; label-colored strokes follow the appearance.",
+          "by": "claude:6baf63b2"
+        }
+      ]
     },
     {
       "id": "T-130",
@@ -5083,7 +5094,7 @@
       "description": "Walking along the strip (`doc/design/desktop-companion.md` › Animations › Walk).\n\n## Change\n- The 8 poses: contact, down, passing, up, then mirrored; hips lowest at down, highest at up; about 1 s per cycle.\n- Horizontal travel matched to stride × cadence so feet don't slide; turns around (flips) at the strip's ends.\n- A `walk(to x:)` and a `stroll(for seconds:)` the scene controller can call.\n\n## Tests\n- App test: the poses' feet stay on the floor line at contact; travel per cycle equals two strides.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-129"
       ],
@@ -5092,9 +5103,11 @@
         "App/Tests/StickFigureTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:56:51Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:6baf63b2",
+      "started_at": "2026-10-31T07:56:51Z",
+      "started_by": "claude:6baf63b2"
     },
     {
       "id": "T-131",

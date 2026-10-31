@@ -94,6 +94,73 @@ final class StickFigureTests: XCTestCase {
         XCTAssertEqual(rotation?.repeatCount, .infinity)
     }
 
+    // MARK: Walk
+
+    func testTheWalkKeepsAFootOnTheFloor() {
+        let walk = Moves.walk()
+        XCTAssertEqual(walk.count, 9, "8 poses, then the first again")
+        XCTAssertEqual(walk.first, walk.last)
+        for (i, pose) in walk.enumerated() {
+            let p = s.points(pose)
+            let lower = min(p.footBack.y, p.footFront.y)
+            // On the floor, or up on the toes (at most a point) in the up poses.
+            XCTAssertGreaterThanOrEqual(lower, -0.001, "pose \(i) doesn't sink into the floor")
+            XCTAssertLessThanOrEqual(lower, 1, "pose \(i) keeps a foot down")
+        }
+        // At contact both feet touch the floor.
+        let contact = s.points(walk[0])
+        XCTAssertEqual(contact.footBack.y, contact.footFront.y, accuracy: 1.5)
+        XCTAssertGreaterThan(contact.footFront.x, contact.footBack.x)
+    }
+
+    func testTheSecondStepMirrorsTheFirst() {
+        let walk = Moves.walk()
+        for i in 0..<4 { XCTAssertEqual(walk[i + 4], walk[i].mirrored) }
+    }
+
+    func testTravelPerCycleIsTwoStrides() {
+        XCTAssertGreaterThan(Moves.stride(), 5)
+        XCTAssertEqual(Moves.walkSpeed() * CGFloat(Moves.walkCycle), 2 * Moves.stride(), accuracy: 0.001)
+    }
+
+    func testWalkingTurnsTowardTheTargetAndTravels() {
+        let figure = StickFigure()
+        figure.layer.position.x = 100
+        figure.walk(to: 40)
+        XCTAssertEqual(figure.facing, .left)
+        XCTAssertTrue(figure.isAnimating)
+        XCTAssertNotNil(figure.layer.animation(forKey: StickFigure.travelKey))
+        XCTAssertEqual(figure.layer.position.x, 40, "the model is at the target; the animation gets it there")
+        figure.walk(to: 200)
+        XCTAssertEqual(figure.facing, .right)
+        figure.stop()
+        XCTAssertNil(figure.layer.animation(forKey: StickFigure.travelKey))
+        XCTAssertFalse(figure.isAnimating)
+    }
+
+    func testAStoppedWalkDoesNotReportArriving() {
+        let figure = StickFigure()
+        figure.layer.position.x = 0
+        var arrived = false
+        figure.walk(to: 100) { arrived = true }
+        figure.stop()
+        let moment = expectation(description: "a moment")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { moment.fulfill() }
+        wait(for: [moment], timeout: 1)
+        XCTAssertFalse(arrived)
+    }
+
+    func testStrollTargetsAreFarEnoughAndInRange() {
+        let range: ClosedRange<CGFloat> = 20...200
+        for x in stride(from: CGFloat(20), through: 200, by: 30) {
+            for r in stride(from: 0.0, to: 1.0, by: 0.1) {
+                let target = StickFigure.strollTarget(from: x, in: range, random: r)
+                XCTAssertTrue(range.contains(target), "\(target) in range from \(x)")
+                XCTAssertGreaterThanOrEqual(abs(target - x), 60 - 0.001, "from \(x) with \(r)")
+            }
+        }
+    }
+
     func testFacingLeftFlipsTheFigure() {
         let figure = StickFigure()
         figure.facing = .left

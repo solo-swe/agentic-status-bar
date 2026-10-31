@@ -30,8 +30,8 @@ struct Pose: Equatable, Sendable {
     /// Sitting on something `seatHeight` points high, thighs level, shins hanging, hands on the knees.
     static func sitting(seatHeight: CGFloat, skeleton: Skeleton = .standard) -> Pose {
         Pose(
-            hipY: seatHeight - skeleton.legLength, lean: 0.1, shoulderBack: 0.5, elbowBack: 0.4,
-            shoulderFront: 0.6, elbowFront: 0.4, hipBack: .pi / 2, kneeBack: -.pi / 2, hipFront: .pi / 2,
+            hipY: seatHeight - skeleton.legLength, lean: 0.1, shoulderBack: 0.25, elbowBack: 0.9,
+            shoulderFront: 0.35, elbowFront: 0.9, hipBack: .pi / 2, kneeBack: -.pi / 2, hipFront: .pi / 2,
             kneeFront: -.pi / 2)
     }
 

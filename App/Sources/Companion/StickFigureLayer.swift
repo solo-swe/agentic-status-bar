@@ -158,12 +158,59 @@ final class StickFigure {
         bones[.hips]?.add(keyframe("position", frames.map { NSValue(point: hipsPosition($0)) }), forKey: Self.moveKey + ".position")
     }
 
-    /// Stops the current move; the figure holds the model pose.
+    /// Stops the current move and any travel, and cancels callbacks waiting on them (`after`); the figure
+    /// holds the model pose where it is on screen.
     func stop() {
+        generation += 1
         for joint in bones.values {
             joint.removeAnimation(forKey: Self.moveKey)
             joint.removeAnimation(forKey: Self.moveKey + ".position")
         }
+        if layer.animation(forKey: Self.travelKey) != nil {
+            let x = presentedX
+            withoutActions { layer.position.x = x }
+            layer.removeAnimation(forKey: Self.travelKey)
+        }
+    }
+
+    /// Counts `stop` calls, so a callback can tell that its move was replaced.
+    private(set) var generation = 0
+    static let travelKey = "travel"
+
+    /// Where the figure is along the strip right now (mid-walk too).
+    var presentedX: CGFloat { (layer.presentation() ?? layer).position.x }
+
+    /// Runs `block` after `seconds`, unless the figure was stopped (or given another move) in between.
+    func after(_ seconds: TimeInterval, _ block: @escaping @MainActor () -> Void) {
+        let token = generation
+        DispatchQueue.main.asyncAfter(deadline: .now() + seconds) { [weak self] in
+            MainActor.assumeIsolated {
+                guard let self, self.generation == token else { return }
+                block()
+            }
+        }
+    }
+
+    /// Moves the figure along the strip to `x` at `speed` points a second, then runs `done` (unless stopped).
+    func travel(to x: CGFloat, speed: CGFloat, done: @escaping @MainActor () -> Void) {
+        let from = presentedX
+        let duration = CFTimeInterval(abs(x - from) / max(speed, 1))
+        let token = generation
+        CATransaction.begin()
+        CATransaction.setCompletionBlock { [weak self] in
+            MainActor.assumeIsolated {
+                guard let self, self.generation == token else { return }
+                done()
+            }
+        }
+        let a = CABasicAnimation(keyPath: "position.x")
+        a.fromValue = from
+        a.toValue = x
+        a.duration = duration
+        a.timingFunction = CAMediaTimingFunction(name: .linear)
+        withoutActions { layer.position.x = x }
+        layer.add(a, forKey: Self.travelKey)
+        CATransaction.commit()
     }
 
     /// Whether a move is playing.
