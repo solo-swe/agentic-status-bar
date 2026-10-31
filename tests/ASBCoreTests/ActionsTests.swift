@@ -184,6 +184,12 @@ private struct Fixture {
     #expect(text.hasSuffix("icon_idle=moon.zzz\ncolor_busy=#000000\nicon=bolt\n"))
 }
 
+@Test func theDefaultConfigListsTheCompanionKeys() {
+    let text = Actions.defaultConfig(Config.parse("companion=1\ncompanion_position=top-left"))
+    #expect(text.contains("\ncompanion=1\ncompanion_position=top-left\ncompanion_over_fullscreen=0\n"))
+    #expect(Config.parse(text) == Config.parse("companion=1\ncompanion_position=top-left"))
+}
+
 @Test func theSwiftBarLoginActionIsGone() throws {
     let f = try Fixture()
     f.perform("login")

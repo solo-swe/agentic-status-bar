@@ -9,7 +9,11 @@ public struct Config: Equatable, Sendable {
         "show_interactive", "show_headless", "show_subagents", "show_ide", "stale_minutes", "use_registry",
         "instant_refresh", "icon", "store_prompt_preview", "state_dir", "theme",
         "notify_waiting", "notify_idle", "notify_delay_seconds", "notify_sound", "debug_hook_log",
+        "companion", "companion_position", "companion_over_fullscreen",
     ] + themeStates.map { "icon_\($0)" } + themeStates.map { "color_\($0)" }
+
+    /// The screen corners the desktop companion can sit in (doc/design/desktop-companion.md).
+    public static let companionPositions = ["bottom-right", "bottom-left", "top-right", "top-left"]
 
     public var showInteractive = true
     public var showHeadless = true
@@ -36,6 +40,10 @@ public struct Config: Equatable, Sendable {
     public var notifySound = true
     /// Debugging: `asb hook` appends every payload it receives to `HookLog.fileName` in the state dir.
     public var debugHookLog = false
+    /// The desktop companion: shown or not, the corner it sits in, and whether it stays over full-screen apps.
+    public var companion = false
+    public var companionPosition = "bottom-right"
+    public var companionOverFullscreen = false
 
     public init() {}
 
@@ -69,6 +77,7 @@ public struct Config: Equatable, Sendable {
             let parts = value.split(separator: ",", omittingEmptySubsequences: false)
             return (1...2).contains(parts.count) && parts.allSatisfy(isHexColor)
         }
+        if key == "companion_position" { return companionPositions.contains(value) }
         return value.unicodeScalars.allSatisfy { scalar in
             scalar.isASCII && (CharacterSet.alphanumerics.contains(scalar) || "_./~-".unicodeScalars.contains(scalar))
         }
@@ -97,6 +106,9 @@ public struct Config: Equatable, Sendable {
         case "notify_delay_seconds": if let n = Int(value), n >= 0 { notifyDelaySeconds = n }
         case "notify_sound": notifySound = on
         case "debug_hook_log": debugHookLog = on
+        case "companion": companion = on
+        case "companion_position": companionPosition = value
+        case "companion_over_fullscreen": companionOverFullscreen = on
         default:
             if key.hasPrefix("icon_") {
                 iconOverrides[String(key.dropFirst(5))] = value.isEmpty ? nil : value

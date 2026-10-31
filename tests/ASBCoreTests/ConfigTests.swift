@@ -27,6 +27,25 @@ private func tempFile(_ name: String = "config") -> String {
     #expect(Config.parse("notify_delay_seconds=soon\n").notifyDelaySeconds == 10)
 }
 
+@Test func companionKeys() throws {
+    let defaults = Config.parse(nil)
+    #expect(!defaults.companion && defaults.companionPosition == "bottom-right" && !defaults.companionOverFullscreen)
+    let config = Config.parse("companion=1\ncompanion_position=top-left\ncompanion_over_fullscreen=1\n")
+    #expect(config.companion && config.companionPosition == "top-left" && config.companionOverFullscreen)
+    for position in Config.companionPositions {
+        #expect(Config.parse("companion_position=\(position)\n").companionPosition == position)
+    }
+    #expect(Config.parse("companion_position=middle\n").companionPosition == "bottom-right")
+
+    let file = tempFile()
+    #expect(try Config.set("companion", "1", in: file))
+    #expect(try Config.set("companion_position", "top-right", in: file))
+    #expect(try Config.set("companion_over_fullscreen", "1", in: file))
+    #expect(try !Config.set("companion_position", "center", in: file))
+    let saved = Config.parse(try String(contentsOfFile: file, encoding: .utf8))
+    #expect(saved.companion && saved.companionPosition == "top-right" && saved.companionOverFullscreen)
+}
+
 @Test func readsOverridesAndSkipsComments() {
     let config = Config.parse("stale_minutes=10\n# a comment\nicon=bolt\nstate_dir=~/agents\nshow_headless=0\n")
     #expect(config.staleMinutes == 10)

@@ -197,6 +197,12 @@ public struct Actions {
             notify_delay_seconds=\(c.notifyDelaySeconds)
             notify_sound=\(flag(c.notifySound))
 
+            # Desktop companion: shown, its corner (bottom-right, bottom-left, top-right, top-left),
+            # and whether it stays visible over full-screen apps.
+            companion=\(flag(c.companion))
+            companion_position=\(c.companionPosition)
+            companion_over_fullscreen=\(flag(c.companionOverFullscreen))
+
             # Theme: default, monochrome or high_contrast.
             theme=\(c.theme)
             # Override the theme for one state (waiting, idle, uncertain, busy, subagents,
