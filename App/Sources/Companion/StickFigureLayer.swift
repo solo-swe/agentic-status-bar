@@ -149,14 +149,19 @@ final class StickFigure {
         bones[.hips]?.position = hipsPosition(p)
     }
 
+    /// Still frames a second moves are cut into: a hand-drawn look, and less work for the render server.
+    /// 12 normally, 6 in Low Power Mode.
+    var frameRate: Double = 12
+
     /// Plays `keyframes`, evenly spaced over `duration` seconds and eased between each pair. For a loop
-    /// (`repeats`), end with the first pose again. With `fps`, the move is cut into that many still
-    /// frames a second (a hand-drawn look, and less work for the render server); nil plays it smoothly.
+    /// (`repeats`), end with the first pose again. The move is cut into `frameRate` still frames a
+    /// second, unless `smooth` (slow moves such as breathing, where steps would show).
     /// The figure keeps the last pose afterwards, or the first one when a loop is stopped.
-    func animate(_ keyframes: [Pose], duration: CFTimeInterval, repeats: Bool = false, fps: Double? = 12) {
+    func animate(_ keyframes: [Pose], duration: CFTimeInterval, repeats: Bool = false, smooth: Bool = false) {
         guard let first = keyframes.first, let last = keyframes.last else { return }
         stop()
         withoutActions { setModel(repeats ? first : last) }
+        let fps: Double? = smooth ? nil : frameRate
         let frames: [Pose]
         let keyTimes: [NSNumber]
         if let fps {

@@ -139,11 +139,13 @@ be fun but crowded and costly. That could come later, as small followers.
 
 Rules (APIs from Apple's docs [12]–[15]):
 
-- **Stop when unseen.** Pause all animation (`layer.speed = 0`) when the panel's occlusion state isn't `.visible`
-  [12], when the displays sleep (`NSWorkspace.screensDidSleepNotification`) [14], and when the screen locks (the
-  `com.apple.screenIsLocked` distributed notification, undocumented but widely used).
-- **Low Power Mode.** On `NSProcessInfoPowerStateDidChange`, read `ProcessInfo.isLowPowerModeEnabled` [13]. Walk at
-  half rate, or show still poses.
+- **Stop when unseen.** Stop everything (animations, props and the routine's timers) when the panel's occlusion
+  state isn't `.visible` [12], when the displays sleep (`NSWorkspace.screensDidSleepNotification`) [14], and when
+  the screen locks (the `com.apple.screenIsLocked` distributed notification, undocumented but widely used); play the
+  current scene again from the start when it can be seen. (Freezing with `layer.speed = 0` would leave the timers
+  running.) Built: `CompanionEnergy`, `CompanionEnergyWatcher`.
+- **Low Power Mode.** On `NSProcessInfoPowerStateDidChange`, read `ProcessInfo.isLowPowerModeEnabled` [13]. Moves at
+  6 still frames a second instead of 12, and twice as long rests between activities.
 - **Reduce Motion.** With `NSWorkspace.accessibilityDisplayShouldReduceMotion` set [15], show one still pose per
   state, swapped on change.
 - **No App Nap opt-out.** Don't call `beginActivity`; napping is fine for a decoration.
@@ -152,6 +154,24 @@ Rules (APIs from Apple's docs [12]–[15]):
   except a slow *zzz* loop.
 - **Budget.** Averaged over a minute: under 1 % CPU walking and about 0 % asleep or hidden, measured with
   `top -pid` and Activity Monitor's Energy tab on an Apple-silicon Mac. The measurement goes in this document.
+
+### Measured (2026-10-31)
+
+The app's CPU over 60 s (`top -l 2 -s 60 -pid <pid>`, CPU time used in the minute), debug build, MacBook Air
+(Apple silicon), macOS 26.5, medium size (1.5×), with the halo. Each scene ran against a one-session fixture
+(`ASB_CONFIG`, `ASB_STATE_DIR` passed through `tests/app.sh --run`), so nothing else changed the snapshot.
+
+| Scene | CPU time in 60 s | Average |
+| --- | --- | --- |
+| Companion off (baseline) | 0.19 s | 0.3 % |
+| Busy (the workout routine) | 0.20 s | 0.3 % |
+| Waiting (the wave loop) | 0.19 s | 0.3 % |
+| Idle, live sessions (walk to bed, then asleep) | 0.54 s | 0.9 %; 0.4 % once asleep |
+
+The companion adds no measurable CPU to the app: the render server plays the keyframes, and the controller only
+runs code when a scene or activity changes. The baseline is the app's own refresh (every 5 s). The render server's
+work (WindowServer) isn't in these numbers; Activity Monitor showed no change in its energy impact with the
+companion on, but that is hard to separate from other windows. The halo stays: no cost showed up.
 
 Etiquette: **off by default** (Settings and the first-run window offer it). It's click-through except on the figure
 itself, never covers more than its strip, can be hidden from the app menu in one click, and never steals focus or

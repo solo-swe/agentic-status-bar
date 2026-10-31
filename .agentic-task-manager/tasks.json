@@ -5293,7 +5293,7 @@
       "description": "Drive the character from the sessions' state (`doc/design/desktop-companion.md` › State → animation, Busy routine).\n\n## Change\n- `CompanionScene`: a pure function from `Snapshot` (header state, the waiting session's reason) to a scene: `busy`, `waiting(reason)`, `idle`, `none`, and placeholders for the states T-136 adds.\n- `CompanionController` observes `SessionStore.snapshot` like `StatusItemController` and changes the scene only when it changes; every change blends through `standing` in about 0.3 s.\n- **Busy routine:** one activity (walk, weight lifting, push-ups, jumping jacks, pull-ups) for 8–15 s, a 4–8 s rest (stand, slow breath), then a different random one; never the same twice in a row. The random source is injectable for tests.\n\n## Tests\n- App tests: the mapping for every header state; the routine never repeats an activity and keeps its durations in range.\n- **Milestone:** check it live with the user in the dev build (enable `companion`).",
       "requirements": [],
       "use_cases": [],
-      "status": "in_review",
+      "status": "done",
       "dependencies": [
         "T-130",
         "T-131",
@@ -5308,12 +5308,12 @@
         "App/Tests/CompanionSceneTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T08:30:42Z",
+      "updated_at": "2026-10-31T08:39:01Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "started_at": "2026-10-31T08:13:52Z",
       "started_by": "claude:6baf63b2",
-      "commit": "45fa4c9eab30119b5b94dd3b8994cc9b35a10006",
+      "commit": "2051880e4e5d9b6128f3a52c3ccb7e017f61e72d",
       "review_requested_at": "2026-10-31T08:16:54Z",
       "notes": [
         {
@@ -5321,8 +5321,22 @@
           "kind": "review",
           "text": "Live check in the dev build with `companion=1`: busy runs the calm routine (walk, lift, push-ups, jumping jacks, pull-ups with rests), waiting waves with **!**/**?**, idle sleeps in bed, no sessions sits on the bed. Also check the corner switch moves bed and figure.",
           "by": "claude:6baf63b2"
+        },
+        {
+          "at": "2026-10-31T08:39:01Z",
+          "kind": "outcome",
+          "text": "Approved live: scenes follow the menu-bar header (waiting, idle, uncertain, busy); calm busy routine; bolder lines with a contrasting halo, bigger z’s, `companion_color` and `companion_size` (medium 1.5× default) added in review.",
+          "by": "claude:6baf63b2"
         }
-      ]
+      ],
+      "reviews": [
+        {
+          "from": "2026-10-31T08:16:54Z",
+          "to": "2026-10-31T08:39:01Z"
+        }
+      ],
+      "completed_at": "2026-10-31T08:39:01Z",
+      "completed_by": "claude:6baf63b2"
     },
     {
       "id": "T-136",
@@ -5365,7 +5379,7 @@
       "description": "Keep it cheap (`doc/design/desktop-companion.md` › Energy and etiquette).\n\n## Change\n- Pause all animation (`layer.speed = 0`) when the panel isn't visible (`didChangeOcclusionStateNotification`), when displays sleep (`NSWorkspace.screensDidSleepNotification` / `screensDidWake`), and while the screen is locked (`com.apple.screenIsLocked` / `screenIsUnlocked`).\n- Low Power Mode (`NSProcessInfoPowerStateDidChange`, then `isLowPowerModeEnabled`): longer rests, half rate.\n- Reduce Motion (`accessibilityDisplayShouldReduceMotion` and its change notification): one still pose per scene.\n- No `beginActivity`.\n\n## Tests\n- App tests with injected notifications: paused when occluded, locked or asleep; still poses under Reduce Motion.\n- Measure CPU over a minute (`top -pid`) for busy, waiting, idle and hidden on an Apple-silicon Mac; record the numbers in the design doc. Budget: under 1 % busy, about 0 % idle or hidden.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-135"
       ],
@@ -5375,7 +5389,7 @@
         "doc/design/desktop-companion.md"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T08:31:00Z",
+      "updated_at": "2026-10-31T08:39:01Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "notes": [
@@ -5385,7 +5399,9 @@
           "text": "The halo (`shadowColor`/`shadowOpacity` on the figure and bed layers, added in T-135 review) needs an offscreen pass per frame: measure with and without it, and give it a `shadowPath` or drop it if it busts the budget.",
           "by": "claude:6baf63b2"
         }
-      ]
+      ],
+      "started_at": "2026-10-31T08:39:01Z",
+      "started_by": "claude:6baf63b2"
     },
     {
       "id": "T-138",
@@ -5410,9 +5426,17 @@
         "App/Tests/CompanionWindowTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T08:36:42Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:6baf63b2",
+      "notes": [
+        {
+          "at": "2026-10-31T08:36:42Z",
+          "kind": "note",
+          "text": "Since T-135 review the scene is scaled by `companion_size` (`CompanionWindow.scale`, 1×/1.5×/2×): convert mouse points by dividing by the scale before hit-testing the figure.",
+          "by": "claude:6baf63b2"
+        }
+      ]
     },
     {
       "id": "T-139",
@@ -5441,9 +5465,17 @@
         "App/Tests/HelpTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T08:30:55Z",
+      "updated_at": "2026-10-31T08:36:43Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:6baf63b2"
+      "updated_by": "claude:6baf63b2",
+      "notes": [
+        {
+          "at": "2026-10-31T08:36:43Z",
+          "kind": "note",
+          "text": "Also a size picker for `companion_size` (Small, Medium, Large; medium is the default), added during the T-135 review.",
+          "by": "claude:6baf63b2"
+        }
+      ]
     },
     {
       "id": "T-140",

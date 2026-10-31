@@ -12,20 +12,36 @@ final class CompanionController {
     /// The scene playing; nil while the companion is hidden.
     private(set) var scene: CompanionScene?
     private var playedLayout: StripLayout?
+    private var watcher: CompanionEnergyWatcher?
 
     /// Seconds to blend into standing before a new scene.
     static let blend: CFTimeInterval = 0.3
 
     var figure: StickFigure { window.figure }
     private var layout: StripLayout { window.layout }
+    var energy: CompanionEnergy { watcher?.energy ?? CompanionEnergy() }
 
     init(store: SessionStore, random: @escaping () -> Double = { .random(in: 0..<1) }) {
         self.store = store
         routine = BusyRoutine(random: random)
         window = CompanionWindow(store: store)
+        // Visible until the window server says otherwise (it reports when the panel is covered).
+        var initial = CompanionEnergy.current(panel: window.panel)
+        initial.visible = true
+        watcher = CompanionEnergyWatcher(panel: window.panel, initial: initial) { [weak self] energy in
+            self?.energyChanged(energy)
+        }
+        figure.frameRate = initial.frameRate
         window.onChange = { [weak self] in self?.refresh() }
         refresh()
         observe()
+    }
+
+    /// Plays the scene again for the new energy state (or stops it).
+    private func energyChanged(_ energy: CompanionEnergy) {
+        figure.frameRate = energy.frameRate
+        scene = nil
+        refresh()
     }
 
     private func observe() {
@@ -41,8 +57,8 @@ final class CompanionController {
 
     /// Plays the scene for the current snapshot if it changed (or the strip moved to another corner).
     func refresh() {
-        guard window.panel.isVisible else {
-            // Hidden: nothing plays.
+        guard window.panel.isVisible, energy.shouldAnimate else {
+            // Hidden, covered, displays asleep or screen locked: nothing plays, no timers run.
             figure.stop()
             figure.hideProps()
             scene = nil
@@ -56,8 +72,40 @@ final class CompanionController {
         scene = next
         playedLayout = layout
         figure.hideProps()
+        if energy.stillPoses {
+            playStill(next)
+            return
+        }
         figure.animate([figure.presentedPose(), .standing], duration: Self.blend)
         figure.after(Self.blend) { [weak self] in self?.play(next) }
+    }
+
+    /// Reduce Motion: one still pose per scene, in its place, no walking.
+    private func playStill(_ scene: CompanionScene) {
+        figure.stop()
+        func place(_ x: CGFloat, facing: StickFigure.Facing) {
+            figure.withoutActions { figure.layer.position.x = x }
+            figure.facing = facing
+        }
+        switch scene {
+        case .busy:
+            let range = layout.walkRange
+            place((range.lowerBound + range.upperBound) / 2, facing: .right)
+            figure.apply(Moves.weightLifting(figure.skeleton).loop[2])
+            figure.show(.barbell)
+        case .waiting(let reason):
+            figure.apply(Moves.wave(figure.skeleton)[2])
+            figure.say(Moves.bubbleGlyph(reason: reason), color: waitingColor())
+        case .idle:
+            place(layout.restX, facing: layout.bedFacing)
+            figure.apply(Moves.lying(figure.skeleton))
+            figure.showStillZzz()
+        case .none, .muted:
+            place(layout.restX, facing: layout.bedFacing)
+            figure.apply(Moves.sittingOnBed(figure.skeleton))
+        case .uncertain, .warning:
+            figure.apply(.standing)
+        }
     }
 
     private func play(_ scene: CompanionScene) {
@@ -95,8 +143,8 @@ final class CompanionController {
 
     /// Stands catching its breath for a few seconds, then the next move.
     private func rest() {
-        figure.animate(Moves.resting(figure.skeleton), duration: Moves.breath, repeats: true, fps: nil)
-        figure.after(routine.rest()) { [weak self] in self?.nextMove() }
+        figure.animate(Moves.resting(figure.skeleton), duration: Moves.breath, repeats: true, smooth: true)
+        figure.after(routine.rest(longer: energy.lowPower)) { [weak self] in self?.nextMove() }
     }
 
     /// The theme's waiting color, in the current appearance.

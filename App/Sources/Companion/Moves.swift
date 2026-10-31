@@ -273,7 +273,7 @@ extension StickFigure {
                 guard let self else { return }
                 show(.zzz)
                 // Breathing is slow: smooth, not cut into frames.
-                animate(Moves.breathing(skeleton), duration: Moves.breath, repeats: true, fps: nil)
+                animate(Moves.breathing(skeleton), duration: Moves.breath, repeats: true, smooth: true)
             }
         }
     }

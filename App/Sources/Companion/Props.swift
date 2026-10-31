@@ -136,6 +136,20 @@ extension StickFigure {
     /// Text is rendered sharp enough for a Retina screen at the largest companion size (2×).
     static let textScale: CGFloat = 4
 
+    /// The *z*s standing still along their path (Reduce Motion).
+    func showStillZzz() {
+        show(.zzz)
+        let zs = props[.zzz]?.sublayers ?? []
+        withoutActions {
+            for (i, z) in zs.enumerated() {
+                z.removeAllAnimations()
+                z.opacity = 1
+                let t = CGFloat(i + 1) / CGFloat(zs.count + 1)
+                z.position = CGPoint(x: 6 + t * (Self.zzzSize.width - 15), y: 6 + t * (Self.zzzSize.height - 15))
+            }
+        }
+    }
+
     /// The area the *z*s rise through, from above the sleeping head.
     static let zzzSize = CGSize(width: 34, height: 32)
 
