@@ -2,6 +2,22 @@ import AppKit
 import ASBCore
 import Observation
 
+/// A menu item that runs a closure.
+final class ClosureMenuItem: NSMenuItem {
+    private let handler: () -> Void
+
+    init(_ title: String, _ handler: @escaping () -> Void) {
+        self.handler = handler
+        super.init(title: title, action: #selector(run), keyEquivalent: "")
+        target = self
+    }
+
+    @available(*, unavailable)
+    required init(coder: NSCoder) { fatalError("not used") }
+
+    @objc private func run() { handler() }
+}
+
 /// Drives the companion from the sessions' state: picks the scene (`CompanionScene`) for each snapshot
 /// and plays it, blending through standing between scenes (doc/design/desktop-companion.md).
 @MainActor
@@ -21,10 +37,20 @@ final class CompanionController {
     private var layout: StripLayout { window.layout }
     var energy: CompanionEnergy { watcher?.energy ?? CompanionEnergy() }
 
-    init(store: SessionStore, random: @escaping () -> Double = { .random(in: 0..<1) }) {
+    private let showSessions: () -> Void
+    private let openSettings: () -> Void
+
+    init(
+        store: SessionStore, showSessions: @escaping () -> Void = {}, openSettings: @escaping () -> Void = {},
+        random: @escaping () -> Double = { .random(in: 0..<1) }
+    ) {
         self.store = store
+        self.showSessions = showSessions
+        self.openSettings = openSettings
         routine = BusyRoutine(random: random)
         window = CompanionWindow(store: store)
+        window.onClick = { [weak self] in self?.clicked() }
+        window.onRightClick = { [weak self] event, view in self?.showMenu(event, in: view) }
         // Visible until the window server says otherwise (it reports when the panel is covered).
         var initial = CompanionEnergy.current(panel: window.panel)
         initial.visible = true
@@ -115,6 +141,51 @@ final class CompanionController {
             figure.apply(Moves.holdingSign(figure.skeleton)[0])
             figure.show(.sign)
         }
+    }
+
+    // MARK: Mouse
+
+    /// What a click on the figure does.
+    enum ClickTarget: Equatable {
+        /// Bring the waiting session's terminal to the front.
+        case focus(sessionId: String)
+        /// Open the session list.
+        case sessions
+        /// Open Settings (a warning: usually the hooks).
+        case settings
+    }
+
+    static func clickTarget(_ snapshot: Snapshot?) -> ClickTarget {
+        guard let snapshot else { return .sessions }
+        switch snapshot.header.state {
+        case .warning:
+            return .settings
+        case .waiting:
+            // The first session waiting on you, if a click can focus it.
+            if let waiting = snapshot.sessions.first(where: { $0.shown == .waiting }), waiting.focusable {
+                return .focus(sessionId: waiting.sessionId)
+            }
+            return .sessions
+        default:
+            return .sessions
+        }
+    }
+
+    private func clicked() {
+        switch Self.clickTarget(store.snapshot) {
+        case .focus(let id): store.perform("focus", [id])
+        case .sessions: showSessions()
+        case .settings: openSettings()
+        }
+    }
+
+    private func showMenu(_ event: NSEvent, in view: NSView) {
+        let menu = NSMenu()
+        menu.addItem(ClosureMenuItem("Show Sessions") { [weak self] in self?.showSessions() })
+        menu.addItem(ClosureMenuItem("Hide Companion") { [weak self] in self?.store.set("companion", false) })
+        menu.addItem(.separator())
+        menu.addItem(ClosureMenuItem("Settings…") { [weak self] in self?.openSettings() })
+        NSMenu.popUpContextMenu(menu, with: event, for: view)
     }
 
     /// One follower per running subagent while working, up to `StickFigure.maxFollowers`.

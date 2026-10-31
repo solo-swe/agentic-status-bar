@@ -55,6 +55,46 @@ final class CompanionWindowTests: XCTestCase {
         XCTAssertTrue(dockBottom.contains(frame))
     }
 
+    func testADragSnapsToTheNearestCorner() {
+        let screen = dockBottom
+        XCTAssertEqual(CompanionWindow.nearestCorner(NSPoint(x: 1300, y: 100), in: screen), "bottom-right")
+        XCTAssertEqual(CompanionWindow.nearestCorner(NSPoint(x: 100, y: 100), in: screen), "bottom-left")
+        XCTAssertEqual(CompanionWindow.nearestCorner(NSPoint(x: 1300, y: 800), in: screen), "top-right")
+        XCTAssertEqual(CompanionWindow.nearestCorner(NSPoint(x: 100, y: 800), in: screen), "top-left")
+        XCTAssertEqual(CompanionWindow.nearestCorner(NSPoint(x: 2000, y: 700), in: dockLeft), "top-left", "the second screen's own halves")
+        for corner in ["bottom-right", "bottom-left", "top-right", "top-left"] {
+            let frame = CompanionWindow.frame(position: corner, in: screen)
+            XCTAssertEqual(CompanionWindow.nearestCorner(NSPoint(x: frame.midX, y: frame.midY), in: screen), corner)
+        }
+    }
+
+    func testTheHitAreaCoversTheFigureOnly() {
+        let standing = CompanionWindow.figureRect(x: 100, wide: false)
+        XCTAssertTrue(standing.contains(CGPoint(x: 100, y: CompanionWindow.floorY + 20)))
+        XCTAssertTrue(standing.contains(CGPoint(x: 100, y: CompanionWindow.floorY + Skeleton.standard.height)), "the head")
+        XCTAssertFalse(standing.contains(CGPoint(x: 130, y: 20)), "beside it, clicks go through")
+        XCTAssertFalse(standing.contains(CGPoint(x: 100, y: 1)), "below the floor")
+        let lying = CompanionWindow.figureRect(x: 100, wide: true)
+        XCTAssertTrue(lying.contains(CGPoint(x: 78, y: 14)), "the head on the pillow")
+        XCTAssertLessThan(standing.width * 2, CompanionWindow.size.width / 2, "a small part of the strip")
+    }
+
+    func testTheViewTellsAClickFromADrag() {
+        let view = CompanionView(frame: NSRect(x: 0, y: 0, width: 100, height: 60))
+        XCTAssertTrue(view.acceptsFirstMouse(for: nil), "the app is never active when you click it")
+        var clicks = 0
+        view.clicked = { clicks += 1 }
+        let event = try? XCTUnwrap(NSEvent.mouseEvent(
+            with: .leftMouseUp, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: 0, context: nil,
+            eventNumber: 0, clickCount: 1, pressure: 0))
+        if let event {
+            view.mouseDown(with: event)
+            view.mouseUp(with: event)
+        }
+        XCTAssertEqual(clicks, 1)
+        XCTAssertFalse(view.dragging)
+    }
+
     func testFullScreenLevelIsOptIn() {
         XCTAssertEqual(CompanionWindow.level(overFullscreen: false), .floating)
         XCTAssertEqual(CompanionWindow.level(overFullscreen: true), .screenSaver)

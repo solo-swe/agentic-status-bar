@@ -5351,7 +5351,7 @@
       "description": "The remaining states (`doc/design/desktop-companion.md` › State → animation).\n\n## Change\n- **Subagents:** the busy routine plus one tiny follower figure per running subagent (up to 3) that copies the main figure at a delay.\n- **Uncertain:** stands and scratches its head, with a **…** bubble.\n- **Muted** (only muted sessions): sits on the bed reading a small book; an occasional page turn.\n- **Warning** (hooks missing): holds up a small sign with a wrench.\n\n## Tests\n- App tests: `CompanionScene` mapping for each state; follower count capped at 3.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-135"
       ],
@@ -5362,7 +5362,7 @@
         "App/Tests/CompanionSceneTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T08:48:56Z",
+      "updated_at": "2026-10-31T08:53:35Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "notes": [
@@ -5371,10 +5371,19 @@
           "kind": "note",
           "text": "Update `HelpLegend.companion` in `App/Sources/HelpView.swift` (the \"No activity or warning\" and \"muted\" lines) and the README’s Desktop companion paragraph to the new poses.",
           "by": "claude:6baf63b2"
+        },
+        {
+          "at": "2026-10-31T08:53:35Z",
+          "kind": "outcome",
+          "text": "Up to three subagent followers copying the moves with a delay; uncertain scratches its head with a ••• bubble; muted reads a book on the bed; warning holds up a wrench sign; Reduce Motion stills for each; Help and README updated.",
+          "by": "claude:6baf63b2"
         }
       ],
       "started_at": "2026-10-31T08:48:56Z",
-      "started_by": "claude:6baf63b2"
+      "started_by": "claude:6baf63b2",
+      "commit": "ae747ec20c308bafb1750e115cc846765f311c31",
+      "completed_at": "2026-10-31T08:53:35Z",
+      "completed_by": "claude:6baf63b2"
     },
     {
       "id": "T-137",
@@ -5435,7 +5444,7 @@
       "description": "Let the figure itself take the mouse (`doc/design/desktop-companion.md` › Interaction).\n\n## Change\n- The panel stays click-through; a mouse-moved monitor turns `ignoresMouseEvents` off only while the cursor is over the figure's bounds.\n- **Click:** focuses the waiting session when it is focusable (`SessionStore.perform(\"focus\", …)`), else opens the session list (`StatusItemController.showPopover`).\n- **Drag:** moves the panel; on release it snaps to the nearest corner and saves `companion_position`.\n- **Right-click:** Hide companion (turns `companion` off), Settings….\n\n## Tests\n- App tests: nearest-corner snapping; the click target picked for waiting focusable, waiting not focusable, and other states.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-135"
       ],
@@ -5445,7 +5454,7 @@
         "App/Tests/CompanionWindowTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T08:36:42Z",
+      "updated_at": "2026-10-31T08:53:36Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "notes": [
@@ -5455,7 +5464,9 @@
           "text": "Since T-135 review the scene is scaled by `companion_size` (`CompanionWindow.scale`, 1×/1.5×/2×): convert mouse points by dividing by the scale before hit-testing the figure.",
           "by": "claude:6baf63b2"
         }
-      ]
+      ],
+      "started_at": "2026-10-31T08:53:36Z",
+      "started_by": "claude:6baf63b2"
     },
     {
       "id": "T-139",

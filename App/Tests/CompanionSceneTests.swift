@@ -53,6 +53,27 @@ final class CompanionSceneTests: XCTestCase {
         XCTAssertEqual(CompanionController.followers(.waiting(reason: nil)), 0)
     }
 
+    func testAClickFocusesTheWaitingSessionWhenItCan() {
+        var focusable = session(.waiting, reason: "permission")
+        focusable.focusable = true
+        let notFocusable = session(.waiting)
+        XCTAssertEqual(
+            CompanionController.clickTarget(snapshot(.waiting, [focusable, session(.busy)])), .focus(sessionId: focusable.sessionId))
+        XCTAssertEqual(CompanionController.clickTarget(snapshot(.waiting, [notFocusable])), .sessions)
+        XCTAssertEqual(CompanionController.clickTarget(snapshot(.warning, [focusable])), .settings, "a warning opens Settings")
+        XCTAssertEqual(CompanionController.clickTarget(snapshot(.busy, [session(.busy)])), .sessions)
+        XCTAssertEqual(CompanionController.clickTarget(snapshot(.idle, [session(.idle)])), .sessions)
+        XCTAssertEqual(CompanionController.clickTarget(nil), .sessions)
+    }
+
+    func testTheMenuItemsRunTheirAction() {
+        var ran = false
+        let item = ClosureMenuItem("Hide Companion") { ran = true }
+        XCTAssertNotNil(item.action)
+        _ = (item.target as AnyObject).perform(item.action)
+        XCTAssertTrue(ran)
+    }
+
     func testANewSubagentDoesNotRestartTheRoutine() {
         XCTAssertTrue(CompanionScene.busy(subagents: 0).sameMoves(as: .busy(subagents: 2)))
         XCTAssertFalse(CompanionScene.busy(subagents: 0).sameMoves(as: .idle))

@@ -27,7 +27,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MainMenuActions {
             openHelp: { [weak self] in self?.help.show() })
         notifier.start()
         store.start()
-        companion = CompanionController(store: store)
+        companion = CompanionController(
+            store: store,
+            showSessions: { [weak self] in
+                // The companion's panel never activates the app; the list needs it active to take the keyboard.
+                NSApp.activate()
+                self?.statusItem?.showPopover()
+            },
+            openSettings: { [weak self] in self?.settings.show() })
         firstRun.showIfNeeded()
         // For checking windows during development: open -a "Agentic Status Bar" --args -ShowSettingsOnLaunch YES
         // (or -ShowHelpOnLaunch YES).

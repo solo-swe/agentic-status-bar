@@ -103,7 +103,8 @@ struct HelpView: View {
                         }
                     }
                 }
-                Text("It never takes the focus or your clicks. It stops moving when it can't be seen, slows down in Low Power Mode, and holds still with Reduce Motion.")
+                Text("Click it to jump to the session waiting on you (or open the session list), drag it to another corner, or right-click it to hide it. Clicks anywhere else go through to what's behind it, and it never takes the focus.")
+                Text("It stops moving when it can't be seen, slows down in Low Power Mode, and holds still with Reduce Motion.")
                     .foregroundStyle(.secondary)
             }
             section("Notifications") {

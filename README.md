@@ -88,8 +88,10 @@ Turn on **Settings › Companion** for a small stick figure in a corner of your 
 shows: it works out while your sessions work (walking, weights, push-ups, jumping jacks and pull-ups, with rests in
 between, and a tiny follower for each running subagent), stops and waves with a **!** or **?** when one needs you,
 goes to bed when they're idle, scratches its head when one has gone quiet, holds up a wrench sign on a warning, reads
-on its bed when every session is muted, and sits on its bed when there are none. It is off by default, never takes the focus or your clicks, stops moving when it can't be
-seen, slows down in Low Power Mode and holds still with Reduce Motion. Choose its corner, size (small, medium or
+on its bed when every session is muted, and sits on its bed when there are none. Click it to jump to the session
+waiting on you (or open the session list), drag it to another corner, or right-click it to hide it; clicks anywhere
+else go through. It is off by default, never takes the focus, stops moving when it can't be seen, slows down in Low
+Power Mode and holds still with Reduce Motion. Choose its corner, size (small, medium or
 large), color, and whether it stays over full-screen apps.
 
 ## How it works

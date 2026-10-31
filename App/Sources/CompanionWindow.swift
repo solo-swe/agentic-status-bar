@@ -25,6 +25,10 @@ final class CompanionWindow {
     private var bed: CALayer?
     /// Called after the panel was shown, hidden or moved.
     var onChange: (() -> Void)?
+    /// A click on the figure, and a right-click (with its event and the view, for a menu).
+    var onClick: (() -> Void)?
+    var onRightClick: ((NSEvent, NSView) -> Void)?
+    private var monitors: [Any] = []
 
     private let store: SessionStore
     private var screenObserver: NSObjectProtocol?
@@ -40,8 +44,14 @@ final class CompanionWindow {
         contentLayer.addSublayer(figure.layer)
         if let view = panel.contentView as? CompanionView {
             view.appearanceChanged = { [weak self] view in self?.updateColors(view) }
+            view.clicked = { [weak self] in self?.onClick?() }
+            view.dragEnded = { [weak self] frame in self?.snap(frame) }
+            view.rightClicked = { [weak self, weak view] event in
+                if let view { self?.onRightClick?(event, view) }
+            }
             updateColors(view)
         }
+        watchMouse()
         screenObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
         ) { [weak self] _ in
@@ -146,6 +156,58 @@ final class CompanionWindow {
         }
     }
 
+    // MARK: Mouse
+
+    /// The panel takes the mouse only while it is over the figure; everywhere else clicks go through. Mouse
+    /// monitors need no Accessibility permission (only key monitors do).
+    private func watchMouse() {
+        panel.acceptsMouseMovedEvents = true
+        if let global = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved, handler: { [weak self] _ in
+            MainActor.assumeIsolated { self?.hover(NSEvent.mouseLocation) }
+        }) { monitors.append(global) }
+        // While the panel takes the mouse, its moves come to the app instead.
+        if let local = NSEvent.addLocalMonitorForEvents(matching: .mouseMoved, handler: { [weak self] event in
+            MainActor.assumeIsolated { self?.hover(NSEvent.mouseLocation) }
+            return event
+        }) { monitors.append(local) }
+    }
+
+    func hover(_ point: NSPoint) {
+        guard panel.isVisible, !((panel.contentView as? CompanionView)?.dragging ?? false) else { return }
+        let over = isOverFigure(point)
+        if panel.ignoresMouseEvents == over { panel.ignoresMouseEvents = !over }
+    }
+
+    /// Whether a screen point is on the figure (its hit area, in the panel's scaled drawing).
+    func isOverFigure(_ point: NSPoint) -> Bool {
+        let frame = panel.frame
+        guard frame.contains(point) else { return false }
+        let local = CGPoint(x: (point.x - frame.minX) / scale, y: (point.y - frame.minY) / scale)
+        return Self.figureRect(x: figure.presentedX, wide: abs(figure.pose.body) > 0.5).contains(local)
+    }
+
+    /// The figure's hit area in drawing units around its spot `x`: taller than wide, or wide while it lies
+    /// down (in bed, push-ups).
+    static func figureRect(x: CGFloat, wide: Bool) -> CGRect {
+        let half: CGFloat = wide ? 26 : 14
+        return CGRect(x: x - half, y: floorY, width: 2 * half, height: Skeleton.standard.height + 12)
+    }
+
+    /// After a drag: the corner nearest the panel's middle becomes `companion_position`, and the panel goes there.
+    private func snap(_ frame: NSRect) {
+        guard let screen = NSScreen.main else { return }
+        let corner = Self.nearestCorner(NSPoint(x: frame.midX, y: frame.midY), in: screen.visibleFrame)
+        store.set("companion_position", corner)
+        // Back into the corner even when it didn't change.
+        update()
+    }
+
+    static func nearestCorner(_ point: NSPoint, in visibleFrame: NSRect) -> String {
+        let vertical = point.y > visibleFrame.midY ? "top" : "bottom"
+        let horizontal = point.x < visibleFrame.midX ? "left" : "right"
+        return "\(vertical)-\(horizontal)"
+    }
+
     /// Points on screen per drawing unit for `companion_size`.
     static func scale(_ size: String) -> CGFloat {
         switch size {
@@ -171,12 +233,57 @@ final class CompanionWindow {
     }
 }
 
-/// The panel's content view: tells the companion when light or dark mode changes.
+/// The panel's content view: tells the companion when light or dark mode changes, and about clicks,
+/// drags and right-clicks on the figure (the panel only takes the mouse while it is over the figure).
 final class CompanionView: NSView {
     var appearanceChanged: ((NSView) -> Void)?
+    var clicked: (() -> Void)?
+    /// The drag ended with the panel's frame here.
+    var dragEnded: ((NSRect) -> Void)?
+    var rightClicked: ((NSEvent) -> Void)?
+    private(set) var dragging = false
+    private var dragStart: NSPoint?
+    private var originAtStart: NSPoint?
+
+    /// Points the mouse must move before a press counts as a drag.
+    static let dragThreshold: CGFloat = 3
 
     override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
         appearanceChanged?(self)
+    }
+
+    // The app is never active while you click the figure.
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    override func mouseDown(with event: NSEvent) {
+        dragStart = NSEvent.mouseLocation
+        originAtStart = window?.frame.origin
+        dragging = false
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        guard let start = dragStart, let origin = originAtStart, let window else { return }
+        let now = NSEvent.mouseLocation
+        let (dx, dy) = (now.x - start.x, now.y - start.y)
+        if !dragging, hypot(dx, dy) < Self.dragThreshold { return }
+        dragging = true
+        window.setFrameOrigin(NSPoint(x: origin.x + dx, y: origin.y + dy))
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        defer {
+            dragStart = nil
+            dragging = false
+        }
+        if dragging, let frame = window?.frame {
+            dragEnded?(frame)
+        } else {
+            clicked?()
+        }
+    }
+
+    override func rightMouseDown(with event: NSEvent) {
+        rightClicked?(event)
     }
 }
