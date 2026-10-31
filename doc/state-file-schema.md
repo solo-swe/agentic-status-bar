@@ -165,6 +165,7 @@ otherwise the default stays. Writers change one line and keep the others.
 | `companion` | `0` | `0` or `1`: the app shows the desktop companion (doc/design/desktop-companion.md) |
 | `companion_position` | `bottom-right` | `bottom-right`, `bottom-left`, `top-right`, `top-left` (others are rejected) |
 | `companion_over_fullscreen` | `0` | `0` or `1`: the companion stays visible over full-screen apps |
+| `companion_size` | `medium` | `small` (1×), `medium` (1.5×), `large` (2×) (others are rejected) |
 | `companion_color` | empty | `#RRGGBB`, or `#RRGGBB,#RRGGBB` (light, dark); empty: dark on a light desktop, light on a dark one |
 | `debug_hook_log` | `0` | `0` or `1`: `asb hook` appends every payload it receives, with the environment variables it reads and its parent pid, to `<state dir>/hook-payloads.jsonl` (one JSON object per line; nothing is appended once the file reaches 5 MB). For debugging; turn it off and delete the file afterwards |
 

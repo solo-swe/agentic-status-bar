@@ -43,6 +43,18 @@ final class CompanionWindowTests: XCTestCase {
         XCTAssertNotNil(panel.contentView?.layer)
     }
 
+    func testSizesScaleTheWholeStrip() {
+        XCTAssertEqual(CompanionWindow.scale("small"), 1)
+        XCTAssertEqual(CompanionWindow.scale("medium"), 1.5)
+        XCTAssertEqual(CompanionWindow.scale("large"), 2)
+        XCTAssertEqual(CompanionWindow.scale("other"), 1.5, "medium by default")
+        let big = NSSize(width: CompanionWindow.size.width * 2, height: CompanionWindow.size.height * 2)
+        let frame = CompanionWindow.frame(position: "top-left", in: dockBottom, size: big)
+        XCTAssertEqual(frame.size, big)
+        XCTAssertEqual(frame.maxY, dockBottom.maxY, "still just under the menu bar")
+        XCTAssertTrue(dockBottom.contains(frame))
+    }
+
     func testFullScreenLevelIsOptIn() {
         XCTAssertEqual(CompanionWindow.level(overFullscreen: false), .floating)
         XCTAssertEqual(CompanionWindow.level(overFullscreen: true), .screenSaver)

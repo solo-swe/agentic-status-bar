@@ -40,6 +40,9 @@ private func tempFile(_ name: String = "config") -> String {
     #expect(Config.parse("companion_color=#FF2D55\n").companionColor == "#FF2D55")
     #expect(Config.parse("companion_color=#111111,#EEEEEE\n").companionColor == "#111111,#EEEEEE")
     #expect(Config.parse("companion_color=pink\n").companionColor == "")
+    #expect(defaults.companionSize == "medium")
+    #expect(Config.parse("companion_size=large\n").companionSize == "large")
+    #expect(Config.parse("companion_size=huge\n").companionSize == "medium")
 
     let file = tempFile()
     #expect(try Config.set("companion", "1", in: file))

@@ -133,6 +133,9 @@ extension StickFigure {
         return container
     }
 
+    /// Text is rendered sharp enough for a Retina screen at the largest companion size (2×).
+    static let textScale: CGFloat = 4
+
     /// The area the *z*s rise through, from above the sleeping head.
     static let zzzSize = CGSize(width: 34, height: 32)
 
@@ -153,7 +156,7 @@ extension StickFigure {
             z.font = "Helvetica-Bold" as CFString
             z.alignmentMode = .center
             z.foregroundColor = color
-            z.contentsScale = 2
+            z.contentsScale = Self.textScale
             z.frame = CGRect(x: 0, y: 0, width: 18, height: 18)
             z.opacity = 0
             let rise = CABasicAnimation(keyPath: "position")
@@ -217,7 +220,7 @@ extension StickFigure {
         text.fontSize = 9
         text.font = "Helvetica-Bold" as CFString
         text.foregroundColor = CGColor(gray: 1, alpha: 1)
-        text.contentsScale = 2
+        text.contentsScale = Self.textScale
         container.addSublayer(shape)
         container.addSublayer(text)
         return container

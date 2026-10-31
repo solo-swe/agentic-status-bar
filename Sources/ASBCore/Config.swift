@@ -9,11 +9,13 @@ public struct Config: Equatable, Sendable {
         "show_interactive", "show_headless", "show_subagents", "show_ide", "stale_minutes", "use_registry",
         "instant_refresh", "icon", "store_prompt_preview", "state_dir", "theme",
         "notify_waiting", "notify_idle", "notify_delay_seconds", "notify_sound", "debug_hook_log",
-        "companion", "companion_position", "companion_over_fullscreen", "companion_color",
+        "companion", "companion_position", "companion_over_fullscreen", "companion_color", "companion_size",
     ] + themeStates.map { "icon_\($0)" } + themeStates.map { "color_\($0)" }
 
     /// The screen corners the desktop companion can sit in (doc/design/desktop-companion.md).
     public static let companionPositions = ["bottom-right", "bottom-left", "top-right", "top-left"]
+    /// The companion's sizes: 1×, 1.5× and 2× its drawing.
+    public static let companionSizes = ["small", "medium", "large"]
 
     public var showInteractive = true
     public var showHeadless = true
@@ -46,6 +48,7 @@ public struct Config: Equatable, Sendable {
     public var companionOverFullscreen = false
     /// The companion's color: `#RRGGBB` or a light,dark pair; "" = the label color (dark or light).
     public var companionColor = ""
+    public var companionSize = "medium"
 
     public init() {}
 
@@ -80,6 +83,7 @@ public struct Config: Equatable, Sendable {
             return (1...2).contains(parts.count) && parts.allSatisfy(isHexColor)
         }
         if key == "companion_position" { return companionPositions.contains(value) }
+        if key == "companion_size" { return companionSizes.contains(value) }
         return value.unicodeScalars.allSatisfy { scalar in
             scalar.isASCII && (CharacterSet.alphanumerics.contains(scalar) || "_./~-".unicodeScalars.contains(scalar))
         }
@@ -112,6 +116,7 @@ public struct Config: Equatable, Sendable {
         case "companion_position": companionPosition = value
         case "companion_over_fullscreen": companionOverFullscreen = on
         case "companion_color": companionColor = value
+        case "companion_size": companionSize = value
         default:
             if key.hasPrefix("icon_") {
                 iconOverrides[String(key.dropFirst(5))] = value.isEmpty ? nil : value

@@ -5308,12 +5308,12 @@
         "App/Tests/CompanionSceneTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T08:26:54Z",
+      "updated_at": "2026-10-31T08:30:42Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "started_at": "2026-10-31T08:13:52Z",
       "started_by": "claude:6baf63b2",
-      "commit": "52e9470d8a86e295a8595e4b9ab4d24f3510e2df",
+      "commit": "45fa4c9eab30119b5b94dd3b8994cc9b35a10006",
       "review_requested_at": "2026-10-31T08:16:54Z",
       "notes": [
         {
@@ -5375,9 +5375,17 @@
         "doc/design/desktop-companion.md"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T08:31:00Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:6baf63b2",
+      "notes": [
+        {
+          "at": "2026-10-31T08:31:00Z",
+          "kind": "note",
+          "text": "The halo (`shadowColor`/`shadowOpacity` on the figure and bed layers, added in T-135 review) needs an offscreen pass per frame: measure with and without it, and give it a `shadowPath` or drop it if it busts the budget.",
+          "by": "claude:6baf63b2"
+        }
+      ]
     },
     {
       "id": "T-138",
@@ -5416,7 +5424,7 @@
         "companion",
         "app"
       ],
-      "description": "Make it discoverable and configurable (`doc/design/desktop-companion.md` › Settings).\n\n## Change\n- Settings: a Companion section with \"Show the companion\", a corner picker (bottom right, bottom left, top right, top left) and \"Show over full-screen apps\", written through `SessionStore.set`.\n- Help: what the companion's poses mean (one line per state).\n- README: a short paragraph and how to turn it on.\n- The first-run window mentions it, off by default.\n\n## Tests\n- `SettingsTests`: the controls write the keys; `HelpTests`: the companion entries.\n- `tests/app.sh --test` and `tests/lint.sh` pass.",
+      "description": "Make it discoverable and configurable (`doc/design/desktop-companion.md` › Settings).\n\n## Change\n- Settings: a Companion section with \"Show the companion\", a corner picker (bottom right, bottom left, top right, top left), \"Show over full-screen apps\", and a **color** choice for `companion_color` (Automatic, plus a few presets and a custom color well, like the theme color overrides), written through `SessionStore.set`.\n- Help: what the companion's poses mean (one line per state).\n- README: a short paragraph and how to turn it on; the `companion*` keys in the config table.\n- The first-run window mentions it, off by default.\n\n## Tests\n- `SettingsTests`: the controls write the keys (the color too, and Automatic clears it); `HelpTests`: the companion entries.\n- `tests/app.sh --test` and `tests/lint.sh` pass.\n",
       "requirements": [],
       "use_cases": [],
       "status": "todo",
@@ -5433,9 +5441,9 @@
         "App/Tests/HelpTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T08:30:55Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:6baf63b2"
     },
     {
       "id": "T-140",

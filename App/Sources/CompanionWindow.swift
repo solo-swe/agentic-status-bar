@@ -6,7 +6,7 @@ import Observation
 /// never takes focus (doc/design/desktop-companion.md › The window). Shown while `companion` is on.
 @MainActor
 final class CompanionWindow {
-    /// The strip the character lives in.
+    /// The strip the character lives in, in drawing units; on screen it is `scale` times this.
     static let size = NSSize(width: 260, height: 60)
     /// Distance from the screen's left or right edge.
     static let sideMargin: CGFloat = 16
@@ -15,9 +15,11 @@ final class CompanionWindow {
     static let floorY: CGFloat = 4
 
     let panel: NSPanel
-    /// The layer the character draws into.
-    var contentLayer: CALayer { panel.contentView!.layer! }
+    /// The layer the character draws into, in drawing units (`size`), scaled to `companion_size`.
+    let contentLayer = CALayer()
     let figure = StickFigure()
+    /// How many points on screen a drawing unit takes.
+    private(set) var scale: CGFloat = 1
     /// Where the bed is and where the figure may walk, for the current corner.
     private(set) var layout = StripLayout(width: size.width, position: "bottom-right")
     private var bed: CALayer?
@@ -30,6 +32,10 @@ final class CompanionWindow {
     init(store: SessionStore) {
         self.store = store
         panel = Self.makePanel()
+        contentLayer.anchorPoint = .zero
+        contentLayer.bounds = CGRect(origin: .zero, size: Self.size)
+        contentLayer.position = .zero
+        panel.contentView?.layer?.addSublayer(contentLayer)
         figure.layer.position = CGPoint(x: Self.size.width / 2, y: Self.floorY)
         contentLayer.addSublayer(figure.layer)
         if let view = panel.contentView as? CompanionView {
@@ -61,6 +67,7 @@ final class CompanionWindow {
         panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
         let view = CompanionView(frame: NSRect(origin: .zero, size: size))
         view.wantsLayer = true
+        view.autoresizingMask = [.width, .height]
         panel.contentView = view
         return panel
     }
@@ -107,7 +114,10 @@ final class CompanionWindow {
             return
         }
         panel.level = Self.level(overFullscreen: config.companionOverFullscreen)
-        panel.setFrame(Self.frame(position: config.companionPosition, in: screen.visibleFrame), display: false)
+        scale = Self.scale(config.companionSize)
+        let size = NSSize(width: Self.size.width * scale, height: Self.size.height * scale)
+        panel.setFrame(Self.frame(position: config.companionPosition, in: screen.visibleFrame, size: size), display: false)
+        figure.withoutActions { contentLayer.transform = CATransform3DMakeScale(scale, scale, 1) }
         placeBed(StripLayout(width: Self.size.width, position: config.companionPosition))
         if let view = panel.contentView { updateColors(view) }
         panel.orderFrontRegardless()
@@ -133,6 +143,15 @@ final class CompanionWindow {
             StickFigure.applyHalo(figure.halo, to: layer)
             contentLayer.insertSublayer(layer, at: 0)
             bed = layer
+        }
+    }
+
+    /// Points on screen per drawing unit for `companion_size`.
+    static func scale(_ size: String) -> CGFloat {
+        switch size {
+        case "small": 1
+        case "large": 2
+        default: 1.5
         }
     }
 
