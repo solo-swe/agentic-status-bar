@@ -8,51 +8,146 @@
     "workflow": {
       "type": "direct"
     },
-    "phases": [
+    "repository": "https://github.com/solo-swe/agentic-status-bar",
+    "sprints": [
       {
-        "id": 0,
-        "name": "Foundations"
+        "id": "Foundations",
+        "state": "closed",
+        "start": "2026-10-25T06:28:07Z",
+        "end": "2026-10-25T07:00:40Z",
+        "report": {
+          "done": [
+            "T-001",
+            "T-002",
+            "T-003",
+            "T-004",
+            "T-005",
+            "T-006"
+          ],
+          "carried": []
+        }
       },
       {
-        "id": 1,
-        "name": "Core"
+        "id": "Core",
+        "state": "closed",
+        "start": "2026-10-25T07:00:41Z",
+        "end": "2026-10-25T07:10:57Z",
+        "report": {
+          "done": [
+            "T-007",
+            "T-008",
+            "T-009",
+            "T-010",
+            "T-011",
+            "T-012",
+            "T-013"
+          ],
+          "carried": []
+        }
       },
       {
-        "id": 2,
-        "name": "Accuracy"
+        "id": "Accuracy",
+        "state": "closed",
+        "start": "2026-10-25T07:10:58Z",
+        "end": "2026-10-25T07:17:53Z",
+        "report": {
+          "done": [
+            "T-014",
+            "T-015",
+            "T-016",
+            "T-017",
+            "T-018",
+            "T-019"
+          ],
+          "carried": []
+        }
       },
       {
-        "id": 3,
-        "name": "Reach"
+        "id": "Reach",
+        "state": "closed",
+        "start": "2026-10-25T07:17:54Z",
+        "end": "2026-10-25T07:26:28Z",
+        "report": {
+          "done": [
+            "T-020",
+            "T-021",
+            "T-022",
+            "T-023",
+            "T-024",
+            "T-025"
+          ],
+          "carried": []
+        }
       },
       {
-        "id": 4,
-        "name": "Release"
+        "id": "Release",
+        "state": "closed",
+        "start": "2026-10-25T07:26:29Z",
+        "end": "2026-10-25T20:43:30Z",
+        "report": {
+          "done": [
+            "T-026",
+            "T-027",
+            "T-028",
+            "T-029",
+            "T-030",
+            "T-031",
+            "T-032",
+            "T-039",
+            "T-040",
+            "T-041"
+          ],
+          "carried": []
+        }
       },
       {
-        "id": 5,
-        "name": "Polish and design"
+        "id": "Polish and design",
+        "state": "closed",
+        "start": "2026-10-25T07:36:30Z",
+        "end": "2026-10-25T23:43:17Z",
+        "report": {
+          "done": [
+            "T-033",
+            "T-034",
+            "T-035",
+            "T-036",
+            "T-037",
+            "T-038",
+            "T-042",
+            "T-043",
+            "T-044",
+            "T-045",
+            "T-046",
+            "T-047",
+            "T-048"
+          ],
+          "carried": []
+        }
       },
       {
-        "id": 6,
-        "name": "Swift migration"
+        "id": "Swift migration",
+        "state": "planned"
       },
       {
-        "id": 7,
-        "name": "Architecture: more agents and terminals"
+        "id": "Architecture: more agents and terminals",
+        "state": "planned"
       },
       {
-        "id": 8,
-        "name": "Desktop companion"
+        "id": "Desktop companion",
+        "state": "planned"
+      },
+      {
+        "id": "Animated Companion",
+        "state": "active",
+        "goal": "Finish the companion check, fix subagents waiting on input, and decide on the two architecture proposals",
+        "start": "2026-10-31T09:14:46Z"
       }
-    ],
-    "repository": "https://github.com/solo-swe/agentic-status-bar"
+    ]
   },
   "tasks": [
     {
       "id": "T-001",
       "name": "Scaffold repo layout, LICENSE and .gitignore",
-      "phase": 0,
       "type": "infra",
       "description": "Create the repo layout from `doc/PRD.md` 'Repo layout'.\n\n## Details\n- Directories: `.claude-plugin/`, `hooks/`, `swiftbar/`, `lib/`, `tests/`, `tests/fixtures/`.\n- Add an MIT `LICENSE` (copyright holder: the repo owner, year 2026) and a `.gitignore` that ignores `.DS_Store`, `tests/tmp/` and `*.log`.\n- Add a placeholder `.gitkeep` where a directory would otherwise be empty.\n- Do not create any scripts yet.\n",
       "requirements": [
@@ -85,12 +180,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "d80316a7f7551e1493d93f645441c4ee9085c2bd"
+      "commit": "d80316a7f7551e1493d93f645441c4ee9085c2bd",
+      "sprint": "Foundations",
+      "sprint_history": [
+        {
+          "sprint": "Foundations",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-002",
       "name": "Set up bats test harness",
-      "phase": 0,
       "type": "infra",
       "description": "Add `tests/run.sh` that runs all `tests/*.bats` with bats-core (print an install hint and exit 1 if `bats` is not on `PATH`).\n\n## Details\n- Add `tests/test_helper.bash` that, per test, creates a temp dir under `tests/tmp/` and exports `HOME`, `CLAUDE_AGENTS_STATE_DIR` (state files), `CLAUDE_AGENTS_CONFIG` (config file path) and `CLAUDE_AGENTS_REGISTRY_DIR` (stand-in for `~/.claude/sessions`) into it, and removes it in teardown.\n- Include a helper to put a fake-command dir first on `PATH` so tests can stub `ps`, `herdr` and `open`.\n- Add one smoke test (`tests/smoke.bats`) proving the helper works.\n",
       "requirements": [
@@ -121,12 +222,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "20234e3588be37c6a18d3d673102f679418010fd"
+      "commit": "20234e3588be37c6a18d3d673102f679418010fd",
+      "sprint": "Foundations",
+      "sprint_history": [
+        {
+          "sprint": "Foundations",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-003",
       "name": "Capture real hook payloads and environment (spike)",
-      "phase": 0,
       "type": "infra",
       "description": "Register a temporary capture hook to record real hook payloads and environment, then remove it.\n\n## Capture hook\nRegister it in project-local `.claude/settings.local.json` (not committed). It appends stdin plus selected env vars (`CLAUDE_CODE_ENTRYPOINT`, `HERDR_PANE_ID`, `__CFBundleIdentifier`, `TERM_PROGRAM`, `PPID`) to a scratch file for:\n- `SessionStart`\n- `UserPromptSubmit`\n- `PreToolUse`\n- `PostToolUse`\n- `Notification`\n- `Stop`\n- `SubagentStart`\n- `SubagentStop`\n- `SessionEnd`\n\n## Trigger each\n- a permission prompt\n- an `AskUserQuestion`/elicitation\n- a 60 s idle notification\n- an Esc interrupt\n- a subagent run\n\n## Record\n- Save one sanitized payload per event/notification type to `tests/fixtures/payloads/<event>[-<type>].json` (replace real paths, project names and IDs with made-up values).\n- Record the exact user-interrupt marker text found in the transcript.\n- Check whether `herdr agent focus` takes a pane ID or agent ID and whether it raises the host terminal.\n\n## Done when\nUpdate the 'Open questions' checklist in `doc/PRD.md` with the answers, then remove the capture hook.\n",
       "requirements": [
@@ -157,12 +264,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "bf29e6795fc4a2f90f1e2ba94cbdbf14a9a0d473"
+      "commit": "bf29e6795fc4a2f90f1e2ba94cbdbf14a9a0d473",
+      "sprint": "Foundations",
+      "sprint_history": [
+        {
+          "sprint": "Foundations",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-004",
       "name": "Shared shell library: config, time, atomic writes",
-      "phase": 0,
       "type": "feature",
       "description": "Create `lib/common.sh` (POSIX sh, sourced by hook and plugin).\n\n## Provide\n1. `load_config` — reads `${CLAUDE_AGENTS_CONFIG:-~/.config/claude-agents/config}` as `key=value` lines (ignore comments/unknown keys, never eval arbitrary content) with defaults `show_interactive=1` `show_headless=1` `show_subagents=1` `show_ide=1` `stale_minutes=30` `use_registry=1` `instant_refresh=1` `icon=sparkle` `store_prompt_preview=1` `state_dir=${CLAUDE_AGENTS_STATE_DIR:-~/.claude/swiftbar-agents}`;\n2. `set_config KEY VALUE` — rewrites one key atomically;\n3. `now_ms` — epoch milliseconds using stock macOS tools (e.g. `perl -MTime::HiRes`);\n4. `atomic_write FILE` — reads stdin, writes `FILE.tmp.$$` in the same dir, then `mv`;\n5. `find_jq` — `/usr/bin/jq`, then `/opt/homebrew/bin/jq`, `/usr/local/bin/jq`, else empty;\n6. `log_once KEY MSG` — appends to `$state_dir/plugin.log` only if `KEY` not logged before.\n",
       "requirements": [
@@ -193,12 +306,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "e00838395e1fdc2f802c119b3fedccc74cee3c78"
+      "commit": "e00838395e1fdc2f802c119b3fedccc74cee3c78",
+      "sprint": "Foundations",
+      "sprint_history": [
+        {
+          "sprint": "Foundations",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-005",
       "name": "Tests for lib/common.sh",
-      "phase": 0,
       "type": "test",
       "description": "Add `tests/common.bats` covering the cases below.\n\n## Tests\n- defaults when no config file;\n- overrides from a config file;\n- unknown keys and malicious lines (e.g. `x=$(touch pwned)`) are ignored and not executed;\n- `set_config` changes one key and keeps others;\n- `now_ms` returns a 13-digit number;\n- `atomic_write` leaves no `.tmp` file and produces exact content;\n- `find_jq` returns a path when `jq` exists;\n- `log_once` writes a key only once.\n",
       "requirements": [
@@ -228,12 +347,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "e64041f4d53213441a89a143fbdda584cb1909d4"
+      "commit": "e64041f4d53213441a89a143fbdda584cb1909d4",
+      "sprint": "Foundations",
+      "sprint_history": [
+        {
+          "sprint": "Foundations",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-006",
       "name": "CI: shellcheck and bats on macOS",
-      "phase": 0,
       "type": "infra",
       "description": "Add `.github/workflows/ci.yml` running on `push` and `pull_request` on `macos-latest`.\n\n## Steps\n1. Install bats-core and shellcheck via Homebrew.\n2. Run `shellcheck -s sh` on `hooks/*.sh`, `swiftbar/*.sh`, `lib/*.sh`, `install.sh`, `uninstall.sh` (skip files that don't exist yet).\n3. Then run `tests/run.sh`.\n",
       "requirements": [
@@ -262,12 +387,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "5d86eb421a996d6043cde985447c534873e797ba"
+      "commit": "5d86eb421a996d6043cde985447c534873e797ba",
+      "sprint": "Foundations",
+      "sprint_history": [
+        {
+          "sprint": "Foundations",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-007",
       "name": "state-hook.sh skeleton and event dispatch",
-      "phase": 1,
       "type": "feature",
       "description": "Create `hooks/state-hook.sh` (POSIX sh, executable).\n\n## Details\nIt resolves its own directory (following symlinks) to source `../lib/common.sh`, reads the full hook JSON from stdin, extracts `hook_event_name` and `session_id` with `jq`, and dispatches to one function per event (stubs for now).\n\n## Hard rules from the PRD\n- never `set -e`;\n- trap and swallow all errors;\n- always exit 0;\n- print nothing to stdout or stderr;\n- exit early if `jq` is missing or `session_id` is empty.\n\n## `write_state` helper\nProvide `write_state` helper that:\n- merges a `jq` object into `$state_dir/<session_id>.json` (creating it with `\"v\":1` if absent),\n- sets `updatedAt=now_ms`,\n- sets `stateSince=now_ms` only when `state` actually changes,\n- and writes atomically.\n",
       "requirements": [
@@ -297,12 +428,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "e44bc9d9d6d0ef74d8429b4629a58e5ddba73c0f"
+      "commit": "e44bc9d9d6d0ef74d8429b4629a58e5ddba73c0f",
+      "sprint": "Core",
+      "sprint_history": [
+        {
+          "sprint": "Core",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-008",
       "name": "SessionStart handler: PID walk and session metadata",
-      "phase": 1,
       "type": "feature",
       "description": "Implement the `SessionStart` handler in `hooks/state-hook.sh`.\n\n## PID walk\nWalk up parent processes from `$PPID` (`ps -o ppid=,comm=`) to the first ancestor whose command basename is `claude` (or a known IDE/desktop host binary per T-003 findings); record its `pid` and `ps -o lstart= -p <pid>` as `procStart`. If none found, omit `pid`/`procStart`.\n\n## Session metadata\nAlso record `cwd` and `transcript_path` from the payload, `herdrPane` from `$HERDR_PANE_ID`, `termBundleId` from `$__CFBundleIdentifier`, and `kind` from `$CLAUDE_CODE_ENTRYPOINT`:\n- `cli` → `interactive`\n- `sdk-*` or a `-p`/`--print` flag in the parent's args → `headless`\n- IDE values → `ide`\n- `desktop` → `desktop`\n- unknown → `interactive`\n\nWrite `state=idle`.\n",
       "requirements": [
@@ -336,12 +473,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "264078bb15736fd18fd8021732d71b44beaf469b"
+      "commit": "264078bb15736fd18fd8021732d71b44beaf469b",
+      "sprint": "Core",
+      "sprint_history": [
+        {
+          "sprint": "Core",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-009",
       "name": "Busy handlers: UserPromptSubmit, PreToolUse, PostToolUse",
-      "phase": 1,
       "type": "feature",
       "description": "Implement the busy handlers in `hooks/state-hook.sh`.\n\n## Handlers\n- `UserPromptSubmit` → `state=busy` and, if `store_prompt_preview=1`, `promptPreview` = first 80 characters of the prompt with newlines collapsed (omit the field otherwise). Prompts starting with `<task-notification>` are background-task results (see `tests/fixtures/payloads/UserPromptSubmit-task-notification.json`): set busy but keep the existing `promptPreview`.\n- `PreToolUse` → `state=busy`, `lastTool=tool_name`;\n- `PostToolUse` → `state=busy`.\n\nClear `reason` and `message` on every busy write.\n",
       "requirements": [
@@ -373,12 +516,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "37526a217c9f6812cda21bac3353acc521d61093"
+      "commit": "37526a217c9f6812cda21bac3353acc521d61093",
+      "sprint": "Core",
+      "sprint_history": [
+        {
+          "sprint": "Core",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-010",
       "name": "Notification and Stop handlers",
-      "phase": 1,
       "type": "feature",
       "description": "Implement in `hooks/state-hook.sh` using `tests/fixtures/payloads/`.\n\n## Notification\n- `notification_type=permission_prompt` → `state=waiting`, `message=<message>`, `reason=question` if the session's `lastTool` is `AskUserQuestion`, else `reason=permission`;\n- `notification_type=elicitation_dialog` → `state=waiting`, `reason=question`;\n- `notification_type=idle_prompt` → `state=idle`.\n- If `notification_type` is missing, fall back to the message text ('needs your permission' → `permission`, 'waiting for your input' → `idle`).\n\n## Stop\n`Stop` → `state=idle`, clear `reason`/`message`.\n\n`PermissionRequest` needs no handling (the `Notification` follows it).\n",
       "requirements": [
@@ -412,12 +561,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "eaf3eb3f89ad6c143abb5de374a8614b2c4cb690"
+      "commit": "eaf3eb3f89ad6c143abb5de374a8614b2c4cb690",
+      "sprint": "Core",
+      "sprint_history": [
+        {
+          "sprint": "Core",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-011",
       "name": "SessionEnd handler deletes the state file",
-      "phase": 1,
       "type": "feature",
       "description": "Implement `SessionEnd` in `hooks/state-hook.sh`: remove `$state_dir/<session_id>.json` if present. Must succeed silently if the file is already gone.\n",
       "requirements": [
@@ -448,12 +603,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "9c421ab6cb63b294cbe25a2338e29013047a9f1b"
+      "commit": "9c421ab6cb63b294cbe25a2338e29013047a9f1b",
+      "sprint": "Core",
+      "sprint_history": [
+        {
+          "sprint": "Core",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-012",
       "name": "Tests for state-hook.sh",
-      "phase": 1,
       "type": "test",
       "description": "Add `tests/hook.bats` feeding the fixture payloads from `tests/fixtures/payloads/` into `hooks/state-hook.sh` and asserting the resulting state file.\n\n## Tests\n- `SessionStart` writes `idle` with `v=1`, `cwd`, `kind`, `herdrPane`/`termBundleId` from env;\n- busy events set `busy` and `lastTool`/`promptPreview` (and no preview when `store_prompt_preview=0`);\n- permission and question notifications set `waiting` with the right `reason`;\n- idle notification and `Stop` set `idle`;\n- `stateSince` changes only on state change;\n- `SessionEnd` deletes the file.\n\n## Also assert\nExit code 0 and empty stdout/stderr for every event, including malformed JSON, empty stdin and missing `jq` (`PATH` without `jq`).\n",
       "requirements": [
@@ -491,12 +652,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "e97099812ad8f2534d310e50e29af661fb6205df"
+      "commit": "e97099812ad8f2534d310e50e29af661fb6205df",
+      "sprint": "Core",
+      "sprint_history": [
+        {
+          "sprint": "Core",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-013",
       "name": "Claude Code plugin manifest and hooks.json",
-      "phase": 1,
       "type": "infra",
       "description": "Add `.claude-plugin/plugin.json` and `hooks/hooks.json` for the Claude Code plugin.\n\n## Change\n- `.claude-plugin/plugin.json`: name `claude-agents`, version `0.1.0`, description, MIT license, repository placeholder.\n- `hooks/hooks.json` registering `${CLAUDE_PLUGIN_ROOT}/hooks/state-hook.sh` for `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Notification`, `Stop`, `SubagentStart`, `SubagentStop` and `SessionEnd`, all with `\"async\": true` and a short timeout.\n\n## Verify\nVerify locally with `claude --plugin-dir .` that state files appear in `~/.claude/swiftbar-agents/` and that existing user hooks still run. Document this local dev workflow in `CONTRIBUTING.md`.\n",
       "requirements": [
@@ -530,12 +697,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "225c8e76c0b4024e64ae3bbbf390e76bea36a47f"
+      "commit": "225c8e76c0b4024e64ae3bbbf390e76bea36a47f",
+      "sprint": "Core",
+      "sprint_history": [
+        {
+          "sprint": "Core",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-014",
       "name": "SwiftBar plugin skeleton: load and validate state files",
-      "phase": 2,
       "type": "feature",
       "description": "Create `swiftbar/claude-agents.5s.sh` (POSIX sh, executable) that loads and validates the state files.\n\n## Details\n- SwiftBar metadata headers: `<xbar.title>`, `<xbar.version>`, `<xbar.author>`, `<xbar.desc>`, `<swiftbar.hideRunInTerminal>true`, `<swiftbar.hideLastUpdated>true`, `<swiftbar.hideDisappearPlugin>true`.\n- Resolve its real path (it will be symlinked) to source `../lib/common.sh`.\n- If `find_jq` returns nothing, print a warning menu-bar item and a dropdown line explaining how to install `jq`, then exit 0.\n- Load every `$state_dir/*.json` in one `jq` invocation, skipping unparseable files and files with `v>1` (count them; if any, show the warning state per PRD 'Menu-bar item' table).\n- Output for now: a placeholder line with the session count.\n",
       "requirements": [
@@ -565,12 +738,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "d376e362bada6a9d904dfff92e0f38e8aaf7c117"
+      "commit": "d376e362bada6a9d904dfff92e0f38e8aaf7c117",
+      "sprint": "Accuracy",
+      "sprint_history": [
+        {
+          "sprint": "Accuracy",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-015",
       "name": "Process snapshot and C1 liveness check",
-      "phase": 2,
       "type": "feature",
       "description": "In `swiftbar/claude-agents.5s.sh` take exactly one process snapshot per run and add the C1 liveness check.\n\n## Details\n- Snapshot: `ps -axo pid=,ppid=,lstart=,comm=` (keep it in a variable/temp file for later checks C4/C5).\n- For each session with a `pid`: if the `pid` is not in the snapshot, or its `lstart` differs from `procStart`, delete the state file and drop the session.\n- Sessions without `pid` are kept (rely on `SessionEnd` and C5).\n- Structure the code so checks run in order C1..C5 per session and the first one that changes or removes a session wins.\n",
       "requirements": [
@@ -602,12 +781,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "46561d034d6d35ba08b913580284705b2c1e54f6"
+      "commit": "46561d034d6d35ba08b913580284705b2c1e54f6",
+      "sprint": "Accuracy",
+      "sprint_history": [
+        {
+          "sprint": "Accuracy",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-016",
       "name": "Menu-bar item: most urgent state and count",
-      "phase": 2,
       "type": "feature",
       "description": "Render the first output line per the PRD 'Menu-bar item' table: priority `waiting` > `idle` > `uncertain` > `busy` > `none`.\n\n## Count\nShow the count of sessions in the winning state:\n- for `busy`: total sessions;\n- for `none`: no count;\n- for `uncertain`: '?' + count.\n\n## Icon and color\nUse SwiftBar `sfimage=` with a distinct SF Symbol variant per state derived from the configured `icon` (e.g. `sparkle`, exclamationmark-badged variant for waiting) and `sfcolor=` with light,dark color pairs:\n- red for waiting,\n- yellow for idle,\n- gray for uncertain,\n- dimmed secondary for busy,\n- faint for none.\n\nColor must never be the only signal.\n",
       "requirements": [
@@ -641,12 +826,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "a323c2729ee546b5ee682ddb40f518e6a3ea4ede"
+      "commit": "a323c2729ee546b5ee682ddb40f518e6a3ea4ede",
+      "sprint": "Accuracy",
+      "sprint_history": [
+        {
+          "sprint": "Accuracy",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-017",
       "name": "Dropdown session rows",
-      "phase": 2,
       "type": "feature",
       "description": "After `---`, render one row per session sorted `waiting`, `idle`, `uncertain`, `busy`; within a state, longest time in state (oldest `stateSince`) first.\n\n## Row\n- Label = `cwd` basename + ' — ' + title, where title is `promptPreview` for now (a title-source function so T-027 can add herdr titles), truncated to 48 characters with '…'.\n- Right side = state word (permission, question, idle, working, no activity) + ' · ' + duration since `stateSince` formatted as 12s / 4m / 2h / 3d.\n- Use a leading glyph per state (●, ○, ?) and SwiftBar params `font=Menlo` or `ansi`/tab alignment so the right side lines up.\n- Escape '|' in titles so SwiftBar params aren't broken.\n",
       "requirements": [
@@ -678,12 +869,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "558672c984c456392b0a2cd395872286ad62860d"
+      "commit": "558672c984c456392b0a2cd395872286ad62860d",
+      "sprint": "Accuracy",
+      "sprint_history": [
+        {
+          "sprint": "Accuracy",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-018",
       "name": "Row submenus and footer items",
-      "phase": 2,
       "type": "feature",
       "description": "Under each row add a SwiftBar submenu (`--` prefix), and add the footer items.\n\n## Submenu\n- Copy session ID\n- Copy cwd (`pbcopy` via `bash=` running the plugin itself with an action argument, `terminal=false`)\n- Open folder in Finder (`open <cwd>`)\n- Reveal transcript (`open -R <transcriptPath>`, only if set)\n\nMake the plugin dispatch action arguments (`$1` = `copy`|`open`|`reveal`) before rendering.\n\n## Footer\nAfter `---`: Refresh (`refresh=true`). Leave placeholders for the Show and Settings items added in phase 4.\n",
       "requirements": [
@@ -714,12 +911,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "1b308ff9651edf8979f80659368d43ea36e50e44"
+      "commit": "1b308ff9651edf8979f80659368d43ea36e50e44",
+      "sprint": "Accuracy",
+      "sprint_history": [
+        {
+          "sprint": "Accuracy",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-019",
       "name": "Tests for plugin core rendering",
-      "phase": 2,
       "type": "test",
       "description": "Add `tests/plugin.bats` with fixture state files and a stubbed `ps`.\n\n## Tests\n- menu bar shows waiting with red and correct count when one session waits;\n- idle wins over busy;\n- all-busy shows dimmed with total count;\n- no files shows faint icon with no count;\n- corrupt and `v=2` files trigger the warning state;\n- missing `jq` shows the `jq` hint;\n- rows sort correctly by state then age;\n- truncation at 48 chars;\n- duration formatting;\n- '|' in a title is escaped;\n- C1 removes a session whose `pid` is absent or whose `lstart` differs and deletes its file;\n- submenu action arguments call `pbcopy`/`open` stubs with the right values.\n",
       "requirements": [
@@ -761,12 +964,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "7282297f28c27a9456960b6837b960afcde4300d"
+      "commit": "7282297f28c27a9456960b6837b960afcde4300d",
+      "sprint": "Accuracy",
+      "sprint_history": [
+        {
+          "sprint": "Accuracy",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-020",
       "name": "Instant refresh poke with debounce",
-      "phase": 3,
       "type": "feature",
       "description": "At the end of every state write in `hooks/state-hook.sh`, if `instant_refresh=1`, run `open -g 'swiftbar://refreshplugin?name=claude-agents'` in the background, but only if `$state_dir/.last-poke` is older than 500 ms (compare stored `now_ms`); update `.last-poke` atomically. Must not add measurable latency: background the `open` call and never wait on it.\n",
       "requirements": [
@@ -799,12 +1008,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "87558cdd373cbcc6d19ab80ba1a31b9fa1c3f7b4"
+      "commit": "87558cdd373cbcc6d19ab80ba1a31b9fa1c3f7b4",
+      "sprint": "Reach",
+      "sprint_history": [
+        {
+          "sprint": "Reach",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-021",
       "name": "C2 registry override (newest wins)",
-      "phase": 3,
       "type": "feature",
       "description": "In the plugin, when `use_registry=1` and `${CLAUDE_AGENTS_REGISTRY_DIR:-~/.claude/sessions}/<pid>.json` exists with matching `sessionId` and a `status` field, let the newer registry status win.\n\n## Override\nIf its `statusUpdatedAt` > the hook file's `updatedAt`, render using its `status`:\n- `busy` → `busy`\n- `waiting` → `waiting` with `reason` from `waitingFor`\n- `idle` → `idle`\n- unknown values ignored.\n\n## Rules\n- Never write the hook state file.\n- If the registry file lacks `status`, ignore it and `log_once 'registry-schema'`.\n",
       "requirements": [
@@ -836,12 +1051,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "e3781a45047f496d42cc0fbf21891b67f5d787c6"
+      "commit": "e3781a45047f496d42cc0fbf21891b67f5d787c6",
+      "sprint": "Reach",
+      "sprint_history": [
+        {
+          "sprint": "Reach",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-022",
       "name": "C3 interrupt detection from transcript tail",
-      "phase": 3,
       "type": "feature",
       "description": "In the plugin, for sessions `busy` or `waiting` after C1/C2 with a readable `transcriptPath`, detect an interrupt from the transcript tail.\n\n## Details\n1. Read only the last 8192 bytes (`tail -c 8192`, dropping the first partial line).\n2. Find the latest entry that is a real user prompt (`type=user` with string content or a text block that is not a `tool_result`).\n3. If after it there is a user text entry containing '[Request interrupted by user' (constant `INTERRUPT_MARKER`) or a `type=system` entry with `subtype=turn_duration`, render the session as `idle`.\n\nSee `tests/fixtures/transcripts/`:\n- `denied-permission` → `idle`\n- `completed-turn` → `idle`\n- `esc-before-output` → no change\n\nDo not write the state file.\n",
       "requirements": [
@@ -873,12 +1094,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "272f388288e1f5051e8c1261bcfbe39f1ae3bedb"
+      "commit": "272f388288e1f5051e8c1261bcfbe39f1ae3bedb",
+      "sprint": "Reach",
+      "sprint_history": [
+        {
+          "sprint": "Reach",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-023",
       "name": "C4 approved-tool detection via child processes",
-      "phase": 3,
       "type": "feature",
       "description": "In the plugin, for sessions `waiting` with a `pid`, detect an approved tool from its child processes.\n\n## Details\n- Using the single `ps` snapshot from T-015, find child processes of the `pid` (`ppid` match) whose `lstart` is later than `stateSince`, ignoring `comm` `caffeinate` (Claude Code starts one per turn).\n- If any remain, render the session as `busy` (the permission was approved and a tool is running; the spike saw a `/bin/zsh` child).\n- Long-lived children started before `stateSince` (MCP servers) must not trigger it.\n- Convert `lstart` to epoch with `date -j -f` or `perl`, once per process.\n",
       "requirements": [
@@ -909,12 +1136,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "9e5a96b8ab7981d257403f29849fe6f0eea7e4aa"
+      "commit": "9e5a96b8ab7981d257403f29849fe6f0eea7e4aa",
+      "sprint": "Reach",
+      "sprint_history": [
+        {
+          "sprint": "Reach",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-024",
       "name": "C5 staleness → uncertain state",
-      "phase": 3,
       "type": "feature",
       "description": "In the plugin, when `stale_minutes>0` and a session is still `busy` after C1–C4: if now − max(`updatedAt`, transcript mtime via `stat -f %m`, newest child `lstart`) exceeds `stale_minutes`, render it as `uncertain` ('?', state word 'no activity', duration since that latest activity). Waiting and idle sessions are never marked stale.\n",
       "requirements": [
@@ -945,12 +1178,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "ebddecaafb4709132d20cc76f180c6d45f2d3fca"
+      "commit": "ebddecaafb4709132d20cc76f180c6d45f2d3fca",
+      "sprint": "Reach",
+      "sprint_history": [
+        {
+          "sprint": "Reach",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-025",
       "name": "Tests for C2–C5 and refresh poke",
-      "phase": 3,
       "type": "test",
       "description": "Extend tests (`tests/checks.bats`, `tests/hook.bats`) for C2–C5 and the refresh poke.\n\n## Tests\n- C2 overrides only when registry is newer, ignores mismatched `sessionId` and missing `status`, and respects `use_registry=0`;\n- C3 flips `busy`→`idle` when the marker is in the tail and not when it's earlier than 8 KB;\n- C4 flips `waiting`→`busy` for a child started after `stateSince` but not for an older child;\n- C5 marks `busy` as `uncertain` past the threshold, never marks `waiting`/`idle`, and is off at `stale_minutes=0`;\n- checks never modify state files;\n- poke calls the stubbed `open` once for two writes within 500 ms and not at all when `instant_refresh=0`.\n",
       "requirements": [
@@ -993,12 +1232,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "9aed8a2dd04d92e66d2f4bf7dcc18440fe8a9e48"
+      "commit": "9aed8a2dd04d92e66d2f4bf7dcc18440fe8a9e48",
+      "sprint": "Reach",
+      "sprint_history": [
+        {
+          "sprint": "Reach",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-026",
       "name": "Fail-safe herdr focus on row click",
-      "phase": 4,
       "type": "feature",
       "description": "Implement a single `focus_session` function in the plugin (the extension point for future integrations).\n\n## Click action\n- A row gets `bash=<plugin> focus <session_id> terminal=false refresh=true` only if `herdrPane` is set and a `herdr` binary is found (`PATH`, then `/opt/homebrew/bin`, `/usr/local/bin`).\n- Rows without it get no click action and a disabled 'not in herdr' submenu line.\n\n## Focus\n1. Run `herdr agent focus <pane>` (use the target form confirmed in T-003),\n2. then `open -b <termBundleId>` if set.\n\nEach step is time-limited (~2 s, via a background process plus `kill` since macOS has no `timeout`) and errors are swallowed; never launch herdr, open new windows, or activate any other app.\n",
       "requirements": [
@@ -1031,12 +1276,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "f28d18ba81309bc96b4da8091125a3dd92dbad94"
+      "commit": "f28d18ba81309bc96b4da8091125a3dd92dbad94",
+      "sprint": "Release",
+      "sprint_history": [
+        {
+          "sprint": "Release",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-027",
       "name": "Row titles from herdr terminal titles",
-      "phase": 4,
       "type": "feature",
       "description": "Extend the title-source function to use herdr terminal titles first.\n\n## Details\nIf herdr is available, call `herdr agent list` once per refresh (time-limited ~1 s, errors swallowed), build a map of `agent_session.value` (Claude session ID) → `terminal_title_stripped`, and use it as the first title source.\n\n## Fallback order per PRD\n1. herdr title,\n2. Claude Code session name (from the registry file's `name` if present),\n3. `promptPreview`.\n",
       "requirements": [
@@ -1065,12 +1316,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "f125d3fde189e8bdc0a9c442d38db095b4eebc1e"
+      "commit": "f125d3fde189e8bdc0a9c442d38db095b4eebc1e",
+      "sprint": "Release",
+      "sprint_history": [
+        {
+          "sprint": "Release",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-028",
       "name": "Subagent tracking in the hook",
-      "phase": 4,
       "type": "feature",
       "description": "Implement `SubagentStart` and `SubagentStop` in `hooks/state-hook.sh` (payloads in `tests/fixtures/payloads/`).\n\n## Details\n- On `SubagentStart` add `subagents[agent_id] = {type: agent_type, since: now_ms}` to the parent session's file;\n- on `SubagentStop` delete `subagents[agent_id]`.\n- Ignore `SubagentStop` events with an empty `agent_type` (one fires after every `Stop` with no matching start).\n- Read-modify-write with atomic `mv`.\n- Subagent events must not change the parent's state.\n",
       "requirements": [
@@ -1103,12 +1360,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "6e71fe7e3718c92436e4d15dcae68ad1cadd8d3f"
+      "commit": "6e71fe7e3718c92436e4d15dcae68ad1cadd8d3f",
+      "sprint": "Release",
+      "sprint_history": [
+        {
+          "sprint": "Release",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-029",
       "name": "Render subagent rows under their parent",
-      "phase": 4,
       "type": "feature",
       "description": "In the dropdown, after each session row, render its subagents indented (`    ↳ subagent: <type>   working · <duration>`) when `show_subagents=1`. Subagents never count toward the menu-bar state or counts and are not clickable.\n",
       "requirements": [
@@ -1140,12 +1403,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "6362981a945727357332331fe4b83878766f7653"
+      "commit": "6362981a945727357332331fe4b83878766f7653",
+      "sprint": "Release",
+      "sprint_history": [
+        {
+          "sprint": "Release",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-030",
       "name": "Session-kind filter toggles",
-      "phase": 4,
       "type": "feature",
       "description": "Add a 'Show' section to the footer with four checkmark items reflecting `show_interactive`/`show_headless`/`show_subagents`/`show_ide` (`checked=true`).\n\n## Items\n- Interactive\n- Headless\n- Subagents\n- IDE/Desktop\n\n## Behavior\n- Clicking runs `<plugin> toggle <key>` which flips the value via `set_config`, with `refresh=true`.\n- Sessions whose `kind` is hidden are excluded from rows and from menu-bar counts.\n- Defaults: all on.\n",
       "requirements": [
@@ -1178,12 +1447,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "0e74e35d1a3e4a472e0bce3c82b3b3ec22c5a62a"
+      "commit": "0e74e35d1a3e4a472e0bce3c82b3b3ec22c5a62a",
+      "sprint": "Release",
+      "sprint_history": [
+        {
+          "sprint": "Release",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-031",
       "name": "Settings submenu",
-      "phase": 4,
       "type": "feature",
       "description": "Add a 'Settings…' submenu.\n\n## Items\n- Stale threshold (10m, 30m, 60m, Off — checkmark on current; sets `stale_minutes` 10/30/60/0)\n- Instant refresh (toggle `instant_refresh`)\n- Use Claude Code registry (toggle `use_registry`)\n- Store prompt preview (toggle `store_prompt_preview`)\n- Reveal config file (`open -R`, creating the file with defaults first if missing)\n\n## Details\nAll via `<plugin> set <key> <value>` / `toggle <key>` with `refresh=true`. Validate values; ignore anything not on the allowed list.\n",
       "requirements": [
@@ -1213,12 +1488,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "414977fa07e3da45d3a9289873626274067a5749"
+      "commit": "414977fa07e3da45d3a9289873626274067a5749",
+      "sprint": "Release",
+      "sprint_history": [
+        {
+          "sprint": "Release",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-032",
       "name": "Tests for focus, titles, subagents, filters, settings",
-      "phase": 4,
       "type": "test",
       "description": "Add `tests/reach.bats` for focus, titles, subagents, filters and settings.\n\n## Tests\n- rows with `herdrPane` and a stub `herdr` get a focus action, rows without get none and show 'not in herdr';\n- focus calls `herdr` then `open -b` with the right args;\n- a failing or hanging `herdr` stub doesn't hang the plugin (>2 s) and calls nothing else;\n- herdr titles are preferred over `promptPreview`, and a failing `herdr agent list` falls back cleanly;\n- `SubagentStart`/`SubagentStop` add and remove entries without touching state;\n- subagent rows render and don't affect counts;\n- toggles flip config and hide kinds from rows and counts;\n- settings accept only allowed values.\n",
       "requirements": [
@@ -1257,12 +1538,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "416429c6b575036b29156d105a1e67a0745c2bab"
+      "commit": "416429c6b575036b29156d105a1e67a0745c2bab",
+      "sprint": "Release",
+      "sprint_history": [
+        {
+          "sprint": "Release",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-033",
       "name": "install.sh for non-plugin installs",
-      "phase": 5,
       "type": "infra",
       "description": "Create `install.sh` for non-plugin installs.\n\n## Steps\n1. Require `jq` (`find_jq`).\n2. Back up `~/.claude/settings.json` to `settings.json.bak-claude-agents-<timestamp>`.\n3. For each event in `hooks/hooks.json`, append a hook entry pointing at the absolute path of `hooks/state-hook.sh` with `async=true` and a marker field or command suffix (e.g. `# claude-agents`) so uninstall can find it; never replace or reorder existing entries; skip if already installed (idempotent).\n4. Then symlink `swiftbar/claude-agents.5s.sh` into `defaults read com.ameba.SwiftBar PluginDirectory`, or prompt for a folder if unset.\n5. Print what was done.\n",
       "requirements": [
@@ -1295,12 +1582,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "82b24297cf23ebe88510af442bde279d0618748e"
+      "commit": "82b24297cf23ebe88510af442bde279d0618748e",
+      "sprint": "Polish and design",
+      "sprint_history": [
+        {
+          "sprint": "Polish and design",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-034",
       "name": "uninstall.sh",
-      "phase": 5,
       "type": "infra",
       "description": "Create `uninstall.sh`. Idempotent.\n\n## Steps\n1. Back up `settings.json`.\n2. Remove only hook entries carrying the `claude-agents` marker (dropping event arrays/matcher groups left empty by the removal, but nothing else).\n3. Remove the SwiftBar symlink if it points at this repo.\n4. Offer (y/N) to delete `~/.claude/swiftbar-agents` and `~/.config/claude-agents`.\n",
       "requirements": [
@@ -1331,12 +1624,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "3d59ffc3bf629b75e39105504d09e3d9cc357706"
+      "commit": "3d59ffc3bf629b75e39105504d09e3d9cc357706",
+      "sprint": "Polish and design",
+      "sprint_history": [
+        {
+          "sprint": "Polish and design",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-035",
       "name": "Tests for install and uninstall",
-      "phase": 5,
       "type": "test",
       "description": "Add `tests/install.bats` using a temp `HOME` with a fixture `settings.json` that already has unrelated hooks (a `SessionStart` hook with a matcher and an async `PostToolUse` audit hook) and a stubbed `defaults`.\n\n## Tests\n- install adds our entries, keeps existing ones byte-identical and in order, creates a backup, links the plugin;\n- running install twice adds nothing;\n- uninstall removes exactly our entries and the symlink and leaves the rest identical to the original.\n",
       "requirements": [
@@ -1371,12 +1670,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "f00f3df0093a957ef3ca3bb366e137f3db26a570"
+      "commit": "f00f3df0093a957ef3ca3bb366e137f3db26a570",
+      "sprint": "Polish and design",
+      "sprint_history": [
+        {
+          "sprint": "Polish and design",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-036",
       "name": "Marketplace packaging for /plugin install",
-      "phase": 5,
       "type": "infra",
       "description": "Add `.claude-plugin/marketplace.json` listing the `claude-agents` plugin from this repo so users can `/plugin marketplace add <owner>/<repo>` then `/plugin install claude-agents`. Bump `plugin.json` version to `1.0.0-rc.1`. Verify the install flow end to end in a clean Claude Code profile and note the exact commands for the README.\n",
       "requirements": [
@@ -1408,12 +1713,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "5b0258eab2d1f28e7c8cc2e1772c00c0683fd0f6"
+      "commit": "5b0258eab2d1f28e7c8cc2e1772c00c0683fd0f6",
+      "sprint": "Polish and design",
+      "sprint_history": [
+        {
+          "sprint": "Polish and design",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-037",
       "name": "Performance benchmark for plugin and hook",
-      "phase": 5,
       "type": "test",
       "description": "Add `tests/bench.sh` that generates 10 realistic state files (mixed states, transcripts, registry files) in a temp dir, runs the plugin 20 times and the hook 50 times, and reports median/p95 wall time.\n\n## Done when\n- Fail (exit 1) if plugin median > 150 ms or hook median > 20 ms, per PRD success criteria.\n- Fix any hot spots found (e.g. per-session `jq` calls).\n",
       "requirements": [
@@ -1444,12 +1755,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "3155782b47e75b81144fe58c59d6d89c8b747645"
+      "commit": "3155782b47e75b81144fe58c59d6d89c8b747645",
+      "sprint": "Polish and design",
+      "sprint_history": [
+        {
+          "sprint": "Polish and design",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-038",
       "name": "Finalize README for release",
-      "phase": 5,
       "type": "docs",
       "description": "Update `README.md` for release.\n\n## Change\n- remove the 'design phase' notice;\n- replace planned install steps with the verified commands from T-033 and T-036;\n- add the `state_dir` key to the config table;\n- add a troubleshooting section (`jq` missing, SwiftBar folder unset, warning icon meaning, where `plugin.log` lives);\n- and add screenshot placeholders (`doc/screenshots/*.png`) for each menu-bar state.\n\nKeep all examples using made-up project names.\n",
       "requirements": [
@@ -1481,12 +1798,18 @@
           "by": "claude:c631bc24"
         }
       ],
-      "commit": "a7be9a0f59d2acd482da65e22e29cdcb3e53fd16"
+      "commit": "a7be9a0f59d2acd482da65e22e29cdcb3e53fd16",
+      "sprint": "Polish and design",
+      "sprint_history": [
+        {
+          "sprint": "Polish and design",
+          "from": "2026-10-25T06:21:40Z"
+        }
+      ]
     },
     {
       "id": "T-039",
       "name": "Use a zzz icon for idle and add an icon legend to the README",
-      "phase": 4,
       "type": "polish",
       "description": "Replace the idle menu-bar symbol `checkmark.circle` with the SF Symbol `zzz` (same idle color) and update the tests that check it. Expand the README 'What it shows' table into an icon legend: icon, color, what the number counts and meaning, in priority order; note that only the most urgent state is shown and icons never animate.\n",
       "requirements": [],
@@ -1508,12 +1831,18 @@
       "started_at": "2026-10-25T20:29:39Z",
       "started_by": "claude:c631bc24",
       "completed_at": "2026-10-25T20:29:40Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Release",
+      "sprint_history": [
+        {
+          "sprint": "Release",
+          "from": "2026-10-25T20:29:36Z"
+        }
+      ]
     },
     {
       "id": "T-040",
       "name": "Show the state icon on each dropdown row",
-      "phase": 4,
       "type": "polish",
       "description": "Replace the text glyph (● ○ ?) at the start of each session row with the same SF Symbol and color the menu bar uses for that state (waiting `exclamationmark.circle.fill` red, idle `zzz` orange, uncertain `questionmark.circle` gray, busy the configured icon dimmed), so rows can be matched to the menu-bar icon. Update tests and the README dropdown example.\n",
       "requirements": [],
@@ -1532,12 +1861,18 @@
       "started_at": "2026-10-25T20:30:58Z",
       "started_by": "claude:c631bc24",
       "completed_at": "2026-10-25T20:34:36Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Release",
+      "sprint_history": [
+        {
+          "sprint": "Release",
+          "from": "2026-10-25T20:30:57Z"
+        }
+      ]
     },
     {
       "id": "T-041",
       "name": "Mute a project for an hour or for today from its row",
-      "phase": 4,
       "type": "feature",
       "description": "Each session row's submenu gets 'Mute project for 1 hour' and 'Mute project for today' (until local midnight), or 'Unmute project' when muted.\n\n## Mutes\n- Mutes are per project (`cwd`), stored in the state dir outside the session files, and expire on their own.\n- Sending a prompt in a muted project unmutes it (hook records `promptAt`; the plugin drops mutes older than a newer prompt).\n\n## Display\n- A muted session that is idle, stale or busy shows a gray `bell.slash` icon, sorts to the bottom with 'muted until HH:MM', and doesn't count in the menu bar; a waiting session still breaks through.\n- When every shown session is muted the menu bar shows a gray `bell.slash` with no number.\n- 'Unmute all' appears in the footer while anything is muted.\n\n## Done when\nTests, README and PRD.\n",
       "requirements": [],
@@ -1559,12 +1894,18 @@
       "started_at": "2026-10-25T20:38:47Z",
       "started_by": "claude:c631bc24",
       "completed_at": "2026-10-25T20:43:30Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Release",
+      "sprint_history": [
+        {
+          "sprint": "Release",
+          "from": "2026-10-25T20:38:47Z"
+        }
+      ]
     },
     {
       "id": "T-042",
       "name": "Show state symbols in color in the menu bar and rows",
-      "phase": 5,
       "type": "bugfix",
       "description": "The `zzz`, exclamation, question-mark and `bell.slash` symbols render without their state color in the menu bar (and possibly in rows), although the plugin sends `sfcolor`.\n\n## Change\n- Find out how SwiftBar 2.x colors SF Symbols (`sfcolor` vs `sfconfig` with `renderingMode` Palette/Hierarchical, template images in the status item),\n- make every state symbol show its light/dark color in both the menu bar and the dropdown rows,\n- verify live in light and dark mode,\n- and update tests and the README icon legend.\n",
       "requirements": [],
@@ -1592,12 +1933,18 @@
           "text": "SwiftBar colors only inline :symbol: text, not sfimage; menu bar and rows now use inline symbols with sfcolor; verified colored zzz in dark menu bar",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Polish and design",
+      "sprint_history": [
+        {
+          "sprint": "Polish and design",
+          "from": "2026-10-25T21:22:51Z"
+        }
       ]
     },
     {
       "id": "T-043",
       "name": "Settings: start automatically, and themes for icons and colors",
-      "phase": 5,
       "type": "feature",
       "description": "Extend the dropdown's Settings submenu with a start-at-login toggle and themes.\n\n## Change\n1. A 'Start automatically' toggle that makes the status bar launch at login (find out what is possible from a plugin: SwiftBar's own launch-at-login setting, a LaunchAgent, or opening System Settings > Login Items; fail safe and say which it controls);\n2. a Theme submenu to pick the icon and color for each state (waiting, idle, uncertain, busy, muted, none), with a few built-in themes (e.g. default, monochrome, high contrast) plus per-state overrides stored in the config file (validated: SF Symbol names and `#RRGGBB` or light,dark pairs only).\n\nMenu bar and rows use the chosen theme.\n\n## Done when\nTests, README config table and PRD.\n",
       "requirements": [],
@@ -1629,12 +1976,18 @@
           "text": "Settings: Start SwiftBar at login (own LaunchAgent, next login), Theme submenu (default, monochrome, high contrast) and icon_/color_<state> overrides in config",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Polish and design",
+      "sprint_history": [
+        {
+          "sprint": "Polish and design",
+          "from": "2026-10-25T21:22:52Z"
+        }
       ]
     },
     {
       "id": "T-044",
       "name": "Design: SwiftBar plugin vs standalone app vs atm integration",
-      "phase": 5,
       "type": "docs",
       "description": "Write `doc/design/future-architecture.md` comparing three directions for the product. Docs only; no code changes.\n\n## Options\n- (a) stay a SwiftBar plugin,\n- (b) a standalone macOS menu-bar app (e.g. Swift/SwiftUI `MenuBarExtra`: native colors, notifications, launch at login, no SwiftBar dependency, signing and distribution cost),\n- (c) integrating with atm (agentic-task-manager): showing tasks and loop progress next to sessions, or atm's dashboard consuming this project's state files.\n\n## For each\n- what it enables,\n- cost,\n- risks,\n- what of today's hooks and state files carries over,\n- and migration path.\n\nEnd with a recommendation and the open questions for the user.\n",
       "requirements": [],
@@ -1660,12 +2013,18 @@
           "text": "doc/design/future-architecture.md: stay on SwiftBar, prototype atm tasks in rows (C-menu), revisit a native app when SwiftBar blocks a feature; 5 open questions",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Polish and design",
+      "sprint_history": [
+        {
+          "sprint": "Polish and design",
+          "from": "2026-10-25T21:22:52Z"
+        }
       ]
     },
     {
       "id": "T-045",
       "name": "Don't show idle while subagents are still working",
-      "phase": 5,
       "type": "bugfix",
       "description": "When a session's subagents are still running and the parent agent is waiting for them, the row and the menu bar show idle (`zzz`), although work is going on.\n\n## Change\nShow it as working, or a distinct 'waiting on subagents' state with its own symbol.\n\n## Discuss first\n**DISCUSS WITH THE USER BEFORE IMPLEMENTING:**\n- which state or symbol to use,\n- whether it counts in the menu bar like busy,\n- and how to detect it reliably (`subagents` map from `SubagentStart`/`SubagentStop` vs `Stop` ordering, background agents vs foreground ones, stale subagent entries when `SubagentStop` is missed).\n",
       "requirements": [],
@@ -1700,12 +2059,18 @@
       "started_by": "claude:c631bc24",
       "commit": "1199c28048433d3d10a5cac11ce0d8850d58d021",
       "completed_at": "2026-10-25T22:10:30Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Polish and design",
+      "sprint_history": [
+        {
+          "sprint": "Polish and design",
+          "from": "2026-10-25T21:41:09Z"
+        }
+      ]
     },
     {
       "id": "T-046",
       "name": "Deepen the future architecture doc: tech options for B and C",
-      "phase": 5,
       "type": "docs",
       "description": "Extend `doc/design/future-architecture.md` with a detailed analysis of option B (standalone app) and C (atm integration).\n\n## Cover\n- concrete tech options (Swift/SwiftUI `MenuBarExtra` vs AppKit `NSStatusItem` vs Tauri/Electron/Go),\n- how the hooks and checks move (shell+`jq` vs a Swift core),\n- whether shell is maintainable by humans,\n- and an intermediate option that eases moving to B or C later (e.g. a Swift core CLI behind the SwiftBar plugin).\n\n## Record the user's answers\n- no user base yet,\n- not targeting SwiftBar users (standalone preferred),\n- Apple Developer account is fine,\n- calling atm from outside is fine,\n- notifications are in scope.\n\nUpdate the recommendation and open questions.\n",
       "requirements": [],
@@ -1731,12 +2096,18 @@
           "text": "Doc now covers shell maintainability, core language choice (Swift), option D (Swift core + CLI first), B tech stack, notifications, distribution, C via atm claims/status with caching; recommendation D then B then C",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Polish and design",
+      "sprint_history": [
+        {
+          "sprint": "Polish and design",
+          "from": "2026-10-25T22:17:03Z"
+        }
       ]
     },
     {
       "id": "T-047",
       "name": "Update the future architecture doc with the user's decisions",
-      "phase": 5,
       "type": "docs",
       "description": "Record the user's decisions in `doc/design/future-architecture.md` and add a detailed Homebrew section.\n\n## Record\n- app name `agentic-status-bar`, short form and CLI name `asb`;\n- minimum macOS 14;\n- the hook moves to Swift (no shell left);\n- the SwiftBar plugin is removed once the Swift migration is complete;\n- atm's JSON becomes a stable contract at some point, and we live with drift until then.\n\n## Homebrew section\nFrom the start vs later (own tap vs homebrew/cask, cask vs formula for the CLI, notability rules, `auto_updates` with Sparkle, release automation), with 'later' as the recommendation.\n\nUpdate the recommendation and open questions.\n",
       "requirements": [],
@@ -1762,12 +2133,18 @@
           "text": "Doc records name agentic-status-bar/asb, macOS 14, Swift hook with stable binary path, renames, SwiftBar plugin removal, atm lenient decoding; Homebrew section recommends later (GitHub Releases+Sparkle, own tap at 1.0, homebrew/cask once notable)",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Polish and design",
+      "sprint_history": [
+        {
+          "sprint": "Polish and design",
+          "from": "2026-10-25T23:28:36Z"
+        }
       ]
     },
     {
       "id": "T-048",
       "name": "Doc: Swift vs alternatives and the cross-platform question",
-      "phase": 5,
       "type": "docs",
       "description": "Add a section to `doc/design/future-architecture.md` on Swift vs alternatives and the cross-platform question.\n\n## Answer\n- can Swift do everything for the macOS app or does any part need another language;\n- alternatives (Objective-C, Rust/Tauri, Go, .NET/Avalonia, Electron, Kotlin Compose, Flutter) and reasons to prefer any of them;\n- can Rust/Tauri give one implementation for macOS, Windows and Linux (tray differences, GNOME tray, WSL, process checks, terminal focus, notifications), and at what effort;\n- and a phased path that solidifies on Swift first and moves to a cross-platform stack later, with what to do now to keep that cheap.\n\nUpdate the recommendation and open questions.\n",
       "requirements": [],
@@ -1793,12 +2170,18 @@
           "text": "New section: Swift covers everything on macOS; alternatives compared; Rust+Tauri cross-platform is reasonable for core and basic tray but costs 1.5-2x (tray gaps, GNOME, WSL, focus); phased Swift-first path with conformance suite and a checkpoint",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Polish and design",
+      "sprint_history": [
+        {
+          "sprint": "Polish and design",
+          "from": "2026-10-25T23:42:09Z"
+        }
       ]
     },
     {
       "id": "T-049",
       "name": "Swift package skeleton: ASBCore, asb and tests",
-      "phase": 6,
       "type": "infra",
       "priority": "P0",
       "labels": [
@@ -1832,12 +2215,18 @@
           "text": "Package AgenticStatusBar: ASBCore (Foundation only), asb (ArgumentParser, --version 0.1.0), ASBCoreTests at tests/ASBCoreTests (lowercase: macOS paths ignore case)",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-050",
       "name": "CI: build and test the Swift package",
-      "phase": 6,
       "type": "infra",
       "priority": "P0",
       "labels": [
@@ -1871,12 +2260,18 @@
           "text": "CI swift job (newest Xcode, tests/swift.sh); wrapper and CONTRIBUTING updated; CI job unverified until the phase push",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-051",
       "name": "Freeze the state file schema v1 as a public contract",
-      "phase": 6,
       "type": "docs",
       "priority": "P0",
       "labels": [
@@ -1907,12 +2302,18 @@
           "text": "doc/state-file-schema.md: v1 fields, events, metadata, writer and reader rules, mutes and config files; linked from the PRD",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-052",
       "name": "Snapshot schema v1 and its Codable types",
-      "phase": 6,
       "type": "feature",
       "priority": "P0",
       "labels": [
@@ -1947,12 +2348,18 @@
           "text": "Snapshot v1 types (sorted keys, optionals omitted) with detail/focusable fields for renderers; doc/snapshot-schema.md",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-053",
       "name": "Conformance suite: data-driven case format and runner",
-      "phase": 6,
       "type": "test",
       "priority": "P0",
       "labels": [
@@ -1987,12 +2394,18 @@
           "text": "Case format in tests/conformance/README.md, runner with diff and pending-as-known-issue, self-tests for the runner; pure Engine.snapshot(SnapshotInputs) entry point (stub handles no sessions)",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-054",
       "name": "ASBCore: config loading, validation and set_config",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2026,12 +2439,18 @@
           "text": "Config.parse/load/set with the key whitelist and validation (colors included), Paths with env overrides and state dir precedence; common.bats cases ported",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-055",
       "name": "ASBCore: load state files leniently",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2065,12 +2484,18 @@
           "text": "StateFile.parse (lenient per field, v 1...1, sessionId falls back to file name), ParsedStates with invalid count, StateDirectory.read (*.json regular files only)",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-056",
       "name": "ASBCore: ProcessInspector with a libproc implementation",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2110,12 +2535,18 @@
       "started_by": "claude:c631bc24",
       "commit": "62fe852d8c54ee2233b5953f4e1edc92bbf88d00",
       "completed_at": "2026-10-26T00:16:40Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
+      ]
     },
     {
       "id": "T-057",
       "name": "ASBCore: check C1 liveness and dead files",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2152,12 +2583,18 @@
           "text": "ReconciledSession model and Checks.liveness (C1); engine reports dead files and invalid count; c1-dead and c1-reused-pid pass, c1-alive pending on T-064",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-058",
       "name": "ASBCore: check C2 registry override and session names",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2192,12 +2629,18 @@
           "text": "RegistryEntry.parse and Checks.registry (C2: newer wins, waiting reason, user-given names, schema-issue flag, off with use_registry=0); Engine.reconcile exposes checked sessions; C2 conformance cases left to T-066",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-059",
       "name": "ASBCore: transcript tail and check C3 interrupt",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2232,12 +2675,18 @@
           "text": "Transcript.tailEntries (8 KB, cut first line dropped), prompt/turn-end rules and Checks.interrupts (C3, only for files saying busy/waiting); fixtures-based tests; C3 conformance cases left to T-066",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-060",
       "name": "ASBCore: checks C4 approved tool and C5 staleness",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2272,12 +2721,18 @@
           "text": "Checks.approvedTools (C4, caffeinate ignored) and Checks.staleness (C5 on busy and subagents, transcript mtime only for files saying busy/waiting); checks.bats C4/C5 cases ported; conformance cases left to T-066",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-061",
       "name": "ASBCore: subagents state and session-type filters",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2312,12 +2767,18 @@
           "text": "Checks.subagents (before C5, interrupt wins) and Filters (kind defaults to interactive, desktop follows ide, unknown shown); reach.bats subagent and filter cases ported; conformance cases left to T-067",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-062",
       "name": "ASBCore: project mutes",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2352,12 +2813,18 @@
           "text": "Mutes: parse/active (expiry, lifted by later promptAt)/apply (waiting breaks through), muteHour/muteToday (local midnight), encode (sorted, expired dropped), atomic update; mute.bats logic ported; conformance cases left to T-067",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-063",
       "name": "ASBCore: themes and per-state overrides",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2390,12 +2857,18 @@
           "text": "Theme.builtIn (default, monochrome, high_contrast, all 8 states) and Theme.resolve (unknown → default, icon key for busy/none, per-state overrides)",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-064",
       "name": "ASBCore: menu model (header, rows, labels)",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2438,12 +2911,18 @@
       "started_by": "claude:c631bc24",
       "commit": "28510f096db7194ce83f120688d41441ce2c1a32",
       "completed_at": "2026-10-26T00:25:38Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
+      ]
     },
     {
       "id": "T-065",
       "name": "asb snapshot --json on real inputs",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2485,12 +2964,18 @@
       "started_by": "claude:c631bc24",
       "commit": "430fd4ca80080eb326dc1a9be46ac74b9105283e",
       "completed_at": "2026-10-26T00:27:24Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
+      ]
     },
     {
       "id": "T-066",
       "name": "Conformance cases: checks and rows from the bats suite",
-      "phase": 6,
       "type": "test",
       "priority": "P1",
       "labels": [
@@ -2523,12 +3008,18 @@
           "text": "Single-file case format (.case.json) added to the runner and README; 48 hand-written cases cover every snapshot scenario of checks.bats (C2-C5) and plugin.bats (rows, header, C1); all 52 cases pass with no behavior differences found",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-067",
       "name": "Conformance cases: mutes, filters, subagents and titles",
-      "phase": 6,
       "type": "test",
       "priority": "P1",
       "labels": [
@@ -2561,12 +3052,18 @@
           "text": "27 cases for mutes, herdr titles and focus, subagents, themes and filters from mute.bats and reach.bats; 79 cases pass, no behavior differences found",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-068",
       "name": "asb swiftbar: render SwiftBar's menu format",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2601,12 +3098,18 @@
           "text": "asb swiftbar [--plugin PATH]: SwiftBarRenderer from the snapshot; with --plugin the output is byte-identical to the shell plugin on live sessions (diffed); without it, items call asb action. Unit tests pin each line instead of golden files",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-069",
       "name": "asb action: every menu action",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2641,12 +3144,18 @@
           "text": "asb action NAME [ARGS]: Actions with an injectable CommandRunner (ProcessRunner resolves on PATH so bats stubs work); focus/toggle/set/login/reveal-config/mute*/copy*/open*/reveal; same validation and default config text as the shell; action tests ported",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-070",
       "name": "Point the SwiftBar plugin at asb",
-      "phase": 6,
       "type": "refactor",
       "priority": "P1",
       "labels": [
@@ -2680,12 +3189,18 @@
           "text": "Plugin is now a thin sh front end that execs asb swiftbar/asb action (asb from CLAUDE_STATUSBAR_ASB, the stable path, or the repo build); bats use .build/debug/asb and CLAUDE_STATUSBAR_PS_TABLE; all 203 bats pass; plugin refresh 16 ms (was 103). Fixed: Paths now honors $HOME (a test had written a login item to the real home; removed). Shell hook median 21 ms on a busy machine, to be replaced by asb hook.",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-071",
       "name": "asb hook: event handling",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2720,12 +3235,18 @@
           "text": "HookPayload + pure HookEvents.apply (all 9 events, newer-wins drop, stateSince rule, unknown fields kept) and asb hook (silent, exit 0); metadata and locking follow in T-072/T-073",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-072",
       "name": "asb hook: session metadata and backfill",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2760,12 +3281,18 @@
           "text": "HookMetadata (claude walk over 6 processes incl. node+claude, procStart in ps format, kind, herdr pane, bundle id), applied at SessionStart and as a one-time backfill (pid null counts as recorded); stale same-pid files removed at SessionStart; lookups only when needed",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-073",
       "name": "asb hook: locking, ordering and refresh poke",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2799,12 +3326,18 @@
           "text": "StateWriter.withLock (mkdir lock, 50x10 ms, quiet give-up), atomicWrite (<file>.tmp.<pid> + rename), Refresh.poke (500 ms debounce via .last-poke); asb hook does read-modify-write under the lock and pokes SwiftBar without waiting",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-074",
       "name": "Run the hook bats suite against asb hook, and measure it",
-      "phase": 6,
       "type": "test",
       "priority": "P1",
       "labels": [
@@ -2839,12 +3372,18 @@
           "text": "run_hook and hook.bats use asb hook (HOOK helper); all 203 bats pass; jq-missing test became 'works without jq'; teardown tolerates the background open stub. Bench now times asb hook (target 10 ms) but could not be measured fairly: machine under heavy load (load avg 6.5, headless Chrome), all timings inflated (snapshot 48 ms vs 14 ms earlier). Rerun on a quiet machine (noted on T-077).",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-075",
       "name": "asb install and asb uninstall",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -2879,12 +3418,18 @@
           "text": "asb install/uninstall [--purge]: order-preserving JSON for settings.json, HookSettings (add 9 async hooks, replace old shell entries, exact uninstall), Installer (stable copy under ~/Library/Application Support/agentic-status-bar/bin, backup, SwiftBar link, login item, purge/ask); install.bats ported; smoke-tested on a scratch HOME, not run on the real setup",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-076",
       "name": "Rename paths and names to agentic-status-bar",
-      "phase": 6,
       "type": "refactor",
       "priority": "P1",
       "labels": [
@@ -2923,12 +3468,18 @@
       "started_at": "2026-10-26T04:25:39Z",
       "started_by": "claude:c631bc24",
       "completed_at": "2026-10-26T04:26:04Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
+      ]
     },
     {
       "id": "T-077",
       "name": "Remove the shell hook, jq code and install scripts",
-      "phase": 6,
       "type": "refactor",
       "priority": "P1",
       "labels": [
@@ -2977,12 +3528,18 @@
       "started_by": "claude:c631bc24",
       "commit": "a794e21c3f61fde38071df987ab4e436795efaa1",
       "completed_at": "2026-10-26T04:30:17Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
+      ]
     },
     {
       "id": "T-078",
       "name": "Rename the GitHub repo to agentic-status-bar and update docs",
-      "phase": 6,
       "type": "docs",
       "priority": "P2",
       "labels": [
@@ -3018,12 +3575,18 @@
           "text": "GitHub repo renamed to hakanserce/agentic-status-bar (remote updated by gh); README clone URL and PRD name updated; .claude-plugin was already gone",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-079",
       "name": "macOS app project: AgenticStatusBar target",
-      "phase": 6,
       "type": "infra",
       "priority": "P1",
       "labels": [
@@ -3060,12 +3623,18 @@
           "text": "XcodeGen spec App/project.yml (bundle com.hakanserce.agentic-status-bar, macOS 14, LSUIElement, hardened runtime, ad-hoc), links ASBCore, post-build embeds asb in Contents/Helpers; placeholder status item; tests/app.sh builds it locally and in a new CI job",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-080",
       "name": "App: session store with file watching",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -3098,12 +3667,18 @@
           "text": "SessionStore (@Observable, main actor): DispatchSource watchers on state, registry and config dirs plus a 5 s timer feed a 200 ms Coalescer; snapshot computed off the main thread with LiveInputs (now Sendable), dead files deleted; app test target with 4 Coalescer tests; tests/app.sh --test prints a summary",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-081",
       "name": "App: colored status item with count",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -3135,12 +3710,18 @@
           "text": "Colored status item with count; visually checked by the user on live sessions",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-082",
       "name": "App: session rows popover",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -3174,12 +3755,18 @@
           "text": "Popover with session rows, subagents indented, focus on click; checked by the user",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-083",
       "name": "App: row actions and Unmute all",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -3213,12 +3800,18 @@
           "text": "Row menu (hover … and right-click) with mute, copy, open, reveal, focus; Unmute all; checked by the user",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-084",
       "name": "App: Settings window",
-      "phase": 6,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -3251,12 +3844,18 @@
           "text": "Tabbed Settings window (General, Appearance) owned by the app; fixed size; checked by the user",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-085",
       "name": "App: start at login with SMAppService",
-      "phase": 6,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -3289,12 +3888,18 @@
           "text": "Start at login via SMAppService.mainApp with approval hint; removes the SwiftBar-era LaunchAgent; checked by the user",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-086",
       "name": "App: first-run hook install and the stable asb copy",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -3336,12 +3941,18 @@
       "started_by": "claude:c631bc24",
       "commit": "f933588f9de3a2c507dfc970ca38bbb165a12085",
       "completed_at": "2026-10-26T05:48:51Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
+      ]
     },
     {
       "id": "T-087",
       "name": "App: notifications when a session waits on you",
-      "phase": 6,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -3376,12 +3987,18 @@
           "text": "Waiting notifications after 10 s with Focus and Mute actions; checked live by the user",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-088",
       "name": "App: notification settings",
-      "phase": 6,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -3417,12 +4034,18 @@
           "text": "Notifications tab: waiting, idle, delay, sound, test button; notify_* config keys; checked by the user",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-089",
       "name": "App: view model and row tests",
-      "phase": 6,
       "type": "test",
       "priority": "P2",
       "labels": [
@@ -3456,12 +4079,18 @@
           "text": "44 app tests: header states, MenuModel rows with muted last, store actions with a recording runner, notification edge cases; CI app job runs them",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-090",
       "name": "Release: Developer ID signing and notarization in CI",
-      "phase": 6,
       "type": "infra",
       "priority": "P2",
       "labels": [
@@ -3505,12 +4134,18 @@
       "started_at": "2026-10-26T23:46:43Z",
       "started_by": "claude:c631bc24",
       "completed_at": "2026-10-26T23:53:12Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
+      ]
     },
     {
       "id": "T-091",
       "name": "Release: Sparkle updates and GitHub Releases",
-      "phase": 6,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -3557,12 +4192,18 @@
       "started_by": "claude:c631bc24",
       "commit": "060bbe890ba6061e49071f14a90a5fe6939b6c33",
       "completed_at": "2026-10-27T04:54:08Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
+      ]
     },
     {
       "id": "T-092",
       "name": "Remove the SwiftBar plugin, the remaining shell and bats",
-      "phase": 6,
       "type": "refactor",
       "priority": "P2",
       "labels": [
@@ -3610,12 +4251,18 @@
         }
       ],
       "completed_at": "2026-10-26T06:20:13Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
+      ]
     },
     {
       "id": "T-093",
       "name": "Docs: README, PRD and CONTRIBUTING for the app",
-      "phase": 6,
       "type": "docs",
       "priority": "P2",
       "labels": [
@@ -3652,12 +4299,18 @@
           "text": "README, CONTRIBUTING, PRD and the schema docs describe the app; design doc marks D and B done; Sparkle's README section moved to T-091",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-25T23:56:22Z"
+        }
       ]
     },
     {
       "id": "T-094",
       "name": "Allow Swift and Xcode build commands without prompts",
-      "phase": 6,
       "type": "infra",
       "priority": "P0",
       "labels": [
@@ -3687,12 +4340,18 @@
           "text": "Allowlisted swift build/test/package resolve, tests/swift.sh, xcodegen, xcodebuild",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-26T00:01:05Z"
+        }
       ]
     },
     {
       "id": "T-095",
       "name": "Fewer permission prompts: test summary and allowlist",
-      "phase": 6,
       "type": "infra",
       "priority": "P0",
       "labels": [
@@ -3723,12 +4382,18 @@
           "text": "tests/swift.sh --summary filters its own output; allowlisted .build asb, git status/mv/rm, ls, jq",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-26T04:25:18Z"
+        }
       ]
     },
     {
       "id": "T-096",
       "name": "Hook: newer-wins compares event start times; subagent events always merge",
-      "phase": 6,
       "type": "bugfix",
       "priority": "P0",
       "labels": [
@@ -3761,12 +4426,18 @@
           "text": "Newer-wins compares eventAt (event start) instead of updatedAt; older subagent events still merge",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-26T05:12:19Z"
+        }
       ]
     },
     {
       "id": "T-097",
       "name": "Checks: a missed Stop doesn't hide running subagents",
-      "phase": 6,
       "type": "bugfix",
       "priority": "P0",
       "labels": [
@@ -3798,12 +4469,18 @@
           "text": "C3 sets interrupted only for the interrupt marker; a missed Stop with running subagents shows waiting on subagents",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-26T05:12:19Z"
+        }
       ]
     },
     {
       "id": "T-098",
       "name": "Hook: track background subagents from background_tasks",
-      "phase": 6,
       "type": "bugfix",
       "priority": "P0",
       "labels": [
@@ -3835,12 +4512,18 @@
           "text": "Background subagents follow the background_tasks registry on Stop and SubagentStop; installed live",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-26T05:37:35Z"
+        }
       ]
     },
     {
       "id": "T-099",
       "name": "App: Quit button in the session list",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -3871,12 +4554,18 @@
           "text": "Quit button (and Cmd-Q) at the bottom of the session list; checked by the user",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-26T06:32:59Z"
+        }
       ]
     },
     {
       "id": "T-100",
       "name": "App: app icon (logo)",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -3910,12 +4599,18 @@
           "text": "Beacon icon (orange status light with signal arcs) on a white rounded square with a thin black edge and drop shadow; rendered by scripts/make-icon.swift into App/Resources/Assets.xcassets; user approved it in the dev build.",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T00:07:46Z"
+        }
       ]
     },
     {
       "id": "T-101",
       "name": "App: About window",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -3950,12 +4645,18 @@
           "text": "AboutPanel.show() opens the standard About panel (icon, name, version, build, copyright, credits with the repo link); info button next to the gear in the popover; app tests added. User checks visually at the end of the loop.",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T00:07:46Z"
+        }
       ]
     },
     {
       "id": "T-102",
       "name": "App: tidy the Settings window and fit each tab without scrolling",
-      "phase": 6,
       "type": "polish",
       "priority": "P1",
       "labels": [
@@ -3987,12 +4688,18 @@
           "text": "NSTabViewController toolbar tabs (title follows the tab), each SwiftUI tab sized to its content at 500pt wide with scrolling off; General shows hook status with an icon, shorter footers. Screenshots of all three tabs checked; no scrollbars.",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T00:28:06Z"
+        }
       ]
     },
     {
       "id": "T-103",
       "name": "App: app menu while a window is open",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -4028,12 +4735,18 @@
           "text": "Settings and first-run windows switch the app to .regular (menus + Dock icon); closing the last window returns to .accessory. App menu: About, Settings… (Cmd-,), Show Sessions, Hide/Hide Others/Show All, Quit; Edit and Window menus. Verified live via System Events; app tests added.",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T00:28:06Z"
+        }
       ]
     },
     {
       "id": "T-104",
       "name": "App: pick symbols and colors from a set instead of typing",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -4067,12 +4780,18 @@
           "text": "Symbol popover with a 54-symbol grid (all exist, covers every theme symbol) and a 14-swatch palette of light,dark system color pairs replace the text field and ColorPickers; reset kept; tests added. Symbol picker checked on screen; palette left for the user's check.",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T00:28:06Z"
+        }
       ]
     },
     {
       "id": "T-105",
       "name": "App: in-app Help",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -4113,12 +4832,18 @@
         }
       ],
       "completed_at": "2026-10-27T05:04:55Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T00:47:57Z"
+        }
+      ]
     },
     {
       "id": "T-106",
       "name": "Release: Homebrew cask in a tap",
-      "phase": 6,
       "type": "infra",
       "priority": "P2",
       "labels": [
@@ -4155,12 +4880,18 @@
           "text": "Cask live in solo-swe/homebrew-tap (0.2.1): brew style, audit --online, fetch (sha256) and livecheck pass; a fully qualified brew install trusts the cask itself. homebrew.yml updates it on release: published (tested by hand: deploy key clone works, no change). brew uninstall's hook removal untested (it would remove the live hooks).",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T00:47:57Z"
+        }
       ]
     },
     {
       "id": "T-107",
       "name": "Release: transfer the repository to the solo-swe organization",
-      "phase": 6,
       "type": "infra",
       "priority": "P1",
       "labels": [
@@ -4193,12 +4924,18 @@
       "started_at": "2026-10-27T05:30:25Z",
       "started_by": "claude:c631bc24",
       "completed_at": "2026-10-27T05:30:42Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T05:14:16Z"
+        }
+      ]
     },
     {
       "id": "T-108",
       "name": "Release: reconnect the clone and check secrets and CI after the move",
-      "phase": 6,
       "type": "infra",
       "priority": "P1",
       "labels": [
@@ -4228,12 +4965,18 @@
           "text": "Remote is git@github.com:solo-swe/agentic-status-bar.git; 6 secrets present; SPARKLE_PUBLIC_KEY matches generate_keys -p; CI run 40455737403 on solo-swe passed; Actions enabled (workflow token default read, release.yml asks contents: write).",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T05:14:16Z"
+        }
       ]
     },
     {
       "id": "T-109",
       "name": "Release: point the app and docs at solo-swe/agentic-status-bar",
-      "phase": 6,
       "type": "refactor",
       "priority": "P1",
       "labels": [
@@ -4271,12 +5014,18 @@
           "text": "All links point at solo-swe/agentic-status-bar (About, Help, SUFeedURL, appcast.sh, README, PRD); bundle ID and the Hakan Serce copyright unchanged; core, app tests and lint pass.",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T05:14:16Z"
+        }
       ]
     },
     {
       "id": "T-110",
       "name": "Release: scan the git history before going public",
-      "phase": 6,
       "type": "infra",
       "priority": "P1",
       "labels": [
@@ -4303,12 +5052,18 @@
           "text": "History clean: gitleaks over 138 commits found no secrets; no home path, email in files, or names of the user's other projects in any commit. Only exposure: every commit's author email is hakanserce@gmail.com (user's call: keep, or noreply for new commits).",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T05:14:16Z"
+        }
       ]
     },
     {
       "id": "T-111",
       "name": "Release: make the repository public",
-      "phase": 6,
       "type": "infra",
       "priority": "P1",
       "labels": [
@@ -4344,12 +5099,18 @@
       "started_at": "2026-10-27T05:37:51Z",
       "started_by": "claude:c631bc24",
       "completed_at": "2026-10-27T05:37:51Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T05:14:16Z"
+        }
+      ]
     },
     {
       "id": "T-112",
       "name": "Release: v0.2.1, the first public release",
-      "phase": 6,
       "type": "infra",
       "priority": "P1",
       "labels": [
@@ -4382,12 +5143,18 @@
           "text": "v0.2.1 published as the latest release (run 40456432369): notarized DMG and app, solo-swe SUFeedURL, matching SUPublicEDKey, appcast signature valid; releases/latest/download/appcast.xml and the zip download anonymously (200, sizes match). Old v0.1.0/v0.2.0 releases and tags deleted.",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T05:14:16Z"
+        }
       ]
     },
     {
       "id": "T-113",
       "name": "Docs: one release guide, doc/RELEASING.md",
-      "phase": 6,
       "type": "docs",
       "priority": "P1",
       "labels": [
@@ -4422,12 +5189,18 @@
           "text": "doc/RELEASING.md: flow diagram, one-time setup (Apple, Sparkle, tap deploy key) with a secrets/variables table, per-release checklist, checking a release, failure table, replacing keys; scripts/notarize.md folded in and deleted; CONTRIBUTING, README, PRD, release.yml and package.sh link to it.",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T06:05:22Z"
+        }
       ]
     },
     {
       "id": "T-114",
       "name": "CI: move actions off Node 20",
-      "phase": 6,
       "type": "infra",
       "priority": "P2",
       "labels": [
@@ -4459,12 +5232,18 @@
           "text": "All five uses moved to actions/checkout@v7 (node24); CI run 40459877078 and Homebrew run 40459884074 pass with no Node 20 warning (only GitHub's runner-capacity and ubuntu-latest notices). release.yml is confirmed at the next release.",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T06:11:22Z"
+        }
       ]
     },
     {
       "id": "T-115",
       "name": "Proposal: support more coding agents than Claude Code",
-      "phase": 7,
       "type": "docs",
       "priority": "P2",
       "labels": [
@@ -4479,9 +5258,9 @@
         "doc/design/agent-providers.md"
       ],
       "created_at": "2026-10-27T06:37:58Z",
-      "updated_at": "2026-10-27T07:30:01Z",
+      "updated_at": "2026-10-31T09:14:25Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24",
+      "updated_by": "claude:6baf63b2",
       "started_at": "2026-10-27T06:52:29Z",
       "started_by": "claude:c631bc24",
       "commit": "f853cf5f53a4f6ccef5cf5252464efbe7af27a34",
@@ -4493,12 +5272,23 @@
           "text": "Proposal in doc/design/agent-providers.md: 25 Claude Code assumptions mapped; Codex, Copilot CLI, opencode, Gemini CLI, Cursor, Amp, Aider and others researched; provider abstraction, optional agent field (no schema bump, conformance unchanged), feasibility table, order (Cursor guard, abstraction, Codex, Copilot, opencode, ...), 38 tasks, 7 open questions for the user.",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Animated Companion",
+      "sprint_history": [
+        {
+          "sprint": "Architecture: more agents and terminals",
+          "from": "2026-10-27T06:37:58Z",
+          "to": "2026-10-31T09:14:25Z"
+        },
+        {
+          "sprint": "Animated Companion",
+          "from": "2026-10-31T09:14:25Z"
+        }
       ]
     },
     {
       "id": "T-116",
       "name": "Proposal: focus sessions in more terminals and apps",
-      "phase": 7,
       "type": "docs",
       "priority": "P2",
       "labels": [
@@ -4513,9 +5303,9 @@
         "doc/design/focus-targets.md"
       ],
       "created_at": "2026-10-27T06:37:58Z",
-      "updated_at": "2026-10-27T07:30:01Z",
+      "updated_at": "2026-10-31T09:14:25Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:c631bc24",
+      "updated_by": "claude:6baf63b2",
       "started_at": "2026-10-27T06:52:30Z",
       "started_by": "claude:c631bc24",
       "commit": "9c6464b870729ec1db880cf09c9c6dcdd03e8188",
@@ -4527,12 +5317,23 @@
           "text": "Proposal in `doc/design/focus-targets.md`: today's herdr-only focus mapped; 14 targets researched; a layered focus model (innermost layer at hook time, outer layers resolved at click time), an optional `focus` field (no schema bump), feasibility table, order (layer model → app raise for all → tmux → WezTerm/kitty → iTerm2/Terminal.app → VS Code/Cursor → Ghostty), 43 tasks and 7 open questions.",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Animated Companion",
+      "sprint_history": [
+        {
+          "sprint": "Architecture: more agents and terminals",
+          "from": "2026-10-27T06:37:58Z",
+          "to": "2026-10-31T09:14:25Z"
+        },
+        {
+          "sprint": "Animated Companion",
+          "from": "2026-10-31T09:14:25Z"
+        }
       ]
     },
     {
       "id": "T-117",
       "name": "Docs: show the Homebrew tap and trust commands in the README",
-      "phase": 6,
       "type": "docs",
       "priority": "P1",
       "labels": [
@@ -4563,12 +5364,18 @@
           "text": "README Install shows brew tap, the full-name install (trusts the cask), and brew trust --cask / brew trust for the short name; checked with brew help trust and brew info; RELEASING.md notes the trust for brew info.",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T06:39:03Z"
+        }
       ]
     },
     {
       "id": "T-118",
       "name": "Debug option: log raw hook payloads",
-      "phase": 6,
       "type": "feature",
       "priority": "P1",
       "labels": [
@@ -4602,12 +5409,18 @@
           "text": "`debug_hook_log=1` makes `asb hook` append each raw payload (plus its env vars and parent pid) to `hook-payloads.jsonl` in the state dir, capped at 5 MB; off by default; 5 tests; checked end to end with the release binary.",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T07:16:40Z"
+        }
       ]
     },
     {
       "id": "T-119",
       "name": "Spike: capture hook payloads when a subagent asks for permission",
-      "phase": 6,
       "type": "test",
       "priority": "P1",
       "labels": [
@@ -4625,14 +5438,25 @@
         "tests/fixtures/payloads/"
       ],
       "created_at": "2026-10-27T07:16:40Z",
-      "updated_at": "2026-10-27T07:16:40Z",
+      "updated_at": "2026-10-31T09:14:25Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:6baf63b2",
+      "sprint": "Animated Companion",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T07:16:40Z",
+          "to": "2026-10-31T09:14:25Z"
+        },
+        {
+          "sprint": "Animated Companion",
+          "from": "2026-10-31T09:14:25Z"
+        }
+      ]
     },
     {
       "id": "T-120",
       "name": "Fix: a subagent waiting on input shows as waiting",
-      "phase": 6,
       "type": "bugfix",
       "priority": "P1",
       "labels": [
@@ -4656,14 +5480,25 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-27T07:16:40Z",
-      "updated_at": "2026-10-27T07:16:40Z",
+      "updated_at": "2026-10-31T09:14:25Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:6baf63b2",
+      "sprint": "Animated Companion",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T07:16:40Z",
+          "to": "2026-10-31T09:14:25Z"
+        },
+        {
+          "sprint": "Animated Companion",
+          "from": "2026-10-31T09:14:25Z"
+        }
+      ]
     },
     {
       "id": "T-121",
       "name": "Fix: Help menu says Help isn't available",
-      "phase": 6,
       "type": "bugfix",
       "priority": "P1",
       "labels": [
@@ -4730,12 +5565,18 @@
       "commit": "c238526662d2d96b21d6423416b085923457d7ff",
       "review_requested_at": "2026-10-27T07:52:05Z",
       "completed_at": "2026-10-27T08:17:02Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T07:43:57Z"
+        }
+      ]
     },
     {
       "id": "T-122",
       "name": "App: Esc closes the Help and Settings windows",
-      "phase": 6,
       "type": "polish",
       "priority": "P2",
       "labels": [
@@ -4767,12 +5608,18 @@
           "text": "Help and Settings use `EscClosingWindow` (`cancelOperation` → `performClose`); popovers inside still take Esc first; app test added.",
           "by": "claude:c631bc24"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T08:19:51Z"
+        }
       ]
     },
     {
       "id": "T-123",
       "name": "Release: v0.2.2",
-      "phase": 6,
       "type": "infra",
       "priority": "P1",
       "labels": [
@@ -4816,12 +5663,18 @@
         }
       ],
       "completed_at": "2026-10-27T08:34:21Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T08:24:35Z"
+        }
+      ]
     },
     {
       "id": "T-124",
       "name": "Docs: social media preview image for the repository",
-      "phase": 6,
       "type": "docs",
       "priority": "P2",
       "labels": [
@@ -4866,12 +5719,18 @@
         }
       ],
       "completed_at": "2026-10-27T16:30:50Z",
-      "completed_by": "claude:c631bc24"
+      "completed_by": "claude:c631bc24",
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-27T16:26:30Z"
+        }
+      ]
     },
     {
       "id": "T-125",
       "name": "Fix: waiting lingers after a permission is approved",
-      "phase": 6,
       "type": "bugfix",
       "priority": "P1",
       "labels": [
@@ -4907,12 +5766,18 @@
           "text": "Native install’s version-named `claude` process is now found (C4 works again); null pids retried on each prompt; a new subagent ends a wait on the `Agent`/`Task` tool.",
           "by": "claude:6baf63b2"
         }
+      ],
+      "sprint": "Swift migration",
+      "sprint_history": [
+        {
+          "sprint": "Swift migration",
+          "from": "2026-10-31T06:54:28Z"
+        }
       ]
     },
     {
       "id": "T-126",
       "name": "Proposal: an animated desktop companion outside the menu bar",
-      "phase": 8,
       "type": "docs",
       "priority": "P2",
       "labels": [
@@ -4961,12 +5826,18 @@
       "started_by": "claude:6baf63b2",
       "commit": "4474ca8b8f98509617a8c32034f14f83b475dcff",
       "completed_at": "2026-10-31T07:39:36Z",
-      "completed_by": "claude:6baf63b2"
+      "completed_by": "claude:6baf63b2",
+      "sprint": "Desktop companion",
+      "sprint_history": [
+        {
+          "sprint": "Desktop companion",
+          "from": "2026-10-31T07:19:10Z"
+        }
+      ]
     },
     {
       "id": "T-127",
       "name": "Companion: config keys",
-      "phase": 8,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -4999,12 +5870,18 @@
           "text": "Config keys `companion`, `companion_position` (four corners, others rejected), `companion_over_fullscreen`; in the config template and the schema doc.",
           "by": "claude:6baf63b2"
         }
+      ],
+      "sprint": "Desktop companion",
+      "sprint_history": [
+        {
+          "sprint": "Desktop companion",
+          "from": "2026-10-31T07:39:30Z"
+        }
       ]
     },
     {
       "id": "T-128",
       "name": "Companion: the floating panel in its corner",
-      "phase": 8,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -5039,12 +5916,18 @@
           "text": "Non-activating, click-through `NSPanel` (260×60 strip) in the configured corner of the main screen’s `visibleFrame`; follows config and screen changes; `.screenSaver` level only with `companion_over_fullscreen`.",
           "by": "claude:6baf63b2"
         }
+      ],
+      "sprint": "Desktop companion",
+      "sprint_history": [
+        {
+          "sprint": "Desktop companion",
+          "from": "2026-10-31T07:39:30Z"
+        }
       ]
     },
     {
       "id": "T-129",
       "name": "Companion: stick-figure rig and poses",
-      "phase": 8,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -5079,12 +5962,18 @@
           "text": "Zero-size joint layers (11 bones) with `Pose` joint angles; `Skeleton.points` does the same forward kinematics for tests; `animate` plays per-joint keyframes, discrete at 12 fps by default; label-colored strokes follow the appearance.",
           "by": "claude:6baf63b2"
         }
+      ],
+      "sprint": "Desktop companion",
+      "sprint_history": [
+        {
+          "sprint": "Desktop companion",
+          "from": "2026-10-31T07:39:30Z"
+        }
       ]
     },
     {
       "id": "T-130",
       "name": "Companion: walk cycle",
-      "phase": 8,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -5118,12 +6007,18 @@
           "text": "Eight-pose walk (contact, down, passing, up, mirrored) with grounded hips; travel speed = two strides per cycle; `walk(to:)` turns and stops cleanly, `stroll` wanders the strip with calm pauses.",
           "by": "claude:6baf63b2"
         }
+      ],
+      "sprint": "Desktop companion",
+      "sprint_history": [
+        {
+          "sprint": "Desktop companion",
+          "from": "2026-10-31T07:39:30Z"
+        }
       ]
     },
     {
       "id": "T-131",
       "name": "Companion: weight lifting and push-ups",
-      "phase": 8,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -5158,12 +6053,18 @@
           "text": "Two-bone IK (`Skeleton.reaching`) keeps hands on targets; `Activity` (intro, loop, outro, prop) with `perform(_:reps:)`; weight lifting with a barbell plate in the hands, push-ups with hands and feet planted.",
           "by": "claude:6baf63b2"
         }
+      ],
+      "sprint": "Desktop companion",
+      "sprint_history": [
+        {
+          "sprint": "Desktop companion",
+          "from": "2026-10-31T07:39:30Z"
+        }
       ]
     },
     {
       "id": "T-132",
       "name": "Companion: jumping jacks and pull-ups",
-      "phase": 8,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -5198,12 +6099,18 @@
           "text": "Jumping jacks (hop, land open with arms up, hop closed) and pull-ups on a bar prop (hang, chin over the bar, elbows out via `reachingOut`); bar lowered to 45 pt so the head stays inside the strip.",
           "by": "claude:6baf63b2"
         }
+      ],
+      "sprint": "Desktop companion",
+      "sprint_history": [
+        {
+          "sprint": "Desktop companion",
+          "from": "2026-10-31T07:39:30Z"
+        }
       ]
     },
     {
       "id": "T-133",
       "name": "Companion: wave with a speech bubble",
-      "phase": 8,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -5238,12 +6145,18 @@
           "text": "Wave loop (raise, three forearm swings, lower, ~2 s wait) and a speech bubble prop with **!** or **?** in a given color, kept readable when the figure faces left.",
           "by": "claude:6baf63b2"
         }
+      ],
+      "sprint": "Desktop companion",
+      "sprint_history": [
+        {
+          "sprint": "Desktop companion",
+          "from": "2026-10-31T07:39:30Z"
+        }
       ]
     },
     {
       "id": "T-134",
       "name": "Companion: the bed, sleeping and sitting",
-      "phase": 8,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -5278,12 +6191,18 @@
           "text": "Bed at the strip’s inner end (headboard outward, `StripLayout` gives bed, rest spot and walk range per corner); `sleep(at:)` sits then lies down, breathes and shows rising z’s; `sit(at:)` sits on the edge with an occasional head tilt.",
           "by": "claude:6baf63b2"
         }
+      ],
+      "sprint": "Desktop companion",
+      "sprint_history": [
+        {
+          "sprint": "Desktop companion",
+          "from": "2026-10-31T07:39:30Z"
+        }
       ]
     },
     {
       "id": "T-135",
       "name": "Companion: scene controller and the calm busy routine",
-      "phase": 8,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -5336,12 +6255,18 @@
         }
       ],
       "completed_at": "2026-10-31T08:39:01Z",
-      "completed_by": "claude:6baf63b2"
+      "completed_by": "claude:6baf63b2",
+      "sprint": "Desktop companion",
+      "sprint_history": [
+        {
+          "sprint": "Desktop companion",
+          "from": "2026-10-31T07:39:30Z"
+        }
+      ]
     },
     {
       "id": "T-136",
       "name": "Companion: subagents, uncertain, muted and warning",
-      "phase": 8,
       "type": "feature",
       "priority": "P3",
       "labels": [
@@ -5383,12 +6308,18 @@
       "started_by": "claude:6baf63b2",
       "commit": "ae747ec20c308bafb1750e115cc846765f311c31",
       "completed_at": "2026-10-31T08:53:35Z",
-      "completed_by": "claude:6baf63b2"
+      "completed_by": "claude:6baf63b2",
+      "sprint": "Desktop companion",
+      "sprint_history": [
+        {
+          "sprint": "Desktop companion",
+          "from": "2026-10-31T07:39:30Z"
+        }
+      ]
     },
     {
       "id": "T-137",
       "name": "Companion: energy rules and measurement",
-      "phase": 8,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -5429,12 +6360,18 @@
       "started_by": "claude:6baf63b2",
       "commit": "d4d0724dbd3bf0a0a70a1a911dbb39f120272fe4",
       "completed_at": "2026-10-31T08:47:14Z",
-      "completed_by": "claude:6baf63b2"
+      "completed_by": "claude:6baf63b2",
+      "sprint": "Desktop companion",
+      "sprint_history": [
+        {
+          "sprint": "Desktop companion",
+          "from": "2026-10-31T07:39:30Z"
+        }
+      ]
     },
     {
       "id": "T-138",
       "name": "Companion: click, drag to a corner, and right-click menu",
-      "phase": 8,
       "type": "feature",
       "priority": "P3",
       "labels": [
@@ -5444,7 +6381,7 @@
       "description": "Let the figure itself take the mouse (`doc/design/desktop-companion.md` › Interaction).\n\n## Change\n- The panel stays click-through; a mouse-moved monitor turns `ignoresMouseEvents` off only while the cursor is over the figure's bounds.\n- **Click:** focuses the waiting session when it is focusable (`SessionStore.perform(\"focus\", …)`), else opens the session list (`StatusItemController.showPopover`).\n- **Drag:** moves the panel; on release it snaps to the nearest corner and saves `companion_position`.\n- **Right-click:** Hide companion (turns `companion` off), Settings….\n\n## Tests\n- App tests: nearest-corner snapping; the click target picked for waiting focusable, waiting not focusable, and other states.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-135"
       ],
@@ -5454,7 +6391,7 @@
         "App/Tests/CompanionWindowTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T08:53:36Z",
+      "updated_at": "2026-10-31T08:55:51Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "notes": [
@@ -5463,15 +6400,30 @@
           "kind": "note",
           "text": "Since T-135 review the scene is scaled by `companion_size` (`CompanionWindow.scale`, 1×/1.5×/2×): convert mouse points by dividing by the scale before hit-testing the figure.",
           "by": "claude:6baf63b2"
+        },
+        {
+          "at": "2026-10-31T08:55:51Z",
+          "kind": "outcome",
+          "text": "The panel takes the mouse only over the figure (hover monitor, scaled hit area); click focuses the waiting session, opens Settings on a warning, else the session list; drag snaps to the nearest corner; right-click: Show Sessions, Hide Companion, Settings.",
+          "by": "claude:6baf63b2"
         }
       ],
       "started_at": "2026-10-31T08:53:36Z",
-      "started_by": "claude:6baf63b2"
+      "started_by": "claude:6baf63b2",
+      "commit": "df57221454ac7e2a958a34e9a1a7bde7d853d725",
+      "completed_at": "2026-10-31T08:55:51Z",
+      "completed_by": "claude:6baf63b2",
+      "sprint": "Desktop companion",
+      "sprint_history": [
+        {
+          "sprint": "Desktop companion",
+          "from": "2026-10-31T07:39:30Z"
+        }
+      ]
     },
     {
       "id": "T-139",
       "name": "Companion: Settings section, Help and README",
-      "phase": 8,
       "type": "feature",
       "priority": "P2",
       "labels": [
@@ -5516,12 +6468,18 @@
       "started_by": "claude:6baf63b2",
       "commit": "7464d5f79a5918dcab9ae114f4bccc50253df535",
       "completed_at": "2026-10-31T08:48:55Z",
-      "completed_by": "claude:6baf63b2"
+      "completed_by": "claude:6baf63b2",
+      "sprint": "Desktop companion",
+      "sprint_history": [
+        {
+          "sprint": "Desktop companion",
+          "from": "2026-10-31T07:39:30Z"
+        }
+      ]
     },
     {
       "id": "T-140",
       "name": "Companion: full-screen, Stage Manager and multi-display check",
-      "phase": 8,
       "type": "test",
       "priority": "P2",
       "labels": [
@@ -5531,7 +6489,7 @@
       "description": "A manual pass with the user in the dev build, then fixes.\n\n## Check\n- Each corner, with the Dock at the bottom, on the left, and hidden.\n- Full-screen apps with `companion_over_fullscreen` off (hidden behind) and on (visible); switching Spaces; Mission Control.\n- Stage Manager on: switching sets.\n- Two displays: it stays on the main screen; unplugging moves it.\n- It never takes focus or blocks clicks outside the figure.\n\n## Done when\n- Findings and fixes are recorded as notes; the design doc's \"unverified\" marks are resolved.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_review",
       "dependencies": [
         "T-137",
         "T-138",
@@ -5542,7 +6500,7 @@
         "doc/design/desktop-companion.md"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T08:47:14Z",
+      "updated_at": "2026-10-31T09:14:25Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "notes": [
@@ -5551,6 +6509,27 @@
           "kind": "note",
           "text": "From T-137: also compare WindowServer’s energy impact in Activity Monitor with the companion on and off, and with and without the halo; the app’s own CPU was measured, the render server’s wasn’t. Record it in the design doc’s Measured section.",
           "by": "claude:6baf63b2"
+        },
+        {
+          "at": "2026-10-31T08:56:06Z",
+          "kind": "review",
+          "text": "Manual pass with the user in the dev build: corners with the Dock bottom/left/hidden; full-screen apps with companion_over_fullscreen off and on; Spaces and Mission Control; Stage Manager; two displays; never steals focus or clicks off the figure; WindowServer energy in Activity Monitor with the companion on/off and with/without the halo.",
+          "by": "claude:6baf63b2"
+        }
+      ],
+      "started_at": "2026-10-31T08:55:51Z",
+      "started_by": "claude:6baf63b2",
+      "review_requested_at": "2026-10-31T08:56:06Z",
+      "sprint": "Animated Companion",
+      "sprint_history": [
+        {
+          "sprint": "Desktop companion",
+          "from": "2026-10-31T07:39:30Z",
+          "to": "2026-10-31T09:14:25Z"
+        },
+        {
+          "sprint": "Animated Companion",
+          "from": "2026-10-31T09:14:25Z"
         }
       ]
     }
