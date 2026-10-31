@@ -29,7 +29,13 @@ final class StickFigure {
     static let moveKey = "move"
 
     var facing: Facing = .right {
-        didSet { withoutActions { layer.transform = CATransform3DMakeScale(facing == .left ? -1 : 1, 1, 1) } }
+        didSet {
+            withoutActions {
+                layer.transform = CATransform3DMakeScale(facing == .left ? -1 : 1, 1, 1)
+                // Text in the bubble is flipped back.
+                props[.bubble]?.transform = layer.transform
+            }
+        }
     }
 
     var color: CGColor = NSColor.labelColor.cgColor {

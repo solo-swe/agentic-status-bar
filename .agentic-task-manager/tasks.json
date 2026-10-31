@@ -5173,7 +5173,7 @@
       "description": "Two more busy activities (`doc/design/desktop-companion.md` › Animations › Workouts).\n\n## Change\n- **Jumping jacks:** the whole figure hops while arms and legs open and close; about 0.8 s per rep.\n- **Pull-ups:** a small bar prop (a horizontal line on two posts) shown only during it; hang, pull up until the chin is over the bar, lower; about 2 s per rep. At a top corner the bar fits inside the strip.\n- Pose loops with a way in from and out to `standing`, like the others.\n\n## Tests\n- App test: each loop starts and ends in a pose that blends to `standing`; the bar is hidden afterwards.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-129"
       ],
@@ -5183,11 +5183,22 @@
         "App/Tests/StickFigureTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T08:03:11Z",
+      "updated_at": "2026-10-31T08:07:12Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "started_at": "2026-10-31T08:03:11Z",
-      "started_by": "claude:6baf63b2"
+      "started_by": "claude:6baf63b2",
+      "commit": "3cb8127dcc0cc5f46c1c2b5cce783fa9846001f3",
+      "completed_at": "2026-10-31T08:07:12Z",
+      "completed_by": "claude:6baf63b2",
+      "notes": [
+        {
+          "at": "2026-10-31T08:07:12Z",
+          "kind": "outcome",
+          "text": "Jumping jacks (hop, land open with arms up, hop closed) and pull-ups on a bar prop (hang, chin over the bar, elbows out via `reachingOut`); bar lowered to 45 pt so the head stays inside the strip.",
+          "by": "claude:6baf63b2"
+        }
+      ]
     },
     {
       "id": "T-133",
@@ -5202,7 +5213,7 @@
       "description": "Asking for attention (`doc/design/desktop-companion.md` › Animations › Wave).\n\n## Change\n- Face the viewer, raise an arm, swing the forearm 3 times (about 1 s), lower it, wait about 2 s, repeat.\n- A small bubble above the head with **!** (permission) or **?** (question), filled with the theme's `waiting` color (`Themes`, light/dark pair).\n\n## Tests\n- App test: the bubble shows the right glyph for each reason and is removed when the wave stops.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-129"
       ],
@@ -5212,9 +5223,11 @@
         "App/Tests/StickFigureTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T08:07:13Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:6baf63b2",
+      "started_at": "2026-10-31T08:07:13Z",
+      "started_by": "claude:6baf63b2"
     },
     {
       "id": "T-134",

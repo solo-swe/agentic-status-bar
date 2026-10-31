@@ -250,6 +250,45 @@ final class StickFigureTests: XCTestCase {
         XCTAssertFalse(figure.layer.sublayers?.contains { $0 is CAShapeLayer } ?? false)
     }
 
+    // MARK: Wave
+
+    func testTheWaveRaisesSwingsLowersAndWaits() {
+        let wave = Moves.wave()
+        XCTAssertEqual(wave.first, wave.last)
+        let raised = wave.filter { $0.shoulderFront > 2 }
+        XCTAssertEqual(raised.count, 8, "raised, three swings out and in, raised")
+        let neck = s.points(wave[0]).neck
+        XCTAssertTrue(raised.allSatisfy { s.points($0).handFront.y > neck.y }, "the hand up by the head")
+        let rests = wave.filter { $0 == wave[0] }.count
+        XCTAssertGreaterThanOrEqual(Double(rests - 1) * Moves.waveStep, 2, "about 2 s of waiting")
+        // The swings move the hand side to side.
+        let swingXs = wave[3...8].map { s.points($0).handFront.x }
+        XCTAssertGreaterThan((swingXs.max() ?? 0) - (swingXs.min() ?? 0), 5)
+    }
+
+    func testTheBubbleSaysWhyAndGoesAway() {
+        XCTAssertEqual(Moves.bubbleGlyph(reason: "permission"), "!")
+        XCTAssertEqual(Moves.bubbleGlyph(reason: "question"), "?")
+        XCTAssertEqual(Moves.bubbleGlyph(reason: nil), "!")
+        let figure = StickFigure()
+        figure.wave("?", color: CGColor(red: 1, green: 0, blue: 0, alpha: 1))
+        XCTAssertEqual(figure.bubbleText, "?")
+        XCTAssertTrue(figure.isAnimating)
+        let shape = figure.props[.bubble]?.sublayers?.first as? CAShapeLayer
+        XCTAssertEqual(shape?.fillColor, CGColor(red: 1, green: 0, blue: 0, alpha: 1))
+        figure.say("!", color: CGColor(gray: 0, alpha: 1))
+        XCTAssertEqual(figure.bubbleText, "!")
+        XCTAssertEqual(figure.layer.sublayers?.filter { $0 === figure.props[.bubble] }.count, 1, "one bubble")
+        // The bubble stays readable when the figure turns.
+        figure.facing = .left
+        XCTAssertEqual(figure.props[.bubble]?.transform.m11, -1)
+        figure.stop()
+        figure.hideProps()
+        XCTAssertNil(figure.bubbleText)
+        // The bubble fits in the strip.
+        XCTAssertLessThanOrEqual(figure.bubbleOrigin.y + StickFigure.bubbleSize.height, CompanionWindow.size.height - CompanionWindow.floorY)
+    }
+
     func testTheBarbellIsInTheHandsOnlyWhileShown() {
         let figure = StickFigure()
         figure.show(.barbell)

@@ -86,6 +86,32 @@ enum Moves {
             prop: .pullUpBar)
     }
 
+    // MARK: Wave
+
+    /// Seconds per keyframe of the wave loop.
+    static let waveStep: CFTimeInterval = 0.25
+
+    /// Facing you: raise the front arm, swing the forearm 3 times, lower it, wait about 2 s; one loop.
+    static func wave(_ s: Skeleton = .standard) -> [Pose] {
+        let rest = grounded(Pose(shoulderBack: -0.12, elbowBack: 0.1, shoulderFront: 0.12, elbowFront: -0.1), s)
+        func arm(_ shoulder: CGFloat, _ elbow: CGFloat) -> Pose {
+            var p = rest
+            (p.shoulderFront, p.elbowFront) = (shoulder, elbow)
+            return p
+        }
+        let half = arm(1.3, 0.6)
+        let raised = arm(2.2, 0.0)
+        let (out, inward) = (arm(2.2, -0.7), arm(2.2, 0.7))
+        let swings = Array(repeating: [out, inward], count: 3).flatMap { $0 }
+        let wait = Array(repeating: rest, count: Int(2 / waveStep))
+        return [rest, half, raised] + swings + [raised, half] + wait + [rest]
+    }
+
+    /// The speech bubble's glyph for why a session waits.
+    static func bubbleGlyph(reason: String?) -> String {
+        reason == "question" ? "?" : "!"
+    }
+
     // MARK: Walk
 
     /// Seconds per walk cycle (two steps).
@@ -176,6 +202,16 @@ extension StickFigure {
                     }
                 }
             }
+        }
+    }
+
+    /// Waves at you over and over, with `glyph` (**!** or **?**) in a bubble of `color`, until stopped.
+    func wave(_ glyph: String, color: CGColor) {
+        let loop = Moves.wave(skeleton)
+        animate([presentedPose(), loop[0]], duration: Moves.transitionStep)
+        say(glyph, color: color)
+        after(Moves.transitionStep) { [weak self] in
+            self?.animate(loop, duration: Moves.waveStep * Double(loop.count - 1), repeats: true)
         }
     }
 
