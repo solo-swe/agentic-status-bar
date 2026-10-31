@@ -112,6 +112,43 @@ enum Moves {
         reason == "question" ? "?" : "!"
     }
 
+    // MARK: Bed
+
+    /// Seconds per breath asleep, and per rising *z*.
+    static let breath: CFTimeInterval = 4
+    static let zzzCycle: CFTimeInterval = 3
+
+    /// On its back on the mattress, head toward the headboard (behind it), one knee up, arms along the body.
+    static func lying(_ s: Skeleton = .standard) -> Pose {
+        // The head a little raised by the pillow; the heels rest on the mattress.
+        let pose = Pose(
+            body: -.pi / 2 + 0.14, shoulderBack: -0.05, elbowBack: 0.1, shoulderFront: 0.05, elbowFront: 0.15,
+            hipBack: 0.05, hipFront: 0.45, kneeFront: -0.8)
+        return grounded(pose, s, lift: StripLayout.mattressHeight + s.lineWidth / 2)
+    }
+
+    /// One breath lying down: the chest and head rise a little and settle.
+    static func breathing(_ s: Skeleton = .standard) -> [Pose] {
+        let rest = lying(s)
+        var inhale = rest
+        inhale.lean -= 0.05
+        inhale.neck -= 0.04
+        return [rest, inhale, rest]
+    }
+
+    /// Sitting on the bed's edge.
+    static func sittingOnBed(_ s: Skeleton = .standard) -> Pose {
+        .sitting(seatHeight: StripLayout.mattressHeight, skeleton: s)
+    }
+
+    /// Sitting on the bed's edge for a while, with a tilt of the head now and then; one loop.
+    static func sittingIdle(_ s: Skeleton = .standard) -> [Pose] {
+        let sit = sittingOnBed(s)
+        var tilt = sit
+        tilt.neck = 0.25
+        return Array(repeating: sit, count: 10) + [tilt, tilt, sit]
+    }
+
     // MARK: Walk
 
     /// Seconds per walk cycle (two steps).
@@ -212,6 +249,36 @@ extension StickFigure {
         say(glyph, color: color)
         after(Moves.transitionStep) { [weak self] in
             self?.animate(loop, duration: Moves.waveStep * Double(loop.count - 1), repeats: true)
+        }
+    }
+
+    /// Walks to the bed at `x` (the hips' spot on it), sits down, lies down facing `facing` (head on the
+    /// pillow), and sleeps: breathing, with *z*s rising, until stopped.
+    func sleep(at x: CGFloat, facing bedFacing: Facing) {
+        walk(to: x) { [weak self] in
+            guard let self else { return }
+            facing = bedFacing
+            let sit = Moves.sittingOnBed(skeleton), lie = Moves.lying(skeleton)
+            animate([presentedPose(), sit, lie], duration: 2 * Moves.transitionStep)
+            after(2 * Moves.transitionStep) { [weak self] in
+                guard let self else { return }
+                show(.zzz)
+                // Breathing is slow: smooth, not cut into frames.
+                animate(Moves.breathing(skeleton), duration: Moves.breath, repeats: true, fps: nil)
+            }
+        }
+    }
+
+    /// Walks to the bed at `x` and sits on its edge facing `facing`, tilting its head now and then, until stopped.
+    func sit(at x: CGFloat, facing bedFacing: Facing) {
+        walk(to: x) { [weak self] in
+            guard let self else { return }
+            facing = bedFacing
+            let loop = Moves.sittingIdle(skeleton)
+            animate([presentedPose(), loop[0]], duration: Moves.transitionStep)
+            after(Moves.transitionStep) { [weak self] in
+                self?.animate(loop, duration: 0.5 * Double(loop.count - 1), repeats: true)
+            }
         }
     }
 

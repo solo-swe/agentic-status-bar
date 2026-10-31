@@ -32,8 +32,9 @@ final class StickFigure {
         didSet {
             withoutActions {
                 layer.transform = CATransform3DMakeScale(facing == .left ? -1 : 1, 1, 1)
-                // Text in the bubble is flipped back.
+                // Text in the bubble and the z's are flipped back.
                 props[.bubble]?.transform = layer.transform
+                props[.zzz]?.transform = layer.transform
             }
         }
     }
@@ -44,6 +45,7 @@ final class StickFigure {
                 shape.strokeColor = color
                 if shape.fillColor != nil { shape.fillColor = color }
             }
+            for z in props[.zzz]?.sublayers ?? [] { (z as? CATextLayer)?.foregroundColor = color }
         }
     }
 

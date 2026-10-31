@@ -5213,7 +5213,7 @@
       "description": "Asking for attention (`doc/design/desktop-companion.md` › Animations › Wave).\n\n## Change\n- Face the viewer, raise an arm, swing the forearm 3 times (about 1 s), lower it, wait about 2 s, repeat.\n- A small bubble above the head with **!** (permission) or **?** (question), filled with the theme's `waiting` color (`Themes`, light/dark pair).\n\n## Tests\n- App test: the bubble shows the right glyph for each reason and is removed when the wave stops.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-129"
       ],
@@ -5223,11 +5223,22 @@
         "App/Tests/StickFigureTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T08:07:13Z",
+      "updated_at": "2026-10-31T08:09:37Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "started_at": "2026-10-31T08:07:13Z",
-      "started_by": "claude:6baf63b2"
+      "started_by": "claude:6baf63b2",
+      "commit": "cfd0544c5b06d0b0935671de0052e919ce47aad1",
+      "completed_at": "2026-10-31T08:09:37Z",
+      "completed_by": "claude:6baf63b2",
+      "notes": [
+        {
+          "at": "2026-10-31T08:09:37Z",
+          "kind": "outcome",
+          "text": "Wave loop (raise, three forearm swings, lower, ~2 s wait) and a speech bubble prop with **!** or **?** in a given color, kept readable when the figure faces left.",
+          "by": "claude:6baf63b2"
+        }
+      ]
     },
     {
       "id": "T-134",
@@ -5242,7 +5253,7 @@
       "description": "Rest states (`doc/design/desktop-companion.md` › Animations › Sleep, State → animation).\n\n## Change\n- A tiny bed prop at the strip's inner end (frame, mattress, pillow), always drawn.\n- **Sleep (idle):** walk to the bed, lie down, breathe (slow torso scale, about 4 s per breath); three *z* glyphs rise, drift and fade in a slow loop.\n- **Sit (no sessions):** sit on the bed's edge, legs dangling, an occasional blink-length head tilt.\n\n## Tests\n- App test: the *zzz* layers exist only while sleeping; sitting places the hips on the mattress line.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-129"
       ],
@@ -5252,9 +5263,11 @@
         "App/Tests/StickFigureTests.swift"
       ],
       "created_at": "2026-10-31T07:39:30Z",
-      "updated_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T08:09:38Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce"
+      "updated_by": "claude:6baf63b2",
+      "started_at": "2026-10-31T08:09:38Z",
+      "started_by": "claude:6baf63b2"
     },
     {
       "id": "T-135",

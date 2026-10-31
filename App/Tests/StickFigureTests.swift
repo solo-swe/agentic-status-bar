@@ -289,6 +289,72 @@ final class StickFigureTests: XCTestCase {
         XCTAssertLessThanOrEqual(figure.bubbleOrigin.y + StickFigure.bubbleSize.height, CompanionWindow.size.height - CompanionWindow.floorY)
     }
 
+    // MARK: Bed
+
+    func testTheBedIsAtTheInnerEndAndTheRestIsForWalking() {
+        let width = CompanionWindow.size.width
+        for position in ["bottom-right", "top-right", "bottom-left", "top-left"] {
+            let layout = StripLayout(width: width, position: position)
+            let bed = layout.bedX...(layout.bedX + StripLayout.bedWidth)
+            XCTAssertEqual(layout.bedOnLeft, position.hasSuffix("right"), "toward the middle of the screen")
+            XCTAssertGreaterThanOrEqual(bed.lowerBound, 0)
+            XCTAssertLessThanOrEqual(bed.upperBound, width)
+            XCTAssertTrue(bed.contains(layout.restX))
+            XCTAssertFalse(layout.walkRange.overlaps(bed), "\(position): walks and workouts stay off the bed")
+            XCTAssertGreaterThan(layout.walkRange.upperBound - layout.walkRange.lowerBound, 120)
+            // A pull-up bar fits at either end of the walking range.
+            XCTAssertGreaterThanOrEqual(layout.walkRange.lowerBound - Moves.barHalfWidth, 0)
+            XCTAssertLessThanOrEqual(layout.walkRange.upperBound + Moves.barHalfWidth, width)
+        }
+        XCTAssertEqual(StripLayout(width: width, position: "bottom-right").bedFacing, .right)
+        XCTAssertEqual(StripLayout(width: width, position: "bottom-left").bedFacing, .left)
+    }
+
+    func testLyingInBedHeadOnThePillow() {
+        let layout = StripLayout(width: CompanionWindow.size.width, position: "bottom-right")
+        let p = s.points(Moves.lying())
+        let bed = layout.bedX...(layout.bedX + StripLayout.bedWidth)
+        // Lying facing right, so the head is behind the hips, toward the headboard; all of it on the bed.
+        for point in [p.head, p.neck, p.hips, p.kneeFront, p.footFront, p.footBack] {
+            XCTAssertTrue(bed.contains(layout.restX + point.x), "\(point) on the bed")
+            XCTAssertGreaterThanOrEqual(point.y, StripLayout.mattressHeight - 0.01, "\(point) on the mattress, not in it")
+        }
+        XCTAssertLessThan(p.head.x, p.hips.x)
+        XCTAssertLessThan(p.head.y, StripLayout.mattressHeight + 8, "lying, not sitting up")
+        XCTAssertEqual(Moves.breathing().first, Moves.lying())
+        XCTAssertEqual(Moves.breathing().last, Moves.lying())
+    }
+
+    func testSittingOnTheBedsEdge() {
+        let p = s.points(Moves.sittingOnBed())
+        XCTAssertEqual(p.hips.y, StripLayout.mattressHeight, accuracy: 0.01)
+        XCTAssertEqual(p.footFront.y, 0, accuracy: 0.01, "feet on the floor")
+        let idle = Moves.sittingIdle()
+        XCTAssertEqual(idle.first, idle.last)
+        XCTAssertTrue(idle.contains { $0.neck > 0.2 }, "a tilt of the head now and then")
+    }
+
+    func testTheZsRiseOnlyWhileShown() {
+        let figure = StickFigure()
+        figure.show(.zzz)
+        let zs = figure.props[.zzz]?.sublayers?.compactMap { $0 as? CATextLayer } ?? []
+        XCTAssertEqual(zs.map { $0.string as? String }, ["z", "z", "z"])
+        XCTAssertTrue(zs.allSatisfy { $0.animation(forKey: "zzz") != nil })
+        figure.color = CGColor(gray: 0.5, alpha: 1)
+        XCTAssertTrue(zs.allSatisfy { $0.foregroundColor == CGColor(gray: 0.5, alpha: 1) })
+        figure.hideProps()
+        XCTAssertNil(figure.props[.zzz])
+    }
+
+    func testTheBedIsMirroredAtTheRightEnd() {
+        let figure = StickFigure()
+        let left = figure.makeBed(StripLayout(width: 260, position: "bottom-right"))
+        let right = figure.makeBed(StripLayout(width: 260, position: "bottom-left"))
+        XCTAssertEqual(left.transform.m11, 1)
+        XCTAssertEqual(right.transform.m11, -1, "headboard at the outer end")
+        XCTAssertEqual(right.position.x, 260 - StripLayout.edgeMargin - StripLayout.bedWidth / 2)
+    }
+
     func testTheBarbellIsInTheHandsOnlyWhileShown() {
         let figure = StickFigure()
         figure.show(.barbell)

@@ -18,6 +18,9 @@ final class CompanionWindow {
     /// The layer the character draws into.
     var contentLayer: CALayer { panel.contentView!.layer! }
     let figure = StickFigure()
+    /// Where the bed is and where the figure may walk, for the current corner.
+    private(set) var layout = StripLayout(width: size.width, position: "bottom-right")
+    private var bed: CALayer?
 
     private let store: SessionStore
     private var screenObserver: NSObjectProtocol?
@@ -87,7 +90,21 @@ final class CompanionWindow {
         }
         panel.level = Self.level(overFullscreen: config.companionOverFullscreen)
         panel.setFrame(Self.frame(position: config.companionPosition, in: screen.visibleFrame), display: false)
+        placeBed(StripLayout(width: Self.size.width, position: config.companionPosition))
         panel.orderFrontRegardless()
+    }
+
+    /// Draws the bed at the strip's inner end (again when the corner changes).
+    func placeBed(_ new: StripLayout) {
+        guard bed == nil || new != layout else { return }
+        layout = new
+        figure.withoutActions {
+            bed?.removeFromSuperlayer()
+            let layer = figure.makeBed(new)
+            layer.position.y += Self.floorY
+            contentLayer.insertSublayer(layer, at: 0)
+            bed = layer
+        }
     }
 
     /// Above normal windows; over full-screen apps only when asked (a floating panel sits below them).
