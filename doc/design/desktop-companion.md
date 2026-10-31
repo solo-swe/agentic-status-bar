@@ -1,6 +1,6 @@
 # Desktop companion: an animated character outside the menu bar
 
-Status (2026-10-31): **proposal.** Nothing here is built yet. The idea: a small stick person on the desktop that
+Status (2026-10-31): **approved; tasks T-127 to T-140.** Nothing here is built yet. The idea: a small stick person on the desktop that
 acts out what the sessions are doing. It walks while they work, waves at you when one needs you, and sleeps in a
 tiny bed with *zzz* rising when they're all idle. Research sources are listed at the end; claims marked
 *(unverified)* were not confirmed in official docs or a local test.
@@ -17,8 +17,8 @@ tiny bed with *zzz* rising when they're all idle. Research sources are listed at
   between state changes the app runs no code per frame. There are no dependencies and no art files.
 - **Etiquette.** Off by default. Small, near the Dock, click-through. It stops animating when it can't be seen, on
   Low Power Mode, or with the screen locked, and it holds still poses under Reduce Motion.
-- **Size of the job.** About a dozen small tasks (below). The first visible milestone, a figure that walks, waves
-  and sleeps on the desktop, takes the first seven.
+- **Size of the job.** Fourteen small tasks (below). The first visible milestone, a figure that works out, waves
+  and sleeps on the desktop, takes the first nine.
 
 ## Today
 
@@ -63,10 +63,11 @@ panel.orderFrontRegardless()
   did [1].
 - **Spaces.** With `.canJoinAllSpaces` the panel shows on every Space without listening for Space changes [1];
   `.stationary` keeps it in place in Mission Control [2]; `.ignoresCycle` keeps it out of ⌘\`.
-- **Where it lives.** It's a strip along the bottom of the main screen's `visibleFrame`, just above a bottom Dock,
-  at the right end by default. The figure is about 40 pt tall and the strip about 260 pt wide, which is where it
-  walks. It follows screen changes (`NSApplication.didChangeScreenParametersNotification`) and the Dock moving
-  or hiding. *(Stage Manager behavior is unverified; test it.)*
+- **Where it lives.** A strip about 260 pt wide (the figure is about 40 pt tall) in a corner of the main screen's
+  `visibleFrame`, chosen in Settings: bottom-right (default, just above a bottom Dock), bottom-left, top-right or
+  top-left (just under the menu bar). It follows screen changes
+  (`NSApplication.didChangeScreenParametersNotification`) and the Dock moving or hiding. *(Stage Manager behavior
+  is unverified; test it.)*
 
 ## Rendering: options compared
 
@@ -103,6 +104,12 @@ state's theme color.
 - **Walk.** The classic eight poses: contact, down, passing and up, then the same mirrored [10][11]. The hips are
   lowest at *down* and highest at *up*. A cycle lasts about 1 s. Horizontal travel matches stride × cadence, so the
   feet don't slide. The figure turns around at the strip's ends.
+- **Workouts.** Each is a short loop of poses, like the walk: weight lifting (a barbell prop, lift, hold, lower),
+  push-ups (lying, arms bend and straighten), jumping jacks (the whole figure hops; arms and legs open and close),
+  pull-ups (a small bar prop; hang, pull, lower). Props are a few lines each, drawn only while in use.
+- **Busy routine (calm).** One activity for about 8–15 s, then a rest of about 4–8 s (standing, a slow breath, maybe
+  wiping its brow), then a different activity chosen at random. Never two of the same in a row. Under Low Power Mode
+  the rests get longer.
 - **Wave.** Stop, turn to face you, raise an arm, swing the forearm 3 times (about 1 s), lower it, wait about 2 s,
   repeat. A small bubble shows **!** for a permission and **?** for a question, in the waiting color.
 - **Sleep.** Walk to the bed at the strip's end, lie down, and breathe (a slow torso scale, about 4 s per breath).
@@ -113,15 +120,15 @@ state's theme color.
 
 | Header state | The character |
 | --- | --- |
-| `busy` | Walks back and forth |
-| `busy` with sessions waiting on subagents | Walks, with one tiny follower per running subagent (up to 3) |
+| `busy` | Works out, calmly: one activity for a while (walking, weight lifting, push-ups, jumping jacks, pull-ups on a small bar), then a rest, then another |
+| `busy` with sessions waiting on subagents | The same, with one tiny follower per running subagent (up to 3) |
 | `waiting` (permission) | Waves, with **!** |
 | `waiting` (question) | Waves, with **?** |
 | `idle` | Sleeps in its bed, *zzz* |
 | `uncertain` | Stands and scratches its head, with **…** |
 | `muted` (only muted sessions) | Sits and reads; no motion except an occasional page turn |
 | `warning` (hooks missing) | Holds up a small sign with a wrench; a click opens Settings |
-| `none` (no sessions) | Hidden, or sits on the bed's edge (a setting) |
+| `none` (no sessions) | Sits on the edge of its bed |
 
 **Several sessions.** One character acts out the header state: the most urgent wins, as in the menu bar. So
 "waiting" beats "busy", and a busy session keeps it awake while others are idle. One character per session would
@@ -158,7 +165,7 @@ the cursor is near the strip) turns clicks on only while the cursor is over the 
 
 - **Click:** the waiting session's terminal is focused when it is focusable; otherwise the session list opens
   (`showPopover`).
-- **Drag:** moves the strip along the bottom edge; the position is remembered per screen.
+- **Drag:** drops the strip in the nearest corner and saves it as `companion_position`.
 - **Right-click:** Hide, Settings.
 
 The first milestone can skip all of this and stay fully click-through.
@@ -170,10 +177,11 @@ New config keys, shared with the CLI like the others:
 | Key | Default | Meaning |
 | --- | --- | --- |
 | `companion` | `0` | Show the character |
+| `companion_position` | `bottom-right` | `bottom-right`, `bottom-left`, `top-right` or `top-left` |
 | `companion_over_fullscreen` | `0` | Stay visible over full-screen apps (`.screenSaver` level) |
-| `companion_when_none` | `hide` | `hide` or `sit` when there are no sessions |
 
-The size and position come later, if asked for.
+Settings shows them in a Companion section: the on/off switch, a corner picker, and the full-screen switch. The
+size comes later, if asked for.
 
 ## Prior art
 
@@ -187,48 +195,43 @@ The size and position come later, if asked for.
   their own hooks. A native, low-energy companion that reuses our state and checks (C1–C5) would be more accurate
   and lighter than those.
 
-## Risks and open questions
+## Decisions (2026-10-31)
 
-- **Distraction.** It's off by default, uses still poses under Reduce Motion, and hides in one click. Should
-  `busy` walk all the time, or only now and then (a few steps, then a pause)? The second is calmer.
+1. **Placement is a setting**, along with on/off: a corner, bottom or top, left or right (`companion_position`).
+2. **Busy is calm**: not walking all the time, but a routine of activities (walking, weight lifting, push-ups,
+   jumping jacks, pull-ups) with rests between them.
+3. **One character** for the most urgent state, for now.
+4. **No sessions**: it sits on the edge of its bed.
+
+## Risks
+
+- **Distraction.** It's off by default, rests between activities, uses still poses under Reduce Motion, and hides
+  in one click.
 - **Full-screen apps and Stage Manager.** Behavior there needs testing *(unverified)*.
 - **Multiple displays.** The main screen only at first; the menu bar's screen may be a better choice.
 - **Energy.** The budget above must be measured before release; the rendering choice depends on it.
 - **Scope creep.** Per-session characters, custom skins and Rive art are all later.
 
-Open questions for you:
-
-1. Where should it live: bottom-right above the Dock (proposed), along the whole bottom edge, or under the menu
-   bar item?
-2. Should `busy` walk all the time, or stroll and pause?
-3. One character for the most urgent state (proposed), or one per session?
-4. With no sessions: hide it, or keep it sitting?
-
 ## Task breakdown
 
-Phase 8 (Desktop companion), label `companion`. Each task is under 10 minutes; tests use the app test target
-(`tests/app.sh --test`).
+Phase 8 (Desktop companion), label `companion`; T-127 to T-140. Each task is under 10 minutes; app tests run
+with `tests/app.sh --test`.
 
-1. **Config keys** `companion`, `companion_over_fullscreen`, `companion_when_none`: `Config`, the config template in
-   `Actions`, `asb config` validation, tests.
-2. **Companion panel** (depends on 1): `CompanionWindow` with the `NSPanel` setup above, the strip on the main
-   screen's `visibleFrame`, screen changes, shown and hidden by `companion`. Test: frame placement for a few screen
-   and Dock layouts.
-3. **Rig and poses** (2): `StickFigureLayer` (10 layers, anchor points), `Pose`, and applying a pose without
-   animation. Tests: the joint positions for a pose.
-4. **Walk** (3): the 8-pose cycle, travel matched to stride, turnaround at the strip's ends.
-5. **Wave and bubble** (3): the wave loop with a pause; the **!** / **?** bubble in the waiting color.
-6. **Sleep** (3): the bed, lying down, breathing, the *zzz* loop.
-7. **Scene controller** (4, 5, 6): observe `SessionStore`, map the header to a scene (a pure function, unit-tested
-   for every row of the table), blend transitions through standing. **First milestone: check it live with the
-   user.**
-8. **The other states** (7): subagent followers, uncertain, muted, warning, none.
-9. **Energy** (7): pause on occlusion, display sleep and lock; Low Power Mode; Reduce Motion still poses. Measure
-   against the budget and record the numbers here.
-10. **Interaction** (7): the figure-only hit area, click to focus or open the list, drag along the edge,
-    right-click menu.
-11. **Settings and Help** (1, 7): the toggles in Settings, a Help entry, the README, and the first-run offer.
-12. **Full-screen, Stage Manager and multi-display check** (9, 10): a manual test pass with the user, and fixes.
+1. **Config keys** `companion`, `companion_position`, `companion_over_fullscreen`.
+2. **Companion panel** (1): the `NSPanel`, its strip in the chosen corner, screen and Dock changes.
+3. **Rig and poses** (2): `StickFigureLayer`, `Pose`, applying a pose.
+4. **Walk** (3).
+5. **Weight lifting and push-ups** (3).
+6. **Jumping jacks and pull-ups** (3).
+7. **Wave and bubble** (3).
+8. **Sleep and the bed** (3), including sitting on the bed's edge.
+9. **Scene controller** (4–8): header → scene, the calm busy routine, transitions. **First milestone: check it live
+   with the user.**
+10. **The other states** (9): subagent followers, uncertain, muted, warning.
+11. **Energy** (9): pausing, Low Power Mode, Reduce Motion; measure against the budget.
+12. **Interaction** (9): the figure-only hit area, click, drag to a corner, right-click menu.
+13. **Settings and Help** (1, 9): the Companion section, Help, README, first-run offer.
+14. **Full-screen, Stage Manager and multi-display check** (11, 12, 13): a manual pass with the user.
 
 ## Sources
 

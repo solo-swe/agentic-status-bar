@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 127,
+    "next_id": 141,
     "workflow": {
       "type": "direct"
     },
@@ -4928,11 +4928,417 @@
         "doc/design/desktop-companion.md"
       ],
       "created_at": "2026-10-31T07:19:10Z",
-      "updated_at": "2026-10-31T07:19:10Z",
+      "updated_at": "2026-10-31T07:37:40Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
-      "started_at": "2026-10-31T07:19:10Z",
+      "notes": [
+        {
+          "at": "2026-10-31T07:23:54Z",
+          "kind": "review",
+          "text": "Proposal in `doc/design/desktop-companion.md`: Core Animation stick-figure rig in a non-activating `NSPanel`, state → animation table, energy rules, 12-task breakdown. Four open questions at the end (placement, busy walking style, one vs per-session, no-session behavior).",
+          "by": "claude:6baf63b2"
+        },
+        {
+          "at": "2026-10-31T07:37:39Z",
+          "kind": "rejection",
+          "text": "Approved with decisions (placement setting, calmer busy with exercises, one character, sit on bed); continuing with the doc update and task breakdown",
+          "by": "claude:6baf63b2"
+        }
+      ],
+      "reviews": [
+        {
+          "from": "2026-10-31T07:23:54Z",
+          "to": "2026-10-31T07:37:39Z"
+        }
+      ],
+      "started_at": "2026-10-31T07:37:40Z",
       "started_by": "claude:6baf63b2"
+    },
+    {
+      "id": "T-127",
+      "name": "Companion: config keys",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "companion",
+        "app"
+      ],
+      "description": "Add the companion's settings to the config file the CLI shares (`doc/design/desktop-companion.md` › Settings).\n\n## Change\n- `Config`: `companion` (bool, default off), `companion_position` (`bottom-right` default, `bottom-left`, `top-right`, `top-left`), `companion_over_fullscreen` (bool, default off). Unknown positions are rejected like other invalid values.\n- The config template in `Actions` lists them with a one-line comment.\n- `asb config` accepts them.\n\n## Tests\n- `ConfigTests`: defaults, parsing, setting each key, rejecting a bad position.\n- `tests/swift.sh` passes.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "Sources/ASBCore/Config.swift",
+        "Sources/ASBCore/Actions.swift",
+        "tests/ASBCoreTests/ConfigTests.swift"
+      ],
+      "created_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:39:30Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-128",
+      "name": "Companion: the floating panel in its corner",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "companion",
+        "app"
+      ],
+      "description": "A transparent, non-activating panel for the character (`doc/design/desktop-companion.md` › The window).\n\n## Change\n- `App/Sources/CompanionWindow.swift`: an `NSPanel` (`.borderless`, `.nonactivatingPanel`), `isFloatingPanel`, `hidesOnDeactivate = false`, clear background, no shadow, `ignoresMouseEvents = true`, collection behavior `[.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]`, level `.floating` (`.screenSaver` with `companion_over_fullscreen`), shown with `orderFrontRegardless()`.\n- A static frame function: a 260×60 pt strip in the main screen's `visibleFrame` corner given by `companion_position` (bottom corners sit just above the Dock, top ones just under the menu bar).\n- Re-places itself on `NSApplication.didChangeScreenParametersNotification` and on config changes; shown only while `companion` is on. `AppDelegate` owns it.\n- An empty content view for now.\n\n## Tests\n- App test: the frame for each corner on two made-up screen layouts (Dock at the bottom, Dock on the left).\n- `tests/app.sh --test` passes.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-127"
+      ],
+      "files": [
+        "App/Sources/CompanionWindow.swift",
+        "App/Sources/AppDelegate.swift",
+        "App/Tests/CompanionWindowTests.swift"
+      ],
+      "created_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:39:30Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-129",
+      "name": "Companion: stick-figure rig and poses",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "companion",
+        "app"
+      ],
+      "description": "The character as a Core Animation skeleton (`doc/design/desktop-companion.md` › The character › Rig).\n\n## Change\n- `App/Sources/Companion/StickFigureLayer.swift`: a `CALayer` tree of 10 bones (torso at the hips as root, head circle, upper arms, forearms, thighs, shins), each a `CAShapeLayer` line with its `anchorPoint` at its joint. Stroke in the label color, updated on appearance change.\n- `Pose`: hip height plus one angle per joint; `apply(_ pose:)` sets them without animation; a few named poses (`standing`, `sitting`).\n- `animate(_ poses: [Pose], duration:, repeat:)`: one `CAKeyframeAnimation` per joint on `transform.rotation.z` (and the hips' `position.y`), shared `keyTimes`, `calculationMode` discrete at 12 steps/s by default.\n- Show the standing figure in the panel.\n\n## Tests\n- App test: joint end positions for `standing` (feet on the floor, head on top) and that `apply` sets every bone.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-128"
+      ],
+      "files": [
+        "App/Sources/Companion/StickFigureLayer.swift",
+        "App/Sources/Companion/Pose.swift",
+        "App/Tests/StickFigureTests.swift"
+      ],
+      "created_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:39:30Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-130",
+      "name": "Companion: walk cycle",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "companion",
+        "app"
+      ],
+      "description": "Walking along the strip (`doc/design/desktop-companion.md` › Animations › Walk).\n\n## Change\n- The 8 poses: contact, down, passing, up, then mirrored; hips lowest at down, highest at up; about 1 s per cycle.\n- Horizontal travel matched to stride × cadence so feet don't slide; turns around (flips) at the strip's ends.\n- A `walk(to x:)` and a `stroll(for seconds:)` the scene controller can call.\n\n## Tests\n- App test: the poses' feet stay on the floor line at contact; travel per cycle equals two strides.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-129"
+      ],
+      "files": [
+        "App/Sources/Companion/Moves.swift",
+        "App/Tests/StickFigureTests.swift"
+      ],
+      "created_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:39:30Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-131",
+      "name": "Companion: weight lifting and push-ups",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "companion",
+        "app"
+      ],
+      "description": "Two busy activities (`doc/design/desktop-companion.md` › Animations › Workouts).\n\n## Change\n- **Weight lifting:** a barbell prop (a line and two small plates) shown only during it; squat, lift overhead, hold, lower; about 3 s per rep.\n- **Push-ups:** lie face down (plank), arms bend and straighten; about 1.5 s per rep.\n- Each is a pose loop for `StickFigureLayer.animate`, with a way in from and out to `standing`.\n\n## Tests\n- App test: each loop starts and ends in a pose that blends to `standing`; the barbell is hidden afterwards.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-129"
+      ],
+      "files": [
+        "App/Sources/Companion/Moves.swift",
+        "App/Sources/Companion/Props.swift",
+        "App/Tests/StickFigureTests.swift"
+      ],
+      "created_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:39:30Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-132",
+      "name": "Companion: jumping jacks and pull-ups",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "companion",
+        "app"
+      ],
+      "description": "Two more busy activities (`doc/design/desktop-companion.md` › Animations › Workouts).\n\n## Change\n- **Jumping jacks:** the whole figure hops while arms and legs open and close; about 0.8 s per rep.\n- **Pull-ups:** a small bar prop (a horizontal line on two posts) shown only during it; hang, pull up until the chin is over the bar, lower; about 2 s per rep. At a top corner the bar fits inside the strip.\n- Pose loops with a way in from and out to `standing`, like the others.\n\n## Tests\n- App test: each loop starts and ends in a pose that blends to `standing`; the bar is hidden afterwards.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-129"
+      ],
+      "files": [
+        "App/Sources/Companion/Moves.swift",
+        "App/Sources/Companion/Props.swift",
+        "App/Tests/StickFigureTests.swift"
+      ],
+      "created_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:39:30Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-133",
+      "name": "Companion: wave with a speech bubble",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "companion",
+        "app"
+      ],
+      "description": "Asking for attention (`doc/design/desktop-companion.md` › Animations › Wave).\n\n## Change\n- Face the viewer, raise an arm, swing the forearm 3 times (about 1 s), lower it, wait about 2 s, repeat.\n- A small bubble above the head with **!** (permission) or **?** (question), filled with the theme's `waiting` color (`Themes`, light/dark pair).\n\n## Tests\n- App test: the bubble shows the right glyph for each reason and is removed when the wave stops.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-129"
+      ],
+      "files": [
+        "App/Sources/Companion/Moves.swift",
+        "App/Sources/Companion/Props.swift",
+        "App/Tests/StickFigureTests.swift"
+      ],
+      "created_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:39:30Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-134",
+      "name": "Companion: the bed, sleeping and sitting",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "companion",
+        "app"
+      ],
+      "description": "Rest states (`doc/design/desktop-companion.md` › Animations › Sleep, State → animation).\n\n## Change\n- A tiny bed prop at the strip's inner end (frame, mattress, pillow), always drawn.\n- **Sleep (idle):** walk to the bed, lie down, breathe (slow torso scale, about 4 s per breath); three *z* glyphs rise, drift and fade in a slow loop.\n- **Sit (no sessions):** sit on the bed's edge, legs dangling, an occasional blink-length head tilt.\n\n## Tests\n- App test: the *zzz* layers exist only while sleeping; sitting places the hips on the mattress line.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-129"
+      ],
+      "files": [
+        "App/Sources/Companion/Moves.swift",
+        "App/Sources/Companion/Props.swift",
+        "App/Tests/StickFigureTests.swift"
+      ],
+      "created_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:39:30Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-135",
+      "name": "Companion: scene controller and the calm busy routine",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "companion",
+        "app"
+      ],
+      "description": "Drive the character from the sessions' state (`doc/design/desktop-companion.md` › State → animation, Busy routine).\n\n## Change\n- `CompanionScene`: a pure function from `Snapshot` (header state, the waiting session's reason) to a scene: `busy`, `waiting(reason)`, `idle`, `none`, and placeholders for the states T-136 adds.\n- `CompanionController` observes `SessionStore.snapshot` like `StatusItemController` and changes the scene only when it changes; every change blends through `standing` in about 0.3 s.\n- **Busy routine:** one activity (walk, weight lifting, push-ups, jumping jacks, pull-ups) for 8–15 s, a 4–8 s rest (stand, slow breath), then a different random one; never the same twice in a row. The random source is injectable for tests.\n\n## Tests\n- App tests: the mapping for every header state; the routine never repeats an activity and keeps its durations in range.\n- **Milestone:** check it live with the user in the dev build (enable `companion`).",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-130",
+        "T-131",
+        "T-132",
+        "T-133",
+        "T-134"
+      ],
+      "files": [
+        "App/Sources/Companion/CompanionScene.swift",
+        "App/Sources/Companion/CompanionController.swift",
+        "App/Sources/AppDelegate.swift",
+        "App/Tests/CompanionSceneTests.swift"
+      ],
+      "created_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:39:30Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-136",
+      "name": "Companion: subagents, uncertain, muted and warning",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P3",
+      "labels": [
+        "companion",
+        "app"
+      ],
+      "description": "The remaining states (`doc/design/desktop-companion.md` › State → animation).\n\n## Change\n- **Subagents:** the busy routine plus one tiny follower figure per running subagent (up to 3) that copies the main figure at a delay.\n- **Uncertain:** stands and scratches its head, with a **…** bubble.\n- **Muted** (only muted sessions): sits on the bed reading a small book; an occasional page turn.\n- **Warning** (hooks missing): holds up a small sign with a wrench.\n\n## Tests\n- App tests: `CompanionScene` mapping for each state; follower count capped at 3.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-135"
+      ],
+      "files": [
+        "App/Sources/Companion/CompanionScene.swift",
+        "App/Sources/Companion/Moves.swift",
+        "App/Sources/Companion/Props.swift",
+        "App/Tests/CompanionSceneTests.swift"
+      ],
+      "created_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:39:30Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-137",
+      "name": "Companion: energy rules and measurement",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "companion",
+        "app"
+      ],
+      "description": "Keep it cheap (`doc/design/desktop-companion.md` › Energy and etiquette).\n\n## Change\n- Pause all animation (`layer.speed = 0`) when the panel isn't visible (`didChangeOcclusionStateNotification`), when displays sleep (`NSWorkspace.screensDidSleepNotification` / `screensDidWake`), and while the screen is locked (`com.apple.screenIsLocked` / `screenIsUnlocked`).\n- Low Power Mode (`NSProcessInfoPowerStateDidChange`, then `isLowPowerModeEnabled`): longer rests, half rate.\n- Reduce Motion (`accessibilityDisplayShouldReduceMotion` and its change notification): one still pose per scene.\n- No `beginActivity`.\n\n## Tests\n- App tests with injected notifications: paused when occluded, locked or asleep; still poses under Reduce Motion.\n- Measure CPU over a minute (`top -pid`) for busy, waiting, idle and hidden on an Apple-silicon Mac; record the numbers in the design doc. Budget: under 1 % busy, about 0 % idle or hidden.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-135"
+      ],
+      "files": [
+        "App/Sources/Companion/CompanionController.swift",
+        "App/Tests/CompanionSceneTests.swift",
+        "doc/design/desktop-companion.md"
+      ],
+      "created_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:39:30Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-138",
+      "name": "Companion: click, drag to a corner, and right-click menu",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P3",
+      "labels": [
+        "companion",
+        "app"
+      ],
+      "description": "Let the figure itself take the mouse (`doc/design/desktop-companion.md` › Interaction).\n\n## Change\n- The panel stays click-through; a mouse-moved monitor turns `ignoresMouseEvents` off only while the cursor is over the figure's bounds.\n- **Click:** focuses the waiting session when it is focusable (`SessionStore.perform(\"focus\", …)`), else opens the session list (`StatusItemController.showPopover`).\n- **Drag:** moves the panel; on release it snaps to the nearest corner and saves `companion_position`.\n- **Right-click:** Hide companion (turns `companion` off), Settings….\n\n## Tests\n- App tests: nearest-corner snapping; the click target picked for waiting focusable, waiting not focusable, and other states.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-135"
+      ],
+      "files": [
+        "App/Sources/CompanionWindow.swift",
+        "App/Sources/Companion/CompanionController.swift",
+        "App/Tests/CompanionWindowTests.swift"
+      ],
+      "created_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:39:30Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-139",
+      "name": "Companion: Settings section, Help and README",
+      "phase": 8,
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "companion",
+        "app"
+      ],
+      "description": "Make it discoverable and configurable (`doc/design/desktop-companion.md` › Settings).\n\n## Change\n- Settings: a Companion section with \"Show the companion\", a corner picker (bottom right, bottom left, top right, top left) and \"Show over full-screen apps\", written through `SessionStore.set`.\n- Help: what the companion's poses mean (one line per state).\n- README: a short paragraph and how to turn it on.\n- The first-run window mentions it, off by default.\n\n## Tests\n- `SettingsTests`: the controls write the keys; `HelpTests`: the companion entries.\n- `tests/app.sh --test` and `tests/lint.sh` pass.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-127",
+        "T-135"
+      ],
+      "files": [
+        "App/Sources/SettingsView.swift",
+        "App/Sources/HelpView.swift",
+        "App/Sources/FirstRunView.swift",
+        "README.md",
+        "App/Tests/SettingsTests.swift",
+        "App/Tests/HelpTests.swift"
+      ],
+      "created_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:39:30Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-140",
+      "name": "Companion: full-screen, Stage Manager and multi-display check",
+      "phase": 8,
+      "type": "test",
+      "priority": "P2",
+      "labels": [
+        "companion",
+        "app"
+      ],
+      "description": "A manual pass with the user in the dev build, then fixes.\n\n## Check\n- Each corner, with the Dock at the bottom, on the left, and hidden.\n- Full-screen apps with `companion_over_fullscreen` off (hidden behind) and on (visible); switching Spaces; Mission Control.\n- Stage Manager on: switching sets.\n- Two displays: it stays on the main screen; unplugging moves it.\n- It never takes focus or blocks clicks outside the figure.\n\n## Done when\n- Findings and fixes are recorded as notes; the design doc's \"unverified\" marks are resolved.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-137",
+        "T-138",
+        "T-139"
+      ],
+      "files": [
+        "App/Sources/CompanionWindow.swift",
+        "doc/design/desktop-companion.md"
+      ],
+      "created_at": "2026-10-31T07:39:30Z",
+      "updated_at": "2026-10-31T07:39:30Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
     }
   ]
 }
