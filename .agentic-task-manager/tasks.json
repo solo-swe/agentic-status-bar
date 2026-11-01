@@ -5585,7 +5585,7 @@
       "description": "When a subagent waits on a permission prompt or a question while the parent keeps working (or waits on its subagents), the menu bar shows the parent's state, not that you are needed.\n\n## Why\nThe parent and its subagents share one state file with one `state`:\n- any later `PreToolUse` / `PostToolUse` from the parent or another subagent sets it back to `busy`;\n- the parent's `Stop` sets it to `idle`;\n- check C4 turns `waiting` into `busy` when any new child of the `claude` process starts, which other subagents do all the time.\n\n## Change (adjust to the spike's findings)\n- Install `PermissionRequest` (`HookSettings.events`) if it identifies the waiting agent.\n- Record waiting per agent: e.g. `subagents[agent_id].waiting` with `reason` and `since`, or a map of pending prompts; clear it only with events of the same agent (its `PostToolUse`, its `SubagentStop`, or a denial seen in the transcript).\n- A session is shown as `waiting` while any of its agents waits: header, row word and reason, notifications, and the mute break-through. C4 and the subagents check don't override it.\n- `doc/state-file-schema.md`: the new optional fields and rules (no version bump); `doc/snapshot-schema.md` if the snapshot changes.\n\n## Tests\n- `HookEventsTests` for each event order the spike recorded.\n- New conformance cases in `tests/conformance/` (subagent waiting while the parent is busy, waits on subagents, or has stopped); every existing case unchanged.\n- `swift test`, `tests/app.sh --test`, `tests/lint.sh` pass; check it live in the dev build with the user.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-119"
       ],
@@ -5600,7 +5600,7 @@
         "tests/conformance/"
       ],
       "created_at": "2026-10-27T07:16:40Z",
-      "updated_at": "2026-11-01T09:21:42Z",
+      "updated_at": "2026-11-01T09:44:12Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "sprint": "Animated Companion",
@@ -5621,10 +5621,32 @@
           "kind": "note",
           "text": "From T-119 (see `tests/fixtures/README.md`): install `PermissionRequest`; it carries `agent_id` and comes ~6 s before the `Notification`, which has none. Clear an agent’s waiting on its own next `PreToolUse`/`PostToolUse` or `SubagentStop` (a denial fires no `PostToolUse`); no transcript read needed. The parent’s `Stop` fires during the wait and must not clear it. Agent tool events never set the whole session busy while another agent waits.",
           "by": "claude:6baf63b2"
+        },
+        {
+          "at": "2026-11-01T09:32:37Z",
+          "kind": "review",
+          "text": "Live check with the user in the dev build: a subagent’s permission prompt keeps the session waiting while the other agent works and after the parent stops; approve and deny both end it. Quit the released app first, or it puts back its own `asb`.",
+          "by": "claude:6baf63b2"
+        },
+        {
+          "at": "2026-11-01T09:44:12Z",
+          "kind": "outcome",
+          "text": "Checked live with the user in the dev build: a subagent’s permission prompt keeps the session waiting through the other agent’s work and the parent’s stop; the app added the `PermissionRequest` hook at launch.",
+          "by": "claude:6baf63b2"
         }
       ],
       "started_at": "2026-11-01T09:21:42Z",
-      "started_by": "claude:6baf63b2"
+      "started_by": "claude:6baf63b2",
+      "commit": "7816f0b386043d745f07a68ef65297e372272862",
+      "review_requested_at": "2026-11-01T09:32:37Z",
+      "reviews": [
+        {
+          "from": "2026-11-01T09:32:37Z",
+          "to": "2026-11-01T09:44:12Z"
+        }
+      ],
+      "completed_at": "2026-11-01T09:44:12Z",
+      "completed_by": "claude:6baf63b2"
     },
     {
       "id": "T-121",
