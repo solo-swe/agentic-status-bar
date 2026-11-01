@@ -32,6 +32,8 @@ The hook runs on every tool call of every session; run `tests/bench.sh` after ch
 | `tests/conformance/` | The snapshot engine's behavior as data: input files and the expected snapshot (see its README) |
 | `tests/fixtures/` | Captured Claude Code hook payloads and transcripts (see its README) |
 | `scripts/package.sh`, `appcast.sh`, `homebrew-cask.sh` | Build, sign, notarize and package a release; its update feed; its Homebrew cask (see `doc/RELEASING.md`) |
+| `doc/README.md` | Index of the documents |
+| `doc/guides/` | How code is written here: Swift, the app, the hook, shell scripts |
 | `doc/PRD.md` | Product requirements |
 | `doc/RELEASING.md` | How releases are built, signed, published and delivered |
 | `doc/state-file-schema.md`, `doc/snapshot-schema.md` | The file and snapshot formats |
