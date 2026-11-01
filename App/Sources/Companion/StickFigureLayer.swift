@@ -14,7 +14,7 @@ final class StickFigure {
     enum Facing { case right, left }
 
     let skeleton: Skeleton
-    /// Add this to a layer tree. Its position is the point on the floor under the standing hips.
+    /// Its position is the point on the floor under the standing hips.
     let layer = CALayer()
     private(set) var bones: [Bone: CALayer] = [:]
     private var shapes: [CAShapeLayer] = []

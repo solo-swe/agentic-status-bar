@@ -2,7 +2,6 @@ import AppKit
 import ASBCore
 import Observation
 
-/// A menu item that runs a closure.
 final class ClosureMenuItem: NSMenuItem {
     private let handler: () -> Void
 

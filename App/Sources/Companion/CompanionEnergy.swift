@@ -20,7 +20,8 @@ struct CompanionEnergy: Equatable {
     /// One still pose per scene, swapped when the scene changes.
     var stillPoses: Bool { reduceMotion }
 
-    /// The current system state.
+    /// The state that can be read now; displays asleep and the screen lock come only from notifications
+    /// (`CompanionEnergyWatcher`).
     @MainActor
     static func current(panel: NSWindow) -> CompanionEnergy {
         CompanionEnergy(

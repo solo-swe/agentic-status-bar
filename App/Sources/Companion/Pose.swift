@@ -3,7 +3,7 @@ import CoreGraphics
 /// One pose of the stick figure: joint angles in radians, seen from the side with the figure facing right
 /// (doc/design/desktop-companion.md › The character › Rig). Limbs at 0 hang straight down; a positive
 /// shoulder or hip angle swings the limb forward, a positive elbow or knee bends the lower part forward
-/// (so knees bend with negative angles). `front` limbs are drawn over the torso, `back` ones behind it.
+/// (so knees bend with negative angles). `back` limbs are drawn under the `front` ones, and lighter.
 struct Pose: Equatable, Sendable {
     /// The hips' height above where they are when standing, in points.
     var hipY: CGFloat = 0
@@ -45,6 +45,7 @@ struct Pose: Equatable, Sendable {
         return p
     }
 
+    // Key paths aren't `Sendable`; this array never changes.
     nonisolated(unsafe) static let fields: [WritableKeyPath<Pose, CGFloat>] = [
         \.hipY, \.hipX, \.body, \.lean, \.neck, \.shoulderBack, \.elbowBack, \.shoulderFront, \.elbowFront,
         \.hipBack, \.kneeBack, \.hipFront, \.kneeFront,

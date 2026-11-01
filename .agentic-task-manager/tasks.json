@@ -7358,13 +7358,13 @@
       "description": "Apply `CLAUDE.md` › Code quality to `App/Sources/`, except `Companion/` and `CompanionWindow.swift` (about 150 comment lines): comment only what the code can't say (a non-obvious reason or constraint); clear names and small functions instead of comments.\n\n## Change\n- Keep comments that give a non-obvious reason or constraint (an AppKit quirk, why a window needs a setting), or point to a doc section.\n- Delete comments that repeat the name or the code; rename or extract where a comment explains unclear code.\n\n## Renames (decided with the user, 2026-11-01)\nAny Swift name may change, `public` ones in `ASBCore` included, when every caller (the app, `asb`, the tests) is updated in the same commit. Never changed: JSON keys, file formats, config keys, `asb` commands and flags, and the conformance cases.\n\n## Checks\nNo behavior change. `tests/app.sh --test`, `tests/swift.sh` and `tests/lint.sh` pass (`mise run check` once T-154 is done).\n",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "App/Sources/"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T22:40:50Z",
+      "updated_at": "2026-11-01T22:43:19Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "components": [
@@ -7378,7 +7378,18 @@
       ],
       "sprint": "Quality",
       "started_at": "2026-11-01T22:40:50Z",
-      "started_by": "claude:5f67a194"
+      "started_by": "claude:5f67a194",
+      "commit": "162d7a65ea29bc5d306f82b3d1077c667c902b32",
+      "completed_at": "2026-11-01T22:43:19Z",
+      "completed_by": "claude:5f67a194",
+      "notes": [
+        {
+          "at": "2026-11-01T22:43:19Z",
+          "kind": "outcome",
+          "text": "Most comments carry reasons; 1 removed, 5 out-of-date ones corrected (Settings tabs, launch flags, Send Test label, Edit menu, `SessionStore.config`), and a reason added for `_ = updater`. No renames. Check passes. Seen, not fixed: `SessionStore` watches the `state_dir` it found at start until a restart; `HookInstaller.updateStableCopy` also reinstalls hooks, which its name doesn’t say.",
+          "by": "claude:5f67a194"
+        }
+      ]
     },
     {
       "id": "T-145",
@@ -7391,14 +7402,14 @@
       "description": "Apply `CLAUDE.md` › Code quality to `App/Sources/Companion/` and `App/Sources/CompanionWindow.swift` (about 260 comment lines): comment only what the code can't say (a non-obvious reason or constraint); clear names and small functions instead of comments.\n\n## Change\n- Keep comments that give a non-obvious reason or constraint (an angle convention, why an animation is discrete, an energy rule from `doc/design/desktop-companion.md`).\n- Delete comments that repeat the name or the code; rename or extract where a comment explains unclear code (for example name a pose or an angle instead of describing it).\n\n## Renames (decided with the user, 2026-11-01)\nAny Swift name may change, `public` ones in `ASBCore` included, when every caller (the app, `asb`, the tests) is updated in the same commit. Never changed: JSON keys, file formats, config keys, `asb` commands and flags, and the conformance cases.\n\n## Checks\nNo behavior change: the poses and animations stay the same. `tests/app.sh --test`, `tests/swift.sh` and `tests/lint.sh` pass (`mise run check` once T-154 is done).\n",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "App/Sources/Companion/",
         "App/Sources/CompanionWindow.swift"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T22:19:50Z",
+      "updated_at": "2026-11-01T22:43:19Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "components": [
@@ -7411,7 +7422,9 @@
           "from": "2026-11-01T21:20:28Z"
         }
       ],
-      "sprint": "Quality"
+      "sprint": "Quality",
+      "started_at": "2026-11-01T22:43:19Z",
+      "started_by": "claude:5f67a194"
     },
     {
       "id": "T-146",

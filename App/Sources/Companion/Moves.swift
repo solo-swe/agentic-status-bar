@@ -123,7 +123,7 @@ enum Moves {
 
     // MARK: Other states
 
-    /// Seconds per keyframe of the head scratch, the reading and the sign loops.
+    /// Seconds per keyframe of the head scratch and the reading loops.
     static let idleStep: CFTimeInterval = 0.25
 
     /// No activity: puzzled, a hand scratching the side of the head, head tilted; one loop with a pause.
@@ -177,7 +177,7 @@ enum Moves {
 
     // MARK: Bed
 
-    /// Seconds per breath asleep, and per rising *z*.
+    /// Seconds per breath (asleep or resting), and per rising *z*.
     static let breath: CFTimeInterval = 4
     static let zzzCycle: CFTimeInterval = 3
 
@@ -315,7 +315,7 @@ extension StickFigure {
         }
     }
 
-    /// Scratches its head, puzzled, with a **…** bubble in `color`, until stopped.
+    /// Scratches its head, puzzled, with `Moves.puzzledGlyph` in a bubble of `color`, until stopped.
     func scratchHead(color: CGColor) {
         let loop = Moves.scratching(skeleton)
         say(Moves.puzzledGlyph, color: color)

@@ -149,8 +149,8 @@ extension StickFigure {
         }
     }
 
-    /// The bed, drawn in the figure's color with its headboard on the left; place it with its bottom-left
-    /// corner at `StripLayout.bedX` on the floor (mirrored when the bed is at the right end).
+    /// The bed, drawn in the figure's color with its headboard on the left (mirrored when the bed is at the
+    /// right end), its bottom-left corner at `StripLayout.bedX` and y = 0.
     func makeBed(_ layout: StripLayout) -> CALayer {
         let (w, h) = (StripLayout.bedWidth, StripLayout.mattressHeight)
         let container = CALayer()
@@ -159,7 +159,7 @@ extension StickFigure {
         container.position = CGPoint(x: layout.bedX + w / 2, y: 0)
         if !layout.bedOnLeft { container.transform = CATransform3DMakeScale(-1, 1, 1) }
         let frame = CGMutablePath()
-        // Headboard, mattress, foot.
+        // Headboard, the mattress's top, foot, the mattress's bottom.
         frame.move(to: CGPoint(x: 1, y: 0))
         frame.addLine(to: CGPoint(x: 1, y: h + 7))
         frame.move(to: CGPoint(x: 1, y: h))
@@ -192,13 +192,17 @@ extension StickFigure {
                 z.removeAllAnimations()
                 z.opacity = 1
                 let t = CGFloat(i + 1) / CGFloat(zs.count + 1)
-                z.position = CGPoint(x: 6 + t * (Self.zzzSize.width - 15), y: 6 + t * (Self.zzzSize.height - 15))
+                let (start, end) = (Self.zzzRiseStart, Self.zzzRiseEnd)
+                z.position = CGPoint(x: start.x + t * (end.x - start.x), y: start.y + t * (end.y - start.y))
             }
         }
     }
 
     /// The area the *z*s rise through, from above the sleeping head.
     static let zzzSize = CGSize(width: 34, height: 32)
+    /// Where each *z* starts and ends its rise in that area.
+    static let zzzRiseStart = CGPoint(x: 6, y: 6)
+    static let zzzRiseEnd = CGPoint(x: zzzSize.width - 9, y: zzzSize.height - 9)
 
     /// Three *z*s rising and fading from above the head of a figure lying down, one after another.
     private func makeZzz() -> CALayer {
@@ -221,8 +225,8 @@ extension StickFigure {
             z.frame = CGRect(x: 0, y: 0, width: 18, height: 18)
             z.opacity = 0
             let rise = CABasicAnimation(keyPath: "position")
-            rise.fromValue = NSValue(point: CGPoint(x: 6, y: 6))
-            rise.toValue = NSValue(point: CGPoint(x: Self.zzzSize.width - 9, y: Self.zzzSize.height - 9))
+            rise.fromValue = NSValue(point: Self.zzzRiseStart)
+            rise.toValue = NSValue(point: Self.zzzRiseEnd)
             let fade = CAKeyframeAnimation(keyPath: "opacity")
             fade.values = [0, 1, 1, 0]
             fade.keyTimes = [0, 0.2, 0.7, 1]
