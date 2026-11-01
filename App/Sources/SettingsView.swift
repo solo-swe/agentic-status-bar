@@ -1,7 +1,7 @@
 import ASBCore
 import SwiftUI
 
-/// What the Settings tabs share. The tabs themselves (General, Appearance, Notifications) are hosted by
+/// What the Settings tabs share. The tabs themselves (General, Appearance, Companion, Notifications) are hosted by
 /// `SettingsWindow`; every control reads and writes the config file the CLI uses, so the app and `asb` agree.
 enum SettingsView {
     /// The width of every tab; each tab's height follows its content.

@@ -9,7 +9,7 @@ import Observation
 @Observable
 final class SessionStore {
     private(set) var snapshot: Snapshot?
-    /// The settings the snapshot was computed with (the menu shows them).
+    /// The settings in effect: the ones the last snapshot was computed with, or what `set` just wrote.
     private(set) var config = Config()
 
     static let coalesceInterval: TimeInterval = 0.2

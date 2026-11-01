@@ -7310,7 +7310,7 @@
       "description": "Apply `CLAUDE.md` › Code quality to `Sources/asb/` and `scripts/*.swift`: comment only what the code can't say (a non-obvious reason or constraint); clear names and small functions instead of comments.\n\n## Change\n- Keep comments that give a non-obvious reason or constraint (for example why the hook prints nothing and always exits 0), or point to a doc section.\n- Delete comments that repeat the name or the code; rename or extract where a comment explains unclear code.\n- The commands' `abstract` and help texts are user-facing and stay.\n\n## Renames (decided with the user, 2026-11-01)\nAny Swift name may change, `public` ones in `ASBCore` included, when every caller (the app, `asb`, the tests) is updated in the same commit. Never changed: JSON keys, file formats, config keys, `asb` commands and flags, and the conformance cases.\n\n## Checks\nNo behavior change. `tests/swift.sh`, `tests/app.sh --test` and `tests/lint.sh` pass (`mise run check` once T-154 is done).\n",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "Sources/asb/",
@@ -7319,7 +7319,7 @@
         "scripts/make-social-preview.swift"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T22:36:31Z",
+      "updated_at": "2026-11-01T22:40:43Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "components": [
@@ -7334,7 +7334,18 @@
       ],
       "sprint": "Quality",
       "started_at": "2026-11-01T22:36:31Z",
-      "started_by": "claude:5f67a194"
+      "started_by": "claude:5f67a194",
+      "commit": "d38351f9646765115e8ee27b4072815bdf6151e8",
+      "completed_at": "2026-11-01T22:40:43Z",
+      "completed_by": "claude:5f67a194",
+      "notes": [
+        {
+          "at": "2026-11-01T22:40:43Z",
+          "kind": "outcome",
+          "text": "Small diff: `CommandLine.executablePath` → `absoluteExecutablePath` (one caller), 2 comments removed, 2 rewritten (the stale-file block in `Hook.swift` now says what it does). Check passes; bench hook median 9 ms. The 10 ms hook budget has little headroom here (medians 9–11 ms across runs, HEAD included).",
+          "by": "claude:5f67a194"
+        }
+      ]
     },
     {
       "id": "T-144",
@@ -7347,13 +7358,13 @@
       "description": "Apply `CLAUDE.md` › Code quality to `App/Sources/`, except `Companion/` and `CompanionWindow.swift` (about 150 comment lines): comment only what the code can't say (a non-obvious reason or constraint); clear names and small functions instead of comments.\n\n## Change\n- Keep comments that give a non-obvious reason or constraint (an AppKit quirk, why a window needs a setting), or point to a doc section.\n- Delete comments that repeat the name or the code; rename or extract where a comment explains unclear code.\n\n## Renames (decided with the user, 2026-11-01)\nAny Swift name may change, `public` ones in `ASBCore` included, when every caller (the app, `asb`, the tests) is updated in the same commit. Never changed: JSON keys, file formats, config keys, `asb` commands and flags, and the conformance cases.\n\n## Checks\nNo behavior change. `tests/app.sh --test`, `tests/swift.sh` and `tests/lint.sh` pass (`mise run check` once T-154 is done).\n",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "App/Sources/"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T22:19:48Z",
+      "updated_at": "2026-11-01T22:40:50Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "components": [
@@ -7365,7 +7376,9 @@
           "from": "2026-11-01T21:20:28Z"
         }
       ],
-      "sprint": "Quality"
+      "sprint": "Quality",
+      "started_at": "2026-11-01T22:40:50Z",
+      "started_by": "claude:5f67a194"
     },
     {
       "id": "T-145",

@@ -67,7 +67,7 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
 
     static func identifier(_ sessionId: String) -> String { "asb.\(sessionId)" }
 
-    /// Settings' "Send test notification": a sample, as a waiting session would get it.
+    /// Settings' Send Test button: a sample, as a waiting session would get it.
     func sendTest() {
         deliver([.init(
             sessionId: "test", kind: .waiting, title: "Agentic Status Bar",

@@ -37,7 +37,7 @@ enum MainMenu {
         app.addItem(item("Quit \(appName)", #selector(NSApplication.terminate(_:)), "q"))
         add(app, to: main)
 
-        // Text fields (a symbol name, for one) need the standard editing commands.
+        // Without an Edit menu, ⌘C, ⌘V and the other editing shortcuts don't reach text fields.
         let edit = NSMenu(title: "Edit")
         edit.addItem(item("Undo", Selector(("undo:")), "z"))
         let redo = item("Redo", Selector(("redo:")), "z")
@@ -82,7 +82,6 @@ enum MainMenu {
 /// (menu-bar only) app again when the last one closes.
 @MainActor
 enum ActivationPolicy {
-    /// Call before showing a window.
     static func windowWillShow() {
         if NSApp.activationPolicy() != .regular { NSApp.setActivationPolicy(.regular) }
     }

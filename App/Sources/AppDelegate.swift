@@ -19,7 +19,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MainMenuActions {
         // Unit tests host the app: keep it quiet then.
         guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else { return }
         hooks.updateStableCopy()
-        _ = updater
+        _ = updater  // created now (it's lazy), so Sparkle starts checking at launch
         NSApp.mainMenu = MainMenu.make(actions: self)
         ActivationPolicy.watch()
         statusItem = StatusItemController(
@@ -37,7 +37,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MainMenuActions {
             openSettings: { [weak self] in self?.settings.show() })
         firstRun.showIfNeeded()
         // For checking windows during development: open -a "Agentic Status Bar" --args -ShowSettingsOnLaunch YES
-        // (or -ShowHelpOnLaunch YES).
+        // (or -ShowHelpOnLaunch YES, -ShowSessionsOnLaunch YES).
         if UserDefaults.standard.bool(forKey: "ShowSettingsOnLaunch") { settings.show() }
         if UserDefaults.standard.bool(forKey: "ShowHelpOnLaunch") { help.show() }
         if UserDefaults.standard.bool(forKey: "ShowSessionsOnLaunch") {
