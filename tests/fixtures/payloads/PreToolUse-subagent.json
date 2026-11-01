@@ -1,0 +1,19 @@
+{
+  "session_id": "3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90",
+  "transcript_path": "/Users/alex/.claude/projects/-Users-alex-code-api-gateway/3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90.jsonl",
+  "cwd": "/Users/alex/code/api-gateway",
+  "prompt_id": "6c2e9a4f-3b7d-4f1e-8a5c-9d0b2e7f4a13",
+  "permission_mode": "default",
+  "effort": {
+    "level": "medium"
+  },
+  "agent_id": "a7c3e91f4b2d6a805",
+  "agent_type": "general-purpose",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "npm run migrate",
+    "description": "Run the database migrations"
+  },
+  "tool_use_id": "toolu_01Hq7ZkPw3VbN8xRtY2mLc4D"
+}

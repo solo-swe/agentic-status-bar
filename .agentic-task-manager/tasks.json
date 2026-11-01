@@ -5429,7 +5429,7 @@
       "description": "Find out exactly what Claude Code sends while a **subagent** waits on a permission prompt and other agents keep working. The fix that follows is designed from this.\n\n## Steps\n1. Make sure the installed hook binary has `debug_hook_log` (a dev build updates the stable `asb` copy), and turn it on in the config.\n2. With the user, run a session where the parent starts two subagents: one hits a permission prompt (e.g. a Bash command not on the allow list) while the other keeps running tools; let the prompt wait a while, then approve it. Repeat once with a denial, and once with the parent finishing its turn while the subagent waits.\n3. Turn `debug_hook_log` off and delete the log once the payloads are copied.\n\n## Record\n- For `PreToolUse`, `PostToolUse`, `PermissionRequest`, `Notification`, `SubagentStart`, `SubagentStop`, `Stop`: whether `agent_id` / `agent_type` are present (the docs say tool events inside subagents carry them; `Notification` is undocumented), and the order of events.\n- The `claude` process's children while the subagent waits (`ps -o pid,ppid,lstart,comm`), for check C4.\n- What the transcript shows for an approval and a denial by a subagent.\n\n## Output\n- Sanitized payloads in `tests/fixtures/payloads/` (made-up IDs, paths and prompts), e.g. `Notification-permission_prompt-subagent.json`, `PermissionRequest-subagent.json`, `PreToolUse-subagent.json`.\n- Findings in `tests/fixtures/README.md`, and a short design note for the fix as this task's note.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-118"
       ],
@@ -5438,7 +5438,7 @@
         "tests/fixtures/payloads/"
       ],
       "created_at": "2026-10-27T07:16:40Z",
-      "updated_at": "2026-10-31T09:14:25Z",
+      "updated_at": "2026-11-01T09:03:17Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "sprint": "Animated Companion",
@@ -5452,7 +5452,9 @@
           "sprint": "Animated Companion",
           "from": "2026-10-31T09:14:25Z"
         }
-      ]
+      ],
+      "started_at": "2026-11-01T09:03:17Z",
+      "started_by": "claude:6baf63b2"
     },
     {
       "id": "T-120",
