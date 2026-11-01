@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 142,
+    "next_id": 150,
     "workflow": {
       "type": "direct"
     },
@@ -6729,7 +6729,7 @@
       "description": "Release v0.3.0 following `doc/RELEASING.md` › Each release: the desktop companion (T-127–T-140), the lingering permission icon fix (T-125), a subagent waiting on a permission shows as waiting, with the new `PermissionRequest` hook added at launch (T-119, T-120), and the daylight-saving start-time fix.\n\n## Steps\n1. Set `ASBVersion.current` and `MARKETING_VERSION` to `0.3.0` (build number above 0.2.2's), and the README's build example.\n2. Checks, commit, push, CI.\n3. Tag `v0.3.0`, watch the release run.\n4. Check the draft (Gatekeeper, signatures, `SUFeedURL`, `SUPublicEDKey`, the appcast signature).\n5. The user publishes it as the latest release.\n6. Check the downloads without a login and the Homebrew workflow; an installed v0.2.2 should offer the update, and after updating the app adds the `PermissionRequest` hook.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "blocked",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/Version.swift",
@@ -6737,7 +6737,7 @@
         "README.md"
       ],
       "created_at": "2026-11-01T09:45:45Z",
-      "updated_at": "2026-11-01T09:52:16Z",
+      "updated_at": "2026-11-01T10:05:22Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "sprint_history": [
@@ -6754,7 +6754,204 @@
       "sprint": "Animated Companion",
       "with": "user",
       "started_at": "2026-11-01T09:52:16Z",
-      "started_by": "claude:6baf63b2"
+      "started_by": "claude:6baf63b2",
+      "commit": "2351354c7b9c8fd50c37f593d9d8028d07afc210",
+      "notes": [
+        {
+          "at": "2026-11-01T10:01:52Z",
+          "kind": "note",
+          "text": "Draft v0.3.0 checked (run 41295231166): DMG and app notarized, signatures valid, version 0.3.0 build 5 (above 0.2.2’s build 4), solo-swe feed, matching key, appcast signature valid. Waiting for the user to publish.",
+          "by": "claude:6baf63b2"
+        }
+      ],
+      "waiting_on": "user",
+      "questions": [
+        "Put the proposed release notes (companion, the two waiting fixes, the daylight-saving fix) on the v0.3.0 draft, or keep the generated ones?",
+        "Publish the v0.3.0 draft as the latest release (not a pre-release)? All draft checks passed; publishing is yours."
+      ],
+      "blocked_at": "2026-11-01T10:05:22Z"
+    },
+    {
+      "id": "T-142",
+      "name": "Comments: clean up Sources/ASBCore",
+      "type": "refactor",
+      "priority": "P2",
+      "labels": [
+        "cleanup"
+      ],
+      "description": "Apply `CLAUDE.md` › Code quality to `Sources/ASBCore` (about 360 comment lines in 27 files): *Code documents itself. Clear names and small functions instead of comments. Comment only what the code can't say (a non-obvious reason or constraint).*\n\n## Change\n- Keep comments that give a non-obvious reason or constraint, or point to the doc section a rule comes from (`doc/state-file-schema.md › Events`).\n- Delete comments that repeat the name or the code below them.\n- Where a comment explains what unclear code does, rename or extract a function instead.\n- `public` declarations keep or get proper `///` docs: what it does, its arguments, errors, an example where useful (`CLAUDE.md` › Public APIs).\n\n## Checks\nNo behavior change. `tests/swift.sh`, `tests/app.sh --test` and `tests/lint.sh` pass.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "Sources/ASBCore/"
+      ],
+      "created_at": "2026-11-01T10:04:01Z",
+      "updated_at": "2026-11-01T10:04:01Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-143",
+      "name": "Comments: clean up Sources/asb and scripts/*.swift",
+      "type": "refactor",
+      "priority": "P2",
+      "labels": [
+        "cleanup"
+      ],
+      "description": "Apply `CLAUDE.md` › Code quality to `Sources/asb/` and `scripts/*.swift`: comment only what the code can't say (a non-obvious reason or constraint); clear names and small functions instead of comments.\n\n## Change\n- Keep comments that give a non-obvious reason or constraint (for example why the hook prints nothing and always exits 0), or point to a doc section.\n- Delete comments that repeat the name or the code; rename or extract where a comment explains unclear code.\n- The commands' `abstract` and help texts are user-facing and stay.\n\n## Checks\nNo behavior change. `tests/swift.sh`, `tests/app.sh --test` and `tests/lint.sh` pass.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "Sources/asb/",
+        "scripts/check-sparkle-key.swift",
+        "scripts/make-icon.swift",
+        "scripts/make-social-preview.swift"
+      ],
+      "created_at": "2026-11-01T10:04:01Z",
+      "updated_at": "2026-11-01T10:04:01Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-144",
+      "name": "Comments: clean up App/Sources (except the companion)",
+      "type": "refactor",
+      "priority": "P2",
+      "labels": [
+        "cleanup"
+      ],
+      "description": "Apply `CLAUDE.md` › Code quality to `App/Sources/`, except `Companion/` and `CompanionWindow.swift` (about 150 comment lines): comment only what the code can't say (a non-obvious reason or constraint); clear names and small functions instead of comments.\n\n## Change\n- Keep comments that give a non-obvious reason or constraint (an AppKit quirk, why a window needs a setting), or point to a doc section.\n- Delete comments that repeat the name or the code; rename or extract where a comment explains unclear code.\n\n## Checks\nNo behavior change. `tests/app.sh --test`, `tests/swift.sh` and `tests/lint.sh` pass.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "App/Sources/"
+      ],
+      "created_at": "2026-11-01T10:04:01Z",
+      "updated_at": "2026-11-01T10:04:01Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-145",
+      "name": "Comments: clean up the companion",
+      "type": "refactor",
+      "priority": "P2",
+      "labels": [
+        "cleanup"
+      ],
+      "description": "Apply `CLAUDE.md` › Code quality to `App/Sources/Companion/` and `App/Sources/CompanionWindow.swift` (about 260 comment lines): comment only what the code can't say (a non-obvious reason or constraint); clear names and small functions instead of comments.\n\n## Change\n- Keep comments that give a non-obvious reason or constraint (an angle convention, why an animation is discrete, an energy rule from `doc/design/desktop-companion.md`).\n- Delete comments that repeat the name or the code; rename or extract where a comment explains unclear code (for example name a pose or an angle instead of describing it).\n\n## Checks\nNo behavior change: the poses and animations stay the same. `tests/app.sh --test`, `tests/swift.sh` and `tests/lint.sh` pass.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "App/Sources/Companion/",
+        "App/Sources/CompanionWindow.swift"
+      ],
+      "created_at": "2026-11-01T10:04:01Z",
+      "updated_at": "2026-11-01T10:04:01Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-146",
+      "name": "Comments: clean up the tests",
+      "type": "refactor",
+      "priority": "P2",
+      "labels": [
+        "cleanup"
+      ],
+      "description": "Apply `CLAUDE.md` › Code quality to `tests/ASBCoreTests/` and `App/Tests/` (about 130 comment lines): tests show how the code is meant to be used, so a test's name and its expectations say what it checks.\n\n## Change\n- Keep comments that give a non-obvious reason (why an input is shaped the way it is, which captured event order a test replays).\n- Delete comments that repeat the test name or the code; move what a comment says into the test name or an expectation message where it helps.\n\n## Checks\nNo test removed or weakened. `tests/swift.sh`, `tests/app.sh --test` and `tests/lint.sh` pass.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "tests/ASBCoreTests/",
+        "App/Tests/"
+      ],
+      "created_at": "2026-11-01T10:04:01Z",
+      "updated_at": "2026-11-01T10:04:01Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-147",
+      "name": "Coverage: measure ASBCore and asb line coverage",
+      "type": "infra",
+      "priority": "P2",
+      "labels": [
+        "coverage"
+      ],
+      "description": "Add `tests/coverage.sh`, which reports line coverage of the Swift package's sources and checks it against a threshold.\n\n## Change\n- Run the package tests with code coverage on, then report line coverage over `Sources/ASBCore/` and `Sources/asb/` only (not the tests, not the app), per file and in total, with `llvm-cov` from the active toolchain.\n- Exit non-zero when the total is below a threshold given as an argument (default `99`). POSIX `sh`, shellcheck clean (`doc/guides/shell.md`).\n- Document it in `CONTRIBUTING.md` › Checks and `CLAUDE.md` › Commands.\n\n## Done when\nThe script runs locally and `tests/lint.sh` passes. Record today's total and the five least covered files as this task's note.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "tests/coverage.sh",
+        "CONTRIBUTING.md",
+        "CLAUDE.md"
+      ],
+      "created_at": "2026-11-01T10:04:01Z",
+      "updated_at": "2026-11-01T10:04:01Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-148",
+      "name": "Coverage: raise ASBCore and asb to 99%",
+      "type": "test",
+      "priority": "P2",
+      "labels": [
+        "coverage"
+      ],
+      "description": "Bring line coverage of `Sources/ASBCore/` and `Sources/asb/` to at least 99%, as `tests/coverage.sh` reports it.\n\n## Change\n- Add tests for the uncovered lines the report lists. They test behavior (an input and its expected result), not lines touched for the count.\n- Exclude only what can't run in a test (an entry point, a Darwin call that tests replace with a fake), and list each exclusion with its reason in `CONTRIBUTING.md` › Checks.\n- If the gap is large, split the work per file into follow-up tasks (`/atm:create-tasks`).\n\n## Done when\n`tests/coverage.sh` exits 0 at 99%, and `tests/swift.sh`, `tests/app.sh --test` and `tests/lint.sh` pass.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-147"
+      ],
+      "files": [
+        "tests/ASBCoreTests/",
+        "CONTRIBUTING.md"
+      ],
+      "created_at": "2026-11-01T10:04:01Z",
+      "updated_at": "2026-11-01T10:04:01Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce"
+    },
+    {
+      "id": "T-149",
+      "name": "Coverage: 99% gate in CI",
+      "type": "infra",
+      "priority": "P2",
+      "labels": [
+        "coverage"
+      ],
+      "description": "Enforce the 99% line coverage of `ASBCore` and `asb` in CI. The CI workflow is the user's to approve, so this is done with the user.\n\n## Change\n- Run `tests/coverage.sh` in the `swift` job of `.github/workflows/ci.yml`, so the job fails below 99%.\n- Add to `CLAUDE.md` › Testing: *ASBCore and asb keep at least 99% line coverage. A change is done when its tests pass and the checks, coverage included, are green.*\n\n## Done when\nThe user approved the workflow change, it is pushed, and the CI run is green with the gate in place.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-148"
+      ],
+      "files": [
+        ".github/workflows/ci.yml",
+        "CLAUDE.md"
+      ],
+      "created_at": "2026-11-01T10:04:01Z",
+      "updated_at": "2026-11-01T10:04:01Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce",
+      "with": "user"
     }
   ]
 }
