@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 150,
+    "next_id": 151,
     "workflow": {
       "type": "direct"
     },
@@ -245,10 +245,23 @@
       },
       {
         "id": "Animated Companion",
-        "state": "active",
+        "state": "closed",
         "goal": "Finish the companion, fix subagents waiting on input, and release it as v0.3.0",
         "start": "2026-10-31T09:14:46Z",
-        "release": "v0.3.0"
+        "release": "v0.3.0",
+        "end": "2026-11-01T10:14:04Z",
+        "report": {
+          "done": [
+            "T-119",
+            "T-120",
+            "T-140",
+            "T-141"
+          ],
+          "carried": [],
+          "added": [
+            "T-141"
+          ]
+        }
       },
       {
         "id": "Release v0.3.0",
@@ -7174,7 +7187,7 @@
       "description": "Release v0.3.0 following `doc/RELEASING.md` › Each release: the desktop companion (T-127–T-140), the lingering permission icon fix (T-125), a subagent waiting on a permission shows as waiting, with the new `PermissionRequest` hook added at launch (T-119, T-120), and the daylight-saving start-time fix.\n\n## Steps\n1. Set `ASBVersion.current` and `MARKETING_VERSION` to `0.3.0` (build number above 0.2.2's), and the README's build example.\n2. Checks, commit, push, CI.\n3. Tag `v0.3.0`, watch the release run.\n4. Check the draft (Gatekeeper, signatures, `SUFeedURL`, `SUPublicEDKey`, the appcast signature).\n5. The user publishes it as the latest release.\n6. Check the downloads without a login and the Homebrew workflow; an installed v0.2.2 should offer the update, and after updating the app adds the `PermissionRequest` hook.",
       "requirements": [],
       "use_cases": [],
-      "status": "blocked",
+      "status": "done",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/Version.swift",
@@ -7182,7 +7195,7 @@
         "README.md"
       ],
       "created_at": "2026-11-01T09:45:45Z",
-      "updated_at": "2026-11-01T10:05:22Z",
+      "updated_at": "2026-11-01T10:13:50Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:6baf63b2",
       "sprint_history": [
@@ -7198,8 +7211,6 @@
       ],
       "sprint": "Animated Companion",
       "with": "user",
-      "started_at": "2026-11-01T09:52:16Z",
-      "started_by": "claude:6baf63b2",
       "commit": "2351354c7b9c8fd50c37f593d9d8028d07afc210",
       "notes": [
         {
@@ -7207,19 +7218,36 @@
           "kind": "note",
           "text": "Draft v0.3.0 checked (run 41295231166): DMG and app notarized, signatures valid, version 0.3.0 build 5 (above 0.2.2’s build 4), solo-swe feed, matching key, appcast signature valid. Waiting for the user to publish.",
           "by": "claude:6baf63b2"
+        },
+        {
+          "at": "2026-11-01T10:13:49Z",
+          "kind": "answer",
+          "text": "Put the proposed release notes (companion, the two waiting fixes, the daylight-saving fix) on the v0.3.0 draft, or keep the generated ones? → Kept the generated notes.; Publish the v0.3.0 draft as the latest release (not a pre-release)? All draft checks passed; publishing is yours. → Published as the latest release on 2026-11-01; installed through Homebrew.",
+          "by": "claude:6baf63b2"
+        },
+        {
+          "at": "2026-11-01T10:13:50Z",
+          "kind": "outcome",
+          "text": "v0.3.0 published as latest (2026-11-01): appcast and zip download anonymously; homebrew.yml (run 41296144664) pushed the 0.3.0 cask; the user installed it through Homebrew and it works.",
+          "by": "claude:6baf63b2"
         }
       ],
-      "waiting_on": "user",
-      "questions": [
-        "Put the proposed release notes (companion, the two waiting fixes, the daylight-saving fix) on the v0.3.0 draft, or keep the generated ones?",
-        "Publish the v0.3.0 draft as the latest release (not a pre-release)? All draft checks passed; publishing is yours."
-      ],
-      "blocked_at": "2026-11-01T10:05:22Z",
       "components": [
         "core",
         "app",
         "docs"
-      ]
+      ],
+      "blocks": [
+        {
+          "from": "2026-11-01T10:05:22Z",
+          "to": "2026-11-01T10:13:49Z",
+          "on": "user"
+        }
+      ],
+      "started_at": "2026-11-01T10:13:50Z",
+      "started_by": "claude:6baf63b2",
+      "completed_at": "2026-11-01T10:13:50Z",
+      "completed_by": "claude:6baf63b2"
     },
     {
       "id": "T-142",
@@ -7432,6 +7460,34 @@
         "tooling",
         "docs"
       ]
+    },
+    {
+      "id": "T-150",
+      "name": "Skill: check a release without permission prompts",
+      "type": "infra",
+      "priority": "P3",
+      "labels": [
+        "release"
+      ],
+      "description": "During the v0.3.0 release, each check in `doc/RELEASING.md` › Checking a release asked for permission: downloading the draft (`gh release download`), unzipping it (`ditto`), `spctl --assess` on the DMG and the app, `codesign --verify --deep --strict`, `xcrun stapler validate`, `plutil -p` on the Info.plist, `gh variable get SPARKLE_PUBLIC_KEY`, Sparkle's `sign_update --verify`, and after publishing `curl -fsSIL` on the appcast and the zip and `gh run list --workflow homebrew.yml`.\n\n## Change\n- A project skill in `.claude/skills/` (e.g. `check-release`) that runs these checks for a given version in a scratch folder and reports a table of results.\n- Its `allowed-tools` lists exactly those read-only commands, so they run without prompts. **Agree the exact allow list with the user before writing it**: it changes what runs without asking. Don't widen `.claude/settings.json`.\n- Point `doc/RELEASING.md` › Checking a release and `CLAUDE.md` at the skill.\n\n## Done when\nThe user approved the allow list, and the skill ran the checks of the next release without a prompt.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        ".claude/skills/check-release/SKILL.md",
+        "doc/RELEASING.md",
+        "CLAUDE.md"
+      ],
+      "created_at": "2026-11-01T10:14:33Z",
+      "updated_at": "2026-11-01T10:14:33Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce",
+      "components": [
+        "release",
+        "docs"
+      ],
+      "with": "user"
     }
   ]
 }
