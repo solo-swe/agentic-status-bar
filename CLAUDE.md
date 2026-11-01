@@ -84,8 +84,8 @@ Every change leaves the code better than it found it.
 
 Automate tests at every level that applies:
 
-- **Unit tests**: Swift Testing (`@Test`, `#expect`) for `ASBCore` in `tests/ASBCoreTests/`, XCTest for the app in
-  `App/Tests/`.
+- **Unit tests**: Swift Testing (`@Test`, `#expect`) for `ASBCore` in `tests/ASBCoreTests/` and for the `asb`
+  commands in `tests/asbTests/`, XCTest for the app in `App/Tests/`.
 - **Conformance cases** for anything the snapshot engine shows: a new case in `tests/conformance/` with its expected
   snapshot written by hand from the rules, never copied from the engine's output.
 - **Event-order tests** in `HookEventsTests` for hook behaviour, from the orders recorded in `tests/fixtures/`.

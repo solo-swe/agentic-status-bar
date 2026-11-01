@@ -320,6 +320,48 @@ private struct Home {
     #expect((try? FileManager.default.destinationOfSymbolicLink(atPath: home.oldLink)) == nil)
 }
 
+// MARK: The machine's installer
+
+@Test func theMachinesInstallerUsesTheHomeAndTheOverrides() {
+    let home = "/Users/alex"
+    let plain = Installer.forMachine(environment: ["HOME": home], sourceBinary: "/build/asb", swiftBarDir: nil)
+    #expect(plain.settingsFile == "\(home)/.claude/settings.json")
+    #expect(plain.stableBinary == "\(home)/Library/Application Support/agentic-status-bar/bin/asb")
+    #expect(plain.sourceBinary == "/build/asb" && plain.swiftBarDir == nil)
+    #expect(plain.loginItemFile == "\(home)/Library/LaunchAgents/agentic-status-bar.start-swiftbar.plist")
+    #expect(plain.stateDir == "\(home)/.claude/agentic-status-bar")
+    #expect(plain.configFile == "\(home)/.config/agentic-status-bar/config")
+    #expect(plain.old?.stateDir == "\(home)/.claude/swiftbar-claudecode-minimal")
+    #expect(plain.old?.configFile == "\(home)/.config/swiftbar-claudecode-minimal/config")
+    #expect(plain.old?.loginItemFile == "\(home)/Library/LaunchAgents/swiftbar-claudecode-minimal.start-swiftbar.plist")
+
+    let overridden = Installer.forMachine(
+        environment: ["HOME": home, "ASB_SETTINGS": "/tmp/s.json", "ASB_STATE_DIR": "/tmp/state", "ASB_CONFIG": "/tmp/c"],
+        sourceBinary: "/build/asb", swiftBarDir: "/plugins")
+    #expect(overridden.settingsFile == "/tmp/s.json" && overridden.stateDir == "/tmp/state")
+    #expect(overridden.configFile == "/tmp/c" && overridden.swiftBarDir == "/plugins")
+}
+
+@Test func swiftBarsFolderComesFromTheOverrideWithTheHomeExpanded() {
+    #expect(Installer.swiftBarDir(environment: ["ASB_SWIFTBAR_DIR": "~/plugins"], home: "/Users/alex") == "/Users/alex/plugins")
+    #expect(Installer.swiftBarDir(environment: ["ASB_SWIFTBAR_DIR": "/abs"], home: "/Users/alex") == "/abs")
+    #expect(Installer.swiftBarDir(environment: ["ASB_SWIFTBAR_DIR": ""], home: "/Users/alex") == nil)
+}
+
+@Test func theExecutablePathIsAbsoluteWithSymlinksResolved() throws {
+    let dir = FileManager.default.temporaryDirectory.appendingPathComponent("asb-exe-\(UUID().uuidString)")
+        .resolvingSymlinksInPath().path
+    try FileManager.default.createDirectory(atPath: dir + "/bin", withIntermediateDirectories: true)
+    let asb = dir + "/bin/asb"
+    FileManager.default.createFile(atPath: asb, contents: Data(), attributes: [.posixPermissions: 0o755])
+    try FileManager.default.createSymbolicLink(atPath: dir + "/link", withDestinationPath: asb)
+
+    #expect(ExecutablePath.resolve(asb, currentDirectory: "/", searchPath: nil) == asb)
+    #expect(ExecutablePath.resolve("bin/../link", currentDirectory: dir, searchPath: nil) == asb)
+    #expect(ExecutablePath.resolve("asb", currentDirectory: "/", searchPath: "/nowhere:\(dir)/bin") == asb)
+    #expect(ExecutablePath.absolute("asb", currentDirectory: "/", searchPath: "/nowhere") == "asb", "not found: as given")
+}
+
 @Test func uninstallTwiceIsHarmless() throws {
     let home = try Home(settings: Data(contentsOf: fixtureSettings))
     try home.installer().install()

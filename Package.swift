@@ -24,5 +24,10 @@ let package = Package(
         ),
         // Under the existing lowercase tests/ folder (macOS paths ignore case, git doesn't).
         .testTarget(name: "ASBCoreTests", dependencies: ["ASBCore"], path: "tests/ASBCoreTests"),
+        .testTarget(
+            name: "asbTests",
+            dependencies: ["asb", "ASBCore", .product(name: "ArgumentParser", package: "swift-argument-parser")],
+            path: "tests/asbTests"
+        ),
     ]
 )

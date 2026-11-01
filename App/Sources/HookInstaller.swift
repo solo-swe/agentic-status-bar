@@ -24,18 +24,9 @@ final class HookInstaller {
     }
 
     /// An installer for this machine, as `asb install` builds one, except that an old SwiftBar link
-    /// is left to `asb install`. ASB_SETTINGS overrides the settings file.
+    /// is left to `asb install`.
     func installer() -> Installer {
-        let paths = Paths.from(environment: environment)
-        var installer = Installer(
-            settingsFile: environment["ASB_SETTINGS"] ?? "\(paths.home)/.claude/settings.json",
-            stableBinary: paths.stableBinary,
-            sourceBinary: bundledAsb,
-            swiftBarDir: nil,
-            loginItemFile: paths.loginItemFile,
-            stateDir: paths.stateDir(config: Config.load(paths)),
-            configFile: paths.configFile)
-        installer.old = .init(stateDir: paths.oldStateDir, configFile: paths.oldConfigFile, loginItemFile: paths.oldLoginItemFile)
+        var installer = Installer.forMachine(environment: environment, sourceBinary: bundledAsb, swiftBarDir: nil)
         installer.log = { _ in }
         return installer
     }

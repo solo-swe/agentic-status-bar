@@ -34,6 +34,7 @@ The hook runs on every tool call of every session; run `mise run bench` after ch
 | `Sources/asb/` | The `asb` CLI: `hook`, `snapshot`, `action`, `install`, `uninstall` |
 | `App/` | The macOS app: `project.yml` (XcodeGen), `Sources/`, `Tests/` |
 | `tests/ASBCoreTests/` | Swift Testing tests for `ASBCore` |
+| `tests/asbTests/` | Swift Testing tests for the `asb` commands, run against a temporary home |
 | `tests/conformance/` | The snapshot engine's behavior as data: input files and the expected snapshot (see its README) |
 | `tests/fixtures/` | Captured Claude Code hook payloads and transcripts (see its README) |
 | `mise.toml`, `mise-tasks/` | The pinned development tools and the checks as mise tasks (`doc/design/dev-tooling.md`) |

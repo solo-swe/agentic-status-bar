@@ -542,7 +542,7 @@ Each task fits in under 10 minutes for an agent, keeps the suite green, and list
 
 | # | Task | Type | Files | Depends on |
 | --- | --- | --- | --- | --- |
-| 1 | Ignore Claude Code hook calls that carry `CURSOR_VERSION` in the environment; unit test | feature | `Sources/asb/Hook.swift`, `tests/ASBCoreTests/` | — |
+| 1 | Ignore Claude Code hook calls that carry `CURSOR_VERSION` in the environment; unit test | feature | `Sources/ASBCore/Hook.swift`, `tests/ASBCoreTests/HookTests.swift` | — |
 | 2 | Document `agent` (optional, default `claude-code`), reader rules 6 and 7, the provider ID table | docs | `doc/state-file-schema.md` | — |
 | 3 | Document the optional `sessions[].agent` | docs | `doc/snapshot-schema.md` | 2 |
 | 4 | `StateFile.parse` reads `agent`; `agentId` defaults to `claude-code`; unit tests | feature | `Sources/ASBCore/StateFile.swift`, tests | 2 |

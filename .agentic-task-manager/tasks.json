@@ -7494,7 +7494,7 @@
       "description": "Add the mise task `coverage` (`mise-tasks/coverage.sh`, see `doc/design/dev-tooling.md`), which reports line coverage of the Swift package's sources and checks it against a threshold.\n\n## Change\n- Run the package tests with code coverage on (`swift test --enable-code-coverage`), then report line coverage over `Sources/ASBCore/` and `Sources/asb/` only (not the tests, not the app), per file and in total, with `llvm-cov` from the active toolchain (`xcrun llvm-cov`; `swift test --show-codecov-path` gives the profile).\n- Exit non-zero when the total is below a threshold given as its first argument (default `99`; mise passes arguments through, so the script reads `$1`). POSIX `sh`, shellcheck clean (`doc/guides/shell.md`), with a `#MISE description`.\n- Add `coverage` to the `check` task's `depends` in `mise.toml`.\n- Document it in `CONTRIBUTING.md` › Checks and `CLAUDE.md` › Commands.\n\n## Done when\n`mise run coverage` runs locally and `mise run lint` passes. Record today's total and the five least covered files as this task's note. (`mise run check` will fail on coverage until T-148 is done; note that in the outcome.)\n",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-154"
       ],
@@ -7505,7 +7505,7 @@
         "mise.toml"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T22:52:09Z",
+      "updated_at": "2026-11-01T22:53:38Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "components": [
@@ -7520,7 +7520,18 @@
       ],
       "sprint": "Quality",
       "started_at": "2026-11-01T22:52:09Z",
-      "started_by": "claude:5f67a194"
+      "started_by": "claude:5f67a194",
+      "commit": "2769bf2d2405db1f11af569b1cf148427c71f876",
+      "completed_at": "2026-11-01T22:53:38Z",
+      "completed_by": "claude:5f67a194",
+      "notes": [
+        {
+          "at": "2026-11-01T22:53:38Z",
+          "kind": "outcome",
+          "text": "Today: 96.7% of 2290 lines in `ASBCore` (`asb` not measured: no test target, T-156). Least covered: `Inputs` 85%, `Themes` 88%, `StateWriter` 92%, `Transcript` 93%, `Paths` 93%. The count varies by 1–2 lines in `OrderedJSON` between runs. `coverage` joins `check` in T-148 once it passes, so `check` stays green meanwhile.",
+          "by": "claude:5f67a194"
+        }
+      ]
     },
     {
       "id": "T-148",
@@ -7861,7 +7872,7 @@
       "description": "`asb` has no test target, so coverage can't see `Sources/asb/` (decided with the user, 2026-11-01). Move its logic into `ASBCore`, where it is tested, and test the thin commands that are left.\n\n## Change\n- The hook: move what `HookCommand.run()` (`Sources/asb/Hook.swift`) does — the debug log, parsing, the lock, `HookEvents.apply`, the backfill, the atomic write or delete, removing stale files for the pid — into an `ASBCore` type that takes its inputs: the payload bytes, the environment, the parent pid, the clock and the process inspector. `HookCommand.run()` only reads stdin and calls it. The hook's rules stay as they are (`doc/guides/hook.md`: silent, always exits 0, locked atomic writes, newer events win).\n- The other commands (`action`, `install`, `snapshot`): the same where they hold logic; keep only argument parsing and printing in `asb`.\n- Add a test target `asbTests` (`tests/asbTests/`, `@testable import asb`) that covers the commands: parsing, and `run` against a temporary `HOME` with the `ASB_*` overrides.\n- Tests in `tests/ASBCoreTests/` for the moved logic, including the event orders `HookEventsTests` already replays, driven through the new type.\n- `mise-tasks/coverage.sh` reports `Sources/asb/` from the new target too.\n\n## Checks\nNo behavior change: `mise run check` passes and `mise run bench` stays within its targets (`asb hook` under 10 ms).",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-147"
       ],
@@ -7875,9 +7886,9 @@
         "CONTRIBUTING.md"
       ],
       "created_at": "2026-11-01T22:19:06Z",
-      "updated_at": "2026-11-01T22:19:06Z",
+      "updated_at": "2026-11-01T22:53:39Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:5f67a194",
       "sprint_history": [
         {
           "sprint": "Quality",
@@ -7889,7 +7900,9 @@
         "core",
         "cli",
         "docs"
-      ]
+      ],
+      "started_at": "2026-11-01T22:53:39Z",
+      "started_by": "claude:5f67a194"
     }
   ]
 }
