@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 151,
+    "next_id": 157,
     "workflow": {
       "type": "direct"
     },
@@ -273,6 +273,12 @@
           "carried": [],
           "added": []
         }
+      },
+      {
+        "id": "Quality",
+        "state": "active",
+        "goal": "Clean up comments and reach the 99% coverage gate",
+        "start": "2026-11-01T21:20:31Z"
       }
     ],
     "releases": [
@@ -7257,7 +7263,7 @@
       "labels": [
         "cleanup"
       ],
-      "description": "Apply `CLAUDE.md` › Code quality to `Sources/ASBCore` (about 360 comment lines in 27 files): *Code documents itself. Clear names and small functions instead of comments. Comment only what the code can't say (a non-obvious reason or constraint).*\n\n## Change\n- Keep comments that give a non-obvious reason or constraint, or point to the doc section a rule comes from (`doc/state-file-schema.md › Events`).\n- Delete comments that repeat the name or the code below them.\n- Where a comment explains what unclear code does, rename or extract a function instead.\n- `public` declarations keep or get proper `///` docs: what it does, its arguments, errors, an example where useful (`CLAUDE.md` › Public APIs).\n\n## Checks\nNo behavior change. `tests/swift.sh`, `tests/app.sh --test` and `tests/lint.sh` pass.",
+      "description": "Apply `CLAUDE.md` › Code quality to `Sources/ASBCore` (about 360 comment lines in 27 files): *Code documents itself. Clear names and small functions instead of comments. Comment only what the code can't say (a non-obvious reason or constraint).*\n\n## Change\n- Keep comments that give a non-obvious reason or constraint, or point to the doc section a rule comes from (`doc/state-file-schema.md › Events`).\n- Delete comments that repeat the name or the code below them.\n- Where a comment explains what unclear code does, rename or extract a function instead.\n- `public` declarations keep or get proper `///` docs: what it does, its arguments, errors, an example where useful (`CLAUDE.md` › Public APIs).\n\n## Renames (decided with the user, 2026-11-01)\nAny Swift name may change, `public` ones in `ASBCore` included, when every caller (the app, `asb`, the tests) is updated in the same commit. Never changed: JSON keys, file formats, config keys, `asb` commands and flags, and the conformance cases.\n\n## Checks\nNo behavior change. `tests/swift.sh`, `tests/app.sh --test` and `tests/lint.sh` pass (`mise run check` once T-154 is done).\n",
       "requirements": [],
       "use_cases": [],
       "status": "todo",
@@ -7266,12 +7272,19 @@
         "Sources/ASBCore/"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T10:04:01Z",
+      "updated_at": "2026-11-01T22:19:45Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:5f67a194",
       "components": [
         "core"
-      ]
+      ],
+      "sprint_history": [
+        {
+          "sprint": "Quality",
+          "from": "2026-11-01T21:20:28Z"
+        }
+      ],
+      "sprint": "Quality"
     },
     {
       "id": "T-143",
@@ -7281,7 +7294,7 @@
       "labels": [
         "cleanup"
       ],
-      "description": "Apply `CLAUDE.md` › Code quality to `Sources/asb/` and `scripts/*.swift`: comment only what the code can't say (a non-obvious reason or constraint); clear names and small functions instead of comments.\n\n## Change\n- Keep comments that give a non-obvious reason or constraint (for example why the hook prints nothing and always exits 0), or point to a doc section.\n- Delete comments that repeat the name or the code; rename or extract where a comment explains unclear code.\n- The commands' `abstract` and help texts are user-facing and stay.\n\n## Checks\nNo behavior change. `tests/swift.sh`, `tests/app.sh --test` and `tests/lint.sh` pass.",
+      "description": "Apply `CLAUDE.md` › Code quality to `Sources/asb/` and `scripts/*.swift`: comment only what the code can't say (a non-obvious reason or constraint); clear names and small functions instead of comments.\n\n## Change\n- Keep comments that give a non-obvious reason or constraint (for example why the hook prints nothing and always exits 0), or point to a doc section.\n- Delete comments that repeat the name or the code; rename or extract where a comment explains unclear code.\n- The commands' `abstract` and help texts are user-facing and stay.\n\n## Renames (decided with the user, 2026-11-01)\nAny Swift name may change, `public` ones in `ASBCore` included, when every caller (the app, `asb`, the tests) is updated in the same commit. Never changed: JSON keys, file formats, config keys, `asb` commands and flags, and the conformance cases.\n\n## Checks\nNo behavior change. `tests/swift.sh`, `tests/app.sh --test` and `tests/lint.sh` pass (`mise run check` once T-154 is done).\n",
       "requirements": [],
       "use_cases": [],
       "status": "todo",
@@ -7293,13 +7306,20 @@
         "scripts/make-social-preview.swift"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T10:04:01Z",
+      "updated_at": "2026-11-01T22:19:46Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:5f67a194",
       "components": [
         "cli",
         "release"
-      ]
+      ],
+      "sprint_history": [
+        {
+          "sprint": "Quality",
+          "from": "2026-11-01T21:20:28Z"
+        }
+      ],
+      "sprint": "Quality"
     },
     {
       "id": "T-144",
@@ -7309,7 +7329,7 @@
       "labels": [
         "cleanup"
       ],
-      "description": "Apply `CLAUDE.md` › Code quality to `App/Sources/`, except `Companion/` and `CompanionWindow.swift` (about 150 comment lines): comment only what the code can't say (a non-obvious reason or constraint); clear names and small functions instead of comments.\n\n## Change\n- Keep comments that give a non-obvious reason or constraint (an AppKit quirk, why a window needs a setting), or point to a doc section.\n- Delete comments that repeat the name or the code; rename or extract where a comment explains unclear code.\n\n## Checks\nNo behavior change. `tests/app.sh --test`, `tests/swift.sh` and `tests/lint.sh` pass.",
+      "description": "Apply `CLAUDE.md` › Code quality to `App/Sources/`, except `Companion/` and `CompanionWindow.swift` (about 150 comment lines): comment only what the code can't say (a non-obvious reason or constraint); clear names and small functions instead of comments.\n\n## Change\n- Keep comments that give a non-obvious reason or constraint (an AppKit quirk, why a window needs a setting), or point to a doc section.\n- Delete comments that repeat the name or the code; rename or extract where a comment explains unclear code.\n\n## Renames (decided with the user, 2026-11-01)\nAny Swift name may change, `public` ones in `ASBCore` included, when every caller (the app, `asb`, the tests) is updated in the same commit. Never changed: JSON keys, file formats, config keys, `asb` commands and flags, and the conformance cases.\n\n## Checks\nNo behavior change. `tests/app.sh --test`, `tests/swift.sh` and `tests/lint.sh` pass (`mise run check` once T-154 is done).\n",
       "requirements": [],
       "use_cases": [],
       "status": "todo",
@@ -7318,12 +7338,19 @@
         "App/Sources/"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T10:04:01Z",
+      "updated_at": "2026-11-01T22:19:48Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:5f67a194",
       "components": [
         "app"
-      ]
+      ],
+      "sprint_history": [
+        {
+          "sprint": "Quality",
+          "from": "2026-11-01T21:20:28Z"
+        }
+      ],
+      "sprint": "Quality"
     },
     {
       "id": "T-145",
@@ -7333,7 +7360,7 @@
       "labels": [
         "cleanup"
       ],
-      "description": "Apply `CLAUDE.md` › Code quality to `App/Sources/Companion/` and `App/Sources/CompanionWindow.swift` (about 260 comment lines): comment only what the code can't say (a non-obvious reason or constraint); clear names and small functions instead of comments.\n\n## Change\n- Keep comments that give a non-obvious reason or constraint (an angle convention, why an animation is discrete, an energy rule from `doc/design/desktop-companion.md`).\n- Delete comments that repeat the name or the code; rename or extract where a comment explains unclear code (for example name a pose or an angle instead of describing it).\n\n## Checks\nNo behavior change: the poses and animations stay the same. `tests/app.sh --test`, `tests/swift.sh` and `tests/lint.sh` pass.",
+      "description": "Apply `CLAUDE.md` › Code quality to `App/Sources/Companion/` and `App/Sources/CompanionWindow.swift` (about 260 comment lines): comment only what the code can't say (a non-obvious reason or constraint); clear names and small functions instead of comments.\n\n## Change\n- Keep comments that give a non-obvious reason or constraint (an angle convention, why an animation is discrete, an energy rule from `doc/design/desktop-companion.md`).\n- Delete comments that repeat the name or the code; rename or extract where a comment explains unclear code (for example name a pose or an angle instead of describing it).\n\n## Renames (decided with the user, 2026-11-01)\nAny Swift name may change, `public` ones in `ASBCore` included, when every caller (the app, `asb`, the tests) is updated in the same commit. Never changed: JSON keys, file formats, config keys, `asb` commands and flags, and the conformance cases.\n\n## Checks\nNo behavior change: the poses and animations stay the same. `tests/app.sh --test`, `tests/swift.sh` and `tests/lint.sh` pass (`mise run check` once T-154 is done).\n",
       "requirements": [],
       "use_cases": [],
       "status": "todo",
@@ -7343,13 +7370,20 @@
         "App/Sources/CompanionWindow.swift"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T10:04:01Z",
+      "updated_at": "2026-11-01T22:19:50Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:5f67a194",
       "components": [
         "companion",
         "app"
-      ]
+      ],
+      "sprint_history": [
+        {
+          "sprint": "Quality",
+          "from": "2026-11-01T21:20:28Z"
+        }
+      ],
+      "sprint": "Quality"
     },
     {
       "id": "T-146",
@@ -7359,7 +7393,7 @@
       "labels": [
         "cleanup"
       ],
-      "description": "Apply `CLAUDE.md` › Code quality to `tests/ASBCoreTests/` and `App/Tests/` (about 130 comment lines): tests show how the code is meant to be used, so a test's name and its expectations say what it checks.\n\n## Change\n- Keep comments that give a non-obvious reason (why an input is shaped the way it is, which captured event order a test replays).\n- Delete comments that repeat the test name or the code; move what a comment says into the test name or an expectation message where it helps.\n\n## Checks\nNo test removed or weakened. `tests/swift.sh`, `tests/app.sh --test` and `tests/lint.sh` pass.",
+      "description": "Apply `CLAUDE.md` › Code quality to `tests/ASBCoreTests/` and `App/Tests/` (about 130 comment lines): tests show how the code is meant to be used, so a test's name and its expectations say what it checks.\n\n## Change\n- Keep comments that give a non-obvious reason (why an input is shaped the way it is, which captured event order a test replays).\n- Delete comments that repeat the test name or the code; move what a comment says into the test name or an expectation message where it helps.\n\n## Renames (decided with the user, 2026-11-01)\nAny Swift name may change, `public` ones in `ASBCore` included, when every caller (the app, `asb`, the tests) is updated in the same commit. Never changed: JSON keys, file formats, config keys, `asb` commands and flags, and the conformance cases.\n\n## Checks\nNo test removed or weakened. `tests/swift.sh`, `tests/app.sh --test` and `tests/lint.sh` pass (`mise run check` once T-154 is done).\n",
       "requirements": [],
       "use_cases": [],
       "status": "todo",
@@ -7369,13 +7403,20 @@
         "App/Tests/"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T10:04:01Z",
+      "updated_at": "2026-11-01T22:19:51Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:5f67a194",
       "components": [
         "core",
         "app"
-      ]
+      ],
+      "sprint_history": [
+        {
+          "sprint": "Quality",
+          "from": "2026-11-01T21:20:28Z"
+        }
+      ],
+      "sprint": "Quality"
     },
     {
       "id": "T-147",
@@ -7385,24 +7426,34 @@
       "labels": [
         "coverage"
       ],
-      "description": "Add `tests/coverage.sh`, which reports line coverage of the Swift package's sources and checks it against a threshold.\n\n## Change\n- Run the package tests with code coverage on, then report line coverage over `Sources/ASBCore/` and `Sources/asb/` only (not the tests, not the app), per file and in total, with `llvm-cov` from the active toolchain.\n- Exit non-zero when the total is below a threshold given as an argument (default `99`). POSIX `sh`, shellcheck clean (`doc/guides/shell.md`).\n- Document it in `CONTRIBUTING.md` › Checks and `CLAUDE.md` › Commands.\n\n## Done when\nThe script runs locally and `tests/lint.sh` passes. Record today's total and the five least covered files as this task's note.",
+      "description": "Add the mise task `coverage` (`mise-tasks/coverage.sh`, see `doc/design/dev-tooling.md`), which reports line coverage of the Swift package's sources and checks it against a threshold.\n\n## Change\n- Run the package tests with code coverage on (`swift test --enable-code-coverage`), then report line coverage over `Sources/ASBCore/` and `Sources/asb/` only (not the tests, not the app), per file and in total, with `llvm-cov` from the active toolchain (`xcrun llvm-cov`; `swift test --show-codecov-path` gives the profile).\n- Exit non-zero when the total is below a threshold given as an argument (`#USAGE`, default `99`). POSIX `sh`, shellcheck clean (`doc/guides/shell.md`), with a `#MISE description`.\n- Add `coverage` to the `check` task's `depends` in `mise.toml`.\n- Document it in `CONTRIBUTING.md` › Checks and `CLAUDE.md` › Commands.\n\n## Done when\n`mise run coverage` runs locally and `mise run lint` passes. Record today's total and the five least covered files as this task's note. (`mise run check` will fail on coverage until T-148 is done; note that in the outcome.)\n",
       "requirements": [],
       "use_cases": [],
       "status": "todo",
-      "dependencies": [],
+      "dependencies": [
+        "T-154"
+      ],
       "files": [
-        "tests/coverage.sh",
         "CONTRIBUTING.md",
-        "CLAUDE.md"
+        "CLAUDE.md",
+        "mise-tasks/coverage.sh",
+        "mise.toml"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T10:04:01Z",
+      "updated_at": "2026-11-01T22:13:59Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:5f67a194",
       "components": [
         "tooling",
         "docs"
-      ]
+      ],
+      "sprint_history": [
+        {
+          "sprint": "Quality",
+          "from": "2026-11-01T21:20:28Z"
+        }
+      ],
+      "sprint": "Quality"
     },
     {
       "id": "T-148",
@@ -7412,25 +7463,34 @@
       "labels": [
         "coverage"
       ],
-      "description": "Bring line coverage of `Sources/ASBCore/` and `Sources/asb/` to at least 99%, as `tests/coverage.sh` reports it.\n\n## Change\n- Add tests for the uncovered lines the report lists. They test behavior (an input and its expected result), not lines touched for the count.\n- Exclude only what can't run in a test (an entry point, a Darwin call that tests replace with a fake), and list each exclusion with its reason in `CONTRIBUTING.md` › Checks.\n- If the gap is large, split the work per file into follow-up tasks (`/atm:create-tasks`).\n\n## Done when\n`tests/coverage.sh` exits 0 at 99%, and `tests/swift.sh`, `tests/app.sh --test` and `tests/lint.sh` pass.",
+      "description": "Bring line coverage of `Sources/ASBCore/` and `Sources/asb/` to at least 99%, as `mise run coverage` reports it. T-156 has moved the hook's logic into `ASBCore` and added the `asbTests` target.\n\n## Change\n- Add tests for the uncovered lines the report lists. They test behavior (an input and its expected result), not lines touched for the count.\n- **Exclusions** (decided with the user, 2026-11-01): `llvm-cov` excludes whole files only. Code that can't run in a test (the `@main` entry point, real Darwin calls that tests replace with a fake) goes into its own small file named `*Darwin.swift`, like the existing `ProcessesDarwin.swift`, and holds nothing else. The coverage task excludes that pattern (and the entry point file) with `-ignore-filename-regex`. List each excluded file with its reason in `CONTRIBUTING.md` › Checks.\n- If the gap is large, split the work per file into follow-up tasks (`/atm:create-tasks`).\n\n## Done when\n`mise run check` passes, coverage at 99% included.\n",
       "requirements": [],
       "use_cases": [],
       "status": "todo",
       "dependencies": [
-        "T-147"
+        "T-156"
       ],
       "files": [
         "tests/ASBCoreTests/",
-        "CONTRIBUTING.md"
+        "CONTRIBUTING.md",
+        "Sources/ASBCore/",
+        "mise-tasks/coverage.sh"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T10:04:01Z",
+      "updated_at": "2026-11-01T22:19:15Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:5f67a194",
       "components": [
         "core",
         "docs"
-      ]
+      ],
+      "sprint_history": [
+        {
+          "sprint": "Quality",
+          "from": "2026-11-01T21:20:28Z"
+        }
+      ],
+      "sprint": "Quality"
     },
     {
       "id": "T-149",
@@ -7440,7 +7500,7 @@
       "labels": [
         "coverage"
       ],
-      "description": "Enforce the 99% line coverage of `ASBCore` and `asb` in CI. The CI workflow is the user's to approve, so this is done with the user.\n\n## Change\n- Run `tests/coverage.sh` in the `swift` job of `.github/workflows/ci.yml`, so the job fails below 99%.\n- Add to `CLAUDE.md` › Testing: *ASBCore and asb keep at least 99% line coverage. A change is done when its tests pass and the checks, coverage included, are green.*\n\n## Done when\nThe user approved the workflow change, it is pushed, and the CI run is green with the gate in place.",
+      "description": "Enforce the 99% line coverage of `ASBCore` and `asb` in CI. The CI workflow is the user's to approve, so this is done with the user.\n\n## Change\n- Run `mise run coverage` in the `swift` job of `.github/workflows/ci.yml`, so the job fails below 99%.\n- Add to `CLAUDE.md` › Testing: *ASBCore and asb keep at least 99% line coverage. A change is done when `mise run check`, coverage included, passes.*\n\n## Done when\nThe user approved the workflow change, it is pushed, and the CI run is green with the gate in place.\n",
       "requirements": [],
       "use_cases": [],
       "status": "todo",
@@ -7452,14 +7512,21 @@
         "CLAUDE.md"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T10:04:01Z",
+      "updated_at": "2026-11-01T22:14:01Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:5f67a194",
       "with": "user",
       "components": [
         "tooling",
         "docs"
-      ]
+      ],
+      "sprint_history": [
+        {
+          "sprint": "Quality",
+          "from": "2026-11-01T21:20:28Z"
+        }
+      ],
+      "sprint": "Quality"
     },
     {
       "id": "T-150",
@@ -7488,6 +7555,233 @@
         "docs"
       ],
       "with": "user"
+    },
+    {
+      "id": "T-151",
+      "name": "Spike: capture background tasks for a \"waiting on background work\" state",
+      "type": "test",
+      "priority": "P2",
+      "labels": [
+        "hook"
+      ],
+      "description": "A session whose turn ended while it waits on its own background work (a `Monitor` watching CI, a `ScheduleWakeup` / `/loop`) shows as **idle** today, although it doesn't need the user. Find out what Claude Code sends in that case, so a new state can be designed from captured payloads, not guesses.\n\n## Where it stands\n- `Stop` and `SubagentStop` carry `background_tasks`; `HookPayload.parse` (`Sources/ASBCore/HookEvents.swift`) already reads every entry, but `isRunningSubagent` keeps only `type == \"subagent\"`, so shells and monitors are dropped.\n- The only `shell` entry in the repo (`backgroundTasksAreRead` in `tests/ASBCoreTests/HookEventsTests.swift`) was written from the docs; the captured `Stop.json` has an empty list. `session_crons` is in the payload but unused and never captured non-empty.\n\n## Decisions so far (with the user, 2026-11-01)\n- **A new sibling state**, not a wider `subagents` state: subagents and background tasks may grow different features later (showing a task's command, focusing a subagent). Details are not settled.\n- **Only monitors and scheduled wakeups count**, not `run_in_background` shells: a dev or preview server almost always runs in the background and would keep the session looking busy forever, hiding the idle case.\n- **A process fallback** like C4 is wanted where it applies: drop the state when the background work is gone even if no hook fires.\n- **`/loop` and `ScheduleWakeup` (`session_crons`)**: in scope in principle, but more information is needed first; this spike gathers it.\n\n## Steps\n1. Make sure the installed hook binary has `debug_hook_log` (a dev build updates the stable `asb` copy), and turn it on in the config.\n2. With the user, in a real session, end a turn while each of these is running, one at a time: a `Monitor`, a `ScheduleWakeup` (and a `/loop` without an interval), a `run_in_background` Bash (for comparison), and a background subagent alongside one of them.\n3. Let each finish on its own, and once stop one early (TaskStop, or kill the process).\n4. Turn `debug_hook_log` off and delete the log once the payloads are copied.\n\n## Record\n- The `background_tasks` entry for each kind: `type`, `status`, `id` and the other fields (`command`, `description`, ...), and whether `ScheduleWakeup` and `/loop` appear there or in `session_crons`, and in what shape.\n- What happens when the work finishes while the session is idle: does Claude Code start a turn by itself (`UserPromptSubmit` with a `<task-notification>` prompt, then a new `Stop` with the updated list)? For a wakeup, what fires when it is due?\n- What fires, if anything, when the work is stopped early or dies.\n- The `claude` process's children for each kind (`ps -o pid,ppid,lstart,comm`): is a monitor a child process? Is anything visible for a scheduled wakeup? This decides where the process fallback can work.\n- Whether `SubagentStop`'s `background_tasks` lists the parent's monitors too.\n\n## Output\n- Sanitized payloads in `tests/fixtures/payloads/` (made-up IDs, paths, commands), e.g. `Stop-background-monitor.json`, `Stop-session-crons.json`.\n- Findings in `tests/fixtures/README.md`.\n- A short design note as this task's note: the state's name, symbol and wording, how it ranks and counts (like busy?), how it interacts with `subagents`, waiting, C3 and C5, the process fallback, and whether `session_crons` is covered. Settle it with the user, then create the implementation tasks (hook, engine, conformance cases, PRD and schema docs, app).",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "tests/fixtures/README.md",
+        "tests/fixtures/payloads/"
+      ],
+      "created_at": "2026-11-01T21:09:37Z",
+      "updated_at": "2026-11-01T21:09:37Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce",
+      "components": [
+        "cli"
+      ],
+      "with": "user"
+    },
+    {
+      "id": "T-152",
+      "name": "Tooling: pin the tools with mise and Xcode with .xcode-version",
+      "type": "infra",
+      "priority": "P1",
+      "labels": [
+        "tooling"
+      ],
+      "description": "First step of `doc/design/dev-tooling.md` (decisions 1, 4 and 5): the tools the checks need come from `mise.toml` at exact versions, locally and in CI. The scripts stay where they are in this task.\n\n## Before you start\nIf `mise` is not on `PATH`, stop and block on the user (`atm block <id> --on user --question \"Install mise (brew install mise)?\"`): installing tools on the user's machine is theirs to do.\n\n## Change\n- `mise.toml` at the root: `min_version` set to the installed mise version, and `[tools]` with `xcodegen` and `shellcheck` at exact versions (the latest stable releases; the registry has both through aqua).\n- `.xcode-version` with the Xcode version used locally (`xcodebuild -version`), and one that the `macos-latest` runner image has (check the runner image's README).\n- `.github/workflows/ci.yml`: in each job, replace `brew install …` and the \"Select the newest Xcode\" step with `jdx/mise-action` (pinned to a release tag, with its own mise `version` pinned) and a step that selects the Xcode named in `.xcode-version`. The jobs still run `tests/lint.sh`, `tests/swift.sh` and `tests/app.sh --test`.\n- `CONTRIBUTING.md` › Requirements: mise instead of the `brew install` lines (`brew install mise`, then `mise trust` and `mise install` in the clone).\n- The scripts' \"install it with: brew install …\" hints now say `mise install`.\n\n## Checks\n`mise install` installs both tools; `mise exec -- tests/lint.sh`, `mise exec -- tests/swift.sh --summary` and `mise exec -- tests/app.sh --test` pass. Note in this task the versions pinned.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "mise.toml",
+        ".xcode-version",
+        ".github/workflows/ci.yml",
+        "CONTRIBUTING.md",
+        "doc/design/dev-tooling.md"
+      ],
+      "created_at": "2026-11-01T22:13:44Z",
+      "updated_at": "2026-11-01T22:13:44Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce",
+      "sprint_history": [
+        {
+          "sprint": "Quality",
+          "from": "2026-11-01T22:13:44Z"
+        }
+      ],
+      "sprint": "Quality",
+      "components": [
+        "tooling",
+        "docs"
+      ]
+    },
+    {
+      "id": "T-153",
+      "name": "Tooling: turn the check scripts into mise file tasks",
+      "type": "refactor",
+      "priority": "P1",
+      "labels": [
+        "tooling"
+      ],
+      "description": "Move the check scripts to `mise-tasks/` as mise file tasks, as laid out in `doc/design/dev-tooling.md` › Layout. Behavior stays the same; only the names and the way they're run change.\n\n## Change\n- `git mv` each script, so history follows: `tests/lint.sh` → `mise-tasks/lint.sh` (`lint`), `tests/swift.sh` → `mise-tasks/test.sh` (`test`), `tests/bench.sh` → `mise-tasks/bench.sh` (`bench`).\n- Split `tests/app.sh` by its flags into `mise-tasks/app/build.sh`, `test.sh`, `run.sh` (extra `KEY=VALUE` arguments as before) and `quit.sh` (`app:build`, `app:test`, `app:run`, `app:quit`), with the shared code (the `xcodegen` step, the `xcodebuild` call, the app path) in a non-executable `mise-tasks/app/lib.sh` that they source.\n- Each task gets a `#MISE description=\"…\"` header, and `#USAGE` lines for its flags and arguments (`test`: `--summary`, and arguments passed on to `swift test`, such as `--filter <suite>`). Tasks run from the repository root (mise's default working directory); a script run directly still works from anywhere.\n- `lint` checks `mise-tasks/**/*.sh` and `scripts/*.sh`, still with `shellcheck -x -S warning -s sh`.\n- `.github/workflows/ci.yml`: the jobs run `mise run lint`, `mise run test` and `mise run app:test`.\n- Docs: replace every mention of the old paths with the task names in `CLAUDE.md` › Commands, `CONTRIBUTING.md` (Checks, Layout, The app), `README.md`, `doc/PRD.md`, `doc/guides/*.md` (`shell.md`: where scripts live, tools come from `mise.toml` instead of each script checking for them), `tests/conformance/README.md`, and comments in `App/project.yml` and the scripts. Design notes that record history (`doc/design/future-architecture.md`) keep their text. Set this design note's status to built for this part.\n- Don't edit `.claude/settings.json` (the permission allowlist): that change is the user's. Mention it in this task's outcome note.\n\n## Checks\n`mise tasks` lists every task with its description; `mise run lint`, `mise run test --summary` and `mise run app:test` pass; `mise run bench` meets its targets. No old path is left outside history (search for `tests/swift.sh`, `tests/app.sh`, `tests/lint.sh`, `tests/bench.sh`).",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-152"
+      ],
+      "files": [
+        "mise-tasks/",
+        "tests/lint.sh",
+        "tests/swift.sh",
+        "tests/app.sh",
+        "tests/bench.sh",
+        ".github/workflows/ci.yml",
+        "CLAUDE.md",
+        "CONTRIBUTING.md",
+        "README.md",
+        "doc/guides/shell.md",
+        "doc/guides/app.md",
+        "doc/guides/hook.md",
+        "doc/PRD.md",
+        "tests/conformance/README.md",
+        "App/project.yml",
+        "doc/design/dev-tooling.md"
+      ],
+      "created_at": "2026-11-01T22:13:44Z",
+      "updated_at": "2026-11-01T22:13:44Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce",
+      "sprint_history": [
+        {
+          "sprint": "Quality",
+          "from": "2026-11-01T22:13:44Z"
+        }
+      ],
+      "sprint": "Quality",
+      "components": [
+        "core",
+        "cli",
+        "app",
+        "tooling",
+        "docs"
+      ]
+    },
+    {
+      "id": "T-154",
+      "name": "Tooling: a check task that runs what CI runs",
+      "type": "infra",
+      "priority": "P1",
+      "labels": [
+        "tooling"
+      ],
+      "description": "Add `[tasks.check]` to `mise.toml`: a description and `depends = [\"lint\", \"test\", \"app:test\"]`, so `mise run check` runs every check CI runs, in parallel where mise can. The coverage task joins it in T-147.\n\n## Docs\n`CLAUDE.md`: *A change is done when `mise run check` passes locally* (instead of naming the three checks), and `mise run check` first in › Commands. `CONTRIBUTING.md` › Checks the same.\n\n## Checks\n`mise run check` passes, and fails when one of its checks fails (try it once with a deliberately failing test, then revert).",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-153"
+      ],
+      "files": [
+        "mise.toml",
+        "CLAUDE.md",
+        "CONTRIBUTING.md"
+      ],
+      "created_at": "2026-11-01T22:13:44Z",
+      "updated_at": "2026-11-01T22:13:44Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce",
+      "sprint_history": [
+        {
+          "sprint": "Quality",
+          "from": "2026-11-01T22:13:44Z"
+        }
+      ],
+      "sprint": "Quality",
+      "components": [
+        "docs"
+      ]
+    },
+    {
+      "id": "T-155",
+      "name": "Tooling: release scripts as mise tasks",
+      "type": "infra",
+      "priority": "P2",
+      "labels": [
+        "tooling",
+        "release"
+      ],
+      "description": "The last step of `doc/design/dev-tooling.md` › Layout: move the release scripts to mise tasks and the release workflows to mise.\n\n## Change\n- `git mv` `scripts/package.sh` → `mise-tasks/release/package.sh` (`release:package <version>`), `scripts/appcast.sh` → `release/appcast.sh`, `scripts/homebrew-cask.sh` → `release/cask.sh`, with `#MISE` and `#USAGE` headers; the scripts that call each other use the new paths.\n- `.github/workflows/release.yml` and `homebrew.yml`: `jdx/mise-action` and the `.xcode-version` step instead of `brew install` and the newest Xcode, then the tasks. Secrets and their handling stay exactly as they are.\n- `doc/RELEASING.md`, `CONTRIBUTING.md` › Releases and Layout, and this design note (status: built).\n\n## Checks\n`mise run release:package 0.0.0` makes an unsigned dry run as before; `mise run lint` passes. The workflows themselves are checked at the next release, with the user.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-153"
+      ],
+      "files": [
+        "mise-tasks/release/",
+        "scripts/package.sh",
+        "scripts/appcast.sh",
+        "scripts/homebrew-cask.sh",
+        ".github/workflows/release.yml",
+        ".github/workflows/homebrew.yml",
+        "doc/RELEASING.md",
+        "CONTRIBUTING.md",
+        "doc/design/dev-tooling.md"
+      ],
+      "created_at": "2026-11-01T22:13:44Z",
+      "updated_at": "2026-11-01T22:13:44Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce",
+      "components": [
+        "release",
+        "docs"
+      ]
+    },
+    {
+      "id": "T-156",
+      "name": "Coverage: move the hook's logic into ASBCore and test asb",
+      "type": "refactor",
+      "priority": "P2",
+      "labels": [
+        "coverage",
+        "hook"
+      ],
+      "description": "`asb` has no test target, so coverage can't see `Sources/asb/` (decided with the user, 2026-11-01). Move its logic into `ASBCore`, where it is tested, and test the thin commands that are left.\n\n## Change\n- The hook: move what `HookCommand.run()` (`Sources/asb/Hook.swift`) does — the debug log, parsing, the lock, `HookEvents.apply`, the backfill, the atomic write or delete, removing stale files for the pid — into an `ASBCore` type that takes its inputs: the payload bytes, the environment, the parent pid, the clock and the process inspector. `HookCommand.run()` only reads stdin and calls it. The hook's rules stay as they are (`doc/guides/hook.md`: silent, always exits 0, locked atomic writes, newer events win).\n- The other commands (`action`, `install`, `snapshot`): the same where they hold logic; keep only argument parsing and printing in `asb`.\n- Add a test target `asbTests` (`tests/asbTests/`, `@testable import asb`) that covers the commands: parsing, and `run` against a temporary `HOME` with the `ASB_*` overrides.\n- Tests in `tests/ASBCoreTests/` for the moved logic, including the event orders `HookEventsTests` already replays, driven through the new type.\n- `mise-tasks/coverage.sh` reports `Sources/asb/` from the new target too.\n\n## Checks\nNo behavior change: `mise run check` passes and `mise run bench` stays within its targets (`asb hook` under 10 ms).",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-147"
+      ],
+      "files": [
+        "Sources/ASBCore/",
+        "Sources/asb/",
+        "Package.swift",
+        "tests/ASBCoreTests/",
+        "tests/asbTests/",
+        "mise-tasks/coverage.sh",
+        "CONTRIBUTING.md"
+      ],
+      "created_at": "2026-11-01T22:19:06Z",
+      "updated_at": "2026-11-01T22:19:06Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce",
+      "sprint_history": [
+        {
+          "sprint": "Quality",
+          "from": "2026-11-01T22:19:06Z"
+        }
+      ],
+      "sprint": "Quality",
+      "components": [
+        "core",
+        "cli",
+        "docs"
+      ]
     }
   ]
 }

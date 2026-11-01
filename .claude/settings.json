@@ -1,15 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(tests/run.sh)",
-      "Bash(tests/run.sh *)",
-      "Bash(tests/lint.sh)",
-      "Bash(tests/lint.sh *)",
+      "Bash(mise run *)",
+      "Bash(mise tasks)",
+      "Bash(mise tasks *)",
+      "Bash(mise install)",
+      "Bash(mise exec -- tests/*)",
       "Bash(atm *)",
-      "Bash(tests/swift.sh)",
-      "Bash(tests/app.sh)",
-      "Bash(tests/app.sh *)",
-      "Bash(tests/swift.sh *)",
       "Bash(swift build)",
       "Bash(swift build *)",
       "Bash(swift test)",

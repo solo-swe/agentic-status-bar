@@ -10,6 +10,7 @@
 | [design/desktop-companion.md](design/desktop-companion.md) | The animated desktop companion: window, rendering, animations, energy, decisions |
 | [design/agent-providers.md](design/agent-providers.md) | Proposal: showing coding agents other than Claude Code |
 | [design/focus-targets.md](design/focus-targets.md) | Proposal: jumping to a session in other terminals and apps |
+| [design/dev-tooling.md](design/dev-tooling.md) | mise for pinned tools and tasks: the decision, the options considered, the layout |
 
 ## Guides
 
