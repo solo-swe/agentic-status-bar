@@ -1,6 +1,6 @@
 # Developer tooling: mise for tools and tasks
 
-Status (2026-11-01): **decided**, not built yet. The tasks are in the sprint Quality.
+Status (2026-11-01): **decided**; the tools and Xcode are pinned (T-152), the tasks are next (sprint Quality).
 
 ## Decisions
 

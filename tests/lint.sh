@@ -3,7 +3,7 @@
 cd "$(dirname "$0")/.." || exit 1
 
 if ! command -v shellcheck >/dev/null 2>&1; then
-  echo "shellcheck is not installed. Install it with: brew install shellcheck" >&2
+  echo "shellcheck is not installed. Install it with: mise install" >&2
   exit 1
 fi
 

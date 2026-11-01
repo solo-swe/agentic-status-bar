@@ -7593,7 +7593,7 @@
       "description": "First step of `doc/design/dev-tooling.md` (decisions 1, 4 and 5): the tools the checks need come from `mise.toml` at exact versions, locally and in CI. The scripts stay where they are in this task.\n\n## Before you start\nIf `mise` is not on `PATH`, stop and block on the user (`atm block <id> --on user --question \"Install mise (brew install mise)?\"`): installing tools on the user's machine is theirs to do.\n\n## Change\n- `mise.toml` at the root: `min_version` set to the installed mise version, and `[tools]` with `xcodegen` and `shellcheck` at exact versions (the latest stable releases; the registry has both through aqua).\n- `.xcode-version` with the Xcode version used locally (`xcodebuild -version`), and one that the `macos-latest` runner image has (check the runner image's README).\n- `.github/workflows/ci.yml`: in each job, replace `brew install …` and the \"Select the newest Xcode\" step with `jdx/mise-action` (pinned to a release tag, with its own mise `version` pinned) and a step that selects the Xcode named in `.xcode-version`. The jobs still run `tests/lint.sh`, `tests/swift.sh` and `tests/app.sh --test`.\n- `CONTRIBUTING.md` › Requirements: mise instead of the `brew install` lines (`brew install mise`, then `mise trust` and `mise install` in the clone).\n- The scripts' \"install it with: brew install …\" hints now say `mise install`.\n\n## Checks\n`mise install` installs both tools; `mise exec -- tests/lint.sh`, `mise exec -- tests/swift.sh --summary` and `mise exec -- tests/app.sh --test` pass. Note in this task the versions pinned.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "mise.toml",
@@ -7603,9 +7603,9 @@
         "doc/design/dev-tooling.md"
       ],
       "created_at": "2026-11-01T22:13:44Z",
-      "updated_at": "2026-11-01T22:13:44Z",
+      "updated_at": "2026-11-01T22:22:12Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:5f67a194",
       "sprint_history": [
         {
           "sprint": "Quality",
@@ -7616,7 +7616,9 @@
       "components": [
         "tooling",
         "docs"
-      ]
+      ],
+      "started_at": "2026-11-01T22:22:12Z",
+      "started_by": "claude:5f67a194"
     },
     {
       "id": "T-153",

@@ -2,9 +2,9 @@
 
 ## Requirements
 
-- macOS 14 or later, Xcode 16 or later (Swift 6)
-- `brew install xcodegen` for the app
-- `brew install shellcheck` for `tests/lint.sh`
+- macOS 14 or later, and the Xcode named in `.xcode-version` (CI builds with that one)
+- [mise](https://mise.jdx.dev) for the other tools, at the versions in `mise.toml` (XcodeGen for the app, shellcheck
+  for `tests/lint.sh`): `brew install mise`, then `mise trust` and `mise install` in the clone
 
 ## Checks
 

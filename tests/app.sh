@@ -1,10 +1,10 @@
 #!/bin/sh
 # Generate the app's Xcode project and build it (unsigned, ad-hoc), or with --test, run its tests.
-# Needs XcodeGen: brew install xcodegen
+# Needs XcodeGen, pinned in mise.toml: mise install
 cd "$(dirname "$0")/.." || exit 1
 
 if ! command -v xcodegen >/dev/null 2>&1; then
-  echo "xcodegen is not installed. Install it with: brew install xcodegen" >&2
+  echo "xcodegen is not installed. Install it with: mise install" >&2
   exit 1
 fi
 
