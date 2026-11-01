@@ -16,6 +16,7 @@ mise run test              # build the Swift package and run its tests (or: mise
 mise run test --summary    # the same, printing only failures and totals
 mise run app:test          # generate the app's Xcode project, build it and run the app's tests
 mise run lint              # shellcheck on the shell scripts (mise-tasks/, scripts/)
+mise run coverage          # line coverage of Sources/ASBCore and Sources/asb; fails below 99% (or: coverage 95)
 mise run bench             # timing: asb hook < 10 ms, asb snapshot < 30 ms on 10 sessions
 ```
 

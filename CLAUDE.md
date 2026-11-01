@@ -30,6 +30,8 @@ The checks are mise tasks (`mise-tasks/`, see `doc/design/dev-tooling.md`); `mis
 - `mise run app:test`: generate the Xcode project, build the app and run its tests. `mise run app:run [KEY=VALUE]`
   builds and starts it (quitting a running copy first); `mise run app:quit` quits it.
 - `mise run lint`: shellcheck on `mise-tasks/` and `scripts/`.
+- `mise run coverage [threshold]`: line coverage of `Sources/ASBCore` and `Sources/asb`, per file and in total;
+  fails below the threshold (default 99).
 - `mise run bench`: `asb hook` under 10 ms, `asb snapshot` under 30 ms on 10 sessions. Run it after changing the hook
   path.
 

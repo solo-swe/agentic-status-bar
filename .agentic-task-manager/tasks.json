@@ -7448,14 +7448,14 @@
       "description": "Apply `CLAUDE.md` › Code quality to `tests/ASBCoreTests/` and `App/Tests/` (about 130 comment lines): tests show how the code is meant to be used, so a test's name and its expectations say what it checks.\n\n## Change\n- Keep comments that give a non-obvious reason (why an input is shaped the way it is, which captured event order a test replays).\n- Delete comments that repeat the test name or the code; move what a comment says into the test name or an expectation message where it helps.\n\n## Renames (decided with the user, 2026-11-01)\nAny Swift name may change, `public` ones in `ASBCore` included, when every caller (the app, `asb`, the tests) is updated in the same commit. Never changed: JSON keys, file formats, config keys, `asb` commands and flags, and the conformance cases.\n\n## Checks\nNo test removed or weakened. `tests/swift.sh`, `tests/app.sh --test` and `tests/lint.sh` pass (`mise run check` once T-154 is done).\n",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "tests/ASBCoreTests/",
         "App/Tests/"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T22:46:52Z",
+      "updated_at": "2026-11-01T22:52:09Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "components": [
@@ -7470,7 +7470,18 @@
       ],
       "sprint": "Quality",
       "started_at": "2026-11-01T22:46:52Z",
-      "started_by": "claude:5f67a194"
+      "started_by": "claude:5f67a194",
+      "commit": "042bf7f58bb55d41ef43287bd9bf69c9746eee3c",
+      "completed_at": "2026-11-01T22:52:09Z",
+      "completed_by": "claude:5f67a194",
+      "notes": [
+        {
+          "at": "2026-11-01T22:52:09Z",
+          "kind": "outcome",
+          "text": "Comments moved into assertion messages (22), 9 out-of-date ones fixed (bats and shell-hook leftovers, the spike replay, `caseNames`), 2 tests renamed; no condition changed, 248 + 114 tests. Seen, not fixed: `testReachingPutsTheHandsOnTheTarget` doesn’t check the elbow’s side; no test for a waiting stretch whose busy part was never seen; `Processes.swift` still mentions bats.",
+          "by": "claude:5f67a194"
+        }
+      ]
     },
     {
       "id": "T-147",
@@ -7483,7 +7494,7 @@
       "description": "Add the mise task `coverage` (`mise-tasks/coverage.sh`, see `doc/design/dev-tooling.md`), which reports line coverage of the Swift package's sources and checks it against a threshold.\n\n## Change\n- Run the package tests with code coverage on (`swift test --enable-code-coverage`), then report line coverage over `Sources/ASBCore/` and `Sources/asb/` only (not the tests, not the app), per file and in total, with `llvm-cov` from the active toolchain (`xcrun llvm-cov`; `swift test --show-codecov-path` gives the profile).\n- Exit non-zero when the total is below a threshold given as its first argument (default `99`; mise passes arguments through, so the script reads `$1`). POSIX `sh`, shellcheck clean (`doc/guides/shell.md`), with a `#MISE description`.\n- Add `coverage` to the `check` task's `depends` in `mise.toml`.\n- Document it in `CONTRIBUTING.md` › Checks and `CLAUDE.md` › Commands.\n\n## Done when\n`mise run coverage` runs locally and `mise run lint` passes. Record today's total and the five least covered files as this task's note. (`mise run check` will fail on coverage until T-148 is done; note that in the outcome.)\n",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-154"
       ],
@@ -7494,7 +7505,7 @@
         "mise.toml"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T22:28:27Z",
+      "updated_at": "2026-11-01T22:52:09Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "components": [
@@ -7507,7 +7518,9 @@
           "from": "2026-11-01T21:20:28Z"
         }
       ],
-      "sprint": "Quality"
+      "sprint": "Quality",
+      "started_at": "2026-11-01T22:52:09Z",
+      "started_by": "claude:5f67a194"
     },
     {
       "id": "T-148",
@@ -7517,7 +7530,7 @@
       "labels": [
         "coverage"
       ],
-      "description": "Bring line coverage of `Sources/ASBCore/` and `Sources/asb/` to at least 99%, as `mise run coverage` reports it. T-156 has moved the hook's logic into `ASBCore` and added the `asbTests` target.\n\n## Change\n- Add tests for the uncovered lines the report lists. They test behavior (an input and its expected result), not lines touched for the count.\n- **Exclusions** (decided with the user, 2026-11-01): `llvm-cov` excludes whole files only. Code that can't run in a test (the `@main` entry point, real Darwin calls that tests replace with a fake) goes into its own small file named `*Darwin.swift`, like the existing `ProcessesDarwin.swift`, and holds nothing else. The coverage task excludes that pattern (and the entry point file) with `-ignore-filename-regex`. List each excluded file with its reason in `CONTRIBUTING.md` › Checks.\n- If the gap is large, split the work per file into follow-up tasks (`/atm:create-tasks`).\n\n## Done when\n`mise run check` passes, coverage at 99% included.\n",
+      "description": "Bring line coverage of `Sources/ASBCore/` and `Sources/asb/` to at least 99%, as `mise run coverage` reports it. T-156 has moved the hook's logic into `ASBCore` and added the `asbTests` target.\n\n## Where it starts (T-147, 2026-11-01)\n96.7% of 2290 lines in `ASBCore` (75–77 missed: the count varies by a line or two between runs in `OrderedJSON`); `asb` wasn't measured until T-156. Least covered: `Inputs.swift` 85% (16 missed), `StateWriter.swift` 92%, `Themes.swift` 88%, `Transcript.swift` 93%, `Paths.swift` 93%.\n\n## Change\n- Add tests for the uncovered lines the report lists. They test behavior (an input and its expected result), not lines touched for the count.\n- **Exclusions** (decided with the user, 2026-11-01): `llvm-cov` excludes whole files only. Code that can't run in a test (the `@main` entry point, real Darwin calls that tests replace with a fake) goes into its own small file named `*Darwin.swift`, like the existing `ProcessesDarwin.swift`, and holds nothing else. The coverage task excludes that pattern (and the entry point file) with `-ignore-filename-regex`. List each excluded file with its reason in `CONTRIBUTING.md` › Checks.\n- Find out why `OrderedJSON`'s count varies between runs (a randomized input?) and make the measurement stable, so the gate doesn't flicker.\n- Once `mise run coverage` passes, add `coverage` to the `check` task's `depends` in `mise.toml` (left out until then, so `check` stays green), and update `doc/design/dev-tooling.md` › Layout.\n- If the gap is large, split the work per file into follow-up tasks (`/atm:create-tasks`).\n\n## Done when\n`mise run check` passes, coverage at 99% included.\n",
       "requirements": [],
       "use_cases": [],
       "status": "todo",
@@ -7528,10 +7541,12 @@
         "tests/ASBCoreTests/",
         "CONTRIBUTING.md",
         "Sources/ASBCore/",
-        "mise-tasks/coverage.sh"
+        "mise-tasks/coverage.sh",
+        "mise.toml",
+        "doc/design/dev-tooling.md"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T22:19:15Z",
+      "updated_at": "2026-11-01T22:53:35Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "components": [
