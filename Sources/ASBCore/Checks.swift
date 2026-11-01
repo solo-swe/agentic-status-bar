@@ -19,6 +19,7 @@ public struct ReconciledSession: Equatable, Sendable {
     public var muteToday = false
     public var muted = false
 
+    /// The session as its state file says, before any check.
     public init(_ file: StateFile) {
         self.file = file
         self.shown = file.state ?? "busy"
@@ -26,6 +27,8 @@ public struct ReconciledSession: Equatable, Sendable {
     }
 }
 
+/// The reconciliation checks C1 to C5, run in that order by `Engine.reconcile`. Each takes the
+/// sessions and returns them with its decision applied.
 public enum Checks {
     /// C1: a session whose claude process is gone, or whose PID now belongs to a process with a
     /// different start time (a reused PID), is dead. Sessions without a PID are kept.
@@ -51,7 +54,7 @@ public enum Checks {
         return (alive, dead)
     }
 
-    /// Start times (epoch ms) of the children of `pid`.
+    /// Start times of the children of `pid`, in epoch ms (process records have seconds).
     static func childStarts(of pid: Int32, in processes: [ProcessRecord], excluding name: String? = nil) -> [Int64] {
         processes.filter { process in
             process.ppid == pid && (name == nil || (process.comm as NSString).lastPathComponent != name)

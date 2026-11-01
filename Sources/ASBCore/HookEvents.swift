@@ -18,6 +18,7 @@ public struct HookPayload: Equatable, Sendable {
     /// has none (older Claude Code, or the task registry wasn't reachable).
     public var backgroundTasks: [BackgroundTask]?
 
+    /// An empty payload: every text field "", no background tasks.
     public init() {}
 
     /// One entry of `background_tasks` (hooks docs › Stop input).
@@ -38,15 +39,16 @@ public struct HookPayload: Equatable, Sendable {
         /// Statuses of a task that is no longer in flight, should the registry still list one.
         static let finished: Set = ["completed", "failed", "killed", "stopped", "cancelled", "canceled", "error"]
 
+        /// A subagent with an ID that is still in flight.
         public var isRunningSubagent: Bool {
             type == "subagent" && !id.isEmpty && !Self.finished.contains(status.lowercased())
         }
     }
 
-    /// Nil when the input isn't a JSON object.
+    /// Parses the JSON Claude Code sends a hook on stdin; nil when it isn't a JSON object.
     public static func parse(_ data: Data) -> HookPayload? {
         guard let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
-        func s(_ key: String) -> String {
+        func text(_ key: String) -> String {
             switch object[key] {
             case nil, is NSNull: return ""
             case let string as String: return string
@@ -58,17 +60,17 @@ public struct HookPayload: Equatable, Sendable {
             }
         }
         var p = HookPayload()
-        p.event = s("hook_event_name")
-        p.sessionId = s("session_id")
-        p.cwd = s("cwd")
-        p.transcriptPath = s("transcript_path")
-        p.source = s("source")
-        p.prompt = s("prompt")
-        p.toolName = s("tool_name")
-        p.notificationType = s("notification_type")
-        p.message = s("message")
-        p.agentId = s("agent_id")
-        p.agentType = s("agent_type")
+        p.event = text("hook_event_name")
+        p.sessionId = text("session_id")
+        p.cwd = text("cwd")
+        p.transcriptPath = text("transcript_path")
+        p.source = text("source")
+        p.prompt = text("prompt")
+        p.toolName = text("tool_name")
+        p.notificationType = text("notification_type")
+        p.message = text("message")
+        p.agentId = text("agent_id")
+        p.agentType = text("agent_type")
         if let tasks = object["background_tasks"] as? [Any] {
             p.backgroundTasks = tasks.compactMap { entry in
                 guard let task = entry as? [String: Any], let id = task["id"] as? String else { return nil }
@@ -90,10 +92,10 @@ public enum HookEvents {
     /// The `waitingAgents` key for the session's own agent (subagents use their `agent_id`).
     public static let mainAgent = "main"
 
+    /// What the hook does with the session's state file.
     public enum Outcome: Equatable {
         /// Write this state (the full object).
         case write([String: AnyHashable])
-        /// Delete the state file.
         case delete
         /// Leave the file as it is.
         case none
@@ -103,7 +105,8 @@ public enum HookEvents {
     /// corrupt). `started` is when the hook started (epoch ms). An event that started before the
     /// last applied one (`eventAt`) is dropped, so async hooks finishing out of order can't go back
     /// in time; subagent events still add or remove their subagent, since that map is keyed by agent
-    /// ID and its order doesn't matter.
+    /// ID and its order doesn't matter. `sessionStartChanges` adds the session details at
+    /// SessionStart (`HookMetadata.apply`).
     public static func apply(
         _ payload: HookPayload, to current: [String: Any]?, now: Int64, started: Int64,
         storePromptPreview: Bool, sessionStartChanges: (inout [String: Any]) -> Void = { _ in }
@@ -313,7 +316,8 @@ public enum HookEvents {
         return entry
     }
 
-    /// The first 80 characters of a prompt, runs of whitespace collapsed to one space, no leading space.
+    /// The first `previewLength` Unicode scalars of a prompt, runs of whitespace collapsed to one
+    /// space, no leading space.
     public static func preview(_ prompt: String) -> String {
         var collapsed = prompt.replacing(/\s+/, with: " ")
         if collapsed.hasPrefix(" ") { collapsed.removeFirst() }

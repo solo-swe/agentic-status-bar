@@ -5,6 +5,7 @@ public struct Config: Equatable, Sendable {
     /// Menu-bar states a theme gives an icon and a color; `icon_<state>` and `color_<state>` override one.
     public static let themeStates = ["waiting", "idle", "uncertain", "busy", "subagents", "muted", "none", "warning"]
 
+    /// Every key the config file may set; lines with other keys are ignored.
     public static let keys: [String] = [
         "show_interactive", "show_headless", "show_subagents", "show_ide", "stale_minutes", "use_registry",
         "instant_refresh", "icon", "store_prompt_preview", "state_dir", "theme",
@@ -35,14 +36,13 @@ public struct Config: Equatable, Sendable {
     /// Per-state overrides, keyed by state; only set entries are present.
     public var iconOverrides: [String: String] = [:]
     public var colorOverrides: [String: String] = [:]
-    /// App notifications: when a session waits on you, when one goes idle, after how long, with a sound.
     public var notifyWaiting = true
     public var notifyIdle = false
     public var notifyDelaySeconds = 10
     public var notifySound = true
     /// Debugging: `asb hook` appends every payload it receives to `HookLog.fileName` in the state dir.
     public var debugHookLog = false
-    /// The desktop companion: shown or not, the corner it sits in, and whether it stays over full-screen apps.
+    /// Whether the desktop companion is shown.
     public var companion = false
     public var companionPosition = "bottom-right"
     public var companionOverFullscreen = false
@@ -50,6 +50,7 @@ public struct Config: Equatable, Sendable {
     public var companionColor = ""
     public var companionSize = "medium"
 
+    /// The defaults.
     public init() {}
 
     /// Parses config file text; nil (no file) gives the defaults. Unknown keys and invalid values are ignored.
@@ -72,6 +73,7 @@ public struct Config: Equatable, Sendable {
         parse(try? String(contentsOfFile: paths.configFile, encoding: .utf8))
     }
 
+    /// Whether `key` is one of `keys`.
     public static func isKey(_ key: String) -> Bool { keys.contains(key) }
 
     /// Values are plain words or paths: letters, digits and `_ . / ~ -`. Colors (`color_*`,
@@ -127,7 +129,8 @@ public struct Config: Equatable, Sendable {
     }
 
     /// Sets one key in the config file, keeping the other lines; creates the file and its directory if
-    /// needed. Returns false, changing nothing, for an unknown key or an invalid value.
+    /// needed. Returns false, changing nothing, for an unknown key or an invalid value. Throws when the
+    /// directory or the file can't be written. Example: `try Config.set("theme", "monochrome", in: paths.configFile)`.
     @discardableResult
     public static func set(_ key: String, _ value: String, in file: String) throws -> Bool {
         guard isKey(key), isValid(value, for: key) else { return false }

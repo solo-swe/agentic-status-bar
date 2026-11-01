@@ -63,7 +63,8 @@ public struct HookMetadata: Equatable, Sendable {
         arguments?.split(separator: " ").first.map { (String($0) as NSString).lastPathComponent }
     }
 
-    /// interactive, headless, ide or desktop.
+    /// The session kind from Claude Code's entrypoint and the claude command line: interactive,
+    /// headless (an SDK entrypoint, `-p` or `--print`), ide or desktop.
     public static func kind(entrypoint: String, arguments: String?) -> String {
         if entrypoint.hasPrefix("sdk-") { return "headless" }
         if ["vscode", "jetbrains", "ide"].contains(where: entrypoint.contains) { return "ide" }
@@ -88,9 +89,8 @@ public struct HookMetadata: Equatable, Sendable {
         state["termBundleId"] = termBundleId
     }
 
-    /// Whether a written state still lacks the details (the session predates the hooks).
-    /// A `pid` of null counts as recorded.
-    /// A null `pid` is looked up again on each prompt: older versions missed the native install's process.
+    /// Whether a written state still lacks the details (the session predates the hooks). A null `pid`
+    /// counts as recorded, except on a prompt: older versions missed the native install's process.
     public static func needsBackfill(_ state: [String: Any], event: String = "") -> Bool {
         state["pid"] == nil || state["cwd"] == nil || (event == "UserPromptSubmit" && state["pid"] is NSNull)
     }

@@ -16,6 +16,7 @@ public struct Mute: Codable, Equatable, Sendable {
     }
 }
 
+/// Project mutes: the mutes file in the state dir, which mutes are in effect, and the sessions they silence.
 public enum Mutes {
     public static let fileName = "mutes"
 
@@ -68,10 +69,12 @@ public enum Mutes {
 
     // MARK: Changes (the menu's mute actions)
 
+    /// Mutes the project at `cwd` for an hour from `now`.
     public static func muteHour(_ mutes: inout [String: Mute], cwd: String, now: Int64) {
         mutes[cwd] = Mute(until: now + 3_600_000, at: now, today: false)
     }
 
+    /// Mutes the project at `cwd` until the next local midnight.
     public static func muteToday(_ mutes: inout [String: Mute], cwd: String, now: Int64, timeZone: TimeZone) {
         mutes[cwd] = Mute(until: nextMidnight(after: now, timeZone: timeZone), at: now, today: true)
     }
@@ -84,7 +87,8 @@ public enum Mutes {
         return String(decoding: (try? encoder.encode(live)) ?? Data("{}".utf8), as: UTF8.self)
     }
 
-    /// Reads the mutes file, applies `change`, drops expired mutes and writes it atomically.
+    /// Reads the mutes file, applies `change`, drops expired mutes and writes it atomically. Throws
+    /// when the directory or the file can't be written.
     public static func update(
         file: String, now: Int64, change: (inout [String: Mute]) -> Void
     ) throws {

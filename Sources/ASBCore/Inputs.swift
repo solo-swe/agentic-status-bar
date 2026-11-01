@@ -14,6 +14,8 @@ public struct LiveInputs: Sendable {
         self.inspector = inspector
     }
 
+    /// Reads what a snapshot needs: the config, the state files, the registry (when used), the
+    /// transcripts the checks read, the process table, herdr's titles and the mutes.
     public func gather(now: Int64 = Int64(Date().timeIntervalSince1970 * 1000), timeZone: TimeZone = .current) -> SnapshotInputs {
         let configText = try? String(contentsOfFile: paths.configFile, encoding: .utf8)
         let config = Config.parse(configText)
@@ -24,7 +26,6 @@ public struct LiveInputs: Sendable {
         if config.useRegistry {
             inputs.registryFiles = StateDirectory.read(paths.registryDir)
         }
-        // Transcripts only of sessions whose file says busy or waiting (checks C3 and C5).
         for state in ParsedStates.parse(stateFiles).sessions where Checks.readsTranscript(state) {
             guard let path = state.transcriptPath, inputs.transcripts[path] == nil,
                   let transcript = Self.readTail(path) else { continue }
@@ -69,6 +70,7 @@ public struct LiveInputs: Sendable {
 
 /// Messages for troubleshooting in `<state dir>/plugin.log`, each kind written once.
 public enum PluginLog {
+    /// Appends `message` to the log unless it already has a line for `key`.
     public static func once(stateDir: String, key: String, message: String, now: Date = Date()) {
         let path = (stateDir as NSString).appendingPathComponent("plugin.log")
         let existing = (try? String(contentsOfFile: path, encoding: .utf8)) ?? ""

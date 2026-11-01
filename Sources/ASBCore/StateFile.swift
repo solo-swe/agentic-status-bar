@@ -86,7 +86,7 @@ public struct StateFile: Equatable, Sendable {
         return s
     }
 
-    /// A JSON number (not a boolean) as a Double.
+    /// A JSON number as a Double; nil for booleans and for numbers that don't fit an Int64.
     private static func number(_ value: Any?) -> Double? {
         guard let n = value as? NSNumber, CFGetTypeID(n) != CFBooleanGetTypeID() else { return nil }
         let d = n.doubleValue
@@ -100,6 +100,7 @@ public struct ParsedStates: Equatable, Sendable {
     /// Files that couldn't be read: shown as a warning, never deleted.
     public var invalidCount: Int
 
+    /// Parses every file, keeping the valid ones in order and counting the others.
     public static func parse(_ files: [RawFile]) -> ParsedStates {
         var sessions: [StateFile] = []
         var invalid = 0

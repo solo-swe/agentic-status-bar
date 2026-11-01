@@ -3,6 +3,7 @@ import Foundation
 /// What every front end reads: the reconciled sessions in display order, plus the
 /// menu-bar header. Produced by `asb snapshot --json`; see doc/snapshot-schema.md.
 public struct Snapshot: Codable, Equatable, Sendable {
+    /// The schema version this code writes.
     public static let currentVersion = 1
 
     public var version: Int
@@ -45,6 +46,7 @@ public struct Snapshot: Codable, Equatable, Sendable {
         }
     }
 
+    /// The header's states, most urgent first.
     public enum HeaderState: String, Codable, Sendable {
         case warning, waiting, idle, uncertain, busy, muted, none
     }
@@ -133,7 +135,8 @@ public struct Snapshot: Codable, Equatable, Sendable {
         }
     }
 
-    /// Stable JSON: sorted keys, absent optionals left out.
+    /// Stable JSON: sorted keys, absent optionals left out. Throws the encoder's error, which a
+    /// snapshot's plain values don't cause in practice.
     public func encodedJSON(pretty: Bool = false) throws -> Data {
         let encoder = JSONEncoder()
         encoder.outputFormatting = pretty ? [.sortedKeys, .prettyPrinted, .withoutEscapingSlashes]

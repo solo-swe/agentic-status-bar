@@ -11,6 +11,7 @@ public indirect enum OrderedJSON: Equatable, Sendable {
     case bool(Bool)
     case null
 
+    /// Written out because tuples aren't Equatable. Objects are equal only with the same keys in the same order.
     public static func == (a: OrderedJSON, b: OrderedJSON) -> Bool {
         switch (a, b) {
         case let (.object(x), .object(y)): x.count == y.count && zip(x, y).allSatisfy { $0.0 == $1.0 && $0.1 == $1.1 }
@@ -25,6 +26,8 @@ public indirect enum OrderedJSON: Equatable, Sendable {
 
     // MARK: Access
 
+    /// An object's value for `key`; nil for other values. Setting nil removes the key, a new key goes
+    /// last, and setting on anything but an object does nothing.
     public subscript(key: String) -> OrderedJSON? {
         get {
             guard case .object(let pairs) = self else { return nil }
@@ -58,10 +61,13 @@ public indirect enum OrderedJSON: Equatable, Sendable {
 
     // MARK: Parsing
 
+    /// The input isn't valid JSON; `offset` is the byte where parsing failed.
     public struct ParseError: Error, Equatable {
         public var offset: Int
     }
 
+    /// Parses one JSON value (surrounding whitespace allowed). Throws `ParseError` otherwise.
+    /// Example: `try OrderedJSON.parse(Data(#"{"b": 1, "a": 2}"#.utf8))` keeps `b` before `a`.
     public static func parse(_ data: Data) throws -> OrderedJSON {
         var parser = Parser(bytes: Array(data))
         parser.skipSpace()

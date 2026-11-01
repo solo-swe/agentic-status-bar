@@ -7266,13 +7266,13 @@
       "description": "Apply `CLAUDE.md` › Code quality to `Sources/ASBCore` (about 360 comment lines in 27 files): *Code documents itself. Clear names and small functions instead of comments. Comment only what the code can't say (a non-obvious reason or constraint).*\n\n## Change\n- Keep comments that give a non-obvious reason or constraint, or point to the doc section a rule comes from (`doc/state-file-schema.md › Events`).\n- Delete comments that repeat the name or the code below them.\n- Where a comment explains what unclear code does, rename or extract a function instead.\n- `public` declarations keep or get proper `///` docs: what it does, its arguments, errors, an example where useful (`CLAUDE.md` › Public APIs).\n\n## Renames (decided with the user, 2026-11-01)\nAny Swift name may change, `public` ones in `ASBCore` included, when every caller (the app, `asb`, the tests) is updated in the same commit. Never changed: JSON keys, file formats, config keys, `asb` commands and flags, and the conformance cases.\n\n## Checks\nNo behavior change. `tests/swift.sh`, `tests/app.sh --test` and `tests/lint.sh` pass (`mise run check` once T-154 is done).\n",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T22:19:45Z",
+      "updated_at": "2026-11-01T22:30:18Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "components": [
@@ -7284,7 +7284,9 @@
           "from": "2026-11-01T21:20:28Z"
         }
       ],
-      "sprint": "Quality"
+      "sprint": "Quality",
+      "started_at": "2026-11-01T22:30:18Z",
+      "started_by": "claude:5f67a194"
     },
     {
       "id": "T-143",
@@ -7707,7 +7709,7 @@
       "description": "Add `[tasks.check]` to `mise.toml`: a description and `depends = [\"lint\", \"test\", \"app:test\"]`, so `mise run check` runs every check CI runs, in parallel where mise can. The coverage task joins it in T-147.\n\n## Docs\n`CLAUDE.md`: *A change is done when `mise run check` passes locally* (instead of naming the three checks), and `mise run check` first in › Commands. `CONTRIBUTING.md` › Checks the same.\n\n## Checks\n`mise run check` passes, and fails when one of its checks fails (try it once with a deliberately failing test, then revert).",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-153"
       ],
@@ -7717,7 +7719,7 @@
         "CONTRIBUTING.md"
       ],
       "created_at": "2026-11-01T22:13:44Z",
-      "updated_at": "2026-11-01T22:28:55Z",
+      "updated_at": "2026-11-01T22:30:15Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "sprint_history": [
@@ -7731,7 +7733,18 @@
         "docs"
       ],
       "started_at": "2026-11-01T22:28:55Z",
-      "started_by": "claude:5f67a194"
+      "started_by": "claude:5f67a194",
+      "commit": "f439f649cf941753e91e7a5f428f2829a0fdafa0",
+      "completed_at": "2026-11-01T22:30:15Z",
+      "completed_by": "claude:5f67a194",
+      "notes": [
+        {
+          "at": "2026-11-01T22:30:15Z",
+          "kind": "outcome",
+          "text": "`mise run check` runs `lint`, `test --summary` and `app:test` in parallel; checked that it fails on a failing test (temporary test, removed). `CLAUDE.md`: done when `mise run check` passes.",
+          "by": "claude:5f67a194"
+        }
+      ]
     },
     {
       "id": "T-155",

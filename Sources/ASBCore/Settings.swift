@@ -7,6 +7,7 @@ public enum HookSettings {
     public static let marker = "# agentic-status-bar"
     /// The shell era's entries, replaced on install and removed on uninstall.
     public static let oldMarker = "# swiftbar-claudecode-minimal"
+    /// The Claude Code events asb handles; install adds a hook for each.
     public static let events = [
         "SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "PermissionRequest", "Notification", "Stop",
         "SubagentStart", "SubagentStop", "SessionEnd",

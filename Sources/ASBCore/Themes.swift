@@ -3,9 +3,12 @@ public struct Theme: Equatable, Sendable {
     public var icons: [String: String]
     public var colors: [String: String]
 
+    /// The SF Symbol name for `state`; "" when the theme has none.
     public func symbol(_ state: String) -> String { icons[state] ?? "" }
+    /// The color pair for `state`; "" when the theme has none.
     public func color(_ state: String) -> String { colors[state] ?? "" }
 
+    /// The built-in themes by their `theme` config value.
     public static let builtIn: [String: Theme] = [
         "default": Theme(
             icons: [

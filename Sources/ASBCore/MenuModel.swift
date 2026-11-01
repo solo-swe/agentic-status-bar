@@ -6,6 +6,7 @@ public enum MenuModel {
     /// Width of the row label (project — title) before the state column.
     public static let labelWidth = 48
 
+    /// Everything besides the sessions the header and rows are built from.
     public struct Context: Sendable {
         public var now: Int64
         public var timeZone: TimeZone
@@ -32,6 +33,7 @@ public enum MenuModel {
         }
     }
 
+    /// The snapshot of `sessions`: the header and the rows.
     public static func snapshot(_ sessions: [ReconciledSession], _ context: Context) -> Snapshot {
         Snapshot(
             generatedAt: context.now,
@@ -78,6 +80,8 @@ public enum MenuModel {
         s.shownSince ?? s.file.stateSince ?? now
     }
 
+    /// The rows, most urgent first (waiting, idle, uncertain, busy or on subagents, then muted), each
+    /// state's longest-waiting first.
     public static func rows(_ sessions: [ReconciledSession], _ context: Context) -> [Snapshot.Session] {
         let ordered = sessions.enumerated().sorted { a, b in
             let (ra, rb) = (rank(a.element), rank(b.element))
@@ -146,7 +150,6 @@ public enum MenuModel {
             .compactMap { $0 }.first { !$0.isEmpty } ?? ""
     }
 
-    /// The cwd's last path component, or "unknown".
     static func projectName(_ cwd: String?) -> String {
         cwd?.split(separator: "/").last.map(String.init) ?? "unknown"
     }

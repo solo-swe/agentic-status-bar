@@ -41,6 +41,7 @@ public struct SnapshotInputs: Sendable {
     }
 }
 
+/// A file's path and raw contents, read by the caller and parsed by the engine.
 public struct RawFile: Sendable, Equatable {
     public var path: String
     public var contents: Data
@@ -51,6 +52,7 @@ public struct RawFile: Sendable, Equatable {
     }
 }
 
+/// A session transcript, as checks C3 and C5 need it.
 public struct TranscriptInput: Sendable, Equatable {
     /// Modification time, epoch milliseconds.
     public var mtime: Int64
@@ -100,6 +102,11 @@ public struct SnapshotResult: Sendable, Equatable {
 
 /// Computes snapshots. Pure: no file system, clock or process access.
 public enum Engine {
+    /// The snapshot for `inputs`: the state files reconciled (C1 to C5), filtered by session type and
+    /// marked by the active mutes, as header and rows; plus what the caller should clean up.
+    ///
+    ///     let inputs = live.gather()
+    ///     live.apply(Engine.snapshot(inputs), configText: inputs.configText)
     public static func snapshot(_ inputs: SnapshotInputs) -> SnapshotResult {
         let config = Config.parse(inputs.configText)
         let reconciled = reconcile(inputs)

@@ -48,6 +48,7 @@ public enum Transcript {
             || (type == "user" && promptText(entry).hasPrefix(interruptMarker))
     }
 
+    /// How a turn ended.
     public enum TurnEnd: Equatable, Sendable {
         /// The turn finished normally (`turn_duration`): its Stop hook was missed.
         case finished

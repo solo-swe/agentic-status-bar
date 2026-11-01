@@ -11,6 +11,7 @@ public protocol ProcessInspector: Sendable {
     func arguments(_ pid: Int32) -> String?
 }
 
+/// A process table given in code, for tests. Like the real one, only `arguments(_:)` returns `args`.
 public struct FakeProcessInspector: ProcessInspector {
     public var records: [ProcessRecord]
 
@@ -51,6 +52,7 @@ public struct TableProcessInspector: ProcessInspector {
     public func arguments(_ pid: Int32) -> String? { FakeProcessInspector(records).arguments(pid) }
 }
 
+/// Chooses the process table to read.
 public enum ProcessInspectors {
     /// The fake table when `ASB_PS_TABLE` is set (tests), else the system's.
     public static func fromEnvironment(_ environment: [String: String]) -> any ProcessInspector {

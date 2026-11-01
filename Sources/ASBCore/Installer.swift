@@ -32,6 +32,7 @@ public struct Installer {
         }
     }
 
+    /// The SwiftBar plugin's file names, now and before the rename; install removes our links to them.
     public static let pluginName = "agentic-status-bar.5s.sh"
     public static let oldPluginName = "swiftbar-claudecode-minimal.5s.sh"
 
@@ -48,7 +49,9 @@ public struct Installer {
         self.configFile = configFile
     }
 
+    /// Why install, uninstall or `updateBinary` stopped; the payload is the file's path.
     public enum Failure: Error, Equatable {
+        /// The settings file isn't a JSON object; it is left as it is.
         case invalidSettings(String)
         case cannotWrite(String)
     }
@@ -57,6 +60,9 @@ public struct Installer {
 
     // MARK: Install
 
+    /// Copies asb to `stableBinary`, backs up the settings and adds our hooks, moves the old paths' files
+    /// and removes the SwiftBar plugin. Throws `Failure` when the settings aren't a JSON object or a file
+    /// can't be written, or the file system's error when asb or the backup can't be copied.
     public func install() throws {
         try copyBinary()
         var settings = try readSettings(backup: true) ?? .object([])
@@ -129,7 +135,8 @@ public struct Installer {
         return fm.contents(atPath: sourceBinary) == stable
     }
 
-    /// Replaces the stable copy with the asb being run, leaving the settings alone.
+    /// Replaces the stable copy with the asb being run, leaving the settings alone. Throws
+    /// `Failure.cannotWrite`, or the file system's error when asb can't be copied.
     public func updateBinary() throws {
         try copyBinary()
     }
@@ -178,7 +185,8 @@ public struct Installer {
     // MARK: Uninstall
 
     /// Removes our hooks, SwiftBar-era leftovers and the stable asb. State and config go too when
-    /// `purge` is set or `confirmPurge` says yes.
+    /// `purge` is set or `confirmPurge` says yes. Throws `Failure` when the settings aren't a JSON object
+    /// or can't be written, or the file system's error when the backup can't be made.
     public func uninstall(purge: Bool, confirmPurge: () -> Bool = { false }) throws {
         if let settings = try readSettings(backup: true) {
             try writeSettings(HookSettings.uninstall(settings))

@@ -12,6 +12,7 @@ public enum Filters {
         }
     }
 
+    /// The sessions whose kind is shown, in their order.
     public static func apply(_ sessions: [ReconciledSession], _ config: Config) -> [ReconciledSession] {
         sessions.filter { shows(kind: $0.file.kind, config) }
     }

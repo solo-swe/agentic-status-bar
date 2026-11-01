@@ -2,14 +2,16 @@ import Foundation
 
 /// Runs external commands for the menu actions (open, pbcopy, herdr). Injectable so tests can record calls.
 public protocol CommandRunner {
-    /// Runs `command` (a name looked up on PATH, or a path) and reports whether it exited with 0.
-    /// Gives up after `timeout` seconds when one is given.
+    /// Runs `command` (a name looked up on PATH, or a path) with `arguments`, writing `input` to its
+    /// standard input when given. Returns whether it exited with 0; false when it can't start or
+    /// runs longer than `timeout` seconds (nil waits for ever).
     @discardableResult
     func run(_ command: String, _ arguments: [String], input: Data?, timeout: TimeInterval?) -> Bool
 }
 
 /// Runs commands with Foundation's Process.
 public struct ProcessRunner: CommandRunner {
+    /// Its `PATH` is where commands are looked up.
     public var environment: [String: String]
 
     public init(environment: [String: String] = ProcessInfo.processInfo.environment) {
@@ -80,6 +82,9 @@ public struct Actions {
         "theme": ["default", "monochrome", "high_contrast"],
     ]
 
+    /// Performs the menu action `name` (an `asb action` name) with `args`, e.g.
+    /// `perform("focus", [sessionId])` or `perform("set", ["theme", "monochrome"])`. Unknown actions,
+    /// missing arguments and values the menu doesn't offer do nothing.
     public func perform(_ name: String, _ args: [String]) {
         let first = args.first ?? ""
         switch name {
@@ -111,7 +116,7 @@ public struct Actions {
     var config: Config { Config.load(paths) }
     var stateDir: String { paths.stateDir(config: config) }
 
-    /// Session IDs become file names: only safe characters.
+    /// Whether `id` is non-empty ASCII letters, digits, `_` and `-`: session IDs become file names.
     public static func isSafeId(_ id: String) -> Bool {
         !id.isEmpty && id.unicodeScalars.allSatisfy {
             $0.isASCII && (CharacterSet.alphanumerics.contains($0) || $0 == "_" || $0 == "-")
