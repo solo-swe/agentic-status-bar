@@ -8,7 +8,7 @@ A macOS menu-bar app that shows, in one menu-bar item, whether any running
 [Claude Code](https://claude.com/claude-code) agent needs you, and notifies you when one has been waiting on you for
 a few seconds.
 
-> **Status: early releases (0.2).** Signed and notarized, and it updates itself. See the [PRD](doc/PRD.md) for the
+> **Status: early releases (0.3).** Signed and notarized, and it updates itself. See the [PRD](doc/PRD.md) for the
 > full design.
 
 <!-- Screenshots: doc/screenshots/waiting.png, idle.png, popover.png, settings.png -->
@@ -145,8 +145,8 @@ and notarized by Apple. Builds run on Apple silicon Macs. Or build the app yours
 ```sh
 git clone https://github.com/solo-swe/agentic-status-bar.git ~/code/agentic-status-bar
 cd ~/code/agentic-status-bar
-scripts/package.sh 0.2.2
-open dist/agentic-status-bar-0.2.2.dmg
+scripts/package.sh 0.3.0
+open dist/agentic-status-bar-0.3.0.dmg
 ```
 
 Drag **Agentic Status Bar** to Applications and open it. On first launch it explains what it changes and offers
