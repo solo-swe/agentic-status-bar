@@ -49,7 +49,7 @@ enum Setup {
         let env = ProcessInfo.processInfo.environment
         let paths = Paths.from(environment: env)
         let config = Config.load(paths)
-        let executable = URL(fileURLWithPath: CommandLine.executablePath).resolvingSymlinksInPath().path
+        let executable = URL(fileURLWithPath: CommandLine.absoluteExecutablePath).resolvingSymlinksInPath().path
         var installer = Installer(
             settingsFile: env["ASB_SETTINGS"] ?? "\(paths.home)/.claude/settings.json",
             stableBinary: paths.stableBinary,
@@ -81,14 +81,13 @@ enum Setup {
 }
 
 extension CommandLine {
-    /// The absolute path of the running executable.
-    static var executablePath: String {
+    static var absoluteExecutablePath: String {
         let path = arguments[0]
         if path.hasPrefix("/") { return path }
         if path.contains("/") {
             return URL(fileURLWithPath: FileManager.default.currentDirectoryPath).appendingPathComponent(path).standardized.path
         }
-        // Found through PATH.
+        // A bare name: the shell found it through PATH.
         let dirs = (ProcessInfo.processInfo.environment["PATH"] ?? "").split(separator: ":")
         return dirs.map { "\($0)/\(path)" }.first { FileManager.default.isExecutableFile(atPath: $0) } ?? path
     }

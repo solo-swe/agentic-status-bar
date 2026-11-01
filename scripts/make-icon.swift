@@ -88,7 +88,6 @@ func draw(_ ctx: CGContext) {
     drawBeacon(ctx)
     ctx.restoreGState()
 
-    // A thin black edge around the body.
     ctx.addPath(shape)
     ctx.setStrokeColor(color(0x000000, 0.85))
     ctx.setLineWidth(5)

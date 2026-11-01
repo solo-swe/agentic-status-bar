@@ -73,7 +73,8 @@ struct HookCommand: ParsableCommand {
             }
         }
 
-        // The app watches the state dir, so a write is all it takes to update the menu bar.
+        // Files left for this process belong to its earlier session (e.g. before a /clear). The app
+        // watches the state dir, so removing them is all it takes to update the menu bar.
         if payload.event == "SessionStart", let pid = metadata?.pid {
             for stale in HookMetadata.staleFiles(for: pid, in: StateDirectory.read(stateDir), own: file) {
                 try? FileManager.default.removeItem(atPath: stale)

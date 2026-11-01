@@ -7266,13 +7266,13 @@
       "description": "Apply `CLAUDE.md` › Code quality to `Sources/ASBCore` (about 360 comment lines in 27 files): *Code documents itself. Clear names and small functions instead of comments. Comment only what the code can't say (a non-obvious reason or constraint).*\n\n## Change\n- Keep comments that give a non-obvious reason or constraint, or point to the doc section a rule comes from (`doc/state-file-schema.md › Events`).\n- Delete comments that repeat the name or the code below them.\n- Where a comment explains what unclear code does, rename or extract a function instead.\n- `public` declarations keep or get proper `///` docs: what it does, its arguments, errors, an example where useful (`CLAUDE.md` › Public APIs).\n\n## Renames (decided with the user, 2026-11-01)\nAny Swift name may change, `public` ones in `ASBCore` included, when every caller (the app, `asb`, the tests) is updated in the same commit. Never changed: JSON keys, file formats, config keys, `asb` commands and flags, and the conformance cases.\n\n## Checks\nNo behavior change. `tests/swift.sh`, `tests/app.sh --test` and `tests/lint.sh` pass (`mise run check` once T-154 is done).\n",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T22:30:18Z",
+      "updated_at": "2026-11-01T22:36:25Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "components": [
@@ -7286,7 +7286,18 @@
       ],
       "sprint": "Quality",
       "started_at": "2026-11-01T22:30:18Z",
-      "started_by": "claude:5f67a194"
+      "started_by": "claude:5f67a194",
+      "commit": "4a75a98d668f70f53dc9b0aa7db103ba508c42e6",
+      "completed_at": "2026-11-01T22:36:25Z",
+      "completed_by": "claude:5f67a194",
+      "notes": [
+        {
+          "at": "2026-11-01T22:36:25Z",
+          "kind": "outcome",
+          "text": "Few comments were redundant (5 removed, ~12 corrected); most of the diff is missing `///` docs on public API (~45). One local rename (`s` → `text` in `HookPayload.parse`). Check and bench pass. Left for a follow-up: a force unwrap in `Theme.resolve`.",
+          "by": "claude:5f67a194"
+        }
+      ]
     },
     {
       "id": "T-143",
@@ -7299,7 +7310,7 @@
       "description": "Apply `CLAUDE.md` › Code quality to `Sources/asb/` and `scripts/*.swift`: comment only what the code can't say (a non-obvious reason or constraint); clear names and small functions instead of comments.\n\n## Change\n- Keep comments that give a non-obvious reason or constraint (for example why the hook prints nothing and always exits 0), or point to a doc section.\n- Delete comments that repeat the name or the code; rename or extract where a comment explains unclear code.\n- The commands' `abstract` and help texts are user-facing and stay.\n\n## Renames (decided with the user, 2026-11-01)\nAny Swift name may change, `public` ones in `ASBCore` included, when every caller (the app, `asb`, the tests) is updated in the same commit. Never changed: JSON keys, file formats, config keys, `asb` commands and flags, and the conformance cases.\n\n## Checks\nNo behavior change. `tests/swift.sh`, `tests/app.sh --test` and `tests/lint.sh` pass (`mise run check` once T-154 is done).\n",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "Sources/asb/",
@@ -7308,7 +7319,7 @@
         "scripts/make-social-preview.swift"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T22:19:46Z",
+      "updated_at": "2026-11-01T22:36:31Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "components": [
@@ -7321,7 +7332,9 @@
           "from": "2026-11-01T21:20:28Z"
         }
       ],
-      "sprint": "Quality"
+      "sprint": "Quality",
+      "started_at": "2026-11-01T22:36:31Z",
+      "started_by": "claude:5f67a194"
     },
     {
       "id": "T-144",
