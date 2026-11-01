@@ -37,12 +37,11 @@ final class CompanionSceneTests: XCTestCase {
         XCTAssertEqual(
             CompanionScene.from(snapshot(.waiting, [session(.waiting, reason: "question"), session(.idle)])),
             .waiting(reason: "question"))
-        // Muted sessions don't count toward subagents; subagents of all working sessions do.
         XCTAssertEqual(
             CompanionScene.from(snapshot(.busy, [
                 session(.busy, subagents: 1), session(.subagents, subagents: 2), session(.busy, muted: true, subagents: 4),
             ])),
-            .busy(subagents: 3))
+            .busy(subagents: 3), "the subagents of every working session, but not of muted ones")
     }
 
     func testOneFollowerPerSubagentWhileWorking() {
@@ -99,9 +98,8 @@ final class CompanionSceneTests: XCTestCase {
             last = move
         }
         XCTAssertEqual(seen.count, BusyRoutine.Move.allCases.count, "every move comes up")
-        // Even a source stuck at one value alternates.
         var stuck = BusyRoutine(random: { 0.999 })
-        XCTAssertNotEqual(stuck.next().0, stuck.next().0)
+        XCTAssertNotEqual(stuck.next().0, stuck.next().0, "even a source stuck at one value alternates")
     }
 
     func testRepsFillTheTime() {

@@ -57,7 +57,7 @@ private let tree = FakeProcessInspector([
 }
 
 @Test func theWalkLooksAtSixProcesses() {
-    // Like the shell hook: the start and five ancestors.
+    // HookMetadata.maxDepth: the process it starts from and five ancestors.
     var records = [ProcessRecord(pid: 100, ppid: 1, start: 1, comm: "claude")]
     for pid in 101...107 { records.append(ProcessRecord(pid: Int32(pid), ppid: Int32(pid - 1), start: 1, comm: "sh")) }
     #expect(HookMetadata.findClaude(from: 105, inspector: FakeProcessInspector(records)) == 100)

@@ -128,8 +128,8 @@ private func child(_ pid: Int32, _ comm: String, startedSecondsAgo: Int64, paren
 @Test func c5UsesTheConfiguredThresholdAndIsOffAt0() {
     #expect(checked(#""state":"busy","updatedAt":\#(minutesAgo(45))"#, config: "stale_minutes=60").shown == "busy")
     #expect(checked(#""state":"busy","updatedAt":\#(minutesAgo(600))"#, config: "stale_minutes=0").shown == "busy")
-    // The default is 30 minutes.
-    #expect(checked(#""state":"busy","updatedAt":\#(minutesAgo(45))"#, config: "").shown == "uncertain")
+    #expect(checked(#""state":"busy","updatedAt":\#(minutesAgo(45))"#, config: "").shown == "uncertain",
+            "the default is 30 minutes")
 }
 
 @Test func c5NeverMarksWaitingOrIdleSessionsAsStale() {

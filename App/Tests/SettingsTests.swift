@@ -55,9 +55,8 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(store.config.companionPosition, "top-left")
         XCTAssertEqual(store.config.companionSize, "large")
         XCTAssertEqual(store.config.companionColor, "#D70015,#FF453A")
-        // Automatic clears the color.
         store.set("companion_color", "")
-        XCTAssertEqual(store.config.companionColor, "")
+        XCTAssertEqual(store.config.companionColor, "", "Automatic clears the color")
         let text = try String(contentsOfFile: config, encoding: .utf8)
         XCTAssertTrue(text.contains("companion_size=large"))
     }

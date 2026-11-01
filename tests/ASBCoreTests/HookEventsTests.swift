@@ -186,14 +186,14 @@ private func has(_ state: [String: Any]?, _ key: String) -> Bool { state?[key] !
 
 @Test func otherSubagentStartsKeepTheWait() throws {
     let waiting: [String: Any] = ["state": "waiting", "reason": "permission", "lastTool": "Bash"]
-    // The prompt is for another tool.
-    #expect(str(written(apply(try payload("SubagentStart"), to: waiting, at: 2000)), "state") == "waiting")
-    // A background subagent resuming is already listed.
+    #expect(str(written(apply(try payload("SubagentStart"), to: waiting, at: 2000)), "state") == "waiting",
+            "the prompt is for another tool")
     let resumed = waiting.merging(["lastTool": "Agent", "subagents": ["ac2ed88ebf4ec5d02": ["type": "general-purpose", "since": 1]]]) { $1 }
-    #expect(str(written(apply(try payload("SubagentStart"), to: resumed, at: 2000)), "state") == "waiting")
-    // An older start doesn't change the state.
+    #expect(str(written(apply(try payload("SubagentStart"), to: resumed, at: 2000)), "state") == "waiting",
+            "a background subagent resuming is already listed")
     let older = waiting.merging(["lastTool": "Agent", "eventAt": 5000]) { $1 }
-    #expect(str(written(apply(try payload("SubagentStart"), to: older, at: 6000, started: 4000)), "state") == "waiting")
+    #expect(str(written(apply(try payload("SubagentStart"), to: older, at: 6000, started: 4000)), "state") == "waiting",
+            "an older start doesn't change the state")
 }
 
 @Test func subagentStopRemovesTheSubagentAndKeepsOthers() throws {
@@ -226,7 +226,7 @@ private func has(_ state: [String: Any]?, _ key: String) -> Bool { state?[key] !
     let post = written(apply(try payload("PostToolUse"), to: ["state": "busy"], at: 1500, started: 1000))
     #expect(num(post, "eventAt") == 1000 && num(post, "updatedAt") == 1500)
     #expect(str(written(apply(try payload("Stop"), to: post, at: 1600, started: 1200)), "state") == "idle")
-    // A file from before eventAt accepts the event.
+    // A file without eventAt (written before it existed) accepts the event, whatever its updatedAt.
     #expect(apply(try payload("Stop"), to: ["state": "busy", "updatedAt": 9000], at: 6000, started: 4000) != .none)
 }
 
@@ -355,7 +355,8 @@ private func stop(_ agent: String, tasks: [BGTask]?) throws -> HookPayload {
 
 // MARK: Agents waiting on a prompt (PermissionRequest; spike T-119, tests/fixtures/README.md)
 
-/// A fixture payload, as agent `agent` ("" for the session's own) and with these background tasks.
+/// A fixture payload, changed where given: as agent `agent` ("" for the session's own), with these background
+/// tasks, for tool `tool`.
 private func event(_ name: String, agent: String? = nil, tasks: [String]? = nil, tool: String? = nil) throws -> HookPayload {
     var p = try payload(name)
     if let agent { p.agentId = agent; p.agentType = agent.isEmpty ? "" : "general-purpose" }
@@ -391,8 +392,9 @@ private var busyWithTwo: [String: Any] { ["state": "busy", "subagents": [
 }
 
 @Test func aSubagentWaitOutlastsOtherAgentsTheParentsStopAndTaskResults() throws {
-    // The approve run the spike recorded: other agents keep working, the parent stops, the
-    // notification comes 6 s late, another agent's result arrives; only the agent's own tool ends it.
+    // The approved run the spike recorded: the other agent keeps working, the parent stops, then the permission
+    // notification arrives without agent_id. A main-agent tool, a task result and an idle prompt are added; only
+    // agent a's own PostToolUse ends the wait.
     let states = play([
         try event("PreToolUse-subagent", agent: "a"),
         try event("PermissionRequest-subagent", agent: "a"),

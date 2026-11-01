@@ -32,8 +32,7 @@ private func sample() -> Snapshot {
     #expect(json.hasPrefix(#"{"activeMutes":1,"generatedAt":"#))
     #expect(!json.contains("muteUntil"))
     #expect(!json.contains("transcriptPath"))
-    // Encoding twice gives the same bytes.
-    #expect(try sample().encodedJSON() == sample().encodedJSON())
+    #expect(try sample().encodedJSON() == sample().encodedJSON(), "encoding twice gives the same bytes")
 }
 
 @Test func headerWithoutCountOmitsIt() throws {

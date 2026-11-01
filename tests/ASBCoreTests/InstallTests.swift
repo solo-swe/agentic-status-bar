@@ -196,8 +196,7 @@ private struct Home {
     #expect(!home.installer().binaryIsCurrent)
     try home.installer().updateBinary()
     #expect(home.installer().binaryIsCurrent)
-    // Updating the copy never touches the settings.
-    #expect(!FileManager.default.fileExists(atPath: home.settings))
+    #expect(!FileManager.default.fileExists(atPath: home.settings), "updating the copy never touches the settings")
 }
 
 @Test func installBacksUpTheSettingsFile() throws {
@@ -272,7 +271,7 @@ private struct Home {
     #expect(!FileManager.default.fileExists(atPath: home.config) && !FileManager.default.fileExists(atPath: home.state))
 }
 
-@Test func installMovesTheOldStateConfigLoginItemAndLink() throws {
+@Test func installMovesTheOldStateAndConfigAndRemovesTheOldLoginItemAndLink() throws {
     let home = try Home()
     let fm = FileManager.default
     try fm.createDirectory(atPath: home.oldState, withIntermediateDirectories: true)

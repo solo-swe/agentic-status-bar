@@ -14,8 +14,7 @@ final class StickFigureTests: XCTestCase {
         XCTAssertEqual(p.neck, CGPoint(x: 0, y: s.legLength + s.torso))
         XCTAssertEqual(p.head.y, s.legLength + s.torso + s.headRadius, accuracy: 0.001)
         XCTAssertEqual(s.height, p.head.y + s.headRadius, accuracy: 0.001)
-        // Relaxed arms hang beside the torso, below the neck.
-        XCTAssertLessThan(p.handFront.y, p.neck.y - s.upperArm)
+        XCTAssertLessThan(p.handFront.y, p.neck.y - s.upperArm, "relaxed arms hang beside the torso")
     }
 
     func testAnglesFollowTheSignConventions() {
@@ -65,9 +64,10 @@ final class StickFigureTests: XCTestCase {
             XCTAssertEqual(angle ?? .nan, StickFigure.rotation(bone, p), accuracy: 0.0001, "\(bone)")
         }
         XCTAssertEqual(figure.bones[.hips]?.position, CGPoint(x: 2, y: s.legLength - 3))
-        // Read back from the layers, the pose is the same.
         let read = figure.presentedPose()
-        for field in Pose.fields { XCTAssertEqual(read[keyPath: field], p[keyPath: field], accuracy: 0.0001) }
+        for field in Pose.fields {
+            XCTAssertEqual(read[keyPath: field], p[keyPath: field], accuracy: 0.0001, "read back from the layers")
+        }
     }
 
     func testAMoveAnimatesEveryJointAndEndsInItsLastPose() {
@@ -107,10 +107,9 @@ final class StickFigureTests: XCTestCase {
             XCTAssertGreaterThanOrEqual(lower, -0.001, "pose \(i) doesn't sink into the floor")
             XCTAssertLessThanOrEqual(lower, 1, "pose \(i) keeps a foot down")
         }
-        // At contact both feet touch the floor.
         let contact = s.points(walk[0])
-        XCTAssertEqual(contact.footBack.y, contact.footFront.y, accuracy: 1.5)
-        XCTAssertGreaterThan(contact.footFront.x, contact.footBack.x)
+        XCTAssertEqual(contact.footBack.y, contact.footFront.y, accuracy: 1.5, "at contact both feet are down")
+        XCTAssertGreaterThan(contact.footFront.x, contact.footBack.x, "the front foot ahead")
     }
 
     func testTheSecondStepMirrorsTheFirst() {
@@ -171,7 +170,7 @@ final class StickFigureTests: XCTestCase {
                 XCTAssertEqual(p.handFront.x, target.x, accuracy: 0.01)
                 XCTAssertEqual(p.handFront.y, target.y, accuracy: 0.01)
                 XCTAssertEqual(p.handBack.x, target.x, accuracy: 0.01)
-                // The elbow ends up on the asked side of the line from the shoulder to the hand.
+                // Elbows behind put the front elbow further back than elbows in front do.
                 let side = (target.x - neck.x) * (p.elbowFront.y - neck.y) - (target.y - neck.y) * (p.elbowFront.x - neck.x)
                 let other = s.points(s.reaching(.standing, hand: target, elbowsBehind: !behind, backOffset: 0)).elbowFront
                 XCTAssertEqual(behind, p.elbowFront.x <= other.x + 0.001, "side \(side)")
@@ -261,9 +260,8 @@ final class StickFigureTests: XCTestCase {
         XCTAssertTrue(raised.allSatisfy { s.points($0).handFront.y > neck.y }, "the hand up by the head")
         let rests = wave.filter { $0 == wave[0] }.count
         XCTAssertGreaterThanOrEqual(Double(rests - 1) * Moves.waveStep, 2, "about 2 s of waiting")
-        // The swings move the hand side to side.
         let swingXs = wave[3...8].map { s.points($0).handFront.x }
-        XCTAssertGreaterThan((swingXs.max() ?? 0) - (swingXs.min() ?? 0), 5)
+        XCTAssertGreaterThan((swingXs.max() ?? 0) - (swingXs.min() ?? 0), 5, "the swings move the hand side to side")
     }
 
     func testTheBubbleSaysWhyAndGoesAway() {
@@ -279,14 +277,14 @@ final class StickFigureTests: XCTestCase {
         figure.say("!", color: CGColor(gray: 0, alpha: 1))
         XCTAssertEqual(figure.bubbleText, "!")
         XCTAssertEqual(figure.layer.sublayers?.filter { $0 === figure.props[.bubble] }.count, 1, "one bubble")
-        // The bubble stays readable when the figure turns.
         figure.facing = .left
-        XCTAssertEqual(figure.props[.bubble]?.transform.m11, -1)
+        XCTAssertEqual(figure.props[.bubble]?.transform.m11, -1, "flipped back, so it stays readable when the figure turns")
         figure.stop()
         figure.hideProps()
         XCTAssertNil(figure.bubbleText)
-        // The bubble fits in the strip.
-        XCTAssertLessThanOrEqual(figure.bubbleOrigin.y + StickFigure.bubbleSize.height, CompanionWindow.size.height - CompanionWindow.floorY)
+        XCTAssertLessThanOrEqual(
+            figure.bubbleOrigin.y + StickFigure.bubbleSize.height, CompanionWindow.size.height - CompanionWindow.floorY,
+            "the bubble fits in the strip")
     }
 
     // MARK: Bed

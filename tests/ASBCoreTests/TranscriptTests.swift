@@ -71,7 +71,7 @@ private func afterC3(state: String, extra: String = "", transcript: Data?) -> Re
 }
 
 @Test func c3OnlyReadsTranscriptsOfFilesThatSayBusyOrWaiting() throws {
-    // The registry made an idle file look busy: its transcript isn't read, as in the shell plugin.
+    // The registry (C2) made an idle file look busy: C3 goes by what the file says, so the transcript isn't read.
     let json = #"{"v":1,"sessionId":"s1","state":"idle","updatedAt":5000,"transcriptPath":"t.jsonl"}"#
     var session = ReconciledSession(StateFile.parse(RawFile(path: "s", contents: Data(json.utf8)))!)
     session.shown = "busy"

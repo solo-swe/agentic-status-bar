@@ -6,7 +6,7 @@ private let la = TimeZone(identifier: "America/Los_Angeles")!
 private let claude = ProcessRecord(pid: 4242, ppid: 1, start: 1_792_426_323, comm: "claude")
 
 /// Runs the checks on one live session (pid 4242) merged with `state`, and one registry entry.
-/// The fixtures use small timestamps, so C5 is off (as in tests/checks.bats).
+/// The states use small timestamps against a 2026 `now`, so C5 is off.
 private func reconcile(state: String, registry: String?, config: String = "") -> Engine.Reconciled {
     let base = #""v":1,"sessionId":"s1","pid":4242,"procStart":"Mon Oct 19 09:12:03 2026","cwd":"/x/proj""#
     var inputs = SnapshotInputs(now: 1_792_891_080_000, timeZone: la, configText: config + "\nstale_minutes=0\n")

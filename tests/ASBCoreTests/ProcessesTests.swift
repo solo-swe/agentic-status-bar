@@ -13,7 +13,7 @@ import Testing
     #expect(fake.processes().count == 1)
 }
 
-@Test func tableInspectorReadsTheBatsFakeProcessTable() throws {
+@Test func tableInspectorReadsAFakeProcessTableFile() throws {
     let file = FileManager.default.temporaryDirectory.appendingPathComponent("asb-ps-\(UUID().uuidString)")
     defer { try? FileManager.default.removeItem(at: file) }
     try "4242|1|claude|claude --resume|Mon Oct 19 09:12:03 2026\nbad line\n7001|4242|/bin/zsh|zsh -c npm test|Mon Oct 19 09:13:00 2026\n"

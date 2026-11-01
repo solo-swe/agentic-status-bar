@@ -8,7 +8,7 @@ private let testsDir = URL(fileURLWithPath: #filePath).deletingLastPathComponent
 private let casesDir = testsDir.appendingPathComponent("conformance")
 private let transcriptFixtures = testsDir.appendingPathComponent("fixtures/transcripts")
 
-/// Case names: directories, and single-file cases without their `.case.json` suffix.
+/// Case names: the case directories and the `.case.json` files, sorted.
 private func caseNames() -> [String] {
     let names = (try? FileManager.default.contentsOfDirectory(atPath: casesDir.path)) ?? []
     return names.compactMap { name in

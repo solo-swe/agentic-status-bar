@@ -43,9 +43,8 @@ final class CompanionEnergyTests: XCTestCase {
         XCTAssertFalse(watcher.energy.visible)
         XCTAssertEqual(reported.count, 5)
 
-        // Only changes are reported.
         workspace.post(name: NSWorkspace.screensDidWakeNotification, object: nil)
-        XCTAssertEqual(reported.count, 5)
+        XCTAssertEqual(reported.count, 5, "only changes are reported")
     }
 
     func testLowPowerFramesAndStillZs() {

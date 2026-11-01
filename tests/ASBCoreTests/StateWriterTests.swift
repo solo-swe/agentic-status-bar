@@ -26,8 +26,7 @@ private func tempDir() throws -> String {
     #expect(!StateWriter.withLock(file, tries: 5, interval: 0.01) { ran = true })
     #expect(!ran)
     #expect(Date().timeIntervalSince(start) < 1)
-    // Someone else's lock is left alone.
-    #expect(FileManager.default.fileExists(atPath: file + ".lock"))
+    #expect(FileManager.default.fileExists(atPath: file + ".lock"), "someone else's lock is left alone")
 }
 
 @Test func atomicWriteLeavesNoTempFile() throws {

@@ -38,9 +38,8 @@ final class NotificationRulesTests: XCTestCase {
         _ = rules.evaluate(snapshot(session("a", .waiting, since: 0)), now: 20_000, options: defaults)
         let busy = rules.evaluate(snapshot(session("a", .busy, since: 21_000)), now: 22_000, options: defaults)
         XCTAssertEqual(busy.cleared, ["a"])
-        // Waiting again (even when the busy stretch in between was never seen): a new notification.
         let again = rules.evaluate(snapshot(session("a", .waiting, since: 30_000)), now: 40_000, options: defaults)
-        XCTAssertEqual(again.alerts.map(\.sessionId), ["a"])
+        XCTAssertEqual(again.alerts.map(\.sessionId), ["a"], "waiting again is a new stretch and a new notification")
     }
 
     func testWaitingBreaksThroughMutesButIdleDoesNot() {
@@ -92,8 +91,9 @@ final class NotificationRulesTests: XCTestCase {
         let out = rules.evaluate(snapshot(session("b", .waiting, since: 0)), now: 25_000, options: defaults)
         XCTAssertEqual(out.cleared, ["a"])
         XCTAssertEqual(out.alerts, [])
-        // If it comes back waiting (a new file for the same ID), it is notified again.
-        XCTAssertEqual(rules.evaluate(snapshot(session("a", .waiting, since: 0)), now: 30_000, options: defaults).alerts.count, 1)
+        XCTAssertEqual(
+            rules.evaluate(snapshot(session("a", .waiting, since: 0)), now: 30_000, options: defaults).alerts.count, 1,
+            "back waiting (a new state file for the same ID): notified again")
     }
 
     func testAMutedSessionThatStopsWaitingIsNotNotifiedForIdle() {
