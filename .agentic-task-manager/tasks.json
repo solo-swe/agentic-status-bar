@@ -7642,7 +7642,7 @@
       "description": "Move the check scripts to `mise-tasks/` as mise file tasks, as laid out in `doc/design/dev-tooling.md` › Layout. Behavior stays the same; only the names and the way they're run change.\n\n## Change\n- `git mv` each script, so history follows: `tests/lint.sh` → `mise-tasks/lint.sh` (`lint`), `tests/swift.sh` → `mise-tasks/test.sh` (`test`), `tests/bench.sh` → `mise-tasks/bench.sh` (`bench`).\n- Split `tests/app.sh` by its flags into `mise-tasks/app/build.sh`, `test.sh`, `run.sh` (extra `KEY=VALUE` arguments as before) and `quit.sh` (`app:build`, `app:test`, `app:run`, `app:quit`), with the shared code (the `xcodegen` step, the `xcodebuild` call, the app path) in a non-executable `mise-tasks/app/lib.sh` that they source.\n- Each task gets a `#MISE description=\"…\"` header, and `#USAGE` lines for its flags and arguments (`test`: `--summary`, and arguments passed on to `swift test`, such as `--filter <suite>`). Tasks run from the repository root (mise's default working directory); a script run directly still works from anywhere.\n- `lint` checks `mise-tasks/**/*.sh` and `scripts/*.sh`, still with `shellcheck -x -S warning -s sh`.\n- `.github/workflows/ci.yml`: the jobs run `mise run lint`, `mise run test` and `mise run app:test`.\n- Docs: replace every mention of the old paths with the task names in `CLAUDE.md` › Commands, `CONTRIBUTING.md` (Checks, Layout, The app), `README.md`, `doc/PRD.md`, `doc/guides/*.md` (`shell.md`: where scripts live, tools come from `mise.toml` instead of each script checking for them), `tests/conformance/README.md`, and comments in `App/project.yml` and the scripts. Design notes that record history (`doc/design/future-architecture.md`) keep their text. Set this design note's status to built for this part.\n- Don't edit `.claude/settings.json` (the permission allowlist): that change is the user's. Mention it in this task's outcome note.\n\n## Checks\n`mise tasks` lists every task with its description; `mise run lint`, `mise run test --summary` and `mise run app:test` pass; `mise run bench` meets its targets. No old path is left outside history (search for `tests/swift.sh`, `tests/app.sh`, `tests/lint.sh`, `tests/bench.sh`).",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-152"
       ],
@@ -7665,7 +7665,7 @@
         "doc/design/dev-tooling.md"
       ],
       "created_at": "2026-11-01T22:13:44Z",
-      "updated_at": "2026-11-01T22:24:34Z",
+      "updated_at": "2026-11-01T22:28:48Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "sprint_history": [
@@ -7683,7 +7683,18 @@
         "docs"
       ],
       "started_at": "2026-11-01T22:24:34Z",
-      "started_by": "claude:5f67a194"
+      "started_by": "claude:5f67a194",
+      "commit": "5ed288be6dc3f1d5c1615c330d54e10c58f0cf12",
+      "completed_at": "2026-11-01T22:28:48Z",
+      "completed_by": "claude:5f67a194",
+      "notes": [
+        {
+          "at": "2026-11-01T22:28:48Z",
+          "kind": "outcome",
+          "text": "Checks are mise tasks: `lint`, `test`, `app:build|test|run|quit`, `bench`; CI runs them. No `#USAGE` specs: args pass through to the scripts (design note updated). `app:run` not started here (it opens the app). The allowlist was already moved to `mise run *`.",
+          "by": "claude:5f67a194"
+        }
+      ]
     },
     {
       "id": "T-154",
@@ -7696,7 +7707,7 @@
       "description": "Add `[tasks.check]` to `mise.toml`: a description and `depends = [\"lint\", \"test\", \"app:test\"]`, so `mise run check` runs every check CI runs, in parallel where mise can. The coverage task joins it in T-147.\n\n## Docs\n`CLAUDE.md`: *A change is done when `mise run check` passes locally* (instead of naming the three checks), and `mise run check` first in › Commands. `CONTRIBUTING.md` › Checks the same.\n\n## Checks\n`mise run check` passes, and fails when one of its checks fails (try it once with a deliberately failing test, then revert).",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-153"
       ],
@@ -7706,9 +7717,9 @@
         "CONTRIBUTING.md"
       ],
       "created_at": "2026-11-01T22:13:44Z",
-      "updated_at": "2026-11-01T22:13:44Z",
+      "updated_at": "2026-11-01T22:28:55Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:5f67a194",
       "sprint_history": [
         {
           "sprint": "Quality",
@@ -7718,7 +7729,9 @@
       "sprint": "Quality",
       "components": [
         "docs"
-      ]
+      ],
+      "started_at": "2026-11-01T22:28:55Z",
+      "started_by": "claude:5f67a194"
     },
     {
       "id": "T-155",

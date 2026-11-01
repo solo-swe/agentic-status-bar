@@ -1,7 +1,7 @@
 # Developer tooling: mise for tools and tasks
 
-Status (2026-11-01): **built** for the tools, Xcode and the checks (T-152, T-153); the `check` task and the release
-tasks are next.
+Status (2026-11-01): **built** for the tools, Xcode, the checks and `check` (T-152 to T-154); the release tasks are
+next (T-155).
 
 ## Decisions
 
@@ -54,7 +54,7 @@ and each script checks for its own tools.
 | `app:build`, `app:test`, `app:run`, `app:quit` | `mise-tasks/app/*.sh` (shared code in a non-executable `mise-tasks/app/lib.sh`) | `tests/app.sh` and its flags |
 | `bench` | `mise-tasks/bench.sh` | `tests/bench.sh` |
 | `coverage` | `mise-tasks/coverage.sh` | new (T-147) |
-| `check` | `mise.toml` (`depends` on `lint`, `test`, `app:test`, `coverage`) | new |
+| `check` | `mise.toml` (`depends` on `lint`, `test --summary`, `app:test`; `coverage` joins with T-147) | new |
 | `release:package`, `release:appcast`, `release:cask` | `mise-tasks/release/*.sh` | `scripts/package.sh`, `appcast.sh`, `homebrew-cask.sh` (a later task) |
 
 `tests/` keeps the tests, fixtures and conformance cases; `scripts/` keeps the Swift helper scripts. Tasks run from the

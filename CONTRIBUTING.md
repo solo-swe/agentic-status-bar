@@ -11,6 +11,7 @@
 The checks are mise tasks, scripts in `mise-tasks/` (`mise tasks` lists them):
 
 ```sh
+mise run check             # everything CI runs: lint, test and app:test, in parallel
 mise run test              # build the Swift package and run its tests (or: mise run test --filter ConfigTests)
 mise run test --summary    # the same, printing only failures and totals
 mise run app:test          # generate the app's Xcode project, build it and run the app's tests
@@ -18,7 +19,8 @@ mise run lint              # shellcheck on the shell scripts (mise-tasks/, scrip
 mise run bench             # timing: asb hook < 10 ms, asb snapshot < 30 ms on 10 sessions
 ```
 
-CI runs the same tasks, in three jobs: lint, the Swift package, and the app. Tests run in a temporary `HOME`, so
+CI runs the same tasks, in three jobs: lint, the Swift package, and the app. A change is done when `mise run check`
+passes. Tests run in a temporary `HOME`, so
 they never touch your real `~/.claude` or config.
 
 The hook runs on every tool call of every session; run `mise run bench` after changing it.

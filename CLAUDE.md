@@ -24,6 +24,7 @@ SwiftUI app.
 
 The checks are mise tasks (`mise-tasks/`, see `doc/design/dev-tooling.md`); `mise tasks` lists them.
 
+- `mise run check`: every check CI runs (lint, the package tests and the app tests), in parallel.
 - `mise run test` (`--summary` for failures and totals only, `--filter X` for one suite): build the package and run
   its tests.
 - `mise run app:test`: generate the Xcode project, build the app and run its tests. `mise run app:run [KEY=VALUE]`
@@ -32,7 +33,7 @@ The checks are mise tasks (`mise-tasks/`, see `doc/design/dev-tooling.md`); `mis
 - `mise run bench`: `asb hook` under 10 ms, `asb snapshot` under 30 ms on 10 sessions. Run it after changing the hook
   path.
 
-CI runs `lint`, `test` and `app:test`. A change is done when all three pass locally.
+CI runs `lint`, `test` and `app:test`. A change is done when `mise run check` passes locally.
 
 ## How to work
 
