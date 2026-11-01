@@ -45,6 +45,16 @@ import Testing
     #expect(!ProcStart.matches("Mon Oct 19 09:12:04 2026", seconds: later, timeZone: utc))
 }
 
+@Test func procStartMatchesInTheHourRepeatedWhenDaylightSavingEnds() {
+    // 1:30 comes twice on Nov 1 2026 in Los Angeles: 08:30 UTC (PDT), then 09:30 UTC (PST).
+    let la = TimeZone(identifier: "America/Los_Angeles")!
+    let pdt: Int64 = 1_793_521_800
+    let pst: Int64 = 1_793_525_400
+    #expect(ProcStart.matches("Sun Nov  1 01:30:00 2026", seconds: pdt, timeZone: la))
+    #expect(ProcStart.matches("Sun Nov  1 01:30:00 2026", seconds: pst, timeZone: la))
+    #expect(!ProcStart.matches("Sun Nov  1 01:30:01 2026", seconds: pst, timeZone: la))
+}
+
 #if os(macOS)
 @Test func darwinInspectorFindsThisProcessAndItsParent() throws {
     let inspector = DarwinProcessInspector()

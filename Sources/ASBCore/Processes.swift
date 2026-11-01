@@ -78,8 +78,11 @@ public enum ProcStart {
 
     /// Epoch seconds for an lstart string; runs of spaces are allowed. Nil when it doesn't parse.
     public static func parse(_ text: String, timeZone: TimeZone = .current) -> Int64? {
-        let normalized = text.split(whereSeparator: \.isWhitespace).joined(separator: " ")
-        return formatter(timeZone).date(from: normalized).map { Int64($0.timeIntervalSince1970) }
+        formatter(timeZone).date(from: normalized(text)).map { Int64($0.timeIntervalSince1970) }
+    }
+
+    private static func normalized(_ text: String) -> String {
+        text.split(whereSeparator: \.isWhitespace).joined(separator: " ")
     }
 
     /// The lstart string for epoch seconds, with the day padded to two characters like `ps` does
@@ -92,8 +95,9 @@ public enum ProcStart {
         return "\(parts[0]) \(parts[1]) \(day) \(parts[3]) \(parts[4])"
     }
 
-    /// Whether an lstart string names the same start time as `seconds`.
+    /// Whether an lstart string names the same start time as `seconds`. Compares as text: in the hour
+    /// repeated when daylight saving time ends, the local time is ambiguous and parsing it can be an hour off.
     public static func matches(_ text: String, seconds: Int64, timeZone: TimeZone = .current) -> Bool {
-        parse(text, timeZone: timeZone) == seconds
+        normalized(text) == normalized(format(seconds, timeZone: timeZone))
     }
 }
