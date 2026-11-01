@@ -87,6 +87,8 @@ public enum HookEvents {
     public static let taskNotificationPrefix = "<task-notification>"
     /// Characters of the prompt kept as the row title fallback.
     public static let previewLength = 80
+    /// The `waitingAgents` key for the session's own agent (subagents use their `agent_id`).
+    public static let mainAgent = "main"
 
     public enum Outcome: Equatable {
         /// Write this state (the full object).
@@ -112,8 +114,38 @@ public enum HookEvents {
         let older = lastEvent.map { $0 > started } ?? false
         if older && payload.event != "SubagentStart" && payload.event != "SubagentStop" { return .none }
 
+        // Agents with a prompt open (PermissionRequest): each is cleared only by its own next event,
+        // so other agents' events, the parent's Stop and task results can't end the wait.
+        let agent = payload.agentId.isEmpty ? mainAgent : payload.agentId
+        let pending = old["waitingAgents"] as? [String: String] ?? [:]
+        var holding = pending
+        switch payload.event {
+        case "SessionStart" where payload.source == "compact", "SubagentStart", "PermissionRequest", "Notification": break
+        case "SessionStart": holding = [:]
+        case "UserPromptSubmit" where !payload.prompt.hasPrefix(taskNotificationPrefix): holding = [:]
+        default: holding[agent] = nil
+        }
+        // A subagent the task registry no longer lists has finished (or was killed) and waits no more.
+        if let tasks = payload.backgroundTasks, !older {
+            let running = Set(tasks.filter(\.isRunningSubagent).map(\.id))
+            holding = holding.filter { $0.key == mainAgent || running.contains($0.key) }
+        }
+
         var s = old
         switch payload.event {
+        case "PermissionRequest":
+            if pending.isEmpty {
+                let state = old["state"] as? String
+                s["afterWaiting"] = state == "idle" ? "idle" : "busy"
+            }
+            let reason = payload.toolName == "AskUserQuestion" ? "question" : "permission"
+            var agents = pending
+            agents[agent] = reason
+            s["waitingAgents"] = agents
+            s["state"] = "waiting"
+            s["reason"] = reason
+            s["message"] = nil
+            return .write(stamped(s, old: old, sessionId: payload.sessionId, now: now, eventAt: max(started, lastEvent ?? started)))
         case "SessionStart":
             sessionStartChanges(&s)
             if !(payload.source == "compact" && s["state"] != nil && !(s["state"] is NSNull)) {
@@ -150,6 +182,9 @@ public enum HookEvents {
                 else if payload.message.contains("waiting for your input") { type = "idle_prompt" }
             }
             switch type {
+            case "permission_prompt" where !pending.isEmpty, "elicitation_dialog" where !pending.isEmpty:
+                // PermissionRequest already said who waits and why; this one has no agent_id.
+                s["message"] = payload.message
             case "permission_prompt":
                 // AskUserQuestion questions also arrive as permission prompts.
                 s["state"] = "waiting"
@@ -187,10 +222,12 @@ public enum HookEvents {
             // A new subagent while the Agent or Task tool waited on a permission: it was approved and runs.
             // (A resumed background subagent is already listed and leaves the state alone.)
             if !older, agents[payload.agentId] == nil, s["state"] as? String == "waiting",
+               pending.isEmpty || pending[mainAgent] != nil,
                ["Agent", "Task"].contains(s["lastTool"] as? String ?? "") {
                 s["state"] = "busy"
                 s["reason"] = nil
                 s["message"] = nil
+                holding[mainAgent] = nil
             }
             // A resumed subagent keeps its entry (and first start time).
             if agents[payload.agentId] == nil {
@@ -227,7 +264,29 @@ public enum HookEvents {
         default:
             return .none
         }
+        if !pending.isEmpty { holdWaiting(&s, old: old, holding: holding) }
         return .write(stamped(s, old: old, sessionId: payload.sessionId, now: now, eventAt: max(started, lastEvent ?? started)))
+    }
+
+    /// While agents still wait, the session stays waiting and the event's own state is kept for later
+    /// (`afterWaiting`); once none waits, it takes that state (or the event's, if it set one).
+    static func holdWaiting(_ s: inout [String: Any], old: [String: Any], holding: [String: String]) {
+        let after = s["state"] as? String == "waiting" ? old["afterWaiting"] as? String ?? "busy" : s["state"]
+        if let reason = holding.sorted(by: { $0.key < $1.key }).first?.value {
+            s["afterWaiting"] = after
+            s["waitingAgents"] = holding
+            s["state"] = "waiting"
+            s["reason"] = reason
+            s["message"] = s["message"] ?? old["message"]
+        } else {
+            s["afterWaiting"] = nil
+            s["waitingAgents"] = nil
+            s["state"] = after
+            if after as? String != "waiting" {
+                s["reason"] = nil
+                s["message"] = nil
+            }
+        }
     }
 
     /// Sets v, sessionId, updatedAt and eventAt, and stateSince when the state changed (or was never set).

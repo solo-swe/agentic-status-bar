@@ -1,0 +1,23 @@
+{
+  "description": "C3: the parent's turn ends normally while a subagent waits on a prompt; the session still waits (spike T-119)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "cwd": "/x/proj", "state": "waiting", "reason": "permission",
+                          "waitingAgents": {"a1": "permission"}, "afterWaiting": "idle",
+                          "transcriptPath": "transcripts/t.jsonl", "updatedAt": 1792891020000, "stateSince": 1792891020000,
+                          "subagents": {"a1": {"type": "Explore", "since": 1792891000000, "background": true}}}},
+    "transcripts": {"t.jsonl": {"fixture": "completed-turn"}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "waiting", "symbol": "exclamationmark.circle.fill", "color": "#D70015,#FF453A", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "proj", "title": "", "cwd": "/x/proj", "kind": "interactive",
+       "shown": "waiting", "reason": "permission", "since": 1792891020000, "label": "proj                                            ",
+       "word": "permission", "detail": "1m", "muted": false, "focusable": false, "transcriptPath": "transcripts/t.jsonl",
+       "symbol": "exclamationmark.circle.fill", "color": "#D70015,#FF453A",
+       "subagents": [{"id": "a1", "type": "Explore", "since": 1792891000000, "detail": "1m"}]}
+    ]
+  }
+}

@@ -288,6 +288,9 @@ removes a session wins for that session.
 - **C3 scope:** only the last 8 KB of the transcript, never the whole file.
 - **C4 noise:** MCP servers and other long-lived children started before `stateSince`, so they never trigger the
   check. Claude Code also starts a `caffeinate` child at the start of each turn; C4 ignores it by name.
+- **A subagent waiting on a prompt** (the file's `waitingAgents` names one): the other agents keep working, so their
+  child processes (C4), a newer registry `busy` or `idle` (C2, which speaks for the session's own agent) and a turn
+  that ended normally (C3) say nothing about the wait and don't override it. Only an interrupt (C3) does.
 - **C5 threshold** is configurable (10, 30, 60 min or off). Waiting and idle states are never marked stale; a long
   wait is real.
 - Checks C2 to C5 never write the state file; corrections live only in the snapshot, so the next real hook event

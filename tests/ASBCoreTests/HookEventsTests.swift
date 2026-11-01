@@ -348,7 +348,148 @@ private func stop(_ agent: String, tasks: [BGTask]?) throws -> HookPayload {
 }
 
 @Test func unknownEventsChangeNothing() throws {
-    #expect(try run(["PermissionRequest"]).0 == .none)
+    var p = try payload("Stop")
+    p.event = "PostToolUseFailure"
+    #expect(apply(p, to: nil, at: 1000) == .none)
+}
+
+// MARK: Agents waiting on a prompt (PermissionRequest; spike T-119, tests/fixtures/README.md)
+
+/// A fixture payload, as agent `agent` ("" for the session's own) and with these background tasks.
+private func event(_ name: String, agent: String? = nil, tasks: [String]? = nil, tool: String? = nil) throws -> HookPayload {
+    var p = try payload(name)
+    if let agent { p.agentId = agent; p.agentType = agent.isEmpty ? "" : "general-purpose" }
+    if let tasks { p.backgroundTasks = tasks.map { BGTask(id: $0, type: "subagent") } }
+    if let tool { p.toolName = tool }
+    return p
+}
+
+/// Applies the payloads in order at 1000, 2000, ...; the state after each one.
+private func play(_ events: [HookPayload], start: [String: Any]? = nil) -> [[String: Any]?] {
+    var state = start
+    return events.enumerated().map { i, p in
+        if case .write(let s) = apply(p, to: state, at: Int64(i + 1) * 1000) { state = s }
+        return state
+    }
+}
+
+private func waiting(_ state: [String: Any]?) -> [String: String] {
+    state?["waitingAgents"] as? [String: String] ?? [:]
+}
+
+private var busyWithTwo: [String: Any] { ["state": "busy", "subagents": [
+    "a": ["type": "general-purpose", "since": 0, "background": true],
+    "b": ["type": "general-purpose", "since": 0, "background": true],
+]] }
+
+@Test func aSubagentPermissionRequestSetsWaitingForThatAgent() throws {
+    let s = play([try event("PermissionRequest-subagent", agent: "a")], start: busyWithTwo).last!
+    #expect(str(s, "state") == "waiting" && str(s, "reason") == "permission")
+    #expect(waiting(s) == ["a": "permission"] && str(s, "afterWaiting") == "busy")
+    let question = play([try event("PermissionRequest-subagent", agent: "a", tool: "AskUserQuestion")], start: busyWithTwo)
+    #expect(str(question.last!, "reason") == "question")
+}
+
+@Test func aSubagentWaitOutlastsOtherAgentsTheParentsStopAndTaskResults() throws {
+    // The approve run the spike recorded: other agents keep working, the parent stops, the
+    // notification comes 6 s late, another agent's result arrives; only the agent's own tool ends it.
+    let states = play([
+        try event("PreToolUse-subagent", agent: "a"),
+        try event("PermissionRequest-subagent", agent: "a"),
+        try event("PreToolUse-subagent", agent: "b"),
+        try event("PostToolUse-subagent", agent: "b"),
+        try event("Stop", tasks: ["a", "b"]),
+        try event("Notification-permission_prompt-subagent"),
+        try event("PreToolUse", agent: ""),
+        try event("UserPromptSubmit-task-notification"),
+        try event("Notification-idle_prompt"),
+        try event("PostToolUse-subagent", agent: "a"),
+    ], start: busyWithTwo)
+    for s in states[1...8] {
+        #expect(str(s, "state") == "waiting" && str(s, "reason") == "permission" && waiting(s) == ["a": "permission"])
+    }
+    #expect(str(states[4], "afterWaiting") == "idle", "the parent's turn ended")
+    #expect(str(states[5], "message") == "Claude needs your permission")
+    #expect(str(states[8], "message") == "Claude needs your permission", "kept until the wait ends")
+    #expect(num(states[8], "stateSince") == 2000, "waiting since the request")
+    let done = states[9]
+    #expect(str(done, "state") == "busy" && !has(done, "reason") && !has(done, "message"))
+    #expect(!has(done, "waitingAgents") && !has(done, "afterWaiting"))
+}
+
+@Test func aDeniedSubagentThatEndsReturnsToTheParentsState() throws {
+    // A denial fires no hook; the subagent ends (or carries on with another tool).
+    let ended = play([
+        try event("PermissionRequest-subagent", agent: "a"),
+        try event("Stop", tasks: ["a", "b"]),
+        try event("SubagentStop", agent: "a", tasks: ["b"]),
+    ], start: busyWithTwo).last!
+    #expect(str(ended, "state") == "idle" && !has(ended, "waitingAgents") && !has(ended, "reason"))
+    let goesOn = play([
+        try event("PermissionRequest-subagent", agent: "a"),
+        try event("PreToolUse-subagent", agent: "a"),
+    ], start: busyWithTwo).last!
+    #expect(str(goesOn, "state") == "busy" && !has(goesOn, "waitingAgents"))
+}
+
+@Test func aWaitingSubagentTheRegistryNoLongerListsWaitsNoMore() throws {
+    let s = play([
+        try event("PermissionRequest-subagent", agent: "a"),
+        try event("Stop", tasks: ["b"]),
+    ], start: busyWithTwo).last!
+    #expect(str(s, "state") == "idle" && !has(s, "waitingAgents"))
+}
+
+@Test func theSessionWaitsUntilEveryAgentIsAnswered() throws {
+    let states = play([
+        try event("PermissionRequest-subagent", agent: "a"),
+        try event("PermissionRequest-subagent", agent: "b", tool: "AskUserQuestion"),
+        try event("PostToolUse-subagent", agent: "a"),
+        try event("PostToolUse-subagent", agent: "b"),
+    ], start: busyWithTwo)
+    #expect(waiting(states[1]) == ["a": "permission", "b": "question"])
+    #expect(str(states[2], "state") == "waiting" && str(states[2], "reason") == "question")
+    #expect(str(states[3], "state") == "busy")
+}
+
+@Test func theMainAgentsPermissionRequestWaitsThroughSubagentActivity() throws {
+    let states = play([
+        try event("PermissionRequest", agent: ""),
+        try event("PostToolUse-subagent", agent: "a"),
+        try event("PostToolUse", agent: ""),
+    ], start: busyWithTwo)
+    #expect(waiting(states[0]) == ["main": "permission"])
+    #expect(str(states[1], "state") == "waiting")
+    #expect(str(states[2], "state") == "busy" && !has(states[2], "waitingAgents"))
+}
+
+@Test func anApprovedAgentToolEndsTheMainAgentsWaitOnly() throws {
+    var start = busyWithTwo
+    start["lastTool"] = "Agent"
+    let states = play([
+        try event("PermissionRequest-subagent", agent: "a"),
+        try event("PermissionRequest", agent: "", tool: "Agent"),
+        try event("SubagentStart", agent: "c"),
+    ], start: start)
+    #expect(waiting(states[2]) == ["a": "permission"] && str(states[2], "state") == "waiting")
+}
+
+@Test func aPromptTheUserTypesOrANewSessionEndsEveryWait() throws {
+    let waits = [try event("PermissionRequest-subagent", agent: "a")]
+    let typed = play(waits + [try event("UserPromptSubmit")], start: busyWithTwo).last!
+    #expect(str(typed, "state") == "busy" && !has(typed, "waitingAgents"))
+    let cleared = play(waits + [try event("SessionStart")], start: busyWithTwo).last!
+    #expect(str(cleared, "state") == "idle" && !has(cleared, "waitingAgents"))
+}
+
+@Test func withoutPermissionRequestTheNotificationWaitIsAsBefore() throws {
+    // Hooks installed by an older version: no agent is known, so any tool event ends the wait.
+    let states = play([
+        try event("Notification-permission_prompt-subagent"),
+        try event("PreToolUse-subagent", agent: "b"),
+    ], start: busyWithTwo)
+    #expect(str(states[0], "state") == "waiting" && !has(states[0], "waitingAgents"))
+    #expect(str(states[1], "state") == "busy")
 }
 
 @Test func encodingIsOneLineWithSortedKeys() throws {

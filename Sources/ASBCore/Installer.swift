@@ -116,6 +116,13 @@ public struct Installer {
         return HookSettings.count(settings) >= HookSettings.events.count
     }
 
+    /// Some of our hooks are installed but not all: a version that knew fewer events installed them.
+    public var hooksOutdated: Bool {
+        guard let settings = try? readSettings(backup: false) else { return false }
+        let count = HookSettings.count(settings)
+        return count > 0 && count < HookSettings.events.count
+    }
+
     /// Whether the stable copy is byte for byte the asb being run.
     public var binaryIsCurrent: Bool {
         guard let stable = fm.contents(atPath: stableBinary) else { return false }

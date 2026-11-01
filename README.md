@@ -96,9 +96,11 @@ large), color, and whether it stays over full-screen apps.
 
 ## How it works
 
-1. **Claude Code hooks** (`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Notification`, `Stop`,
-   `SessionEnd`, subagent events) run `asb hook`, a small command-line tool that comes with the app. It writes one
-   JSON state file per session to `~/.claude/agentic-status-bar/` ([the format](doc/state-file-schema.md)).
+1. **Claude Code hooks** (`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `PermissionRequest`,
+   `Notification`, `Stop`, `SessionEnd`, subagent events) run `asb hook`, a small command-line tool that comes with
+   the app. It writes one JSON state file per session to `~/.claude/agentic-status-bar/`
+   ([the format](doc/state-file-schema.md)). A subagent waiting on a permission shows as waiting even while the other
+   agents keep working. The app adds hooks for new events to an existing install when it starts.
 2. **The app** watches that folder, and checks every 5 seconds. It reads the files and corrects states the hooks
    can't see:
    - removes sessions whose process has exited,

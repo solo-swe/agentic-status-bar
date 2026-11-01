@@ -52,7 +52,7 @@ func orderedJSONRejectsInvalidInput(_ text: String) {
 
 @Test func installAddsOneAsyncHookPerEvent() throws {
     let settings = HookSettings.install(.object([]), command: HookSettings.command(asb: "/a b/asb"))
-    #expect(HookSettings.count(settings) == 9)
+    #expect(HookSettings.count(settings) == 10)
     let hook = settings["hooks"]?["Stop"]?.arrayValue?.first?["hooks"]?.arrayValue?.first
     #expect(hook?["command"] == .string("'/a b/asb' hook # agentic-status-bar"))
     #expect(hook?["async"] == .bool(true) && hook?["timeout"] == .number("10") && hook?["type"] == .string("command"))
@@ -77,10 +77,10 @@ func orderedJSONRejectsInvalidInput(_ text: String) {
 
 @Test func installReplacesTheShellHooks() {
     let shell = HookSettings.install(.object([]), command: "'/repo/hooks/state-hook.sh' # swiftbar-claudecode-minimal")
-    #expect(HookSettings.count(shell, markers: [HookSettings.oldMarker]) == 9)
+    #expect(HookSettings.count(shell, markers: [HookSettings.oldMarker]) == 10)
     let swift = HookSettings.install(shell, command: "x # agentic-status-bar")
     #expect(HookSettings.count(swift, markers: [HookSettings.oldMarker]) == 0)
-    #expect(HookSettings.count(swift) == 9)
+    #expect(HookSettings.count(swift) == 10)
 }
 
 @Test func uninstallRestoresTheSettingsExactly() throws {
@@ -158,7 +158,7 @@ private struct Home {
     try home.installer().install()
     #expect(fm.isExecutableFile(atPath: home.stable))
     let settings = try home.readSettings()
-    #expect(HookSettings.count(settings) == 9)
+    #expect(HookSettings.count(settings) == 10)
     #expect(settings["hooks"]?["Stop"]?.arrayValue?.last?["hooks"]?.arrayValue?.first?["command"]
             == .string("'\(home.stable)' hook # agentic-status-bar"))
     #expect((try? fm.destinationOfSymbolicLink(atPath: home.link)) == nil)
@@ -174,6 +174,17 @@ private struct Home {
     #expect(!home.installer().hooksInstalled)
     #expect(!(try Home(settings: Data("not json".utf8))).installer().hooksInstalled)
     #expect(!(try Home()).installer().hooksInstalled)
+}
+
+@Test func hooksFromAVersionWithFewerEventsAreOutdatedUntilInstalledAgain() throws {
+    // As installed before PermissionRequest was one of the events.
+    var older = HookSettings.install(.object([]), command: "x # agentic-status-bar")
+    older["hooks"]?["PermissionRequest"] = nil
+    let home = try Home(settings: Data(older.serialized().utf8))
+    #expect(home.installer().hooksOutdated && !home.installer().hooksInstalled)
+    try home.installer().install()
+    #expect(!home.installer().hooksOutdated && home.installer().hooksInstalled)
+    #expect(!(try Home()).installer().hooksOutdated, "none installed is not outdated")
 }
 
 @Test func theStableCopyIsUpdatedWhenItDiffers() throws {
@@ -210,7 +221,7 @@ private struct Home {
 @Test func installCreatesASettingsFileWhenThereIsNone() throws {
     let home = try Home()
     try home.installer().install()
-    #expect(HookSettings.count(try home.readSettings()) == 9)
+    #expect(HookSettings.count(try home.readSettings()) == 10)
 }
 
 @Test func installRefusesToTouchAnInvalidSettingsFile() throws {
@@ -224,7 +235,7 @@ private struct Home {
 @Test func installWorksWithoutSwiftBar() throws {
     let home = try Home()
     try home.installer(swiftBarDir: nil).install()
-    #expect(HookSettings.count(try home.readSettings()) == 9)
+    #expect(HookSettings.count(try home.readSettings()) == 10)
     #expect(!FileManager.default.fileExists(atPath: home.swiftBar))
 }
 

@@ -60,10 +60,11 @@ public enum Checks {
 
     /// C4: a waiting session whose claude process has a child that started after the prompt
     /// appeared ran an approved tool, so it is busy since that child started. Claude Code starts a
-    /// `caffeinate` child at the start of every turn; it doesn't count.
+    /// `caffeinate` child at the start of every turn; it doesn't count. Nor does anything while a
+    /// subagent waits: the other agents' tools start children too.
     public static func approvedTools(_ sessions: [ReconciledSession], processes: [ProcessRecord]) -> [ReconciledSession] {
         sessions.map { session in
-            guard session.shown == "waiting", let pid = session.file.pid else { return session }
+            guard session.shown == "waiting", !session.file.subagentWaits, let pid = session.file.pid else { return session }
             let since = session.shownSince ?? session.file.stateSince ?? 0
             guard let started = childStarts(of: pid, in: processes, excluding: "caffeinate").filter({ $0 > since }).min()
             else { return session }

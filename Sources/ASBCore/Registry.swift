@@ -60,7 +60,8 @@ extension Checks {
             }
             guard let at = entry.statusUpdatedAt, at > (s.file.updatedAt ?? 0) else { return s }
             switch status {
-            case "busy", "idle":
+            // The registry speaks for the session's own agent; a waiting subagent still waits.
+            case "busy" where !s.file.subagentWaits, "idle" where !s.file.subagentWaits:
                 s.shown = status
                 s.shownSince = at
             case "waiting":

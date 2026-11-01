@@ -45,6 +45,8 @@ One JSON object per Claude Code session, on one line, named after the session ID
 | `promptPreview` | string | no | UserPromptSubmit | The first 80 characters of the last typed prompt, whitespace collapsed. Absent when `store_prompt_preview=0`. |
 | `promptAt` | integer, epoch ms | no | UserPromptSubmit | When the user last sent a prompt (not a background-task result). Lifts a mute on the project. |
 | `subagents` | object | no | SubagentStart, SubagentStop, Stop | Running subagents: `{ "<agent_id>": { "type": string, "since": epoch ms, "background": true } }`; `background` marks one Claude Code's task registry listed as a background task. Removed when empty |
+| `waitingAgents` | object | no | PermissionRequest, and the events that end a wait | The agents with a prompt open: `{ "<agent_id>": "permission" or "question" }`, `"main"` for the session's own agent. Removed when none waits (see Agents waiting on a prompt) |
+| `afterWaiting` | `"busy"`, `"idle"` | with `waitingAgents` | the same | The state the session goes back to once no agent waits |
 
 ¹ A file created by an early `SubagentStart` gets `state: "busy"`.
 ² Files written before `eventAt` existed lack it until their next write.
@@ -63,6 +65,7 @@ Example:
 | `UserPromptSubmit` | `state = "busy"`, drops `reason` and `message`. Sets `promptPreview` and `promptAt` unless the prompt starts with `<task-notification>` (a background-task result). With `store_prompt_preview=0`, drops `promptPreview`. |
 | `PreToolUse` | `state = "busy"`, drops `reason` and `message`, sets `lastTool`. |
 | `PostToolUse` | `state = "busy"`, drops `reason` and `message`. |
+| `PermissionRequest` | `waitingAgents[agent_id or "main"]` = `"question"` if `tool_name` is `AskUserQuestion`, else `"permission"`; `state = "waiting"` with that `reason`, drops `message`. When no agent was waiting yet, `afterWaiting` = the current state (`idle` stays `idle`, anything else is `busy`). |
 | `Notification` | `permission_prompt` → `waiting`, `reason` `"question"` if `lastTool` is `AskUserQuestion`, else `"permission"`, and `message`. `elicitation_dialog` → `waiting`, `"question"`, `message`. `idle_prompt` → `idle`, drops `reason` and `message`. Without `notification_type`, a message containing "needs your permission" counts as `permission_prompt` and "waiting for your input" as `idle_prompt`. Other types change nothing. |
 | `Stop` | `state = "idle"`, drops `reason` and `message`. With `background_tasks` (see Background subagents), `subagents` becomes exactly the running background subagents it lists. |
 | `SubagentStart` | Adds `subagents[agent_id] = {type (or "agent" when empty), since: now}` unless the agent is already listed (a resumed subagent keeps its entry); sets `state = "busy"` only if the file had none, or if it was `waiting` with `lastTool` `Agent` or `Task` and the agent is new (the approved tool started it; clears `reason` and `message`). Ignored without `agent_id`. |
@@ -81,6 +84,28 @@ killed with TaskStop, which fire no `SubagentStop`. Foreground subagents are nev
 them alone, and at `Stop` none can be running. An older `SubagentStop` (see Newer wins) only keeps or removes its own
 agent. Payloads without `background_tasks` (older Claude Code, or the registry wasn't reachable) use the plain
 add/remove rules.
+
+### Agents waiting on a prompt
+
+The session and its subagents share one `state`, and subagents run alongside the parent: while one waits on a
+permission prompt, the others keep firing tool events, the parent's turn can end (`Stop`), and other subagents'
+results arrive as `<task-notification>` prompts. `PermissionRequest` carries the waiting agent's `agent_id` (none for
+the session's own agent) and fires as the prompt appears; the `Notification` that follows has no `agent_id`. Nothing
+fires when the prompt is answered. So, while `waitingAgents` isn't empty, every event is applied first and then:
+
+- the agent's own event ends its wait: its `PreToolUse` or `PostToolUse` (approved, or denied and trying something
+  else), its `SubagentStop` (denied and finished); for the session's own agent, also a `SubagentStart` it approved with
+  the `Agent` or `Task` tool;
+- a prompt the user typed or a `SessionStart` (other than `compact`) ends every wait;
+- with `background_tasks`, a waiting subagent the registry no longer lists waits no more;
+- `PermissionRequest` and `Notification` end nothing; a `permission_prompt` or `elicitation_dialog` notification only
+  sets `message`;
+- if an agent still waits, `state` stays `"waiting"` with the `reason` of one still waiting (the first by key), and the
+  state the event set is kept as `afterWaiting`; if none does, `state` becomes the state the event set, or
+  `afterWaiting` if it set none, and `waitingAgents` and `afterWaiting` are dropped.
+
+Without `PermissionRequest` (hooks installed by an older version), `Notification` sets `waiting` as before and any
+later event ends it.
 
 ### Metadata
 

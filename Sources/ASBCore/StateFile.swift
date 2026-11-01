@@ -25,6 +25,12 @@ public struct StateFile: Equatable, Sendable {
     public var promptPreview: String?
     public var promptAt: Int64?
     public var subagents: [String: Subagent]
+    /// Agents with a prompt open: agent ID (`main` for the session's own agent) → reason.
+    public var waitingAgents: [String: String] = [:]
+
+    /// A subagent waits on a prompt: other agents keep working meanwhile, so their activity says
+    /// nothing about the wait.
+    public var subagentWaits: Bool { waitingAgents.keys.contains { $0 != HookEvents.mainAgent } }
 
     public struct Subagent: Equatable, Sendable {
         public var type: String
@@ -73,6 +79,9 @@ public struct StateFile: Equatable, Sendable {
                 s.subagents[id] = Subagent(
                     type: agent["type"] as? String ?? "agent", since: number(agent["since"]).map(Int64.init))
             }
+        }
+        if let waiting = object["waitingAgents"] as? [String: Any] {
+            s.waitingAgents = waiting.compactMapValues { $0 as? String }
         }
         return s
     }

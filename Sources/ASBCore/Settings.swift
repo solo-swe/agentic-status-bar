@@ -8,7 +8,7 @@ public enum HookSettings {
     /// The shell era's entries, replaced on install and removed on uninstall.
     public static let oldMarker = "# swiftbar-claudecode-minimal"
     public static let events = [
-        "SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "Notification", "Stop",
+        "SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "PermissionRequest", "Notification", "Stop",
         "SubagentStart", "SubagentStop", "SessionEnd",
     ]
 

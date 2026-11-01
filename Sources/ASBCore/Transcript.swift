@@ -86,6 +86,8 @@ extension Checks {
             else { return session }
             let entries = Transcript.tailEntries(transcript.contents)
             guard !entries.isEmpty, let end = Transcript.turnEnd(entries) else { return session }
+            // The parent's turn ends while its subagents run; only an interrupt stops a waiting one.
+            if session.file.subagentWaits && end != .interrupted { return session }
             var s = session
             s.shown = "idle"
             s.shownSince = s.file.updatedAt
