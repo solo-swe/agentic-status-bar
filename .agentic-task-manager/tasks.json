@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 141,
+    "next_id": 142,
     "workflow": {
       "type": "direct"
     },
@@ -248,6 +248,19 @@
         "state": "active",
         "goal": "Finish the companion check, fix subagents waiting on input, and decide on the two architecture proposals",
         "start": "2026-10-31T09:14:46Z"
+      },
+      {
+        "id": "Release v0.3.0",
+        "state": "planned",
+        "goal": "Ship the desktop companion and the waiting-state fixes as v0.3.0",
+        "release": "v0.3.0"
+      }
+    ],
+    "releases": [
+      {
+        "id": "v0.3.0",
+        "state": "planned",
+        "name": "Desktop companion"
       }
     ]
   },
@@ -6698,6 +6711,37 @@
       ],
       "completed_at": "2026-11-01T09:22:37Z",
       "completed_by": "claude:6baf63b2"
+    },
+    {
+      "id": "T-141",
+      "name": "Release: v0.3.0",
+      "type": "infra",
+      "priority": "P1",
+      "labels": [
+        "release"
+      ],
+      "description": "Release v0.3.0 following `doc/RELEASING.md` › Each release: the desktop companion (T-127–T-140), the lingering permission icon fix (T-125), a subagent waiting on a permission shows as waiting, with the new `PermissionRequest` hook added at launch (T-119, T-120), and the daylight-saving start-time fix.\n\n## Steps\n1. Set `ASBVersion.current` and `MARKETING_VERSION` to `0.3.0` (build number above 0.2.2's), and the README's build example.\n2. Checks, commit, push, CI.\n3. Tag `v0.3.0`, watch the release run.\n4. Check the draft (Gatekeeper, signatures, `SUFeedURL`, `SUPublicEDKey`, the appcast signature).\n5. The user publishes it as the latest release.\n6. Check the downloads without a login and the Homebrew workflow; an installed v0.2.2 should offer the update, and after updating the app adds the `PermissionRequest` hook.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "Sources/ASBCore/Version.swift",
+        "App/project.yml",
+        "README.md"
+      ],
+      "created_at": "2026-11-01T09:45:45Z",
+      "updated_at": "2026-11-01T09:45:45Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce",
+      "sprint_history": [
+        {
+          "sprint": "Release v0.3.0",
+          "from": "2026-11-01T09:45:45Z"
+        }
+      ],
+      "sprint": "Release v0.3.0",
+      "with": "user"
     }
   ]
 }
