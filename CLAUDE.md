@@ -22,15 +22,17 @@ SwiftUI app.
 
 ## Commands
 
-- `tests/swift.sh` (`--summary` for failures and totals only, `--filter X` for one suite): build the package and run
+The checks are mise tasks (`mise-tasks/`, see `doc/design/dev-tooling.md`); `mise tasks` lists them.
+
+- `mise run test` (`--summary` for failures and totals only, `--filter X` for one suite): build the package and run
   its tests.
-- `tests/app.sh --test`: generate the Xcode project, build the app and run its tests. `tests/app.sh --run [KEY=VALUE]`
-  builds and starts it (quitting a running copy first); `--quit` quits it.
-- `tests/lint.sh`: shellcheck on `tests/*.sh` and `scripts/*.sh`.
-- `tests/bench.sh`: `asb hook` under 10 ms, `asb snapshot` under 30 ms on 10 sessions. Run it after changing the hook
+- `mise run app:test`: generate the Xcode project, build the app and run its tests. `mise run app:run [KEY=VALUE]`
+  builds and starts it (quitting a running copy first); `mise run app:quit` quits it.
+- `mise run lint`: shellcheck on `mise-tasks/` and `scripts/`.
+- `mise run bench`: `asb hook` under 10 ms, `asb snapshot` under 30 ms on 10 sessions. Run it after changing the hook
   path.
 
-CI runs lint, `tests/swift.sh` and `tests/app.sh --test`. A change is done when all three pass locally.
+CI runs `lint`, `test` and `app:test`. A change is done when all three pass locally.
 
 ## How to work
 
@@ -84,8 +86,8 @@ Automate tests at every level that applies:
 - **Conformance cases** for anything the snapshot engine shows: a new case in `tests/conformance/` with its expected
   snapshot written by hand from the rules, never copied from the engine's output.
 - **Event-order tests** in `HookEventsTests` for hook behaviour, from the orders recorded in `tests/fixtures/`.
-- **Benchmarks**: `tests/bench.sh` for the hook and snapshot budgets.
+- **Benchmarks**: `mise run bench` for the hook and snapshot budgets.
 - **Coverage**: `ASBCore` and `asb` are to keep at least 99% line coverage. The gate is being added (T-147 to T-149);
   until then, new code comes with tests that cover it.
-- **Live checks** with the user in the dev build (`tests/app.sh --run`) for what tests can't see: windows, Spaces,
+- **Live checks** with the user in the dev build (`mise run app:run`) for what tests can't see: windows, Spaces,
   full screen, animation, real Claude Code sessions.

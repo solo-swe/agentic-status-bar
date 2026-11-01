@@ -1,7 +1,7 @@
 #!/bin/sh
+#MISE description="Time asb hook (under 10 ms) and asb snapshot on 10 sessions (under 30 ms)"
 # Times `asb hook` (median under 10 ms; the shell hook took 19 to 20 ms) and `asb snapshot`
 # on 10 sessions (under 30 ms). Exits 1 if a target is missed.
-# Run it with: tests/bench.sh
 
 cd "$(dirname "$0")/.." || exit 1
 repo="$(pwd)"

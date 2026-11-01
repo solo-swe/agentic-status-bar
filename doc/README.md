@@ -21,7 +21,7 @@ How code is written here, by area:
 | [guides/swift.md](guides/swift.md) | Swift in `ASBCore`, `asb` and the app |
 | [guides/app.md](guides/app.md) | The macOS app: AppKit, SwiftUI, Core Animation |
 | [guides/hook.md](guides/hook.md) | `asb hook` and the state files |
-| [guides/shell.md](guides/shell.md) | The scripts in `tests/` and `scripts/` |
+| [guides/shell.md](guides/shell.md) | The scripts in `mise-tasks/` and `scripts/` |
 
 ## Elsewhere
 

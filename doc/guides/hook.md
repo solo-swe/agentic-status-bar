@@ -8,7 +8,7 @@ stable copy of `asb` in `~/Library/Application Support/agentic-status-bar/bin/`,
 
 - **Silent and always exit 0.** No output, no error codes: a failing hook must never show up in a session. Bad input
   is dropped.
-- **Fast.** The hooks are async, but they run on every tool call: `asb hook` stays under 10 ms (`tests/bench.sh`). Do
+- **Fast.** The hooks are async, but they run on every tool call: `asb hook` stays under 10 ms (`mise run bench`). Do
   only what the event needs; expensive lookups, like the process table, happen only when a field is missing
   (`HookMetadata.needsBackfill`).
 - **Safe names.** The session ID becomes a file name only after `Actions.isSafeId`.

@@ -328,7 +328,7 @@ its valid values are in [state-file-schema.md › Config file](state-file-schema
 
 | Area | Requirement |
 | --- | --- |
-| Performance | `asb hook` under 10 ms; a snapshot under 30 ms for 10 sessions; one process-table read per snapshot, not one per session. `tests/bench.sh` checks both. |
+| Performance | `asb hook` under 10 ms; a snapshot under 30 ms for 10 sessions; one process-table read per snapshot, not one per session. `mise run bench` checks both. |
 | Reliability | Hooks never fail a Claude Code action: always exit 0, no output. Partial or corrupt state files are skipped, not fatal. Atomic writes only. |
 | Concurrency | One file per session, so sessions never contend. Async hooks of one session can race (e.g. `PreToolUse` and the permission `Notification` fire milliseconds apart, parallel subagents start together), so each write takes a short per-session `mkdir` lock and drops an event that started before the last one applied, except subagent events, which always merge. |
 | Privacy | Everything stays local. The state file stores at most an 80-character prompt preview and the notification message; `store_prompt_preview=0` turns the preview off. No network calls. |

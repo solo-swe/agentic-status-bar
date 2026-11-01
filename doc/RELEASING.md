@@ -142,7 +142,7 @@ Once the secrets are set, delete the exported `.p12` and `.p8` from your disk an
 
 1. Set the version: `ASBVersion.current` in `Sources/ASBCore/Version.swift` and `MARKETING_VERSION` in
    `App/project.yml`, and the version in the README's build-it-yourself example.
-2. Run the checks (`swift test`, `tests/app.sh --test`, `tests/lint.sh`), commit, push, and wait for CI.
+2. Run the checks (`mise run test`, `mise run app:test`, `mise run lint`), commit, push, and wait for CI.
 3. Tag and push the tag: `git tag -a v0.3.0 -m v0.3.0 && git push origin v0.3.0`.
 4. Watch the release run (`gh run list --workflow release.yml`, `gh run watch <id>`). It drafts the release.
 5. Check the draft (Checking a release, below) and edit its notes; they're generated from the commits.

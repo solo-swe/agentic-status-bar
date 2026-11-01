@@ -22,7 +22,7 @@ official docs or a local test.
 No tty is recorded. `proc_pidinfo(PROC_PIDTBSDINFO)`, which the inspector already calls, also returns the
 controlling terminal (`e_tdev`), so the tty is free to add.
 
-The hook must stay under 10 ms median (`tests/bench.sh`), print nothing and always exit 0
+The hook must stay under 10 ms median (`mise run bench`), print nothing and always exit 0
 (doc/state-file-schema.md › Writer rules).
 
 ### What a click does
@@ -551,7 +551,7 @@ Inside `HookMetadata.gather`, only on `SessionStart` and backfill, as today:
 4. Write `focus` (below). Keep writing `herdrPane` and `termBundleId` for older readers.
 
 No subprocess, no socket, no network. The extra cost is a few `proc_pidinfo` calls and dictionary lookups;
-`tests/bench.sh` must stay under 10 ms.
+`mise run bench` must stay under 10 ms.
 
 ### State file additions (schema v1, optional field)
 
@@ -685,7 +685,7 @@ Testing. What they cover:
 - **Detection:** fixtures of environment dumps per setup (`tests/fixtures/env/*.json`: iTerm2, Terminal,
   Ghostty, kitty with and without `KITTY_LISTEN_ON`, WezTerm, tmux-in-iTerm2, herdr-in-Ghostty, VS Code), with
   invented values, plus `FakeProcessInspector` ancestor chains. `HookMetadata.gather` → expected `focus` JSON.
-- **Hook budget:** `tests/bench.sh` unchanged target (10 ms); add an environment with several layers.
+- **Hook budget:** `mise run bench` unchanged target (10 ms); add an environment with several layers.
 - **Actions:** `FakeRunner` with scripted output (a new `capture` method) for `tmux list-clients` and friends;
   expected command lists per chain, including failures in the middle. `ASB_<TOOL>` overrides as `ASB_HERDR`.
 - **Safety:** unsafe values in every field (`; rm`, newlines, relative paths) produce no command; AppleScript IDs
@@ -738,9 +738,9 @@ switching it on. Slices don't depend on each other except where noted, so they c
 | 16 | Snapshot `focus {level, via}`; `focusable` from it; conformance cases for old and new state files | feature | `Sources/ASBCore/Snapshot.swift`, `Sources/ASBCore/MenuModel.swift`, `tests/conformance/` | 13, 8 |
 | 17 | Document `focus` in both schemas | docs | `doc/state-file-schema.md`, `doc/snapshot-schema.md` | 12, 16 |
 | 18 | Environment fixtures (invented values) for each setup; detection tests from them | test | `tests/fixtures/env/`, `tests/ASBCoreTests/Focus/FocusDetectorTests.swift` | 11 |
-| 19 | Keep the hook under 10 ms with a multi-layer environment (`tests/bench.sh`) | test | `tests/bench.sh` | 12 |
+| 19 | Keep the hook under 10 ms with a multi-layer environment (`mise run bench`) | test | `mise-tasks/bench.sh` | 12 |
 | 20 | Integration test setup: the `.integration` tag, `ASB_INTEGRATION=1`, skipping when a tool is missing; a CI job | infra | `tests/Integration/`, `Package.swift`, `.github/workflows/ci.yml` | – |
-| 21 | Coverage report for `Sources/ASBCore/Focus/` (`swift test --enable-code-coverage`), 90% lines | infra | `tests/swift.sh` | 14 |
+| 21 | Coverage report for `Sources/ASBCore/Focus/` (`swift test --enable-code-coverage`), 90% lines | infra | `mise-tasks/coverage.sh` | 14 |
 
 **B. App raise for every terminal** (the `app` level; no permission)
 

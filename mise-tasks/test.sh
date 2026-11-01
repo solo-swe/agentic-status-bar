@@ -1,7 +1,7 @@
 #!/bin/sh
-# Build the Swift package and run its tests. Extra arguments are passed to `swift test`
-# (e.g. --filter ConfigTests).
-# tests/swift.sh --summary prints only build errors, failed checks and the totals.
+#MISE description="Build the Swift package and run its tests (--summary: failures and totals only)"
+# Extra arguments are passed to `swift test` (e.g. --filter ConfigTests).
+# --summary prints only build errors, failed checks and the totals.
 cd "$(dirname "$0")/.." || exit 1
 
 if [ "${1:-}" = "--summary" ]; then

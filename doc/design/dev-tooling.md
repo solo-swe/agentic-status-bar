@@ -1,6 +1,7 @@
 # Developer tooling: mise for tools and tasks
 
-Status (2026-11-01): **decided**; the tools and Xcode are pinned (T-152), the tasks are next (sprint Quality).
+Status (2026-11-01): **built** for the tools, Xcode and the checks (T-152, T-153); the `check` task and the release
+tasks are next.
 
 ## Decisions
 
@@ -10,9 +11,11 @@ Status (2026-11-01): **decided**; the tools and Xcode are pinned (T-152), the ta
    `min_version` in `mise.toml` and the action's `version` pin mise itself.
 2. **mise runs the tasks.** The scripts become mise file tasks in `mise-tasks/`, and `mise run <task>` is the one way
    to run a check, locally, in CI and for agents. `mise tasks` lists them with their descriptions.
-3. **The scripts stay POSIX `sh`.** A file task is an executable script with `#MISE` and `#USAGE` header comments;
-   mise drops the `.sh` from the name (`mise-tasks/lint.sh` is `lint`, `mise-tasks/app/test.sh` is `app:test`). They
-   stay shellcheck clean and run directly too. Nothing is rewritten.
+3. **The scripts stay POSIX `sh`.** A file task is an executable script with a `#MISE description` header; mise
+   drops the `.sh` from the name (`mise-tasks/lint.sh` is `lint`, `mise-tasks/app/test.sh` is `app:test`). Arguments
+   after the task name reach the script unchanged (`mise run test --summary --filter X`), so the scripts parse their
+   own; `#USAGE` specs are left out, since they would reject arguments meant for `swift test`. They stay shellcheck
+   clean and run directly too. Nothing is rewritten.
 4. **Xcode is pinned too.** A committed `.xcode-version` names the Xcode CI selects, instead of the newest one on the
    runner. mise doesn't manage Xcode or the Swift toolchain on macOS.
 5. **Only development changes.** Users install the app as before; the PRD's "no Homebrew" is about running the app.
@@ -47,7 +50,7 @@ and each script checks for its own tools.
 | Task | File | Was |
 | --- | --- | --- |
 | `lint` | `mise-tasks/lint.sh` | `tests/lint.sh` |
-| `test` | `mise-tasks/test.sh` (`--summary`, `--filter <suite>`) | `tests/swift.sh` |
+| `test` | `mise-tasks/test.sh` (`--summary`; other arguments go to `swift test`) | `tests/swift.sh` |
 | `app:build`, `app:test`, `app:run`, `app:quit` | `mise-tasks/app/*.sh` (shared code in a non-executable `mise-tasks/app/lib.sh`) | `tests/app.sh` and its flags |
 | `bench` | `mise-tasks/bench.sh` | `tests/bench.sh` |
 | `coverage` | `mise-tasks/coverage.sh` | new (T-147) |

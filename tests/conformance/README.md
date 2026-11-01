@@ -82,4 +82,4 @@ Nothing else is ever skipped.
 
 1. Create the directory and the input files.
 2. Write `expected.json` by hand from the rules in the PRD and the schema docs (not by copying the engine's output).
-3. Run `tests/swift.sh --filter Conformance`.
+3. Run `mise run test --filter Conformance`.

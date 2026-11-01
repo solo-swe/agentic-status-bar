@@ -41,5 +41,5 @@ Xcode project is generated from `App/project.yml` (XcodeGen) and isn't committed
 - Test view models and pure functions directly. For AppKit, test what can be checked without a screen: window style
   masks and collection behavior, frames from given screen rects, hit areas, the layer tree a pose produces.
 - What only a person can see (placement on real displays, Spaces, full screen, Stage Manager, animation feel) is a
-  live check with the user in the dev build: `tests/app.sh --run`, with `ASB_STATE_DIR` and `ASB_CONFIG` pointing at
+  live check with the user in the dev build: `mise run app:run`, with `ASB_STATE_DIR` and `ASB_CONFIG` pointing at
   scratch fixtures when a specific state is needed.

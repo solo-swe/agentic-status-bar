@@ -519,7 +519,7 @@ folders, which is why the extension route is preferred. Cursor: register only on
 | --- | --- | --- |
 | Formats churn (CLIs release weekly; opencode 2.x, Codex `notify` slated for removal, Gemini to Antigravity) | A provider silently stops reporting | Fixtures of real payloads per agent and version in `tests/fixtures/<agent>/`; lenient parsing (unknown events ignored); C5 bounds the damage; Settings shows "installed" from the config file, not from events |
 | Another agent runs our Claude Code hook (Cursor import, Copilot repo hooks) | Wrong or duplicate rows | `--agent` on every non-Claude command; the `CURSOR_VERSION` guard |
-| Hook budget: Codex starts a login shell, Gemini and Aider wait for the hook | The user feels a slower agent | `asb hook` stays under 10 ms (`tests/bench.sh` per provider); no process walk except at session start or backfill, as today; plugins don't wait for `asb` |
+| Hook budget: Codex starts a login shell, Gemini and Aider wait for the hook | The user feels a slower agent | `asb hook` stays under 10 ms (`mise run bench` per provider); no process walk except at session start or backfill, as today; plugins don't wait for `asb` |
 | Output where none is allowed (Gemini shows it, Codex feeds it to the model, Copilot fails closed, Cursor blocks on bad JSON) | Visible noise, or blocked tools | No output, exit 0, as today; no registration on events that need a reply; a test per provider that runs `asb hook` and checks empty stdout and stderr |
 | Privacy: payloads carry prompts, tool input, the last assistant message, Cursor's `user_email` | Data on disk | Keep only what today keeps (an 80-character preview, the notification text); never log payloads; `store_prompt_preview=0` applies to every provider |
 | Install damages a user's config (TOML, YAML, JSONC, trust keys by position) | Lost settings or untrusted hooks | Back up first; only JSON files and files of our own in the first steps; append, never insert; never touch a file that doesn't parse |
@@ -578,7 +578,7 @@ Each task fits in under 10 minutes for an agent, keeps the suite green, and list
 | 34 | Copilot integration: write and remove `~/.copilot/hooks/asb.json` | feature | `Sources/ASBCore/Providers/Copilot.swift` | 22, 33 |
 | 35 | opencode 1.x plugin file: send `session.status`, `permission.*`, `question.*`, `session.idle`, `session.deleted` to `asb hook --events`, silently | feature | `Sources/ASBCore/Resources/opencode-plugin.js` | 15 |
 | 36 | `OpencodeProvider` (process `opencode`; checks C1, C4, C5) and its integration (write and remove the plugin file) | feature | `Sources/ASBCore/Providers/Opencode.swift` | 22, 35 |
-| 37 | Bench: `asb hook` per provider stays under 10 ms; empty stdout and stderr | test | `tests/bench.sh`, tests | 18, 33 |
+| 37 | Bench: `asb hook` per provider stays under 10 ms; empty stdout and stderr | test | `mise-tasks/bench.sh`, tests | 18, 33 |
 | 38 | PRD and README: agents supported, what each can show | docs | `doc/PRD.md`, `README.md` | 30 |
 
 Later steps (Gemini extension, Cursor, Amp, the Qwen/Kimi/Crush/Factory tables) follow the same pattern: a fixture

@@ -4,22 +4,24 @@
 
 - macOS 14 or later, and the Xcode named in `.xcode-version` (CI builds with that one)
 - [mise](https://mise.jdx.dev) for the other tools, at the versions in `mise.toml` (XcodeGen for the app, shellcheck
-  for `tests/lint.sh`): `brew install mise`, then `mise trust` and `mise install` in the clone
+  for linting): `brew install mise`, then `mise trust` and `mise install` in the clone
 
 ## Checks
 
+The checks are mise tasks, scripts in `mise-tasks/` (`mise tasks` lists them):
+
 ```sh
-tests/swift.sh             # build the Swift package and run its tests (or: tests/swift.sh --filter ConfigTests)
-tests/swift.sh --summary   # the same, printing only failures and totals
-tests/app.sh --test        # generate the app's Xcode project, build it and run the app's tests
-tests/lint.sh              # shellcheck on the shell scripts (tests/*.sh, scripts/*.sh)
-tests/bench.sh             # timing: asb hook < 10 ms, asb snapshot < 30 ms on 10 sessions
+mise run test              # build the Swift package and run its tests (or: mise run test --filter ConfigTests)
+mise run test --summary    # the same, printing only failures and totals
+mise run app:test          # generate the app's Xcode project, build it and run the app's tests
+mise run lint              # shellcheck on the shell scripts (mise-tasks/, scripts/)
+mise run bench             # timing: asb hook < 10 ms, asb snapshot < 30 ms on 10 sessions
 ```
 
-CI runs the same commands, in three jobs: lint, the Swift package, and the app. Tests run in a temporary `HOME`, so
+CI runs the same tasks, in three jobs: lint, the Swift package, and the app. Tests run in a temporary `HOME`, so
 they never touch your real `~/.claude` or config.
 
-The hook runs on every tool call of every session; run `tests/bench.sh` after changing it.
+The hook runs on every tool call of every session; run `mise run bench` after changing it.
 
 ## Layout
 
@@ -31,6 +33,7 @@ The hook runs on every tool call of every session; run `tests/bench.sh` after ch
 | `tests/ASBCoreTests/` | Swift Testing tests for `ASBCore` |
 | `tests/conformance/` | The snapshot engine's behavior as data: input files and the expected snapshot (see its README) |
 | `tests/fixtures/` | Captured Claude Code hook payloads and transcripts (see its README) |
+| `mise.toml`, `mise-tasks/` | The pinned development tools and the checks as mise tasks (`doc/design/dev-tooling.md`) |
 | `scripts/package.sh`, `appcast.sh`, `homebrew-cask.sh` | Build, sign, notarize and package a release; its update feed; its Homebrew cask (see `doc/RELEASING.md`) |
 | `doc/README.md` | Index of the documents |
 | `doc/guides/` | How code is written here: Swift, the app, the hook, shell scripts |
@@ -46,14 +49,14 @@ their own tests.
 
 ## The app
 
-The app's Xcode project is generated from `App/project.yml` and isn't committed. `tests/app.sh` generates it; then
+The app's Xcode project is generated from `App/project.yml` and isn't committed. `mise run app:build` generates it; then
 open `App/AgenticStatusBar.xcodeproj` to work in Xcode. A build copies a release build of `asb` into
 `Contents/Helpers`, which the app installs for the hooks. Builds land in `.build/xcode`.
 
 ```sh
-tests/app.sh --run                          # build and start it (quitting a running copy first)
-tests/app.sh --run ASB_SETTINGS=/tmp/s.json # with environment overrides, e.g. a scratch settings file
-tests/app.sh --quit                         # quit it
+mise run app:run                            # build and start it (quitting a running copy first)
+mise run app:run ASB_SETTINGS=/tmp/s.json   # with environment overrides, e.g. a scratch settings file
+mise run app:quit                           # quit it
 ```
 
 Environment overrides, for the app and `asb`: `ASB_STATE_DIR`, `ASB_CONFIG`, `ASB_REGISTRY_DIR`, `ASB_SETTINGS`
