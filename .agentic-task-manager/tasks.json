@@ -7601,7 +7601,7 @@
       "description": "Enforce the 99% line coverage of `ASBCore` and `asb` in CI. The CI workflow is the user's to approve, so this is done with the user.\n\n## Change\n- Run `mise run coverage` in the `swift` job of `.github/workflows/ci.yml`, so the job fails below 99%.\n- Add to `CLAUDE.md` › Testing: *ASBCore and asb keep at least 99% line coverage. A change is done when `mise run check`, coverage included, passes.*\n\n## Done when\nThe user approved the workflow change, it is pushed, and the CI run is green with the gate in place.\n",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-148"
       ],
@@ -7610,7 +7610,7 @@
         "CLAUDE.md"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-02T01:40:05Z",
+      "updated_at": "2026-11-02T01:43:45Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "with": "user",
@@ -7627,7 +7627,17 @@
       "sprint": "Quality",
       "started_at": "2026-11-02T01:36:42Z",
       "started_by": "claude:5f67a194",
-      "commit": "634fa1df0046da831054a7a5f1cd5be48a60630f"
+      "commit": "634fa1df0046da831054a7a5f1cd5be48a60630f",
+      "completed_at": "2026-11-02T01:43:45Z",
+      "completed_by": "claude:5f67a194",
+      "notes": [
+        {
+          "at": "2026-11-02T01:43:45Z",
+          "kind": "outcome",
+          "text": "Approved by the user; `mise run coverage` runs in the `swift` job. CI run 41373728179 is green, the first run of the mise setup too.",
+          "by": "claude:5f67a194"
+        }
+      ]
     },
     {
       "id": "T-150",
@@ -7947,14 +7957,14 @@
       "description": "The Swift guide (`doc/guides/swift.md`) allows no force unwraps outside tests. Two are left:\n\n- `Theme.resolve` in `Sources/ASBCore/Themes.swift` reads `builtIn[\"default\"]!`. Make the default theme a value of its own (a `static let`), so the lookup can't fail and needs no unwrap.\n- `CompanionWindow.halo` in `App/Sources/CompanionWindow.swift` force unwraps a `CGColorSpace(...)`. Use a fallback that can't fail, or `guard` and skip the halo.\n\nBehaviour stays the same.\n\n## Tests\nThe existing theme and companion window tests pass. `mise run coverage` stays at 99% or above.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/Themes.swift",
         "App/Sources/CompanionWindow.swift"
       ],
       "created_at": "2026-11-02T01:34:48Z",
-      "updated_at": "2026-11-02T01:40:56Z",
+      "updated_at": "2026-11-02T01:42:11Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "sprint_history": [
@@ -7970,7 +7980,18 @@
         "app"
       ],
       "started_at": "2026-11-02T01:40:56Z",
-      "started_by": "claude:5f67a194"
+      "started_by": "claude:5f67a194",
+      "commit": "42e987c7407aa4a0de336d878e038ab3a6a09712",
+      "completed_at": "2026-11-02T01:42:11Z",
+      "completed_by": "claude:5f67a194",
+      "notes": [
+        {
+          "at": "2026-11-02T01:42:11Z",
+          "kind": "outcome",
+          "text": "A `Theme.standard` constant replaces the `builtIn[\"default\"]!` lookup; `halo` handles a missing sRGB space with `flatMap`, as it already did a failed conversion. `AboutPanel.projectURL` still force unwraps a URL literal (not named in the task).",
+          "by": "claude:5f67a194"
+        }
+      ]
     },
     {
       "id": "T-158",
@@ -7983,14 +8004,14 @@
       "description": "`SessionStore` (`App/Sources/SessionStore.swift`) watches the `state_dir` it found at start. If the config file changes `state_dir`, the app keeps reading the old directory until it is restarted.\n\n## First\nCheck the PRD and the config docs for what a config change is meant to do while the app runs. If they don't settle it for `state_dir`, block on the user (`atm block --on user`) and don't guess.\n\n## Change\nWhen the config is reloaded with a different `state_dir`, stop watching the old directory and watch the new one. Take a snapshot from the new directory right away.\n\n## Tests\nAn app test with a temporary `HOME` and the `ASB_*` overrides. It changes `state_dir` in the config and checks that sessions in the new directory show and those in the old one don't.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "App/Sources/SessionStore.swift",
         "App/Tests/StoreActionTests.swift"
       ],
       "created_at": "2026-11-02T01:34:48Z",
-      "updated_at": "2026-11-02T01:34:55Z",
+      "updated_at": "2026-11-02T01:43:36Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "sprint_history": [
@@ -8002,7 +8023,9 @@
       "sprint": "Quality",
       "components": [
         "app"
-      ]
+      ],
+      "started_at": "2026-11-02T01:43:36Z",
+      "started_by": "claude:5f67a194"
     },
     {
       "id": "T-159",

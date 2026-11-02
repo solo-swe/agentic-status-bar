@@ -18,6 +18,8 @@ final class SessionStore {
     @ObservationIgnored private let live: LiveInputs
     @ObservationIgnored private var coalescer: Coalescer?
     @ObservationIgnored private var watchers: [DirectoryWatcher] = []
+    /// The state dir the watchers follow; a config that moves it moves them too.
+    @ObservationIgnored private(set) var watchedStateDir: String?
     @ObservationIgnored private var timer: Timer?
     @ObservationIgnored private var computing = false
     @ObservationIgnored private var again = false
@@ -40,7 +42,7 @@ final class SessionStore {
     func start() {
         let coalescer = Coalescer(interval: Self.coalesceInterval) { [weak self] in self?.recompute() }
         self.coalescer = coalescer
-        watch()
+        watch(Config.load(live.paths))
         timer = Timer.scheduledTimer(withTimeInterval: Self.refreshInterval, repeats: true) { _ in
             MainActor.assumeIsolated { coalescer.trigger() }
         }
@@ -77,9 +79,10 @@ final class SessionStore {
         }
     }
 
-    private func watch() {
-        let config = Config.load(live.paths)
+    private func watch(_ config: Config) {
         let stateDir = live.paths.stateDir(config: config)
+        guard stateDir != watchedStateDir else { return }
+        watchedStateDir = stateDir
         try? FileManager.default.createDirectory(atPath: stateDir, withIntermediateDirectories: true)
         let dirs = [stateDir, live.paths.registryDir, (live.paths.configFile as NSString).deletingLastPathComponent]
         watchers = dirs.compactMap { dir in
@@ -101,6 +104,7 @@ final class SessionStore {
                 guard let self else { return }
                 self.snapshot = result.snapshot
                 self.config = config
+                self.watch(config)
                 self.computing = false
                 if self.again {
                     self.again = false
