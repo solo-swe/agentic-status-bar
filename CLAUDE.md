@@ -24,7 +24,7 @@ SwiftUI app.
 
 The checks are mise tasks (`mise-tasks/`, see `doc/design/dev-tooling.md`); `mise tasks` lists them.
 
-- `mise run check`: every check CI runs (lint, the package tests and the app tests), in parallel.
+- `mise run check`: every check CI runs (lint, the package tests, their coverage and the app tests), in parallel.
 - `mise run test` (`--summary` for failures and totals only, `--filter X` for one suite): build the package and run
   its tests.
 - `mise run app:test`: generate the Xcode project, build the app and run its tests. `mise run app:run [KEY=VALUE]`
@@ -35,7 +35,7 @@ The checks are mise tasks (`mise-tasks/`, see `doc/design/dev-tooling.md`); `mis
 - `mise run bench`: `asb hook` under 10 ms, `asb snapshot` under 30 ms on 10 sessions. Run it after changing the hook
   path.
 
-CI runs `lint`, `test` and `app:test`. A change is done when `mise run check` passes locally.
+CI runs `lint`, `test`, `coverage` and `app:test`. A change is done when `mise run check` passes locally.
 
 ## How to work
 
@@ -90,7 +90,7 @@ Automate tests at every level that applies:
   snapshot written by hand from the rules, never copied from the engine's output.
 - **Event-order tests** in `HookEventsTests` for hook behaviour, from the orders recorded in `tests/fixtures/`.
 - **Benchmarks**: `mise run bench` for the hook and snapshot budgets.
-- **Coverage**: `ASBCore` and `asb` are to keep at least 99% line coverage. The gate is being added (T-147 to T-149);
-  until then, new code comes with tests that cover it.
+- **Coverage**: `ASBCore` and `asb` keep at least 99% line coverage; `mise run coverage` fails below it, in CI and
+  in `mise run check`. New code comes with tests that cover it.
 - **Live checks** with the user in the dev build (`mise run app:run`) for what tests can't see: windows, Spaces,
   full screen, animation, real Claude Code sessions.

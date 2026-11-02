@@ -7601,7 +7601,7 @@
       "description": "Enforce the 99% line coverage of `ASBCore` and `asb` in CI. The CI workflow is the user's to approve, so this is done with the user.\n\n## Change\n- Run `mise run coverage` in the `swift` job of `.github/workflows/ci.yml`, so the job fails below 99%.\n- Add to `CLAUDE.md` › Testing: *ASBCore and asb keep at least 99% line coverage. A change is done when `mise run check`, coverage included, passes.*\n\n## Done when\nThe user approved the workflow change, it is pushed, and the CI run is green with the gate in place.\n",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-148"
       ],
@@ -7610,7 +7610,7 @@
         "CLAUDE.md"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T22:14:01Z",
+      "updated_at": "2026-11-02T01:36:42Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "with": "user",
@@ -7624,7 +7624,9 @@
           "from": "2026-11-01T21:20:28Z"
         }
       ],
-      "sprint": "Quality"
+      "sprint": "Quality",
+      "started_at": "2026-11-02T01:36:42Z",
+      "started_by": "claude:5f67a194"
     },
     {
       "id": "T-150",

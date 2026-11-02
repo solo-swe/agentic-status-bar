@@ -41,6 +41,9 @@ jobs:
       - name: Build and test
         run: mise run test
 
+      - name: Line coverage of ASBCore and asb (at least 99%)
+        run: mise run coverage
+
   app:
     runs-on: macos-latest
     steps:
