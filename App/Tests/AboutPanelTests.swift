@@ -16,6 +16,8 @@ final class AboutPanelTests: XCTestCase {
         let credits = AboutPanel.credits()
         let range = (credits.string as NSString).range(of: "github.com/solo-swe/agentic-status-bar")
         XCTAssertNotEqual(range.location, NSNotFound)
-        XCTAssertEqual(credits.attribute(.link, at: range.location, effectiveRange: nil) as? URL, AboutPanel.projectURL)
+        XCTAssertEqual(
+            (credits.attribute(.link, at: range.location, effectiveRange: nil) as? URL)?.absoluteString,
+            "https://github.com/solo-swe/agentic-status-bar")
     }
 }
