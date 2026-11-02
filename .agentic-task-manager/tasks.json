@@ -8141,7 +8141,7 @@
       "description": "Small leftovers found during the comment cleanup:\n\n- `Moves.resting` (`App/Sources/Companion/Moves.swift`) takes a parameter `s` it never uses. Drop it and update the callers.\n- `App/Sources/Companion/StickFigureLayer.swift` holds the `StickFigure` class. Rename the file to `StickFigure.swift` (and the test file too if it follows that name). Run `xcodegen` through `mise run app:test`.\n- `Sources/ASBCore/Processes.swift` still mentions bats, which the project no longer uses. Fix the comment.\n- `Config.instantRefresh` (`Sources/ASBCore/Config.swift`) is parsed but nothing reads it. Config keys never change, so the key stays readable. Check the PRD and the config docs: if they promise a behaviour for it, that's a missing feature, so block on the user (`atm block --on user`). If they don't mention it, ask the same way before removing the property.\n\n## Tests\n`mise run check` passes. Coverage stays at 99% or above.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "App/Sources/Companion/Moves.swift",
@@ -8150,7 +8150,7 @@
         "Sources/ASBCore/Config.swift"
       ],
       "created_at": "2026-11-02T01:34:48Z",
-      "updated_at": "2026-11-02T01:47:20Z",
+      "updated_at": "2026-11-02T01:54:51Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "sprint_history": [
@@ -8166,7 +8166,18 @@
         "app"
       ],
       "started_at": "2026-11-02T01:47:20Z",
-      "started_by": "claude:5f67a194"
+      "started_by": "claude:5f67a194",
+      "commit": "f8585ce2ed0646f920cb20780b31e4c1fc146e13",
+      "completed_at": "2026-11-02T01:54:51Z",
+      "completed_by": "claude:5f67a194",
+      "notes": [
+        {
+          "at": "2026-11-02T01:54:51Z",
+          "kind": "outcome",
+          "text": "Dropped `Moves.resting`’s unused parameter; renamed `StickFigureLayer.swift` to `StickFigure.swift` (the test file already matched); the `Processes.swift` comment no longer mentions bats. `Config.instantRefresh` stays, by the user’s decision: the schema doc already lists it as read but unused.",
+          "by": "claude:5f67a194"
+        }
+      ]
     },
     {
       "id": "T-162",
@@ -8179,14 +8190,14 @@
       "description": "Two app tests don't check enough:\n\n- `testReachingPutsTheHandsOnTheTarget` (`App/Tests/StickFigureTests.swift`) checks where the hands end up but not which side the elbows bend to. Add that check, using the side the rig is meant to bend to (`App/Sources/Companion/Pose.swift`).\n- `NotificationRules` (`App/Sources/NotificationRules.swift`) tells stretches apart by their `since`. No test covers a session that was notified while waiting, went busy, and was waiting again with a new `since` before any busy snapshot was evaluated. Add a test to `App/Tests/NotificationRulesTests.swift` that checks:\n  - the old notification is cleared;\n  - the new stretch notifies once its delay has passed.\n\nThese are test-only changes. If either test shows the code is wrong, fix the code in the same task and say so in the note.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "App/Tests/StickFigureTests.swift",
         "App/Tests/NotificationRulesTests.swift"
       ],
       "created_at": "2026-11-02T01:34:48Z",
-      "updated_at": "2026-11-02T01:34:57Z",
+      "updated_at": "2026-11-02T01:54:52Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "sprint_history": [
@@ -8199,7 +8210,9 @@
       "components": [
         "companion",
         "app"
-      ]
+      ],
+      "started_at": "2026-11-02T01:54:52Z",
+      "started_by": "claude:5f67a194"
     }
   ]
 }

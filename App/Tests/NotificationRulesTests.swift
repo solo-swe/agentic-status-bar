@@ -42,6 +42,18 @@ final class NotificationRulesTests: XCTestCase {
         XCTAssertEqual(again.alerts.map(\.sessionId), ["a"], "waiting again is a new stretch and a new notification")
     }
 
+    func testWaitingAgainWithoutASnapshotInBetweenIsANewStretch() {
+        var rules = NotificationRules()
+        _ = rules.evaluate(snapshot(session("a", .waiting, since: 0)), now: 20_000, options: defaults)
+        // The session went busy and back to waiting between two snapshots: only `since` shows it.
+        let again = snapshot(session("a", .waiting, since: 30_000))
+        let early = rules.evaluate(again, now: 31_000, options: defaults)
+        XCTAssertEqual(early.cleared, ["a"], "the first stretch's notification is out of date")
+        XCTAssertEqual(early.alerts, [])
+        XCTAssertEqual(early.nextDue, 40_000)
+        XCTAssertEqual(rules.evaluate(again, now: 40_000, options: defaults).alerts.map(\.sessionId), ["a"])
+    }
+
     func testWaitingBreaksThroughMutesButIdleDoesNot() {
         var options = defaults
         options.idle = true

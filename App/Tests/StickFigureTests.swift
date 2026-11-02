@@ -170,10 +170,17 @@ final class StickFigureTests: XCTestCase {
                 XCTAssertEqual(p.handFront.x, target.x, accuracy: 0.01)
                 XCTAssertEqual(p.handFront.y, target.y, accuracy: 0.01)
                 XCTAssertEqual(p.handBack.x, target.x, accuracy: 0.01)
+                XCTAssertEqual(p.handBack.y, target.y, accuracy: 0.01)
                 // Elbows behind put the front elbow further back than elbows in front do.
-                let side = (target.x - neck.x) * (p.elbowFront.y - neck.y) - (target.y - neck.y) * (p.elbowFront.x - neck.x)
                 let other = s.points(s.reaching(.standing, hand: target, elbowsBehind: !behind, backOffset: 0)).elbowFront
-                XCTAssertEqual(behind, p.elbowFront.x <= other.x + 0.001, "side \(side)")
+                XCTAssertEqual(behind, p.elbowFront.x <= other.x + 0.001)
+                // The two choices bend the arm to opposite sides of the line from the shoulder to the hand.
+                func side(_ elbow: CGPoint) -> CGFloat {
+                    (target.x - neck.x) * (elbow.y - neck.y) - (target.y - neck.y) * (elbow.x - neck.x)
+                }
+                XCTAssertGreaterThan(abs(side(p.elbowFront)), 1, "the arm bends at the elbow, for \(target)")
+                XCTAssertNotEqual(side(p.elbowFront) > 0, side(other) > 0, "for \(target)")
+                XCTAssertEqual(p.elbowBack.x, p.elbowFront.x, accuracy: 0.01, "with no offset, both arms bend alike")
             }
         }
     }
