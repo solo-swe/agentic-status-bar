@@ -8,19 +8,22 @@ public struct Theme: Equatable, Sendable {
     /// The color pair for `state`; "" when the theme has none.
     public func color(_ state: String) -> String { colors[state] ?? "" }
 
+    /// The `default` theme, also used for unknown theme names.
+    public static let standard = Theme(
+        icons: [
+            "waiting": "exclamationmark.circle.fill", "idle": "zzz", "uncertain": "questionmark.circle",
+            "busy": "sparkle", "subagents": "hourglass", "muted": "bell.slash", "none": "sparkle",
+            "warning": "exclamationmark.triangle",
+        ],
+        colors: [
+            "waiting": "#D70015,#FF453A", "idle": "#B25000,#FFD60A", "uncertain": "#8E8E93,#98989D",
+            "busy": "#6E6E73,#AEAEB2", "subagents": "#6E6E73,#AEAEB2", "muted": "#8E8E93,#98989D",
+            "none": "#C7C7CC,#48484A", "warning": "#B25000,#FFD60A",
+        ])
+
     /// The built-in themes by their `theme` config value.
     public static let builtIn: [String: Theme] = [
-        "default": Theme(
-            icons: [
-                "waiting": "exclamationmark.circle.fill", "idle": "zzz", "uncertain": "questionmark.circle",
-                "busy": "sparkle", "subagents": "hourglass", "muted": "bell.slash", "none": "sparkle",
-                "warning": "exclamationmark.triangle",
-            ],
-            colors: [
-                "waiting": "#D70015,#FF453A", "idle": "#B25000,#FFD60A", "uncertain": "#8E8E93,#98989D",
-                "busy": "#6E6E73,#AEAEB2", "subagents": "#6E6E73,#AEAEB2", "muted": "#8E8E93,#98989D",
-                "none": "#C7C7CC,#48484A", "warning": "#B25000,#FFD60A",
-            ]),
+        "default": standard,
         "monochrome": Theme(
             icons: [
                 "waiting": "exclamationmark.circle.fill", "idle": "zzz", "uncertain": "questionmark.circle",
@@ -48,7 +51,7 @@ public struct Theme: Equatable, Sendable {
     /// The theme the config asks for: the built-in theme (unknown names fall back to default), then
     /// the older `icon` key for the busy and empty icon, then the per-state overrides.
     public static func resolve(_ config: Config) -> Theme {
-        var theme = builtIn[config.theme] ?? builtIn["default"]!
+        var theme = builtIn[config.theme] ?? standard
         if !config.icon.isEmpty {
             theme.icons["busy"] = config.icon
             theme.icons["none"] = config.icon

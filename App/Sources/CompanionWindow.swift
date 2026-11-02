@@ -98,7 +98,9 @@ final class CompanionWindow {
 
     /// White around a dark color, black around a light one.
     static func halo(for color: CGColor) -> CGColor {
-        let rgb = color.converted(to: CGColorSpace(name: CGColorSpace.sRGB)!, intent: .defaultIntent, options: nil)
+        let rgb = CGColorSpace(name: CGColorSpace.sRGB).flatMap {
+            color.converted(to: $0, intent: .defaultIntent, options: nil)
+        }
         let c = rgb?.components ?? [0, 0, 0]
         let luminance = c.count >= 3 ? 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2] : c.first ?? 0
         return luminance < 0.5 ? CGColor(gray: 1, alpha: 1) : CGColor(gray: 0, alpha: 1)
