@@ -8050,7 +8050,7 @@
       "description": "`HookInstaller.updateStableCopy` (`App/Sources/HookInstaller.swift`) updates the stable copy of `asb` and also reinstalls the hooks. Its name only says the first part.\n\nRename it so the name says both, for example `refreshInstall`, and fix its doc comment. Update every caller (`AppDelegate`, the tests) in the same commit. Behaviour doesn't change.\n\n## Tests\nThe `HookInstallerTests` pass under the new name.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "App/Sources/HookInstaller.swift",
@@ -8058,7 +8058,7 @@
         "App/Tests/HookInstallerTests.swift"
       ],
       "created_at": "2026-11-02T01:34:48Z",
-      "updated_at": "2026-11-02T01:45:31Z",
+      "updated_at": "2026-11-02T01:46:12Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "sprint_history": [
@@ -8072,7 +8072,18 @@
         "app"
       ],
       "started_at": "2026-11-02T01:45:31Z",
-      "started_by": "claude:5f67a194"
+      "started_by": "claude:5f67a194",
+      "commit": "77964a67073cacd7f49f5dfb83e8aeb66a3c423d",
+      "completed_at": "2026-11-02T01:46:12Z",
+      "completed_by": "claude:5f67a194",
+      "notes": [
+        {
+          "at": "2026-11-02T01:46:12Z",
+          "kind": "outcome",
+          "text": "Renamed to `bringUpToDate()`, with a doc comment on both paths (reinstall outdated hooks, else replace an outdated stable copy) and that it does nothing when not installed. Callers: `AppDelegate`, `HookInstallerTests`.",
+          "by": "claude:5f67a194"
+        }
+      ]
     },
     {
       "id": "T-160",
@@ -8085,13 +8096,13 @@
       "description": "`doc/design/desktop-companion.md` has fallen behind the code:\n\n- its status line at the top;\n- its Rig section, which should match the rig in `App/Sources/Companion/` (`Pose.swift`, `StickFigureLayer.swift`, `Moves.swift`).\n\nDescribe what is built, in the doc's own style: decisions first, plain wording. Change only the parts that are out of date. If the code and the design disagree on a decision rather than a detail, say so in the task note and don't rewrite the decision.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "doc/design/desktop-companion.md"
       ],
       "created_at": "2026-11-02T01:34:48Z",
-      "updated_at": "2026-11-02T01:34:56Z",
+      "updated_at": "2026-11-02T01:46:13Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "sprint_history": [
@@ -8104,7 +8115,9 @@
       "components": [
         "companion",
         "docs"
-      ]
+      ],
+      "started_at": "2026-11-02T01:46:13Z",
+      "started_by": "claude:5f67a194"
     },
     {
       "id": "T-161",

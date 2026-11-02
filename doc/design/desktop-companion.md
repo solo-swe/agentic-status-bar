@@ -1,6 +1,6 @@
 # Desktop companion: an animated character outside the menu bar
 
-Status (2026-10-31): **approved; tasks T-127 to T-140.** Nothing here is built yet. The idea: a small stick person on the desktop that
+Status (2026-11-01): **built** (T-127 to T-140), released in v0.3.0. The idea: a small stick person on the desktop that
 acts out what the sessions are doing. It walks while they work, waves at you when one needs you, and sleeps in a
 tiny bed with *zzz* rising when they're all idle. Research sources are listed at the end; claims marked
 *(unverified)* were not confirmed in official docs or a local test.
@@ -87,17 +87,35 @@ renderer changes to Rive.
 
 ### Rig
 
-Ten bones, each a layer whose `anchorPoint` sits at its joint: torso (root, at the hips), head, two upper arms, two
-forearms, two thighs and two shins. A **pose** is a set of joint angles plus a hip height. Animations are
-keyframes between poses with easing. Forward kinematics is enough on a flat floor; no inverse kinematics.
+Built in `App/Sources/Companion/`: `Pose.swift` (the pose and the skeleton's math), `StickFigureLayer.swift` (the
+layers and their animations) and `Moves.swift` (the moves as pose lists).
 
-```swift
-struct Pose { var hipY: CGFloat; var torso, head, shoulderL, elbowL, shoulderR, elbowR, hipL, kneeL, hipR, kneeR: CGFloat }
-// One CAKeyframeAnimation per joint ("transform.rotation.z"), values from the pose list, the same keyTimes for all.
-```
+- **Bones.** Eleven zero-size layers, each at its joint and drawing its own line: the hips (the root), the torso, the
+  head, and a back and a front upper arm, forearm, thigh and shin. The bones a bone carries sit at its tip, so
+  turning a bone turns everything below it.
+- **Side view.** The figure is seen from the side, facing right; facing left mirrors the whole layer. Limbs are
+  *back* and *front* rather than left and right, and the back ones are drawn under the front ones, a little lighter,
+  so a side view reads which leg is which.
+- **A pose** is joint angles in radians plus where the hips are. Limbs at 0 hang straight down; a positive shoulder
+  or hip angle swings the limb forward, a positive elbow or knee bends the lower part forward. `body` tips the
+  whole figure around the hips (lying down for push-ups and in bed); `lean` tilts the torso, `neck` the head.
 
-Strokes use the label color (dark on a light desktop, light on a dark one); only the speech bubble takes the
-state's theme color.
+  ```swift
+  struct Pose { var hipY, hipX, body, lean, neck: CGFloat
+                var shoulderBack, elbowBack, shoulderFront, elbowFront, hipBack, kneeBack, hipFront, kneeFront: CGFloat }
+  ```
+- **The skeleton** (`Skeleton`) holds the bone lengths and computes where the joints are for a pose, by the same
+  forward kinematics the layers do. For hands that have to hold something (the barbell, the pull-up bar), it also
+  solves the arm's two bones for a target point (two-bone inverse kinematics), with the elbow bent behind, in front,
+  or out to the side.
+- **Animations.** A move is a list of poses; it plays as one `CAKeyframeAnimation` per joint
+  (`transform.rotation.z`) with the same key times for all, eased between poses and cut into discrete still frames at
+  the energy's frame rate (12 a second, 6 in Low Power Mode). Slow moves such as breathing play smoothly instead,
+  where steps would show. The render server plays them.
+
+Strokes use the label color (dark on a light desktop, light on a dark one), or `companion_color`; a halo in the
+opposite brightness keeps the figure visible on any wallpaper. Only the speech bubble takes the state's theme
+color.
 
 ### Animations
 
