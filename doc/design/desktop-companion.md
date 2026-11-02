@@ -87,7 +87,7 @@ renderer changes to Rive.
 
 ### Rig
 
-Built in `App/Sources/Companion/`: `Pose.swift` (the pose and the skeleton's math), `StickFigureLayer.swift` (the
+Built in `App/Sources/Companion/`: `Pose.swift` (the pose and the skeleton's math), `StickFigure.swift` (the
 layers and their animations) and `Moves.swift` (the moves as pose lists).
 
 - **Bones.** Eleven zero-size layers, each at its joint and drawing its own line: the hips (the root), the torso, the

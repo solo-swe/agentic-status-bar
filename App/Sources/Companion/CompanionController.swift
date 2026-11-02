@@ -232,7 +232,7 @@ final class CompanionController {
 
     /// Stands catching its breath for a few seconds, then the next move.
     private func rest() {
-        figure.animate(Moves.resting(figure.skeleton), duration: Moves.breath, repeats: true, smooth: true)
+        figure.animate(Moves.resting(), duration: Moves.breath, repeats: true, smooth: true)
         figure.after(routine.rest(longer: energy.lowPower)) { [weak self] in self?.nextMove() }
     }
 

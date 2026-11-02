@@ -113,7 +113,7 @@ enum Moves {
     }
 
     /// Standing, catching its breath between activities; one breath.
-    static func resting(_ s: Skeleton = .standard) -> [Pose] {
+    static func resting() -> [Pose] {
         var inhale = Pose.standing
         inhale.lean = -0.04
         inhale.shoulderBack -= 0.06

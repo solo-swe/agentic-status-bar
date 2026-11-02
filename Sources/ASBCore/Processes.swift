@@ -32,8 +32,8 @@ public struct FakeProcessInspector: ProcessInspector {
     }
 }
 
-/// A process table read from a file, one process per line: `pid|ppid|comm|args|lstart` (a fake `ps`
-/// table, the format the old bats tests used). Used when `ASB_PS_TABLE` is set, for tests.
+/// A fake `ps` table read from a file, one process per line: `pid|ppid|comm|args|lstart`. Used when
+/// `ASB_PS_TABLE` is set, for tests.
 public struct TableProcessInspector: ProcessInspector {
     public var records: [ProcessRecord]
 

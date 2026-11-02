@@ -8096,13 +8096,13 @@
       "description": "`doc/design/desktop-companion.md` has fallen behind the code:\n\n- its status line at the top;\n- its Rig section, which should match the rig in `App/Sources/Companion/` (`Pose.swift`, `StickFigureLayer.swift`, `Moves.swift`).\n\nDescribe what is built, in the doc's own style: decisions first, plain wording. Change only the parts that are out of date. If the code and the design disagree on a decision rather than a detail, say so in the task note and don't rewrite the decision.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "doc/design/desktop-companion.md"
       ],
       "created_at": "2026-11-02T01:34:48Z",
-      "updated_at": "2026-11-02T01:46:13Z",
+      "updated_at": "2026-11-02T01:47:19Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "sprint_history": [
@@ -8117,7 +8117,18 @@
         "docs"
       ],
       "started_at": "2026-11-02T01:46:13Z",
-      "started_by": "claude:5f67a194"
+      "started_by": "claude:5f67a194",
+      "commit": "820fa72a52de288b725a90bfb39ce8281eac66b5",
+      "completed_at": "2026-11-02T01:47:19Z",
+      "completed_by": "claude:5f67a194",
+      "notes": [
+        {
+          "at": "2026-11-02T01:47:19Z",
+          "kind": "outcome",
+          "text": "Status: built (T-127 to T-140), released in v0.3.0. Rig rewritten from the code: eleven bones, back and front limbs in a side view, the real `Pose` fields, `Skeleton` with two-bone IK for holding props (the old text said no IK: a detail, not a decision), discrete keyframes at the energy’s frame rate. Still out of date, left alone: Settings omits `companion_color` and `companion_size`; the Measured and Task breakdown sections name `tests/app.sh`.",
+          "by": "claude:5f67a194"
+        }
+      ]
     },
     {
       "id": "T-161",
@@ -8130,7 +8141,7 @@
       "description": "Small leftovers found during the comment cleanup:\n\n- `Moves.resting` (`App/Sources/Companion/Moves.swift`) takes a parameter `s` it never uses. Drop it and update the callers.\n- `App/Sources/Companion/StickFigureLayer.swift` holds the `StickFigure` class. Rename the file to `StickFigure.swift` (and the test file too if it follows that name). Run `xcodegen` through `mise run app:test`.\n- `Sources/ASBCore/Processes.swift` still mentions bats, which the project no longer uses. Fix the comment.\n- `Config.instantRefresh` (`Sources/ASBCore/Config.swift`) is parsed but nothing reads it. Config keys never change, so the key stays readable. Check the PRD and the config docs: if they promise a behaviour for it, that's a missing feature, so block on the user (`atm block --on user`). If they don't mention it, ask the same way before removing the property.\n\n## Tests\n`mise run check` passes. Coverage stays at 99% or above.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "App/Sources/Companion/Moves.swift",
@@ -8139,7 +8150,7 @@
         "Sources/ASBCore/Config.swift"
       ],
       "created_at": "2026-11-02T01:34:48Z",
-      "updated_at": "2026-11-02T01:34:57Z",
+      "updated_at": "2026-11-02T01:47:20Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "sprint_history": [
@@ -8153,7 +8164,9 @@
         "core",
         "companion",
         "app"
-      ]
+      ],
+      "started_at": "2026-11-02T01:47:20Z",
+      "started_by": "claude:5f67a194"
     },
     {
       "id": "T-162",
