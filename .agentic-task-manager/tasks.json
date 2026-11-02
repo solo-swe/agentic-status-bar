@@ -8004,14 +8004,14 @@
       "description": "`SessionStore` (`App/Sources/SessionStore.swift`) watches the `state_dir` it found at start. If the config file changes `state_dir`, the app keeps reading the old directory until it is restarted.\n\n## First\nCheck the PRD and the config docs for what a config change is meant to do while the app runs. If they don't settle it for `state_dir`, block on the user (`atm block --on user`) and don't guess.\n\n## Change\nWhen the config is reloaded with a different `state_dir`, stop watching the old directory and watch the new one. Take a snapshot from the new directory right away.\n\n## Tests\nAn app test with a temporary `HOME` and the `ASB_*` overrides. It changes `state_dir` in the config and checks that sessions in the new directory show and those in the old one don't.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "App/Sources/SessionStore.swift",
         "App/Tests/StoreActionTests.swift"
       ],
       "created_at": "2026-11-02T01:34:48Z",
-      "updated_at": "2026-11-02T01:43:36Z",
+      "updated_at": "2026-11-02T01:45:30Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "sprint_history": [
@@ -8025,7 +8025,18 @@
         "app"
       ],
       "started_at": "2026-11-02T01:43:36Z",
-      "started_by": "claude:5f67a194"
+      "started_by": "claude:5f67a194",
+      "commit": "a13fd012d0110575bf5ddb9c8f0ff18b24b5fe8d",
+      "completed_at": "2026-11-02T01:45:30Z",
+      "completed_by": "claude:5f67a194",
+      "notes": [
+        {
+          "at": "2026-11-02T01:45:30Z",
+          "kind": "outcome",
+          "text": "Snapshots already read the current `state_dir`; only the directory watcher kept the old one (changes showed on the 5 s timer, not within 200 ms). The store now re-watches when a recompute finds a moved state dir; `SessionStoreTests` covers it. No doc change: the PRD says the store watches the state dir.",
+          "by": "claude:5f67a194"
+        }
+      ]
     },
     {
       "id": "T-159",
@@ -8039,7 +8050,7 @@
       "description": "`HookInstaller.updateStableCopy` (`App/Sources/HookInstaller.swift`) updates the stable copy of `asb` and also reinstalls the hooks. Its name only says the first part.\n\nRename it so the name says both, for example `refreshInstall`, and fix its doc comment. Update every caller (`AppDelegate`, the tests) in the same commit. Behaviour doesn't change.\n\n## Tests\nThe `HookInstallerTests` pass under the new name.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "App/Sources/HookInstaller.swift",
@@ -8047,7 +8058,7 @@
         "App/Tests/HookInstallerTests.swift"
       ],
       "created_at": "2026-11-02T01:34:48Z",
-      "updated_at": "2026-11-02T01:34:55Z",
+      "updated_at": "2026-11-02T01:45:31Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "sprint_history": [
@@ -8059,7 +8070,9 @@
       "sprint": "Quality",
       "components": [
         "app"
-      ]
+      ],
+      "started_at": "2026-11-02T01:45:31Z",
+      "started_by": "claude:5f67a194"
     },
     {
       "id": "T-160",

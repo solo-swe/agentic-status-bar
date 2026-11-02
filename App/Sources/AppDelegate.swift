@@ -18,7 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MainMenuActions {
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Unit tests host the app: keep it quiet then.
         guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else { return }
-        hooks.updateStableCopy()
+        hooks.bringUpToDate()
         _ = updater  // created now (it's lazy), so Sparkle starts checking at launch
         NSApp.mainMenu = MainMenu.make(actions: self)
         ActivationPolicy.watch()

@@ -52,11 +52,11 @@ final class HookInstallerTests: XCTestCase {
 
     func testTheStableCopyFollowsTheBundledAsbOnlyWhenInstalled() throws {
         let hooks = make()
-        hooks.updateStableCopy()
+        hooks.bringUpToDate()
         XCTAssertFalse(FileManager.default.fileExists(atPath: stable))
         hooks.install()
         try Data("#!/bin/sh\n# newer\n".utf8).write(to: URL(fileURLWithPath: asb))
-        hooks.updateStableCopy()
+        hooks.bringUpToDate()
         XCTAssertEqual(FileManager.default.contents(atPath: stable), Data("#!/bin/sh\n# newer\n".utf8))
     }
 

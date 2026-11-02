@@ -34,9 +34,10 @@ final class HookInstaller {
     /// The settings file the hooks go into, for the UI.
     var settingsFile: String { installer().settingsFile }
 
-    /// At launch: the hooks run the stable copy, so a newer app brings its asb there, and the hooks
-    /// for events added since they were installed.
-    func updateStableCopy() {
+    /// At launch, brings an existing install up to date: hooks installed before an event was added are
+    /// reinstalled (which also copies asb); otherwise an outdated stable copy, the asb the hooks run, is
+    /// replaced with the bundled one. Does nothing when the hooks aren't installed.
+    func bringUpToDate() {
         let installer = installer()
         guard FileManager.default.fileExists(atPath: bundledAsb) else { return }
         if installer.hooksOutdated {
