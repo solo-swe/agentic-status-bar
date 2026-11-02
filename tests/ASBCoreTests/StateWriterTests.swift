@@ -37,3 +37,15 @@ private func tempDir() throws -> String {
     #expect(try String(contentsOfFile: file, encoding: .utf8) == "two\n")
     #expect(try FileManager.default.contentsOfDirectory(atPath: dir) == ["s1.json"])
 }
+
+@Test func atomicWriteOntoAFolderFailsAndCleansUp() throws {
+    let dir = try tempDir()
+    let file = dir + "/s1.json"
+    try FileManager.default.createDirectory(atPath: file + "/in-the-way", withIntermediateDirectories: true)
+    #expect(!StateWriter.atomicWrite(Data("one\n".utf8), to: file))
+    #expect(try FileManager.default.contentsOfDirectory(atPath: dir) == ["s1.json"])
+}
+
+@Test func atomicWriteIntoAMissingFolderFails() throws {
+    #expect(!StateWriter.atomicWrite(Data("one\n".utf8), to: try tempDir() + "/missing/s1.json"))
+}

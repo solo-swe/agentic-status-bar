@@ -11,7 +11,7 @@
 The checks are mise tasks, scripts in `mise-tasks/` (`mise tasks` lists them):
 
 ```sh
-mise run check             # everything CI runs: lint, test and app:test, in parallel
+mise run check             # everything CI runs: lint, test, coverage and app:test, in parallel
 mise run test              # build the Swift package and run its tests (or: mise run test --filter ConfigTests)
 mise run test --summary    # the same, printing only failures and totals
 mise run app:test          # generate the app's Xcode project, build it and run the app's tests
@@ -25,6 +25,17 @@ passes. Tests run in a temporary `HOME`, so
 they never touch your real `~/.claude` or config.
 
 The hook runs on every tool call of every session; run `mise run bench` after changing it.
+
+Coverage leaves out files named `*Darwin.swift`. Each holds only code a test can't run, and nothing else:
+
+| File | Why tests can't run it |
+| --- | --- |
+| `Sources/ASBCore/ProcessesDarwin.swift` | The real process table (libproc, sysctl); tests use `FakeProcessInspector` or `ASB_PS_TABLE` |
+| `Sources/ASBCore/SwiftBarDarwin.swift` | Reads SwiftBar's own preferences with `defaults`; tests pass a preference to `swiftBarDir(environment:home:preference:)` |
+| `Sources/asb/CommandsDarwin.swift` | The commands' `run()` entry points: the process's real environment, stdin, stdout and terminal; tests call the `run` overloads with a temporary home |
+
+The `@main` entry point (`Sources/asb/ASB.swift`) has no lines to count. Coverage runs the tests one at a time
+(`--no-parallel`): the counters aren't atomic, and parallel tests make the counts vary between runs.
 
 ## Layout
 

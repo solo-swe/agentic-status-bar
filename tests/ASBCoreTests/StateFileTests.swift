@@ -29,6 +29,11 @@ private func raw(_ json: String, _ path: String = "state/s1.json") -> RawFile {
     #expect(s.state == nil && s.pid == nil && s.subagents.isEmpty)
 }
 
+@Test func aSubagentWithoutATypeIsAnAgentAndOneThatIsntAnObjectIsSkipped() throws {
+    let s = try #require(StateFile.parse(raw(#"{"v":1,"sessionId":"s1","subagents":{"a1":{"since":5},"a2":"odd"}}"#)))
+    #expect(s.subagents == ["a1": .init(type: "agent", since: 5)])
+}
+
 @Test func wrongTypesCountAsAbsent() throws {
     let s = try #require(StateFile.parse(raw(#"{"v":1,"sessionId":"s1","pid":"4242","updatedAt":true,"state":3}"#)))
     #expect(s.pid == nil && s.updatedAt == nil && s.state == nil)

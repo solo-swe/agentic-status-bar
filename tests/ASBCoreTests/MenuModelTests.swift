@@ -132,6 +132,17 @@ private func snapshot(_ sessions: [(String, String)], config: String = "", herdr
     #expect(snapshot([("s1", fields)], config: "show_subagents=0").sessions.first?.subagents.isEmpty == true)
 }
 
+@Test func aSubagentWithoutAStartTimeIsShownAsJustStarted() throws {
+    let row = try #require(snapshot([("s1", #""state":"busy","subagents":{"a1":{"type":"Explore"}}"#)]).sessions.first)
+    #expect(row.subagents.map(\.since) == [now] && row.subagents.map(\.detail) == ["0s"])
+}
+
+@Test func aStateFromANewerVersionShowsAsWorkingAfterTheBusySessions() {
+    let rows = snapshot([("new", #""state":"thinking","cwd":"/x/new""#), ("b", #""state":"busy","cwd":"/x/b""#)]).sessions
+    #expect(rows.map(\.project) == ["b", "new"])
+    #expect(rows[1].shown == .busy && rows[1].word == "working")
+}
+
 @Test func waitingOnSubagentsSaysHowMany() throws {
     let row = try #require(snapshot([("s1", #""state":"idle","subagents":{"a1":{"type":"Explore","since":\#(ago(90))},"a2":{"type":"Plan","since":\#(ago(30))}}"#)]).sessions.first)
     #expect(row.shown == .subagents && row.word == "waiting on 2 subagents" && row.detail == "1m" && row.symbol == "hourglass")
@@ -157,6 +168,9 @@ private func herdr(_ agents: String) -> String {
     #expect(empty.title == "first prompt")
     let broken = try #require(snapshot([("s1", #""state":"idle","promptPreview":"first prompt""#)], herdr: "garbage").sessions.first)
     #expect(broken.title == "first prompt")
+    let missing = try #require(snapshot([("s1", #""state":"idle","promptPreview":"first prompt""#)],
+        herdr: herdr(#"[{"agent":"claude","agent_session":{"value":"s1"}}]"#)).sessions.first)
+    #expect(missing.title == "first prompt")
 }
 
 @Test func onlySessionsInAHerdrPaneAreFocusableAndOnlyWithHerdr() {

@@ -14,6 +14,10 @@ private func tempMutesFile() -> String {
     FileManager.default.temporaryDirectory.appendingPathComponent("asb-mutes-\(UUID().uuidString)/mutes").path
 }
 
+@Test func aMuteWithoutASetTimeCountsAsSetAtTheEpoch() {
+    #expect(Mutes.parse(#"{"/x/alpha":{"until":\#(now)}}"#) == ["/x/alpha": Mute(until: now, at: 0, today: false)])
+}
+
 @Test func muteHourLastsSixtyMinutes() {
     var mutes: [String: Mute] = [:]
     Mutes.muteHour(&mutes, cwd: "/x/alpha", now: now)

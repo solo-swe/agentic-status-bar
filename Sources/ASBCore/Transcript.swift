@@ -11,7 +11,7 @@ public enum Transcript {
     /// The JSON entries in the last `tailBytes` of a transcript. When the file is longer, the first
     /// line of the tail is cut and dropped. Lines that aren't JSON objects are skipped.
     public static func tailEntries(_ contents: Data) -> [[String: Any]] {
-        var tail = contents.count > tailBytes ? contents.suffix(tailBytes) : contents[...]
+        var tail = contents.count > tailBytes ? contents.suffix(tailBytes) : contents
         if contents.count > tailBytes {
             guard let newline = tail.firstIndex(of: UInt8(ascii: "\n")) else { return [] }
             tail = tail[tail.index(after: newline)...]
@@ -59,15 +59,10 @@ public enum Transcript {
     /// How the turn after the latest prompt in `entries` ended; nil while it runs. An interrupt marker
     /// anywhere in it wins (Claude Code writes `turn_duration` after the marker too).
     public static func turnEnd(_ entries: [[String: Any]]) -> TurnEnd? {
-        let afterPrompt = entries.lastIndex(where: isPrompt).map { entries[($0 + 1)...] } ?? entries[...]
+        let afterPrompt = entries.lastIndex(where: isPrompt).map { entries[($0 + 1)...] } ?? ArraySlice(entries)
         let ends = afterPrompt.filter(endsTurn)
         if ends.isEmpty { return nil }
         return ends.contains { $0["type"] as? String == "user" } ? .interrupted : .finished
-    }
-
-    /// Whether the turn after the latest prompt in `entries` has already ended.
-    public static func turnEnded(_ entries: [[String: Any]]) -> Bool {
-        turnEnd(entries) != nil
     }
 }
 

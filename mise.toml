@@ -6,5 +6,5 @@ xcodegen = "2.46.0"
 shellcheck = "0.11.0"
 
 [tasks.check]
-description = "Every check CI runs: lint, the package tests and the app tests"
-depends = ["lint", "test --summary", "app:test"]
+description = "Every check CI runs: lint, the package tests, their coverage and the app tests"
+depends = ["lint", "test --summary", "coverage", "app:test"]

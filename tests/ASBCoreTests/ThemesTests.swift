@@ -26,6 +26,11 @@ import Testing
     #expect(theme.symbol("subagents") == "hourglass.circle.fill")
 }
 
+@Test func aStateWithoutAnIconOrColorGetsEmptyOnes() {
+    let theme = Theme(icons: [:], colors: [:])
+    #expect(theme.symbol("idle") == "" && theme.color("idle") == "")
+}
+
 @Test func anUnknownThemeFallsBackToTheDefault() {
     #expect(Theme.resolve(Config.parse("theme=nope")) == Theme.resolve(Config()))
 }

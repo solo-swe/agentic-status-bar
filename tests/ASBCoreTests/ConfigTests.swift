@@ -18,6 +18,11 @@ private func tempFile(_ name: String = "config") -> String {
     #expect(config.iconOverrides.isEmpty && config.colorOverrides.isEmpty)
 }
 
+@Test func instantRefreshIsStillRead() {
+    // Older configs have it; the SwiftBar plugin used it.
+    #expect(!Config.parse("instant_refresh=0\n").instantRefresh)
+}
+
 @Test func notificationKeys() {
     let defaults = Config.parse(nil)
     #expect(defaults.notifyWaiting && !defaults.notifyIdle && defaults.notifySound && defaults.notifyDelaySeconds == 10)

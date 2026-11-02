@@ -149,6 +149,19 @@ private struct TempHome {
     #expect(!FileManager.default.fileExists(atPath: home.stateDir))
 }
 
+@Test func uninstallAsksOnTheTerminalBeforePurging() throws {
+    let installer = try TempHome().installer()
+    var prompts: [String] = []
+    func ask(onTerminal: Bool = true, answer: String?) -> Bool {
+        UninstallCommand.askToPurge(installer, onTerminal: onTerminal, prompt: { prompts.append($0) }, answer: { answer })
+    }
+    #expect(ask(answer: "y") && ask(answer: "YES"))
+    #expect(!ask(answer: "") && !ask(answer: "no") && !ask(answer: nil))
+    #expect(prompts.count == 5)
+    #expect(prompts[0] == "Also delete \(installer.stateDir) and \(installer.configFile)? [y/N] ")
+    #expect(!ask(onTerminal: false, answer: "y") && prompts.count == 5, "no terminal: no question, no purge")
+}
+
 @Test func installAndUninstallFailOnInvalidSettings() throws {
     let home = try TempHome()
     try Data("not json".utf8).write(to: URL(fileURLWithPath: home.settingsFile))

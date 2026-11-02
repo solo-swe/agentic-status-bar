@@ -7544,7 +7544,7 @@
       "description": "Bring line coverage of `Sources/ASBCore/` and `Sources/asb/` to at least 99%, as `mise run coverage` reports it. T-156 has moved the hook's logic into `ASBCore` and added the `asbTests` target.\n\n## Where it starts (T-147, 2026-11-01)\n96.7% of 2290 lines in `ASBCore` (75–77 missed: the count varies by a line or two between runs in `OrderedJSON`); `asb` wasn't measured until T-156. Least covered: `Inputs.swift` 85% (16 missed), `StateWriter.swift` 92%, `Themes.swift` 88%, `Transcript.swift` 93%, `Paths.swift` 93%.\n\n## Change\n- Add tests for the uncovered lines the report lists. They test behavior (an input and its expected result), not lines touched for the count.\n- **Exclusions** (decided with the user, 2026-11-01): `llvm-cov` excludes whole files only. Code that can't run in a test (the `@main` entry point, real Darwin calls that tests replace with a fake) goes into its own small file named `*Darwin.swift`, like the existing `ProcessesDarwin.swift`, and holds nothing else. The coverage task excludes that pattern (and the entry point file) with `-ignore-filename-regex`. List each excluded file with its reason in `CONTRIBUTING.md` › Checks.\n- Find out why `OrderedJSON`'s count varies between runs (a randomized input?) and make the measurement stable, so the gate doesn't flicker.\n- Once `mise run coverage` passes, add `coverage` to the `check` task's `depends` in `mise.toml` (left out until then, so `check` stays green), and update `doc/design/dev-tooling.md` › Layout.\n- If the gap is large, split the work per file into follow-up tasks (`/atm:create-tasks`).\n\n## Done when\n`mise run check` passes, coverage at 99% included.\n",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-156"
       ],
@@ -7557,7 +7557,7 @@
         "doc/design/dev-tooling.md"
       ],
       "created_at": "2026-11-01T10:04:01Z",
-      "updated_at": "2026-11-01T22:53:35Z",
+      "updated_at": "2026-11-02T00:26:19Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "components": [
@@ -7570,7 +7570,16 @@
           "from": "2026-11-01T21:20:28Z"
         }
       ],
-      "sprint": "Quality"
+      "sprint": "Quality",
+      "notes": [
+        {
+          "at": "2026-11-02T00:26:13Z",
+          "kind": "failure",
+          "text": "lease expired (claude:5f67a194)"
+        }
+      ],
+      "started_at": "2026-11-02T00:26:19Z",
+      "started_by": "claude:5f67a194"
     },
     {
       "id": "T-149",
@@ -7872,7 +7881,7 @@
       "description": "`asb` has no test target, so coverage can't see `Sources/asb/` (decided with the user, 2026-11-01). Move its logic into `ASBCore`, where it is tested, and test the thin commands that are left.\n\n## Change\n- The hook: move what `HookCommand.run()` (`Sources/asb/Hook.swift`) does — the debug log, parsing, the lock, `HookEvents.apply`, the backfill, the atomic write or delete, removing stale files for the pid — into an `ASBCore` type that takes its inputs: the payload bytes, the environment, the parent pid, the clock and the process inspector. `HookCommand.run()` only reads stdin and calls it. The hook's rules stay as they are (`doc/guides/hook.md`: silent, always exits 0, locked atomic writes, newer events win).\n- The other commands (`action`, `install`, `snapshot`): the same where they hold logic; keep only argument parsing and printing in `asb`.\n- Add a test target `asbTests` (`tests/asbTests/`, `@testable import asb`) that covers the commands: parsing, and `run` against a temporary `HOME` with the `ASB_*` overrides.\n- Tests in `tests/ASBCoreTests/` for the moved logic, including the event orders `HookEventsTests` already replays, driven through the new type.\n- `mise-tasks/coverage.sh` reports `Sources/asb/` from the new target too.\n\n## Checks\nNo behavior change: `mise run check` passes and `mise run bench` stays within its targets (`asb hook` under 10 ms).",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-147"
       ],
@@ -7886,7 +7895,7 @@
         "CONTRIBUTING.md"
       ],
       "created_at": "2026-11-01T22:19:06Z",
-      "updated_at": "2026-11-01T22:53:39Z",
+      "updated_at": "2026-11-01T23:03:02Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "sprint_history": [
@@ -7902,7 +7911,18 @@
         "docs"
       ],
       "started_at": "2026-11-01T22:53:39Z",
-      "started_by": "claude:5f67a194"
+      "started_by": "claude:5f67a194",
+      "commit": "a88173bd48a68e7ba1f2c42962c5dc699285a05e",
+      "completed_at": "2026-11-01T23:03:02Z",
+      "completed_by": "claude:5f67a194",
+      "notes": [
+        {
+          "at": "2026-11-01T23:03:02Z",
+          "kind": "outcome",
+          "text": "Hook logic in `ASBCore.Hook.handle` (inputs injected; same order, still lazy process walk), installer setup in `Installer.forMachine` (the app uses it too), `ExecutablePath.resolve`; `asb` commands are thin. New `asbTests` (11) and `HookTests` (11), 273 package tests. Bench hook median 9–10 ms. Coverage 95.9% of 2497 lines, `asb` now measured (`Install.swift` 64%).",
+          "by": "claude:5f67a194"
+        }
+      ]
     }
   ]
 }

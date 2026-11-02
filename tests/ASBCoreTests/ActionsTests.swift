@@ -151,6 +151,18 @@ private struct Fixture {
     #expect(f.config() == "show_headless=1\nuse_registry=0\nstore_prompt_preview=0\n")
 }
 
+@Test func everyCheckmarkKeyTogglesBackAndForth() throws {
+    let f = try Fixture()
+    for key in Actions.toggleKeys.sorted() {
+        f.perform("toggle", key)
+        let first = Config.parse(f.config())
+        f.perform("toggle", key)
+        #expect(Config.parse(f.config()) != first, "\(key) flips")
+        f.perform("toggle", key)
+        #expect(Config.parse(f.config()) == first, "\(key) flips back")
+    }
+}
+
 @Test func setTakesOnlyTheMenusChoices() throws {
     let f = try Fixture()
     f.perform("set", "stale_minutes", "60")
@@ -213,6 +225,18 @@ private struct Fixture {
     #expect(f.mutes().isEmpty)
 }
 
+@Test func withoutAnInjectedClockMutesStartNow() throws {
+    let f = try Fixture()
+    try f.addState("a", #""state":"idle","cwd":"/x/alpha""#)
+    let env = ["ASB_HERDR": f.home.appendingPathComponent("no-herdr").path]
+    let before = Int64(Date().timeIntervalSince1970 * 1000)
+    Actions(paths: Paths.from(environment: env, home: f.home.path), environment: env, runner: f.runner)
+        .perform("mute-hour", ["a"])
+    let after = Int64(Date().timeIntervalSince1970 * 1000)
+    let mute = try #require(f.mutes()["/x/alpha"])
+    #expect(mute.at >= before && mute.at <= after && mute.until == mute.at + 3_600_000)
+}
+
 @Test func aSessionWithoutCwdCannotBeMuted() throws {
     let f = try Fixture()
     try f.addState("a", #""state":"idle""#)
@@ -228,6 +252,11 @@ private struct Fixture {
     let start = Date()
     #expect(!runner.run("/bin/sleep", ["5"], input: nil, timeout: 0.3))
     #expect(Date().timeIntervalSince(start) < 2)
+}
+
+@Test func withoutAPathCommandsAreLookedUpInTheSystemFolders() {
+    #expect(ProcessRunner(environment: [:]).resolve("ls") == "/bin/ls")
+    #expect(ProcessRunner(environment: [:]).resolve("./tool") == "./tool")
 }
 
 @Test func unknownActionsDoNothing() throws {

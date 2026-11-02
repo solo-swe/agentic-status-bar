@@ -14,10 +14,6 @@ struct SnapshotCommand: ParsableCommand {
     @Flag(help: "Indent the JSON.")
     var pretty = false
 
-    func run() throws {
-        FileHandle.standardOutput.write(try output(environment: ProcessInfo.processInfo.environment))
-    }
-
     /// The snapshot's JSON and a newline, after its side effects (removing dead sessions' files).
     func output(environment: [String: String]) throws -> Data {
         let live = LiveInputs(

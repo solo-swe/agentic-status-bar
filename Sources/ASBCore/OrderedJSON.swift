@@ -120,11 +120,12 @@ public indirect enum OrderedJSON: Equatable, Sendable {
                 skipSpace()
                 pairs.append((key, try value()))
                 skipSpace()
-                guard i < bytes.count else { throw fail() }
-                if bytes[i] == UInt8(ascii: ",") { i += 1; continue }
-                if bytes[i] == UInt8(ascii: "}") { i += 1; return .object(pairs) }
-                throw fail()
+                guard i < bytes.count, bytes[i] == UInt8(ascii: ",") else { break }
+                i += 1
             }
+            guard i < bytes.count, bytes[i] == UInt8(ascii: "}") else { throw fail() }
+            i += 1
+            return .object(pairs)
         }
 
         mutating func array() throws -> OrderedJSON {
@@ -136,11 +137,12 @@ public indirect enum OrderedJSON: Equatable, Sendable {
                 skipSpace()
                 items.append(try value())
                 skipSpace()
-                guard i < bytes.count else { throw fail() }
-                if bytes[i] == UInt8(ascii: ",") { i += 1; continue }
-                if bytes[i] == UInt8(ascii: "]") { i += 1; return .array(items) }
-                throw fail()
+                guard i < bytes.count, bytes[i] == UInt8(ascii: ",") else { break }
+                i += 1
             }
+            guard i < bytes.count, bytes[i] == UInt8(ascii: "]") else { throw fail() }
+            i += 1
+            return .array(items)
         }
 
         mutating func string() throws -> String {

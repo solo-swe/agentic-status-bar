@@ -34,7 +34,12 @@ private let fixtureSettings = URL(fileURLWithPath: #filePath).deletingLastPathCo
         """)
 }
 
-@Test(arguments: ["", "not json", "{", #"{"a" 1}"#, "[1,]", "{} x", "01x", #""unterminated"#])
+@Test func orderedJSONValuesOfDifferentKindsAreNotEqual() {
+    #expect(OrderedJSON.null != .bool(false) && OrderedJSON.number("1") != .string("1"))
+    #expect(OrderedJSON.number("1").stringValue == nil && OrderedJSON.string("1").arrayValue == nil)
+}
+
+@Test(arguments: ["", "not json", "{", #"{"a" 1}"#, #"{"a":1 "b":2}"#, "[1,]", "[1 2]", "{} x", "01x", #""unterminated"#])
 func orderedJSONRejectsInvalidInput(_ text: String) {
     #expect(throws: OrderedJSON.ParseError.self) { try OrderedJSON.parse(Data(text.utf8)) }
 }
@@ -81,6 +86,19 @@ func orderedJSONRejectsInvalidInput(_ text: String) {
     let swift = HookSettings.install(shell, command: "x # agentic-status-bar")
     #expect(HookSettings.count(swift, markers: [HookSettings.oldMarker]) == 0)
     #expect(HookSettings.count(swift) == 10)
+}
+
+@Test func installAddsOurGroupNextToAGroupWithoutHooks() throws {
+    let settings = try OrderedJSON.parse(Data(#"{"hooks":{"Stop":[{"matcher":"x"}]}}"#.utf8))
+    let installed = HookSettings.install(settings, command: "x # agentic-status-bar")
+    #expect(installed["hooks"]?["Stop"]?.arrayValue?.count == 2 && HookSettings.count(installed) == 10)
+}
+
+@Test func uninstallAndCountLeaveEntriesTheyDontUnderstandAlone() throws {
+    let text = #"{"hooks":{"Stop":"odd","PreToolUse":[{"hooks":[{"type":"command","command":1}]}]}}"#
+    let settings = try OrderedJSON.parse(Data(text.utf8))
+    #expect(HookSettings.uninstall(settings) == settings)
+    #expect(HookSettings.count(settings) == 0)
 }
 
 @Test func uninstallRestoresTheSettingsExactly() throws {
@@ -231,6 +249,22 @@ private struct Home {
     #expect(throws: Installer.Failure.self) { try array.installer().install() }
 }
 
+@Test func installStopsWhenTheStableCopyCantBeReplaced() throws {
+    let home = try Home()
+    // A non-empty folder where the copy goes: the rename onto it fails.
+    try FileManager.default.createDirectory(atPath: home.stable + "/in-the-way", withIntermediateDirectories: true)
+    #expect(throws: Installer.Failure.cannotWrite(home.stable)) { try home.installer().install() }
+    let dir = (home.stable as NSString).deletingLastPathComponent
+    #expect(try FileManager.default.contentsOfDirectory(atPath: dir) == ["asb"], "no temp copy left behind")
+    #expect(!FileManager.default.fileExists(atPath: home.settings))
+}
+
+@Test func installStopsWhenTheSettingsCantBeWritten() throws {
+    let home = try Home()
+    try FileManager.default.createDirectory(atPath: home.settings + "/in-the-way", withIntermediateDirectories: true)
+    #expect(throws: Installer.Failure.cannotWrite(home.settings)) { try home.installer().install() }
+}
+
 @Test func installWorksWithoutSwiftBar() throws {
     let home = try Home()
     try home.installer(swiftBarDir: nil).install()
@@ -348,6 +382,18 @@ private struct Home {
     #expect(Installer.swiftBarDir(environment: ["ASB_SWIFTBAR_DIR": ""], home: "/Users/alex") == nil)
 }
 
+@Test func withoutTheOverrideSwiftBarsFolderIsItsPreference() {
+    func dir(preference: String?) -> String? {
+        Installer.swiftBarDir(environment: [:], home: "/Users/alex", preference: { _ in preference })
+    }
+    #expect(dir(preference: "~/SwiftBar") == "/Users/alex/SwiftBar")
+    #expect(dir(preference: "") == nil && dir(preference: nil) == nil)
+    #expect(Installer.swiftBarDir(environment: ["ASB_SWIFTBAR_DIR": "/abs"], home: "/Users/alex", preference: { _ in
+        Issue.record("the override wins without asking SwiftBar")
+        return nil
+    }) == "/abs")
+}
+
 @Test func theExecutablePathIsAbsoluteWithSymlinksResolved() throws {
     let dir = FileManager.default.temporaryDirectory.appendingPathComponent("asb-exe-\(UUID().uuidString)")
         .resolvingSymlinksInPath().path
@@ -360,6 +406,7 @@ private struct Home {
     #expect(ExecutablePath.resolve("bin/../link", currentDirectory: dir, searchPath: nil) == asb)
     #expect(ExecutablePath.resolve("asb", currentDirectory: "/", searchPath: "/nowhere:\(dir)/bin") == asb)
     #expect(ExecutablePath.absolute("asb", currentDirectory: "/", searchPath: "/nowhere") == "asb", "not found: as given")
+    #expect(ExecutablePath.absolute("asb", currentDirectory: "/", searchPath: nil) == "asb", "no PATH: as given")
 }
 
 @Test func uninstallTwiceIsHarmless() throws {

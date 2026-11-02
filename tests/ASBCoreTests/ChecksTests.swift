@@ -53,6 +53,13 @@ private let claude = ProcessRecord(pid: 4242, ppid: 1, start: claudeStart, comm:
     #expect(Checks.liveness([s], processes: [], timeZone: la).dead == ["state/s1.json"])
 }
 
+@Test func c1UsesTheFirstRecordOfAPidListedTwice() {
+    let s = session(#"{"v":1,"sessionId":"s1","state":"idle","pid":4242,"procStart":"Mon Oct 19 09:12:03 2026"}"#)
+    let later = ProcessRecord(pid: 4242, ppid: 1, start: claudeStart + 60, comm: "claude")
+    #expect(Checks.liveness([s], processes: [claude, later], timeZone: la).alive.count == 1)
+    #expect(Checks.liveness([s], processes: [later, claude], timeZone: la).dead == ["state/s1.json"])
+}
+
 // MARK: C4 approved tool and C5 staleness
 
 private let now: Int64 = 1_792_891_080_000
@@ -130,6 +137,11 @@ private func child(_ pid: Int32, _ comm: String, startedSecondsAgo: Int64, paren
     #expect(checked(#""state":"busy","updatedAt":\#(minutesAgo(600))"#, config: "stale_minutes=0").shown == "busy")
     #expect(checked(#""state":"busy","updatedAt":\#(minutesAgo(45))"#, config: "").shown == "uncertain",
             "the default is 30 minutes")
+}
+
+@Test func c5MarksABusySessionWithoutAnyRecordedTimeAsUncertain() {
+    let s = checked(#""state":"busy""#, config: "stale_minutes=30")
+    #expect(s.shown == "uncertain" && s.shownSince == 0)
 }
 
 @Test func c5NeverMarksWaitingOrIdleSessionsAsStale() {

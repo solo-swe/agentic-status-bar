@@ -8,10 +8,6 @@ struct InstallCommand: ParsableCommand {
         abstract: "Add the hooks to Claude Code's settings. Safe to run again."
     )
 
-    func run() throws {
-        try run(Setup.installer())
-    }
-
     func run(_ installer: Installer) throws {
         try Setup.reportingInvalidSettings { try installer.install() }
     }
@@ -26,19 +22,18 @@ struct UninstallCommand: ParsableCommand {
     @Flag(help: "Also delete the state files and the config without asking.")
     var purge = false
 
-    func run() throws {
-        let installer = Setup.installer()
-        try run(installer, confirmPurge: { Self.askToPurge(installer) })
-    }
-
     func run(_ installer: Installer, confirmPurge: () -> Bool) throws {
         try Setup.reportingInvalidSettings { try installer.uninstall(purge: purge, confirmPurge: confirmPurge) }
     }
 
-    static func askToPurge(_ installer: Installer) -> Bool {
-        guard isatty(0) == 1 else { return false }
-        print("Also delete \(installer.stateDir) and \(installer.configFile)? [y/N] ", terminator: "")
-        return ["y", "yes"].contains((readLine() ?? "").lowercased())
+    /// Asks on the terminal whether to delete the state and config: `prompt` shows the question,
+    /// `answer` reads the reply (nil at end of input). Without a terminal it asks nothing and says no.
+    static func askToPurge(
+        _ installer: Installer, onTerminal: Bool, prompt: (String) -> Void, answer: () -> String?
+    ) -> Bool {
+        guard onTerminal else { return false }
+        prompt("Also delete \(installer.stateDir) and \(installer.configFile)? [y/N] ")
+        return ["y", "yes"].contains((answer() ?? "").lowercased())
     }
 }
 

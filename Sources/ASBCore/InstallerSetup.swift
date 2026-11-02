@@ -30,23 +30,14 @@ extension Installer {
         return installer
     }
 
-    /// SwiftBar's plugin folder, with a leading `~` expanded: `ASB_SWIFTBAR_DIR` when set (empty means
-    /// none), else SwiftBar's `PluginDirectory` preference; nil without SwiftBar.
-    ///
-    /// - Parameters:
-    ///   - environment: Holds the override, and the `PATH` to find `defaults` on.
-    ///   - home: The home directory `~` stands for.
-    public static func swiftBarDir(environment: [String: String], home: String) -> String? {
+    /// `swiftBarDir(environment:home:)` with SwiftBar's `PluginDirectory` preference read by `preference`.
+    static func swiftBarDir(
+        environment: [String: String], home: String, preference: ([String: String]) -> String?
+    ) -> String? {
         let expand = { Paths(home: home, configFile: "", registryDir: "").expandingHome($0) }
         if let dir = environment["ASB_SWIFTBAR_DIR"] { return dir.isEmpty ? nil : expand(dir) }
-        if let dir = swiftBarPreference(environment), !dir.isEmpty { return expand(dir) }
+        if let dir = preference(environment), !dir.isEmpty { return expand(dir) }
         return nil
-    }
-
-    static func swiftBarPreference(_ environment: [String: String]) -> String? {
-        let defaults = ProcessRunner(environment: environment).resolve("defaults") ?? "/usr/bin/defaults"
-        return Herdr.run(defaults, ["read", "com.ameba.SwiftBar", "PluginDirectory"], timeout: 2)?
-            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 

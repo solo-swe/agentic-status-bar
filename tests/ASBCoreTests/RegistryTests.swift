@@ -42,6 +42,20 @@ private func only(_ r: Engine.Reconciled) throws -> ReconciledSession {
     #expect(question.shown == "waiting" && question.reason == "question")
 }
 
+@Test func c2TakesAWaitingStatusWithoutAReasonAsAQuestion() throws {
+    let s = try only(reconcile(
+        state: #""state":"busy","updatedAt":1000"#,
+        registry: #"{"pid":4242,"sessionId":"s1","status":"waiting","statusUpdatedAt":2000}"#))
+    #expect(s.shown == "waiting" && s.reason == "question")
+}
+
+@Test func c2UsesAnyTimedRegistryStatusForAFileWithoutUpdatedAt() throws {
+    let s = try only(reconcile(
+        state: #""state":"busy""#,
+        registry: #"{"pid":4242,"sessionId":"s1","status":"idle","statusUpdatedAt":1}"#))
+    #expect(s.shown == "idle" && s.shownSince == 1)
+}
+
 @Test func c2IgnoresAnOlderOrEqualRegistryStatus() throws {
     for at in [2000, 3000] {
         let s = try only(reconcile(

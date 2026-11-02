@@ -51,6 +51,49 @@ private func tempDir() throws -> URL {
     #expect(!inputs.herdrInstalled && inputs.herdrList == nil)
 }
 
+/// An executable script at `path` that prints `output`.
+private func script(_ path: String, printing output: String) {
+    FileManager.default.createFile(atPath: path, contents: Data("#!/bin/sh\necho '\(output)'\n".utf8),
+                                   attributes: [.posixPermissions: 0o755])
+}
+
+@Test func gatherAsksHerdrForItsAgentsWhenItIsInstalled() throws {
+    let home = try tempDir()
+    defer { try? FileManager.default.removeItem(at: home) }
+    let herdr = home.appendingPathComponent("herdr").path
+    script(herdr, printing: #"{"result":{"agents":[]}}"#)
+    let env = ["ASB_STATE_DIR": home.path, "ASB_HERDR": herdr]
+    let live = LiveInputs(paths: Paths.from(environment: env, home: home.path), environment: env, inspector: FakeProcessInspector())
+    let inputs = live.gather(now: 1000)
+    #expect(inputs.herdrInstalled && inputs.herdrList == #"{"result":{"agents":[]}}"# + "\n")
+}
+
+@Test func gatherReadsATranscriptSharedBySessionsOnceAndSkipsMissingOnes() throws {
+    let home = try tempDir()
+    defer { try? FileManager.default.removeItem(at: home) }
+    let shared = home.appendingPathComponent("shared.jsonl").path
+    let missing = home.appendingPathComponent("missing.jsonl").path
+    try Data("{}\n".utf8).write(to: URL(fileURLWithPath: shared))
+    for (id, transcript) in [("a", shared), ("b", shared), ("c", missing)] {
+        try Data(#"{"v":1,"sessionId":"\#(id)","state":"busy","transcriptPath":"\#(transcript)"}"#.utf8)
+            .write(to: home.appendingPathComponent("\(id).json"))
+    }
+    let env = ["ASB_STATE_DIR": home.path, "ASB_HERDR": home.appendingPathComponent("no-herdr").path]
+    let live = LiveInputs(paths: Paths.from(environment: env, home: home.path), environment: env, inspector: FakeProcessInspector())
+    #expect(Array(live.gather(now: 1000).transcripts.keys) == [shared])
+}
+
+@Test func thePluginLogKeepsOneLinePerKind() throws {
+    let dir = try tempDir()
+    defer { try? FileManager.default.removeItem(at: dir) }
+    PluginLog.once(stateDir: dir.path, key: "a", message: "first")
+    PluginLog.once(stateDir: dir.path, key: "b", message: "second")
+    PluginLog.once(stateDir: dir.path, key: "a", message: "again")
+    let lines = try String(contentsOfFile: dir.appendingPathComponent("plugin.log").path, encoding: .utf8)
+        .split(separator: "\n")
+    #expect(lines.count == 2 && lines[0].hasPrefix("[a] ") && lines[1].hasPrefix("[b] ") && lines[1].hasSuffix(" second"))
+}
+
 @Test func applyDeletesOnlyDeadJsonFilesInsideTheStateDir() throws {
     let dir = try tempDir()
     defer { try? FileManager.default.removeItem(at: dir) }
@@ -75,6 +118,20 @@ private func tempDir() throws -> URL {
 @Test func herdrIsOnlyTheOverrideWhenItIsSet() {
     #expect(Herdr.find(environment: ["ASB_HERDR": "/nonexistent/herdr"]) == nil)
     #expect(Herdr.find(environment: ["ASB_HERDR": "/bin/echo"]) == "/bin/echo")
+}
+
+@Test func withoutTheOverrideHerdrIsLookedForWhereItIsInstalledThenOnThePath() throws {
+    let dir = try tempDir()
+    defer { try? FileManager.default.removeItem(at: dir) }
+    let onPath = dir.appendingPathComponent("herdr").path
+    script(onPath, printing: "")
+    #expect(Herdr.find(environment: ["PATH": "/nowhere:\(dir.path)"], installed: ["/nowhere/herdr"]) == onPath)
+    #expect(Herdr.find(environment: ["PATH": dir.path], installed: ["/bin/echo"]) == "/bin/echo")
+    #expect(Herdr.find(environment: [:], installed: []) == nil)
+}
+
+@Test func herdrRunGivesNothingWhenHerdrCantStart() {
+    #expect(Herdr.run("/nonexistent/herdr", ["agent", "list"], timeout: 2) == nil)
 }
 
 @Test func herdrRunReturnsOutputAndGivesUpOnASlowCommand() {

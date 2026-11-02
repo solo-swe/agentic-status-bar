@@ -10,10 +10,6 @@ struct HookCommand: ParsableCommand {
         abstract: "Record a Claude Code hook event (payload on stdin) in the session's state file."
     )
 
-    func run() {
-        run(input: .standardInput, environment: ProcessInfo.processInfo.environment)
-    }
-
     func run(input: FileHandle, environment: [String: String]) {
         let started = Hook.epochMilliseconds()
         let payload = input.readDataToEndOfFile()

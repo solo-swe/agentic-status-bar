@@ -27,6 +27,24 @@ import Testing
     #expect(ProcessInspectors.fromEnvironment(["ASB_PS_TABLE": file.path]) is TableProcessInspector)
 }
 
+@Test func aProcessTableStartThatDoesntParseIsZero() throws {
+    let file = FileManager.default.temporaryDirectory.appendingPathComponent("asb-ps-\(UUID().uuidString)")
+    defer { try? FileManager.default.removeItem(at: file) }
+    try "4242|1|claude|claude|not a date\n".write(to: file, atomically: true, encoding: .utf8)
+    #expect(TableProcessInspector(path: file.path).process(4242)?.start == 0)
+}
+
+@Test func aMissingProcessTableFileHasNoProcesses() {
+    #expect(TableProcessInspector(path: "/nonexistent/ps-table").processes().isEmpty)
+}
+
+@Test func withoutTheFakeTableTheSystemsProcessTableIsRead() {
+    #if os(macOS)
+    #expect(ProcessInspectors.fromEnvironment([:]) is DarwinProcessInspector)
+    #expect(ProcessInspectors.fromEnvironment(["ASB_PS_TABLE": ""]) is DarwinProcessInspector)
+    #endif
+}
+
 @Test func procStartParsesWithExtraSpaces() {
     let la = TimeZone(identifier: "America/Los_Angeles")!
     let seconds = ProcStart.parse("Mon Oct 19 09:12:03 2026", timeZone: la)

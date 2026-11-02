@@ -21,6 +21,11 @@ private let oneAgent = #""subagents":{"a1":{"type":"Explore","since":\#(now - 5_
     #expect(s.shownSince == now - 90_000)
 }
 
+@Test func aSubagentWithoutAStartTimeIsWaitedOnSinceNow() {
+    let s = checked(#""state":"idle","updatedAt":\#(now - 5_000),"subagents":{"a1":{"type":"Explore"}}"#)
+    #expect(s.shown == "subagents" && s.shownSince == now)
+}
+
 @Test func aParentBlockedInItsTaskOrAgentToolWaitsOnItsSubagent() {
     #expect(checked(#""state":"busy","updatedAt":\#(now),"lastTool":"Agent",\#(oneAgent)"#).shown == "subagents")
     #expect(checked(#""state":"busy","updatedAt":\#(now),"lastTool":"Task",\#(oneAgent)"#).shown == "subagents")

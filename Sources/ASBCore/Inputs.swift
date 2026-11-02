@@ -49,7 +49,7 @@ public struct LiveInputs: Sendable {
         let keep = UInt64(Transcript.tailBytes + 1)
         try? handle.seek(toOffset: size > keep ? size - keep : 0)
         let data = (try? handle.readToEnd()) ?? Data()
-        let modified = (try? FileManager.default.attributesOfItem(atPath: path)[.modificationDate] as? Date) ?? nil
+        let modified = try? FileManager.default.attributesOfItem(atPath: path)[.modificationDate] as? Date
         return TranscriptInput(mtime: modified.map { Int64($0.timeIntervalSince1970) * 1000 } ?? 0, contents: data)
     }
 
@@ -94,12 +94,17 @@ public enum PluginLog {
 public enum Herdr {
     /// herdr's path. `ASB_HERDR`, when set, is the only candidate (used by tests).
     public static func find(environment: [String: String]) -> String? {
+        find(environment: environment, installed: ["/opt/homebrew/bin/herdr", "/usr/local/bin/herdr"])
+    }
+
+    /// herdr's path: `ASB_HERDR` when set, else the first executable of `installed`, then of `PATH`.
+    static func find(environment: [String: String], installed: [String]) -> String? {
         let fm = FileManager.default
         if let only = environment["ASB_HERDR"] {
             return fm.isExecutableFile(atPath: only) ? only : nil
         }
         let path = (environment["PATH"] ?? "").split(separator: ":").map { "\($0)/herdr" }
-        return (["/opt/homebrew/bin/herdr", "/usr/local/bin/herdr"] + path).first { fm.isExecutableFile(atPath: $0) }
+        return (installed + path).first { fm.isExecutableFile(atPath: $0) }
     }
 
     /// Runs herdr and returns its output, or nil if it fails or takes longer than `timeout`. Output goes

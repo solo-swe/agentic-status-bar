@@ -89,6 +89,19 @@ private func afterC3(state: String, extra: String = "", transcript: Data?) -> Re
     #expect(entries.first?["subtype"] as? String == "turn_duration")
 }
 
+@Test func aLongTranscriptWithoutANewlineInItsTailHasNoEntries() {
+    #expect(Transcript.tailEntries(Data(String(repeating: "z", count: Transcript.tailBytes + 10).utf8)).isEmpty)
+}
+
+@Test func withoutAPromptTheWholeTailIsTheTurn() {
+    #expect(Transcript.turnEnd([["type": "system", "subtype": "turn_duration"]]) == .finished)
+}
+
+@Test func aUserEntryWithoutTextIsNeitherAPromptNorATurnEnd() {
+    #expect(!Transcript.isPrompt(["type": "user", "message": ["content": 5]]))
+    #expect(!Transcript.endsTurn(["type": "user"]))
+}
+
 @Test func metaAndToolResultEntriesAreNotPrompts() {
     #expect(!Transcript.isPrompt(["type": "user", "isMeta": true, "message": ["content": "x"]]))
     #expect(!Transcript.isPrompt(["type": "user", "message": ["content": [["type": "tool_result"]]]]))

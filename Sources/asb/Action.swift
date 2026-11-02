@@ -14,10 +14,6 @@ struct ActionCommand: ParsableCommand {
     @Argument(help: "Its arguments, usually a session ID.")
     var arguments: [String] = []
 
-    func run() {
-        run(environment: ProcessInfo.processInfo.environment)
-    }
-
     func run(environment: [String: String]) {
         Actions(paths: Paths.from(environment: environment), environment: environment,
                 runner: ProcessRunner(environment: environment))

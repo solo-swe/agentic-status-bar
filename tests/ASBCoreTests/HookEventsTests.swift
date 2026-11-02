@@ -484,6 +484,55 @@ private var busyWithTwo: [String: Any] { ["state": "busy", "subagents": [
     #expect(str(cleared, "state") == "idle" && !has(cleared, "waitingAgents"))
 }
 
+@Test func withSeveralAgentsStillWaitingTheFirstByIdGivesTheReason() throws {
+    let states = play([
+        try event("PermissionRequest-subagent", agent: "b", tool: "AskUserQuestion"),
+        try event("PermissionRequest-subagent", agent: "a"),
+        try event("PreToolUse", agent: ""),
+    ], start: busyWithTwo)
+    #expect(waiting(states[2]) == ["a": "permission", "b": "question"])
+    #expect(str(states[2], "state") == "waiting" && str(states[2], "reason") == "permission")
+}
+
+@Test func aWaitWithoutASavedStateReturnsToBusy() throws {
+    // A file from before afterWaiting was written: the state to return to is unknown.
+    let start: [String: Any] = ["state": "waiting", "reason": "permission", "waitingAgents": ["a": "permission"]]
+    let states = play([
+        try event("Notification-permission_prompt-subagent"),
+        try event("PostToolUse-subagent", agent: "a"),
+    ], start: start)
+    #expect(str(states[0], "state") == "waiting" && str(states[0], "afterWaiting") == "busy")
+    #expect(str(states[1], "state") == "busy" && !has(states[1], "waitingAgents"))
+}
+
+@Test func aSubagentStartWhileWaitingOnAnUnknownToolKeepsTheWait() throws {
+    let s = written(apply(try payload("SubagentStart"), to: ["state": "waiting", "reason": "permission"], at: 5000))
+    #expect(str(s, "state") == "waiting" && str(s, "reason") == "permission")
+}
+
+@Test func aSubagentStopWithoutAnySubagentsWritesNone() throws {
+    let s = written(apply(try stop("a", tasks: nil), to: ["state": "busy"], at: 5000))
+    #expect(str(s, "state") == "busy" && !has(s, "subagents"))
+}
+
+@Test func theFirstOfDuplicateBackgroundTasksWins() throws {
+    let tasks = [BGTask(id: "a", type: "subagent", agentType: "Explore"), BGTask(id: "a", type: "subagent", agentType: "Plan")]
+    let s = subagents(written(apply(try stop("a", tasks: tasks), to: ["state": "busy"], at: 5000)))
+    #expect(str(s["a"], "type") == "Explore")
+}
+
+@Test func aBackgroundTaskWithoutATypeOrStatusReadsThemAsEmpty() throws {
+    let p = try #require(HookPayload.parse(Data(#"{"hook_event_name":"Stop","background_tasks":[{"id":"a1"}]}"#.utf8)))
+    #expect(p.backgroundTasks == [BGTask(id: "a1", type: "", status: "")])
+}
+
+@Test func valuesThatArentJSONAreNeverEqualAndAreDropped() {
+    struct NotJSON {}
+    #expect(!HookEvents.isEqualJSON(NotJSON(), NotJSON()))
+    let s = HookEvents.hashable(["list": [1, "a", NotJSON()], "odd": NotJSON(), "n": 1])
+    #expect(s == ["list": [1, "a"] as [AnyHashable], "n": 1])
+}
+
 @Test func withoutPermissionRequestTheNotificationWaitIsAsBefore() throws {
     // Hooks installed by an older version: no agent is known, so any tool event ends the wait.
     let states = play([

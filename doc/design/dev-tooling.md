@@ -54,7 +54,7 @@ and each script checks for its own tools.
 | `app:build`, `app:test`, `app:run`, `app:quit` | `mise-tasks/app/*.sh` (shared code in a non-executable `mise-tasks/app/lib.sh`) | `tests/app.sh` and its flags |
 | `bench` | `mise-tasks/bench.sh` | `tests/bench.sh` |
 | `coverage` | `mise-tasks/coverage.sh` (the threshold as its argument, default 99) | new (T-147) |
-| `check` | `mise.toml` (`depends` on `lint`, `test --summary`, `app:test`; `coverage` joins once it passes, T-148) | new |
+| `check` | `mise.toml` (`depends` on `lint`, `test --summary`, `coverage`, `app:test`) | new |
 | `release:package`, `release:appcast`, `release:cask` | `mise-tasks/release/*.sh` | `scripts/package.sh`, `appcast.sh`, `homebrew-cask.sh` (a later task) |
 
 `tests/` keeps the tests, fixtures and conformance cases; `scripts/` keeps the Swift helper scripts. Tasks run from the
