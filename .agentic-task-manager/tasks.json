@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 165,
+    "next_id": 166,
     "workflow": {
       "type": "direct"
     },
@@ -8281,13 +8281,13 @@
       "description": "After T-160, `doc/design/desktop-companion.md` is still out of date in other places. The user asked for the whole doc to be fixed:\n\n- **Settings:** add `companion_color` and `companion_size` (from `Sources/ASBCore/Config.swift` and the Settings view), and drop \"the size comes later\".\n- `tests/app.sh` mentions (Measured, Task breakdown): the commands are now `mise run app:run` and `mise run app:test`.\n- Read the rest of the doc against the code (`App/Sources/Companion/`, `App/Sources/CompanionWindow.swift`) and fix anything else that's out of date.\n\nDecisions stay as they are. Where the code and a decision disagree, say so in the task note.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "doc/design/desktop-companion.md"
       ],
       "created_at": "2026-11-02T02:03:37Z",
-      "updated_at": "2026-11-02T02:04:16Z",
+      "updated_at": "2026-11-02T02:06:54Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:5f67a194",
       "sprint_history": [
@@ -8302,7 +8302,54 @@
         "docs"
       ],
       "started_at": "2026-11-02T02:04:16Z",
-      "started_by": "claude:5f67a194"
+      "started_by": "claude:5f67a194",
+      "commit": "f1fc834605af8389728adcaac9c4dc37942cc20d",
+      "completed_at": "2026-11-02T02:06:54Z",
+      "completed_by": "claude:5f67a194",
+      "notes": [
+        {
+          "at": "2026-11-02T02:06:54Z",
+          "kind": "outcome",
+          "text": "Whole doc checked against the code: Settings (size, color, the tab), window (drawing units, scale, T-140 results), animations and scenes as built, interaction (monitors, hit area, warning click, menu items), energy (WindowServer check), risks, task breakdown (sprints, `mise run app:test`, `StickFigure`). Decisions unchanged; none conflicts with the code.",
+          "by": "claude:5f67a194"
+        }
+      ]
+    },
+    {
+      "id": "T-165",
+      "name": "Release: v0.3.1",
+      "type": "infra",
+      "priority": "P1",
+      "labels": [
+        "release"
+      ],
+      "description": "Release v0.3.1 following `doc/RELEASING.md` › Each release. A patch release:\n\n- the app follows a moved `state_dir` right away (T-158);\n- no force unwraps left (T-157, T-163);\n- the comment and test cleanup and the 99% coverage gate (T-142 to T-149, T-156, T-162);\n- the dev tooling on mise (T-152 to T-154).\n\nThe release workflow itself is unchanged: it still selects the newest Xcode and installs `xcodegen` with Homebrew (moving it to mise is T-155, in the backlog).\n\n## Steps\n1. Set `ASBVersion.current` and `MARKETING_VERSION` to `0.3.1` (build number above 0.3.0's build 5), and the README's build example.\n2. `mise run check`, commit, push, CI green.\n3. Tag `v0.3.1` (only with the user's go), watch the release run.\n4. Check the draft: Gatekeeper, signatures, version and build, `SUFeedURL`, `SUPublicEDKey`, the appcast signature.\n5. The user publishes it as the latest release.\n6. Check the downloads without a login and the Homebrew workflow; an installed v0.3.0 should offer the update.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "Sources/ASBCore/Version.swift",
+        "App/project.yml",
+        "README.md"
+      ],
+      "created_at": "2026-11-02T02:10:08Z",
+      "updated_at": "2026-11-02T02:10:12Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "claude:5f67a194",
+      "sprint_history": [
+        {
+          "sprint": "Quality",
+          "from": "2026-11-02T02:10:08Z"
+        }
+      ],
+      "sprint": "Quality",
+      "with": "user",
+      "components": [
+        "core",
+        "app",
+        "docs"
+      ]
     }
   ]
 }
