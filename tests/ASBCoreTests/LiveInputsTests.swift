@@ -51,6 +51,10 @@ private func tempDir() throws -> URL {
     #expect(!inputs.herdrInstalled && inputs.herdrList == nil)
 }
 
+/// How long tests let a real process run before it counts as hung. Starting a process can take more than a
+/// second while `mise run check` runs the suites in parallel, so tests that expect output wait this long.
+private let slowMachineTimeout: TimeInterval = 10
+
 /// An executable script at `path` that prints `output`.
 private func script(_ path: String, printing output: String) {
     FileManager.default.createFile(atPath: path, contents: Data("#!/bin/sh\necho '\(output)'\n".utf8),
@@ -63,7 +67,8 @@ private func script(_ path: String, printing output: String) {
     let herdr = home.appendingPathComponent("herdr").path
     script(herdr, printing: #"{"result":{"agents":[]}}"#)
     let env = ["ASB_STATE_DIR": home.path, "ASB_HERDR": herdr]
-    let live = LiveInputs(paths: Paths.from(environment: env, home: home.path), environment: env, inspector: FakeProcessInspector())
+    var live = LiveInputs(paths: Paths.from(environment: env, home: home.path), environment: env, inspector: FakeProcessInspector())
+    live.herdrTimeout = slowMachineTimeout
     let inputs = live.gather(now: 1000)
     #expect(inputs.herdrInstalled && inputs.herdrList == #"{"result":{"agents":[]}}"# + "\n")
 }
@@ -135,7 +140,7 @@ private func script(_ path: String, printing output: String) {
 }
 
 @Test func herdrRunReturnsOutputAndGivesUpOnASlowCommand() {
-    #expect(Herdr.run("/bin/echo", ["hello"], timeout: 2) == "hello\n")
+    #expect(Herdr.run("/bin/echo", ["hello"], timeout: slowMachineTimeout) == "hello\n")
     let start = Date()
     #expect(Herdr.run("/bin/sleep", ["5"], timeout: 0.3) == nil)
     #expect(Date().timeIntervalSince(start) < 2)

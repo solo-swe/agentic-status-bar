@@ -8658,13 +8658,13 @@
       "description": "`gatherAsksHerdrForItsAgentsWhenItIsInstalled` in [LiveInputsTests.swift](tests/ASBCoreTests/LiveInputsTests.swift) failed once on 2026-11-13 under the parallel load of `mise run check` (it passed on the rerun and in every other run that day): `herdrList` was nil.\n\n## Cause\nThe test runs a fake `herdr` shell script through `LiveInputs.gather`, which gives herdr the default `herdrTimeout` of 1 s ([Inputs.swift](Sources/ASBCore/Inputs.swift)). With four suites building and testing at once, starting the script can take longer than that, and the result counts as a timeout.\n\n## Change\nIn that test, set `herdrTimeout` on the `LiveInputs` to a generous value (for example 10 s). The production default stays 1 s. Check other tests that run a fake herdr for the same pattern and give them the same treatment.\n\n## Done when\n`mise run check` passes; the test keeps checking that herdr's output is read.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "tests/ASBCoreTests/LiveInputsTests.swift"
       ],
       "created_at": "2026-11-13T14:14:19Z",
-      "updated_at": "2026-11-13T14:20:01Z",
+      "updated_at": "2026-11-13T14:21:24Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "components": [
@@ -8676,7 +8676,9 @@
           "from": "2026-11-13T14:20:01Z"
         }
       ],
-      "sprint": "Background work"
+      "sprint": "Background work",
+      "started_at": "2026-11-13T14:21:24Z",
+      "started_by": "claude:d7ddfe3a"
     }
   ]
 }
