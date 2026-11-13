@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 175,
+    "next_id": 176,
     "workflow": {
       "type": "direct"
     },
@@ -8888,7 +8888,7 @@
       "description": "The app reacts to the `background` state the engine now derives (T-151's design note). T-172 already added it to the Settings symbol and color pickers (`clock.arrow.circlepath`, `clock.fill`, `timer` in `SymbolChoices`), the Help legend and the state names, so the app tests cover every theme state.\n\n## Change\n- The companion: `CompanionScene` counts `background` sessions as working (today only `busy` and `subagents`), so it keeps the calm busy routine while the most urgent state is `background`. Say so in the Help page's companion section if the wording needs it.\n- Notifications: none for `background` (it doesn't need the user). A session that goes from `background` to idle notifies as idle does today (`notify_idle`), with the same delay.\n\n## Tests\nCompanion scene and notification-rule tests in `App/Tests/`. `mise run app:test` passes.\n",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-172"
       ],
@@ -8898,7 +8898,7 @@
         "App/Sources/Companion/CompanionScene.swift"
       ],
       "created_at": "2026-11-13T17:28:19Z",
-      "updated_at": "2026-11-13T18:12:09Z",
+      "updated_at": "2026-11-13T18:13:00Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "sprint_history": [
@@ -8916,7 +8916,18 @@
         "T-151"
       ],
       "started_at": "2026-11-13T18:12:09Z",
-      "started_by": "claude:d7ddfe3a"
+      "started_by": "claude:d7ddfe3a",
+      "commit": "4c1c8216f93b8feb6745b8bae00044c25e50a1f4",
+      "completed_at": "2026-11-13T18:13:00Z",
+      "completed_by": "claude:d7ddfe3a",
+      "notes": [
+        {
+          "at": "2026-11-13T18:13:00Z",
+          "kind": "outcome",
+          "text": "No app code change needed: the companion follows the header, which counts `background` as busy, and notifications only fire for waiting/idle. Tests pin both: background plays the busy routine, never notifies, and its end notifies idle right away (since = when the turn ended). mise run app:test passes.",
+          "by": "claude:d7ddfe3a"
+        }
+      ]
     },
     {
       "id": "T-174",
@@ -8931,13 +8942,14 @@
       "use_cases": [],
       "status": "todo",
       "dependencies": [
-        "T-173"
+        "T-173",
+        "T-175"
       ],
       "files": [],
       "created_at": "2026-11-13T17:28:19Z",
-      "updated_at": "2026-11-13T17:28:19Z",
+      "updated_at": "2026-11-13T18:35:41Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:d7ddfe3a",
       "sprint_history": [
         {
           "sprint": "Background work",
@@ -8948,7 +8960,61 @@
       "with": "user",
       "related": [
         "T-151"
+      ],
+      "notes": [
+        {
+          "at": "2026-11-13T18:35:26Z",
+          "kind": "handoff",
+          "text": "Paused for a fix. Monitor: the hook recorded it at Stop (backgroundShells). Clock showed only briefly: background shells run as `/bin/zsh -c source ~/.claude/shell-snapshots/…`, not bash; the only bash child is the status line. The user chose to drop the process fallback (T-175). Resume: the shell check (sleep 1801, kill it) and the /loop wakeup check, after T-175.",
+          "by": "claude:d7ddfe3a"
+        }
       ]
+    },
+    {
+      "id": "T-175",
+      "name": "Fix: drop the background state's process fallback",
+      "type": "bugfix",
+      "priority": "P1",
+      "labels": [
+        "checks",
+        "swift-core"
+      ],
+      "description": "The live check (T-174) showed the `background` state (T-172) flashing to idle. Its process fallback counts a recorded shell only while the `claude` process has a `bash` child, but Claude Code runs background shells and monitors in the user's login shell through its shell-snapshot wrapper (here `zsh -c source ~/.claude/shell-snapshots/… eval '<command>'`). The `bash` child seen in T-151 was the user's status line script (or a tool shell during a turn).\n\n## Change (agreed with the user)\n- Drop the process check: a recorded shell counts for up to `backgroundShellLimit` (30 minutes) after it was first seen, nothing more. When a shell ends, Claude Code wakes the session and the next `Stop` drops it from `backgroundShells`; the 30 minutes bound anything missed.\n- `Checks.backgroundWork` no longer takes the process table; remove `hasShellChild`.\n\n## Tests and docs\n- Unit tests and conformance cases: remove the process requirement; `background-shell-without-bash-child` becomes a case showing a recorded shell counts without any child process (rename it).\n- PRD › Waiting on background work and the T-172 wording.\n- [tests/fixtures/README.md](tests/fixtures/README.md#background-work-while-the-turn-has-ended): correct the claim that shells and monitors run as a `bash` child; record the wrapper command line instead.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "in_progress",
+      "dependencies": [],
+      "files": [
+        "Sources/ASBCore/BackgroundState.swift",
+        "Sources/ASBCore/Engine.swift",
+        "tests/ASBCoreTests/BackgroundStateTests.swift",
+        "tests/conformance/",
+        "doc/PRD.md",
+        "tests/fixtures/README.md"
+      ],
+      "created_at": "2026-11-13T18:35:38Z",
+      "updated_at": "2026-11-13T18:35:42Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "claude:d7ddfe3a",
+      "sprint_history": [
+        {
+          "sprint": "Background work",
+          "from": "2026-11-13T18:35:38Z"
+        }
+      ],
+      "sprint": "Background work",
+      "components": [
+        "core",
+        "cli",
+        "docs"
+      ],
+      "related": [
+        "T-151",
+        "T-172",
+        "T-174"
+      ],
+      "started_at": "2026-11-13T18:35:42Z",
+      "started_by": "claude:d7ddfe3a"
     }
   ]
 }

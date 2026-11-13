@@ -1,5 +1,5 @@
 {
-  "description": "A recorded background shell whose bash child is gone (it ended without a hook) doesn't count: the session is idle. A caffeinate child is not a shell",
+  "description": "A recorded background shell counts without any process check: Claude Code runs it in the user's login shell through its wrapper, which no child's name gives away (tests/fixtures/README.md › Background work while the turn has ended)",
   "input": {
     "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
     "config": "stale_minutes=0\n",
@@ -11,12 +11,12 @@
   },
   "expected": {
     "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
-    "header": {"state": "idle", "symbol": "zzz", "color": "#B25000,#FFD60A", "count": 1},
+    "header": {"state": "busy", "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "count": 1},
     "sessions": [
       {"sessionId": "s1", "project": "proj", "title": "", "cwd": "/x/proj", "kind": "interactive",
-       "shown": "idle", "since": 1792890960000, "label": "proj                                            ",
-       "word": "idle", "detail": "2m", "muted": false, "focusable": false,
-       "symbol": "zzz", "color": "#B25000,#FFD60A", "subagents": []}
+       "shown": "background", "since": 1792890900000, "label": "proj                                            ",
+       "word": "waiting on background work", "detail": "3m", "muted": false, "focusable": false,
+       "symbol": "clock.arrow.circlepath", "color": "#6E6E73,#AEAEB2", "subagents": []}
     ]
   }
 }

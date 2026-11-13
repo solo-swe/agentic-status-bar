@@ -47,8 +47,13 @@ waiting on a `ScheduleWakeup`.
 
 - **Shells and monitors look the same.** Both are listed in `background_tasks` as `type: "shell"`, with `id`,
   `command`, `description` and `status: "running"`; nothing in the payload tells a `Monitor` from a
-  `run_in_background` Bash. TaskStop calls a monitor a `local_bash` task. Both run as a `bash` child of the
-  `claude` process (`Stop-background-tasks.json`).
+  `run_in_background` Bash. TaskStop calls a monitor a `local_bash` task (`Stop-background-tasks.json`).
+- **Their processes don't give them away.** A background shell is a child of the `claude` process running the
+  user's login shell through Claude Code's wrapper, e.g. `/bin/zsh -c source ~/.claude/shell-snapshots/snapshot-zsh-….sh
+  … && eval 'sleep 1801' …` (seen in the live check, T-174). The `bash` children seen during the spike were the
+  user's status line script (`bash ~/.claude/statusline-command.sh`, run now and then) and the tool shells of the
+  running turn, not the background shells. Between turns, Claude Code's session registry gave the session
+  `status: "shell"` while a background shell ran.
 - **A subagent** is listed as `type: "subagent"` with its `agent_type`. A subagent's own `SubagentStop` lists the
   parent's tasks too, and its own background shells while they run (`SubagentStop-background-tasks.json`); so does
   the empty `SubagentStop` after every `Stop`. A subagent waiting on its own background shell fires `SubagentStop`,

@@ -121,10 +121,12 @@ Quit                                                            ⚙
   "?" after the stale threshold without activity.
 - **Waiting on background work:** an idle session (no prompt open, no subagent running) is shown as `background`
   (`clock.arrow.circlepath`) while it waits on its own background work: a background shell or `Monitor` the hook
-  recorded less than 30 minutes ago, as long as its `claude` process still has a `bash` child, or a `/loop` wakeup
-  that isn't due yet (state-file-schema.md › Background work). The payload can't tell a monitor from a background
-  shell, so both count; the 30 minutes cover a monitor's whole life and keep a dev server left running from hiding
-  the idle state for hours. It ranks and counts like busy; C5 doesn't apply (the limit and the due time bound it).
+  recorded less than 30 minutes ago, or a `/loop` wakeup that isn't due yet (state-file-schema.md › Background
+  work). The payload can't tell a monitor from a background shell, so both count; the 30 minutes cover a monitor's
+  whole life and keep a dev server left running from hiding the idle state for hours. A shell that ends wakes the
+  session, and the next `Stop` drops it. There is no process check: background shells run in the user's login
+  shell through Claude Code's wrapper, which no process name gives away. It ranks and counts like busy; C5 doesn't
+  apply (the limit and the due time bound it).
 - **Click a row:** focus the session's herdr pane (see Architecture: focus) and close the list. Rows without a herdr
   pane do nothing on click.
 - **Row menu** (`…` on hover, or right-click): Focus (in herdr), Mute project for 1 hour / for today (or Unmute
