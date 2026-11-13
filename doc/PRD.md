@@ -86,7 +86,7 @@ session list.
 | 2 | Any session waiting (permission prompt, question, MCP input) | Red icon + count of waiting sessions |
 | 3 | Any session idle | Yellow icon + count of idle sessions |
 | 4 | Any session uncertain ("?") | Gray icon + count |
-| 5 | All sessions busy (or waiting on subagents) | Dimmed icon + count of sessions |
+| 5 | All sessions busy (or waiting on subagents or background work) | Dimmed icon + count of sessions |
 | 6 | Every session is muted | Gray `bell.slash`, no count |
 | 7 | No tracked sessions | Faint icon, no count |
 
@@ -110,8 +110,8 @@ Quit                                                            ⚙
 - **Order:** waiting, idle, uncertain, busy, then muted; within a state, longest in state first.
 - **Label:** project (cwd basename) + task title. Title source in order: herdr terminal title, Claude Code session
   name, first user prompt (80 characters kept).
-- **Right side:** state word (permission, question, idle, working, no activity, waiting on N subagents) and time in
-  state.
+- **Right side:** state word (permission, question, idle, working, no activity, waiting on N subagents, waiting on
+  background work) and time in state.
 - **Subagents** appear indented under their parent, never as separate rows, and never raise the menu-bar state on
   their own.
 - **Waiting on subagents:** a parent with running subagents is shown in its own state, `subagents` (hourglass), when
@@ -119,6 +119,12 @@ Quit                                                            ⚙
   a foreground agent). It ranks and counts like busy; a waiting parent stays waiting, and an interrupt (C3) wins, since
   it can stop subagents without a `SubagentStop`. C5 applies, so a parent whose `SubagentStop` was missed turns into
   "?" after the stale threshold without activity.
+- **Waiting on background work:** an idle session (no prompt open, no subagent running) is shown as `background`
+  (`clock.arrow.circlepath`) while it waits on its own background work: a background shell or `Monitor` the hook
+  recorded less than 30 minutes ago, as long as its `claude` process still has a `bash` child, or a `/loop` wakeup
+  that isn't due yet (state-file-schema.md › Background work). The payload can't tell a monitor from a background
+  shell, so both count; the 30 minutes cover a monitor's whole life and keep a dev server left running from hiding
+  the idle state for hours. It ranks and counts like busy; C5 doesn't apply (the limit and the due time bound it).
 - **Click a row:** focus the session's herdr pane (see Architecture: focus) and close the list. Rows without a herdr
   pane do nothing on click.
 - **Row menu** (`…` on hover, or right-click): Focus (in herdr), Mute project for 1 hour / for today (or Unmute
@@ -210,7 +216,7 @@ herdr without changing the rest.
 
 ## State model
 
-Three stored states — `busy`, `waiting` and `idle` — plus `uncertain` and `subagents`, which only the checks derive
+Three stored states — `busy`, `waiting` and `idle` — plus `uncertain`, `subagents` and `background`, which only the checks derive
 and never write. A session that ends has its file deleted.
 
 **Hook → state**

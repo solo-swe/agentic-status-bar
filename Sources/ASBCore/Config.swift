@@ -3,7 +3,9 @@ import Foundation
 /// Settings from the config file (`key=value` lines). See doc/state-file-schema.md › Config file.
 public struct Config: Equatable, Sendable {
     /// Menu-bar states a theme gives an icon and a color; `icon_<state>` and `color_<state>` override one.
-    public static let themeStates = ["waiting", "idle", "uncertain", "busy", "subagents", "muted", "none", "warning"]
+    public static let themeStates = [
+        "waiting", "idle", "uncertain", "busy", "subagents", "background", "muted", "none", "warning",
+    ]
 
     /// Every key the config file may set; lines with other keys are ignored.
     public static let keys: [String] = [

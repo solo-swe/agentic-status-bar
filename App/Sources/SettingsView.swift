@@ -28,6 +28,7 @@ enum SettingsView {
         switch state {
         case "uncertain": "No activity"
         case "subagents": "Waiting on subagents"
+        case "background": "Waiting on background work"
         case "none": "No sessions"
         case "busy": "Working"
         default: state.prefix(1).uppercased() + state.dropFirst()

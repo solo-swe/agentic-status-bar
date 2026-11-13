@@ -8772,7 +8772,7 @@
       "description": "First half of the `background` state designed in T-151 (its design note; [findings](tests/fixtures/README.md#background-work-while-the-turn-has-ended)). The hook records what the engine needs; the engine (next task) decides what to show.\n\n## Change\nTwo optional, additive state file fields, written by `Stop` and `SubagentStop` when the payload has the lists (the same rules as `subagents` for older events, see Writer rules › Newer wins):\n- `backgroundShells`: `{ \"<task id>\": <epoch ms first seen> }` for each `background_tasks` entry with `type: \"shell\"` and a running status. A shell already in the file keeps its first-seen time; one no longer listed is removed; the field is dropped when empty. (`run_in_background` shells and monitors look the same; both count.)\n- `wakeupAt`: epoch ms of the earliest due time among `session_crons` entries with `recurring: false`. Their `schedule` is a cron line `M H * * *`: the next local time at that hour and minute after the event. Dropped when there is none. Recurring entries (a fixed-interval `/loop`, not captured yet) are ignored for now.\n- `SessionStart` (other than `compact`) drops both, like `subagents`.\n\n## Docs\n`doc/state-file-schema.md`: the two fields and the event rows, in the same commit.\n\n## Tests\nEvent-order tests in `HookEventsTests` from `Stop-background-tasks.json`, `SubagentStop-background-tasks.json` and `Stop-session-crons.json`: first-seen time kept across two `Stop`s, a shell gone from the list removed, a stopped shell (missing from the next `Stop`) removed, `wakeupAt` across midnight, an older `SubagentStop` changing nothing.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/HookEvents.swift",
@@ -8781,7 +8781,7 @@
         "doc/state-file-schema.md"
       ],
       "created_at": "2026-11-13T17:28:19Z",
-      "updated_at": "2026-11-13T17:31:23Z",
+      "updated_at": "2026-11-13T17:44:23Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "sprint_history": [
@@ -8798,7 +8798,18 @@
         "T-151"
       ],
       "started_at": "2026-11-13T17:31:23Z",
-      "started_by": "claude:d7ddfe3a"
+      "started_by": "claude:d7ddfe3a",
+      "commit": "4c00f9701b14ddbe289bbfc18cdfff57b999e5fc",
+      "completed_at": "2026-11-13T17:44:23Z",
+      "completed_by": "claude:d7ddfe3a",
+      "notes": [
+        {
+          "at": "2026-11-13T17:44:23Z",
+          "kind": "outcome",
+          "text": "Stop and SubagentStop record `backgroundShells` (first-seen times) and `wakeupAt` (next due one-shot cron, local time; the zone is read only when one is present). Schema doc updated. mise run check passes; bench is over budget only from machine load: an interleaved A/B against T-170 gave 12.81 vs 12.70 ms on PreToolUse, +0.5 ms on a Stop with a wakeup.",
+          "by": "claude:d7ddfe3a"
+        }
+      ]
     },
     {
       "id": "T-172",
@@ -8812,7 +8823,7 @@
       "description": "Second half of the `background` state designed in T-151 (its design note). Derived only in the snapshot, like `subagents` and `uncertain`.\n\n## Rule\nA session shows `background` when, after C1 to C4 and the subagents state, it is `idle` (not waiting, no running subagents) and either:\n- it has a `backgroundShells` entry first seen less than 30 minutes ago **and** its `claude` process still has a `bash` child (the process fallback: no child, no shell); or\n- its `wakeupAt` is still ahead of now.\n\n`since` is the earliest first-seen time, or the file's `stateSince` for a wakeup. C5 doesn't apply to it (the 30 minutes and the due time bound it).\n\n## Look\nWord \"waiting on background work\", symbol `hourglass`, busy's color; it ranks and counts like `busy`. Config keys `icon_background` and `color_background` (the `<state>` list in the state file schema's config table).\n\n## Docs and tests\n- `doc/snapshot-schema.md` (`shown`, `word`), `doc/state-file-schema.md` (config keys), the PRD's state model and checks.\n- Conformance cases written by hand from these rules: a recent shell, a shell older than 30 min (idle), a shell without a bash child (idle), a pending wakeup, a passed wakeup (idle), waiting and subagents winning, a theme override.\n- Unit tests for the new check.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-171"
       ],
@@ -8828,9 +8839,9 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-11-13T17:28:19Z",
-      "updated_at": "2026-11-13T17:28:19Z",
+      "updated_at": "2026-11-13T17:50:52Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:d7ddfe3a",
       "sprint_history": [
         {
           "sprint": "Background work",
@@ -8844,6 +8855,16 @@
       ],
       "related": [
         "T-151"
+      ],
+      "started_at": "2026-11-13T17:44:27Z",
+      "started_by": "claude:d7ddfe3a",
+      "notes": [
+        {
+          "at": "2026-11-13T17:50:52Z",
+          "kind": "note",
+          "text": "Symbol changed with the user: `hourglass` is taken by `subagents`, so `background` uses `clock.arrow.circlepath` (default, monochrome) and `clock.fill` (high contrast).",
+          "by": "claude:d7ddfe3a"
+        }
       ]
     },
     {

@@ -1,0 +1,27 @@
+{
+  "description": "An idle session with a scheduled wakeup due in a minute waits on background work since it went idle; a passed wakeup leaves the other session idle",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "state": {
+      "s1.json": {"v": 1, "sessionId": "s1", "cwd": "/x/loop", "state": "idle",
+                  "updatedAt": 1792890960000, "stateSince": 1792890960000, "wakeupAt": 1792891140000},
+      "s2.json": {"v": 1, "sessionId": "s2", "cwd": "/x/done", "state": "idle",
+                  "updatedAt": 1792891020000, "stateSince": 1792891020000, "wakeupAt": 1792891080000}
+    }
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "idle", "symbol": "zzz", "color": "#B25000,#FFD60A", "count": 1},
+    "sessions": [
+      {"sessionId": "s2", "project": "done", "title": "", "cwd": "/x/done", "kind": "interactive",
+       "shown": "idle", "since": 1792891020000, "label": "done                                            ",
+       "word": "idle", "detail": "1m", "muted": false, "focusable": false,
+       "symbol": "zzz", "color": "#B25000,#FFD60A", "subagents": []},
+      {"sessionId": "s1", "project": "loop", "title": "", "cwd": "/x/loop", "kind": "interactive",
+       "shown": "background", "since": 1792890960000, "label": "loop                                            ",
+       "word": "waiting on background work", "detail": "2m", "muted": false, "focusable": false,
+       "symbol": "clock.arrow.circlepath", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

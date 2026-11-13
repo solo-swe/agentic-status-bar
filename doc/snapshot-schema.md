@@ -30,7 +30,7 @@ The most urgent state over the sessions that aren't muted, checked in this order
 | `waiting` | any waiting (muted ones included: waiting breaks through mutes) | waiting sessions |
 | `idle` | any idle | idle sessions |
 | `uncertain` | any uncertain | uncertain sessions |
-| `busy` | any session left (busy or waiting on subagents) | those sessions |
+| `busy` | any session left (busy, or waiting on subagents or background work) | those sessions |
 | `muted` | sessions exist but all are muted | absent |
 | `none` | no sessions | absent |
 
@@ -43,7 +43,7 @@ The most urgent state over the sessions that aren't muted, checked in this order
 
 ## `sessions[]`
 
-Sorted by rank (waiting 0, idle 1, uncertain 2, busy and subagents 3, muted 5), then by `since`, oldest first.
+Sorted by rank (waiting 0, idle 1, uncertain 2, busy, subagents and background 3, muted 5), then by `since`, oldest first.
 Sessions of hidden kinds (filters) are left out entirely.
 
 | Field | Type | Meaning |
@@ -53,11 +53,11 @@ Sessions of hidden kinds (filters) are left out entirely.
 | `title` | string | herdr terminal title, else a user-given session name, else the prompt preview; `""` when none |
 | `cwd` | string | Absent when unknown |
 | `kind` | string | `interactive`, `headless`, `ide` or `desktop` |
-| `shown` | string | `waiting`, `idle`, `uncertain`, `busy` or `subagents` (after checks C1–C6) |
+| `shown` | string | `waiting`, `idle`, `uncertain`, `busy`, `subagents` or `background` (after checks C1–C6) |
 | `reason` | string | `permission` or `question` when waiting |
 | `since` | integer, epoch ms | Since when the session is in `shown` |
 | `label` | string | `project — title` (or `project`), `\|` replaced by `│`, `:name:` broken with a zero-width space, cut to 48 characters with `…` or padded with spaces to 48. Shaped for a fixed-width text menu (the SwiftBar plugin's); the app builds its row text from `project` and `title` instead |
-| `word` | string | `permission`, `question`, `idle`, `no activity`, `waiting on N subagent(s)` or `working` |
+| `word` | string | `permission`, `question`, `idle`, `no activity`, `waiting on N subagent(s)`, `waiting on background work` or `working` |
 | `detail` | string | Time in state (`12s`, `4m`, `2h`, `3d`), or `muted today` / `muted until HH:MM` (local time) when muted |
 | `muted` | boolean | Muted and not waiting |
 | `muteUntil` | integer, epoch ms | When the project's mute ends; present whenever the project is muted, also while waiting |

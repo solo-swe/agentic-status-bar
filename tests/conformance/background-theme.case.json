@@ -1,0 +1,19 @@
+{
+  "description": "The background state has its own icon and color per theme (high contrast: clock.fill, busy's color), and icon_background and color_background override them",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "theme=high_contrast\ncolor_background=#112233,#445566\nstale_minutes=0\n",
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "cwd": "/x/proj", "state": "idle",
+                          "updatedAt": 1792890960000, "stateSince": 1792890960000, "wakeupAt": 1792891140000}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "busy", "symbol": "bolt.fill", "color": "#000000,#FFFFFF", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "proj", "title": "", "cwd": "/x/proj", "kind": "interactive",
+       "shown": "background", "since": 1792890960000, "label": "proj                                            ",
+       "word": "waiting on background work", "detail": "2m", "muted": false, "focusable": false,
+       "symbol": "clock.fill", "color": "#112233,#445566", "subagents": []}
+    ]
+  }
+}

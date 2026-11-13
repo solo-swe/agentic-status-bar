@@ -12,13 +12,13 @@ public struct Theme: Equatable, Sendable {
     public static let standard = Theme(
         icons: [
             "waiting": "exclamationmark.circle.fill", "idle": "zzz", "uncertain": "questionmark.circle",
-            "busy": "sparkle", "subagents": "hourglass", "muted": "bell.slash", "none": "sparkle",
-            "warning": "exclamationmark.triangle",
+            "busy": "sparkle", "subagents": "hourglass", "background": "clock.arrow.circlepath", "muted": "bell.slash",
+            "none": "sparkle", "warning": "exclamationmark.triangle",
         ],
         colors: [
             "waiting": "#D70015,#FF453A", "idle": "#B25000,#FFD60A", "uncertain": "#8E8E93,#98989D",
-            "busy": "#6E6E73,#AEAEB2", "subagents": "#6E6E73,#AEAEB2", "muted": "#8E8E93,#98989D",
-            "none": "#C7C7CC,#48484A", "warning": "#B25000,#FFD60A",
+            "busy": "#6E6E73,#AEAEB2", "subagents": "#6E6E73,#AEAEB2", "background": "#6E6E73,#AEAEB2",
+            "muted": "#8E8E93,#98989D", "none": "#C7C7CC,#48484A", "warning": "#B25000,#FFD60A",
         ])
 
     /// The built-in themes by their `theme` config value.
@@ -27,24 +27,25 @@ public struct Theme: Equatable, Sendable {
         "monochrome": Theme(
             icons: [
                 "waiting": "exclamationmark.circle.fill", "idle": "zzz", "uncertain": "questionmark.circle",
-                "busy": "sparkle", "subagents": "hourglass", "muted": "bell.slash", "none": "sparkle",
-                "warning": "exclamationmark.triangle",
+                "busy": "sparkle", "subagents": "hourglass", "background": "clock.arrow.circlepath",
+                "muted": "bell.slash", "none": "sparkle", "warning": "exclamationmark.triangle",
             ],
             colors: [
                 "waiting": "#1D1D1F,#F5F5F7", "idle": "#1D1D1F,#F5F5F7", "uncertain": "#6E6E73,#AEAEB2",
-                "busy": "#6E6E73,#AEAEB2", "subagents": "#6E6E73,#AEAEB2", "muted": "#8E8E93,#98989D",
-                "none": "#C7C7CC,#48484A", "warning": "#1D1D1F,#F5F5F7",
+                "busy": "#6E6E73,#AEAEB2", "subagents": "#6E6E73,#AEAEB2", "background": "#6E6E73,#AEAEB2",
+                "muted": "#8E8E93,#98989D", "none": "#C7C7CC,#48484A", "warning": "#1D1D1F,#F5F5F7",
             ]),
         "high_contrast": Theme(
             icons: [
                 "waiting": "exclamationmark.octagon.fill", "idle": "moon.zzz.fill",
                 "uncertain": "questionmark.circle.fill", "busy": "bolt.fill", "subagents": "hourglass.circle.fill",
-                "muted": "bell.slash.fill", "none": "circle.dotted", "warning": "exclamationmark.triangle.fill",
+                "background": "clock.fill", "muted": "bell.slash.fill", "none": "circle.dotted",
+                "warning": "exclamationmark.triangle.fill",
             ],
             colors: [
                 "waiting": "#FF0000,#FF453A", "idle": "#C93400,#FFD60A", "uncertain": "#5856D6,#BF5AF2",
-                "busy": "#000000,#FFFFFF", "subagents": "#000000,#FFFFFF", "muted": "#636366,#AEAEB2",
-                "none": "#8E8E93,#636366", "warning": "#C93400,#FFD60A",
+                "busy": "#000000,#FFFFFF", "subagents": "#000000,#FFFFFF", "background": "#000000,#FFFFFF",
+                "muted": "#636366,#AEAEB2", "none": "#8E8E93,#636366", "warning": "#C93400,#FFD60A",
             ]),
     ]
 

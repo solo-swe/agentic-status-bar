@@ -116,7 +116,7 @@ public struct Snapshot: Codable, Equatable, Sendable {
 
     /// A session's display state after the checks.
     public enum ShownState: String, Codable, Sendable {
-        case waiting, idle, uncertain, busy, subagents
+        case waiting, idle, uncertain, busy, subagents, background
     }
 
     /// A running subagent, shown indented under its parent.

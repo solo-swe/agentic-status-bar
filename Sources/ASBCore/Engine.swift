@@ -142,6 +142,7 @@ public enum Engine {
         sessions = Checks.interrupts(sessions, transcripts: inputs.transcripts)
         sessions = Checks.approvedTools(sessions, processes: inputs.processes)
         sessions = Checks.subagents(sessions, now: inputs.now)
+        sessions = Checks.backgroundWork(sessions, now: inputs.now, processes: inputs.processes)
         sessions = Checks.staleness(
             sessions, staleMinutes: config.staleMinutes, now: inputs.now,
             transcripts: inputs.transcripts, processes: inputs.processes)

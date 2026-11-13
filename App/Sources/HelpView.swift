@@ -13,7 +13,7 @@ enum HelpLegend {
     }
 
     /// The menu bar shows the first of these that applies; the count is the sessions in that state.
-    static let order = ["warning", "waiting", "idle", "uncertain", "busy", "subagents", "muted", "none"]
+    static let order = ["warning", "waiting", "idle", "uncertain", "busy", "subagents", "background", "muted", "none"]
 
     static let meanings: [String: String] = [
         "warning": "Some state files can't be read. The count is all sessions.",
@@ -22,6 +22,7 @@ enum HelpLegend {
         "uncertain": "A working session has gone quiet for longer than the \u{201C}no activity\u{201D} time in Settings.",
         "busy": "Every session is working; nothing needs you.",
         "subagents": "In the list: a session whose turn ended but whose subagents still run. It counts as working.",
+        "background": "In the list: a session whose turn ended while its own background work runs: a monitor or background command (for up to 30 minutes) or a /loop wakeup that isn\u{2019}t due yet. It counts as working.",
         "muted": "Every session is in a muted project. No count.",
         "none": "No Claude Code sessions are running. No count.",
     ]

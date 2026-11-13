@@ -71,7 +71,7 @@ public enum MenuModel {
         case "waiting": return 0
         case "idle": return 1
         case "uncertain": return 2
-        case "busy", "subagents": return 3
+        case "busy", "subagents", "background": return 3
         default: return 4
         }
     }
@@ -80,7 +80,7 @@ public enum MenuModel {
         s.shownSince ?? s.file.stateSince ?? now
     }
 
-    /// The rows, most urgent first (waiting, idle, uncertain, busy or on subagents, then muted), each
+    /// The rows, most urgent first (waiting, idle, uncertain, busy or on subagents or background work, then muted), each
     /// state's longest-waiting first.
     public static func rows(_ sessions: [ReconciledSession], _ context: Context) -> [Snapshot.Session] {
         let ordered = sessions.enumerated().sorted { a, b in
@@ -140,6 +140,7 @@ public enum MenuModel {
         case "subagents":
             let n = s.file.subagents.count
             return "waiting on \(n) subagent\(n == 1 ? "" : "s")"
+        case "background": return "waiting on background work"
         default: return "working"
         }
     }

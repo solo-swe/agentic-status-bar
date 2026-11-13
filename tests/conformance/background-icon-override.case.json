@@ -1,0 +1,19 @@
+{
+  "description": "icon_background replaces the default theme's background icon; the color stays busy's",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "icon_background=timer\nstale_minutes=0\n",
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "cwd": "/x/proj", "state": "idle",
+                          "updatedAt": 1792890960000, "stateSince": 1792890960000, "wakeupAt": 1792891140000}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "busy", "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "proj", "title": "", "cwd": "/x/proj", "kind": "interactive",
+       "shown": "background", "since": 1792890960000, "label": "proj                                            ",
+       "word": "waiting on background work", "detail": "2m", "muted": false, "focusable": false,
+       "symbol": "timer", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

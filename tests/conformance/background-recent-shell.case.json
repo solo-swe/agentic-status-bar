@@ -1,0 +1,22 @@
+{
+  "description": "An idle session with a background shell first seen 3 minutes ago, while claude has a bash child, waits on background work since the shell was first seen; it counts as busy in the header",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "processes": [{"pid": 4242, "ppid": 1, "start": 1792426323, "comm": "claude"},
+                  {"pid": 4300, "ppid": 4242, "start": 1792890900, "comm": "/bin/bash"}],
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "pid": 4242, "procStart": "Mon Oct 19 09:12:03 2026", "cwd": "/x/proj",
+                          "state": "idle", "updatedAt": 1792890960000, "stateSince": 1792890960000,
+                          "backgroundShells": {"bk3m9qx2p": 1792890900000}}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "busy", "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "count": 1},
+    "sessions": [
+      {"sessionId": "s1", "project": "proj", "title": "", "cwd": "/x/proj", "kind": "interactive",
+       "shown": "background", "since": 1792890900000, "label": "proj                                            ",
+       "word": "waiting on background work", "detail": "3m", "muted": false, "focusable": false,
+       "symbol": "clock.arrow.circlepath", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

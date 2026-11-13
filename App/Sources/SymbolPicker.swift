@@ -12,7 +12,7 @@ enum SymbolChoices {
         "moon", "pause.circle.fill", "pause.circle", "checkmark.circle.fill", "checkmark.circle", "cup.and.saucer.fill",
         "sparkle", "sparkles", "star.fill",
         "bolt.fill", "bolt.circle.fill", "flame.fill", "hare.fill", "tortoise.fill", "cpu",
-        "hourglass", "hourglass.circle.fill", "clock.fill",
+        "hourglass", "hourglass.circle.fill", "clock.arrow.circlepath", "clock.fill", "timer",
         "circle.fill", "circle", "circle.dotted", "smallcircle.filled.circle", "record.circle", "circle.hexagongrid.fill",
         "dot.radiowaves.left.and.right", "antenna.radiowaves.left.and.right", "waveform",
         "terminal", "terminal.fill", "bubble.left.fill", "text.bubble.fill", "person.2.fill", "eye.slash",

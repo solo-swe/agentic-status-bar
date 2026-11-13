@@ -101,7 +101,7 @@ field as it is.
   the form `M H * * *`: the next time, in the hook's local time zone, at that hour and minute (a minute that is
   under way counts as not passed). Recurring entries and other schedules are ignored; dropped when none is left.
 
-The hook only records them; what a reader shows from them is its own decision.
+The hook only records them; the engine shows the `background` state from them (PRD.md › Waiting on background work).
 
 ### Agents waiting on a prompt
 
@@ -212,5 +212,5 @@ otherwise the default stays. Writers change one line and keep the others.
 | `companion_color` | empty | `#RRGGBB`, or `#RRGGBB,#RRGGBB` (light, dark); empty: dark on a light desktop, light on a dark one |
 | `debug_hook_log` | `0` | `0` or `1`: `asb hook` appends every payload it receives, with the environment variables it reads and its parent pid, to `<state dir>/hook-payloads.jsonl` (one JSON object per line; nothing is appended once the file reaches 5 MB). For debugging; turn it off and delete the file afterwards |
 
-`<state>` is one of `waiting`, `idle`, `uncertain`, `busy`, `subagents`, `muted`, `none`, `warning`. All values
+`<state>` is one of `waiting`, `idle`, `uncertain`, `busy`, `subagents`, `background`, `muted`, `none`, `warning`. All values
 other than colors may contain only letters, digits and `_ . / ~ -`.
