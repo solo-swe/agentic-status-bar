@@ -25,6 +25,8 @@ final class CompanionSceneTests: XCTestCase {
         XCTAssertEqual(CompanionScene.from(snapshot(.waiting, [session(.waiting, reason: "permission")])), .waiting(reason: "permission"))
         XCTAssertEqual(CompanionScene.from(snapshot(.busy, [session(.busy)])), .busy(subagents: 0))
         XCTAssertEqual(CompanionScene.from(snapshot(.busy, [session(.subagents, subagents: 2)])), .busy(subagents: 2))
+        XCTAssertEqual(CompanionScene.from(snapshot(.busy, [session(.background)])), .busy(subagents: 0),
+                       "waiting on background work plays the calm busy routine")
         XCTAssertEqual(CompanionScene.from(snapshot(.uncertain, [session(.uncertain)])), .uncertain)
         XCTAssertEqual(CompanionScene.from(snapshot(.idle, [session(.idle)])), .idle)
         XCTAssertEqual(CompanionScene.from(snapshot(.muted, [session(.busy, muted: true)])), .muted)

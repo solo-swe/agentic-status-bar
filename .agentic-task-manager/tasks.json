@@ -8823,7 +8823,7 @@
       "description": "Second half of the `background` state designed in T-151 (its design note). Derived only in the snapshot, like `subagents` and `uncertain`.\n\n## Rule\nA session shows `background` when, after C1 to C4 and the subagents state, it is `idle` (not waiting, no running subagents) and either:\n- it has a `backgroundShells` entry first seen less than 30 minutes ago **and** its `claude` process still has a `bash` child (the process fallback: no child, no shell); or\n- its `wakeupAt` is still ahead of now.\n\n`since` is the earliest first-seen time, or the file's `stateSince` for a wakeup. C5 doesn't apply to it (the 30 minutes and the due time bound it).\n\n## Look\nWord \"waiting on background work\", symbol `hourglass`, busy's color; it ranks and counts like `busy`. Config keys `icon_background` and `color_background` (the `<state>` list in the state file schema's config table).\n\n## Docs and tests\n- `doc/snapshot-schema.md` (`shown`, `word`), `doc/state-file-schema.md` (config keys), the PRD's state model and checks.\n- Conformance cases written by hand from these rules: a recent shell, a shell older than 30 min (idle), a shell without a bash child (idle), a pending wakeup, a passed wakeup (idle), waiting and subagents winning, a theme override.\n- Unit tests for the new check.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-171"
       ],
@@ -8839,7 +8839,7 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-11-13T17:28:19Z",
-      "updated_at": "2026-11-13T17:50:52Z",
+      "updated_at": "2026-11-13T18:12:05Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "sprint_history": [
@@ -8864,8 +8864,17 @@
           "kind": "note",
           "text": "Symbol changed with the user: `hourglass` is taken by `subagents`, so `background` uses `clock.arrow.circlepath` (default, monochrome) and `clock.fill` (high contrast).",
           "by": "claude:d7ddfe3a"
+        },
+        {
+          "at": "2026-11-13T18:12:05Z",
+          "kind": "outcome",
+          "text": "The engine shows `background` (clock.arrow.circlepath, busy color, ranks/counts like busy) for an idle session with a background shell first seen under 30 min ago while claude has a bash child, or a wakeup not yet due. 7 conformance cases, unit tests, docs. Also added it to the app’s Settings, Help legend and symbol choices to keep the app tests green; T-173 narrowed to companion and notifications. mise run check passes.",
+          "by": "claude:d7ddfe3a"
         }
-      ]
+      ],
+      "commit": "14935cf41e8a09c1a83275a82e8e0d6dfbc1a45e",
+      "completed_at": "2026-11-13T18:12:05Z",
+      "completed_by": "claude:d7ddfe3a"
     },
     {
       "id": "T-173",
@@ -8876,22 +8885,22 @@
         "app",
         "companion"
       ],
-      "description": "The app shows the `background` state the engine now derives (T-151's design note).\n\n## Change\n- Settings: `background` in the symbol and color pickers, next to the other states (`SettingsView.swift`).\n- Help: the state in the legend (`HelpView.swift`).\n- Notifications: none for `background` (it doesn't need the user), and a session moving from `background` to idle notifies as idle does today.\n- The companion: the calm busy routine while the most urgent state is `background`.\n\n## Tests\nView-model and notification-rule tests in `App/Tests/`. `mise run app:test` passes.",
+      "description": "The app reacts to the `background` state the engine now derives (T-151's design note). T-172 already added it to the Settings symbol and color pickers (`clock.arrow.circlepath`, `clock.fill`, `timer` in `SymbolChoices`), the Help legend and the state names, so the app tests cover every theme state.\n\n## Change\n- The companion: `CompanionScene` counts `background` sessions as working (today only `busy` and `subagents`), so it keeps the calm busy routine while the most urgent state is `background`. Say so in the Help page's companion section if the wording needs it.\n- Notifications: none for `background` (it doesn't need the user). A session that goes from `background` to idle notifies as idle does today (`notify_idle`), with the same delay.\n\n## Tests\nCompanion scene and notification-rule tests in `App/Tests/`. `mise run app:test` passes.\n",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-172"
       ],
       "files": [
-        "App/Sources/SettingsView.swift",
         "App/Sources/HelpView.swift",
-        "App/Tests/"
+        "App/Tests/",
+        "App/Sources/Companion/CompanionScene.swift"
       ],
       "created_at": "2026-11-13T17:28:19Z",
-      "updated_at": "2026-11-13T17:28:19Z",
+      "updated_at": "2026-11-13T18:12:09Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:d7ddfe3a",
       "sprint_history": [
         {
           "sprint": "Background work",
@@ -8900,11 +8909,14 @@
       ],
       "sprint": "Background work",
       "components": [
-        "app"
+        "app",
+        "companion"
       ],
       "related": [
         "T-151"
-      ]
+      ],
+      "started_at": "2026-11-13T18:12:09Z",
+      "started_by": "claude:d7ddfe3a"
     },
     {
       "id": "T-174",

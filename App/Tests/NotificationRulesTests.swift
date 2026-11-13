@@ -69,8 +69,19 @@ final class NotificationRulesTests: XCTestCase {
         var rules = NotificationRules()
         let out = rules.evaluate(snapshot(
             session("i", .idle, since: 0), session("b", .busy, since: 0), session("s", .subagents, since: 0),
-            session("u", .uncertain, since: 0)), now: 100_000, options: defaults)
+            session("g", .background, since: 0), session("u", .uncertain, since: 0)), now: 100_000, options: defaults)
         XCTAssertEqual(out, .init())
+    }
+
+    func testBackgroundWorkNeverNotifiesAndItsEndNotifiesIdleRightAway() {
+        var options = defaults
+        options.idle = true
+        var rules = NotificationRules()
+        // Waiting on a monitor since its turn ended at 1000: nothing to tell.
+        XCTAssertEqual(rules.evaluate(snapshot(session("a", .background, since: 1000)), now: 60_000, options: options), .init())
+        // The monitor ended: idle since the turn ended, so the delay has long passed.
+        let ended = rules.evaluate(snapshot(session("a", .idle, since: 1000)), now: 61_000, options: options)
+        XCTAssertEqual(ended.alerts.map(\.kind), [.idle])
     }
 
     func testAQuestionAndAnUntitledSessionReadWell() {
