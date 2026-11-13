@@ -1,0 +1,10 @@
+{
+  "session_id": "3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90",
+  "transcript_path": "/Users/alex/.claude/projects/-Users-alex-code-api-gateway/3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90.jsonl",
+  "cwd": "/Users/alex/code/api-gateway",
+  "prompt_id": "1f8a3d6c-5e2b-4c9a-a7d1-0b4e6c2f8a95",
+  "permission_mode": "default",
+  "scratchpad_dir": "/private/tmp/claude-501/-Users-alex-code-api-gateway/3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90/scratchpad",
+  "hook_event_name": "UserPromptSubmit",
+  "prompt": "<agent-message from=\"a7c2e9f41b3d5e608\">\n[Subagent hand-back] The text below is the final report of a subagent this session delegated to.\n  The rate limiter looks right; two small notes below.\n</agent-message>"
+}

@@ -7767,14 +7767,14 @@
       "description": "A session whose turn ended while it waits on its own background work (a `Monitor` watching CI, a `ScheduleWakeup` / `/loop`) shows as **idle** today, although it doesn't need the user. Find out what Claude Code sends in that case, so a new state can be designed from captured payloads, not guesses.\n\n## Where it stands\n- `Stop` and `SubagentStop` carry `background_tasks`; `HookPayload.parse` (`Sources/ASBCore/HookEvents.swift`) already reads every entry, but `isRunningSubagent` keeps only `type == \"subagent\"`, so shells and monitors are dropped.\n- The only `shell` entry in the repo (`backgroundTasksAreRead` in `tests/ASBCoreTests/HookEventsTests.swift`) was written from the docs; the captured `Stop.json` has an empty list. `session_crons` is in the payload but unused and never captured non-empty.\n\n## Decisions so far (with the user, 2026-11-01)\n- **A new sibling state**, not a wider `subagents` state: subagents and background tasks may grow different features later (showing a task's command, focusing a subagent). Details are not settled.\n- **Only monitors and scheduled wakeups count**, not `run_in_background` shells: a dev or preview server almost always runs in the background and would keep the session looking busy forever, hiding the idle case.\n- **A process fallback** like C4 is wanted where it applies: drop the state when the background work is gone even if no hook fires.\n- **`/loop` and `ScheduleWakeup` (`session_crons`)**: in scope in principle, but more information is needed first; this spike gathers it.\n\n## Steps\n1. Make sure the installed hook binary has `debug_hook_log` (a dev build updates the stable `asb` copy), and turn it on in the config.\n2. With the user, in a real session, end a turn while each of these is running, one at a time: a `Monitor`, a `ScheduleWakeup` (and a `/loop` without an interval), a `run_in_background` Bash (for comparison), and a background subagent alongside one of them.\n3. Let each finish on its own, and once stop one early (TaskStop, or kill the process).\n4. Turn `debug_hook_log` off and delete the log once the payloads are copied.\n\n## Record\n- The `background_tasks` entry for each kind: `type`, `status`, `id` and the other fields (`command`, `description`, ...), and whether `ScheduleWakeup` and `/loop` appear there or in `session_crons`, and in what shape.\n- What happens when the work finishes while the session is idle: does Claude Code start a turn by itself (`UserPromptSubmit` with a `<task-notification>` prompt, then a new `Stop` with the updated list)? For a wakeup, what fires when it is due?\n- What fires, if anything, when the work is stopped early or dies.\n- The `claude` process's children for each kind (`ps -o pid,ppid,lstart,comm`): is a monitor a child process? Is anything visible for a scheduled wakeup? This decides where the process fallback can work.\n- Whether `SubagentStop`'s `background_tasks` lists the parent's monitors too.\n\n## Output\n- Sanitized payloads in `tests/fixtures/payloads/` (made-up IDs, paths, commands), e.g. `Stop-background-monitor.json`, `Stop-session-crons.json`.\n- Findings in `tests/fixtures/README.md`.\n- A short design note as this task's note: the state's name, symbol and wording, how it ranks and counts (like busy?), how it interacts with `subagents`, waiting, C3 and C5, the process fallback, and whether `session_crons` is covered. Settle it with the user, then create the implementation tasks (hook, engine, conformance cases, PRD and schema docs, app).",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "tests/fixtures/README.md",
         "tests/fixtures/payloads/"
       ],
       "created_at": "2026-11-01T21:09:37Z",
-      "updated_at": "2026-11-13T14:20:01Z",
+      "updated_at": "2026-11-13T16:37:43Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "components": [
@@ -7787,7 +7787,9 @@
           "from": "2026-11-13T14:20:01Z"
         }
       ],
-      "sprint": "Background work"
+      "sprint": "Background work",
+      "started_at": "2026-11-13T16:37:43Z",
+      "started_by": "claude:d7ddfe3a"
     },
     {
       "id": "T-152",
@@ -8658,13 +8660,13 @@
       "description": "`gatherAsksHerdrForItsAgentsWhenItIsInstalled` in [LiveInputsTests.swift](tests/ASBCoreTests/LiveInputsTests.swift) failed once on 2026-11-13 under the parallel load of `mise run check` (it passed on the rerun and in every other run that day): `herdrList` was nil.\n\n## Cause\nThe test runs a fake `herdr` shell script through `LiveInputs.gather`, which gives herdr the default `herdrTimeout` of 1 s ([Inputs.swift](Sources/ASBCore/Inputs.swift)). With four suites building and testing at once, starting the script can take longer than that, and the result counts as a timeout.\n\n## Change\nIn that test, set `herdrTimeout` on the `LiveInputs` to a generous value (for example 10 s). The production default stays 1 s. Check other tests that run a fake herdr for the same pattern and give them the same treatment.\n\n## Done when\n`mise run check` passes; the test keeps checking that herdr's output is read.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "tests/ASBCoreTests/LiveInputsTests.swift"
       ],
       "created_at": "2026-11-13T14:14:19Z",
-      "updated_at": "2026-11-13T14:21:24Z",
+      "updated_at": "2026-11-13T14:22:21Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "components": [
@@ -8678,7 +8680,18 @@
       ],
       "sprint": "Background work",
       "started_at": "2026-11-13T14:21:24Z",
-      "started_by": "claude:d7ddfe3a"
+      "started_by": "claude:d7ddfe3a",
+      "commit": "363da6c3e2af8e88748398520df69704cf1af816",
+      "completed_at": "2026-11-13T14:22:21Z",
+      "completed_by": "claude:d7ddfe3a",
+      "notes": [
+        {
+          "at": "2026-11-13T14:22:21Z",
+          "kind": "outcome",
+          "text": "The herdr gather test and the echo success case wait up to 10 s (slowMachineTimeout) instead of 1–2 s; the production default stays 1 s and the timeout case (sleep, 0.3 s) is unchanged. Actions tests use a fake runner, so no change there. mise run check passes.",
+          "by": "claude:d7ddfe3a"
+        }
+      ]
     }
   ]
 }

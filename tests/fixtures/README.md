@@ -39,6 +39,32 @@ permission prompt while the other kept reading files; once approved, once denied
   nothing in the session's own transcript.
 - While the subagent waited, the `claude` process's only child was `caffeinate`: C4 has nothing to see.
 
+## Background work while the turn has ended
+
+Captured from Claude Code on 2026-11-13 (spike T-151), in one interactive session: a `run_in_background` Bash, a
+`Monitor`, a background subagent alongside a monitor, a monitor stopped early with TaskStop, and a dynamic `/loop`
+waiting on a `ScheduleWakeup`.
+
+- **Shells and monitors look the same.** Both are listed in `background_tasks` as `type: "shell"`, with `id`,
+  `command`, `description` and `status: "running"`; nothing in the payload tells a `Monitor` from a
+  `run_in_background` Bash. TaskStop calls a monitor a `local_bash` task. Both run as a `bash` child of the
+  `claude` process (`Stop-background-tasks.json`).
+- **A subagent** is listed as `type: "subagent"` with its `agent_type`. A subagent's own `SubagentStop` lists the
+  parent's tasks too, and its own background shells while they run (`SubagentStop-background-tasks.json`); so does
+  the empty `SubagentStop` after every `Stop`. A subagent waiting on its own background shell fires `SubagentStop`,
+  then `SubagentStart` when it resumes.
+- **Finishing or reporting wakes the session.** A shell that ends, each monitor line, and a monitor's last line with
+  its end (one prompt for both) arrive as a `UserPromptSubmit` whose prompt starts `<task-notification>`; a monitor
+  event during a running turn is folded into that turn. A subagent's final report arrives as a `UserPromptSubmit`
+  whose prompt starts `<agent-message from=` (`UserPromptSubmit-agent-message.json`): not a typed prompt either.
+- **Stopped early:** no hook fires; the task is simply gone from the next `Stop`'s `background_tasks` (no finished
+  `status` was seen).
+- **A scheduled wakeup** (`ScheduleWakeup` in a dynamic `/loop`) is not in `background_tasks` but in
+  `session_crons`: `id`, `prompt`, `recurring: false` and `schedule`, a cron line for the minute it is due
+  (`Stop-session-crons.json`). Nothing runs as a child process meanwhile. When it is due, Claude Code sends the
+  `prompt` (`/loop …`) as a plain `UserPromptSubmit`, the same as typing it. A fixed-interval `/loop` (`CronCreate`,
+  `recurring: true`) was not captured.
+
 ## A session parked into a background job
 
 Seen with Claude Code 2.1.319 and 2.1.321 on 2026-11-13 (T-166), in Claude Code's session registry

@@ -1,0 +1,23 @@
+{
+  "session_id": "3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90",
+  "transcript_path": "/Users/alex/.claude/projects/-Users-alex-code-api-gateway/3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90.jsonl",
+  "cwd": "/Users/alex/code/api-gateway",
+  "prompt_id": "9e4b1c7d-2a6f-4d8e-b3c5-7f1a0e2d9c48",
+  "permission_mode": "default",
+  "effort": {
+    "level": "medium"
+  },
+  "scratchpad_dir": "/private/tmp/claude-501/-Users-alex-code-api-gateway/3f9c2a7e-1b4d-4c8e-9a6f-2d5e8b7c1a90/scratchpad",
+  "hook_event_name": "Stop",
+  "stop_hook_active": false,
+  "last_assistant_message": "Checked the deploy; next check in 20 minutes.",
+  "background_tasks": [],
+  "session_crons": [
+    {
+      "id": "4d7e2a91",
+      "prompt": "/loop check the deploy",
+      "recurring": false,
+      "schedule": "31 14 * * *"
+    }
+  ]
+}
