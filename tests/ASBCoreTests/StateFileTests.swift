@@ -34,6 +34,14 @@ private func raw(_ json: String, _ path: String = "state/s1.json") -> RawFile {
     #expect(s.subagents == ["a1": .init(type: "agent", since: 5)])
 }
 
+@Test func parsesTheBackgroundWorkAndSkipsOddEntries() throws {
+    let s = try #require(StateFile.parse(raw(
+        #"{"v":1,"sessionId":"s1","backgroundShells":{"b1":1000,"b2":"odd"},"wakeupAt":5000}"#)))
+    #expect(s.backgroundShells == ["b1": 1000] && s.wakeupAt == 5000)
+    let none = try #require(StateFile.parse(raw(#"{"v":1,"backgroundShells":3,"wakeupAt":true}"#)))
+    #expect(none.backgroundShells.isEmpty && none.wakeupAt == nil)
+}
+
 @Test func wrongTypesCountAsAbsent() throws {
     let s = try #require(StateFile.parse(raw(#"{"v":1,"sessionId":"s1","pid":"4242","updatedAt":true,"state":3}"#)))
     #expect(s.pid == nil && s.updatedAt == nil && s.state == nil)

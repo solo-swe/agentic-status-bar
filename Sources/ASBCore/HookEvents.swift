@@ -17,9 +17,24 @@ public struct HookPayload: Equatable, Sendable {
     /// Stop and SubagentStop: the parent session's in-flight background tasks; nil when the payload
     /// has none (older Claude Code, or the task registry wasn't reachable).
     public var backgroundTasks: [BackgroundTask]?
+    /// Stop and SubagentStop: the session's scheduled prompts (a `/loop` wakeup); nil when the payload
+    /// has none.
+    public var sessionCrons: [ScheduledPrompt]?
 
     /// An empty payload: every text field "", no background tasks.
     public init() {}
+
+    /// One entry of `session_crons` (tests/fixtures/README.md › Background work while the turn has ended).
+    public struct ScheduledPrompt: Equatable, Sendable {
+        /// A cron line; a one-shot wakeup's is `M H * * *`, the minute it is due, in local time.
+        public var schedule: String
+        public var recurring: Bool
+
+        public init(schedule: String, recurring: Bool) {
+            self.schedule = schedule
+            self.recurring = recurring
+        }
+    }
 
     /// One entry of `background_tasks` (hooks docs › Stop input).
     public struct BackgroundTask: Equatable, Sendable {
@@ -40,9 +55,12 @@ public struct HookPayload: Equatable, Sendable {
         static let finished: Set = ["completed", "failed", "killed", "stopped", "cancelled", "canceled", "error"]
 
         /// A subagent with an ID that is still in flight.
-        public var isRunningSubagent: Bool {
-            type == "subagent" && !id.isEmpty && !Self.finished.contains(status.lowercased())
-        }
+        public var isRunningSubagent: Bool { type == "subagent" && isRunning }
+
+        /// A background shell or monitor (both are `shell`) with an ID that is still in flight.
+        public var isRunningShell: Bool { type == "shell" && isRunning }
+
+        private var isRunning: Bool { !id.isEmpty && !Self.finished.contains(status.lowercased()) }
     }
 
     /// Parses the JSON Claude Code sends a hook on stdin; nil when it isn't a JSON object.
@@ -79,6 +97,13 @@ public struct HookPayload: Equatable, Sendable {
                     agentType: task["agent_type"] as? String ?? "")
             }
         }
+        if let crons = object["session_crons"] as? [Any] {
+            p.sessionCrons = crons.compactMap { entry in
+                guard let cron = entry as? [String: Any], let schedule = cron["schedule"] as? String else { return nil }
+                // Only an entry that says it is a one-shot counts as a wakeup.
+                return ScheduledPrompt(schedule: schedule, recurring: cron["recurring"] as? Bool ?? true)
+            }
+        }
         return p
     }
 }
@@ -112,10 +137,13 @@ public enum HookEvents {
     /// last applied one (`eventAt`) is dropped, so async hooks finishing out of order can't go back
     /// in time; subagent events still add or remove their subagent, since that map is keyed by agent
     /// ID and its order doesn't matter. `sessionStartChanges` adds the session details at
-    /// SessionStart (`HookMetadata.apply`).
+    /// SessionStart (`HookMetadata.apply`). `timeZone` is the one a scheduled prompt's due minute
+    /// is in; nil means the hook's own, read only when a payload has scheduled prompts (reading it
+    /// costs time on every hook call otherwise).
     public static func apply(
         _ payload: HookPayload, to current: [String: Any]?, now: Int64, started: Int64,
-        storePromptPreview: Bool, sessionStartChanges: (inout [String: Any]) -> Void = { _ in }
+        storePromptPreview: Bool, timeZone: TimeZone? = nil,
+        sessionStartChanges: (inout [String: Any]) -> Void = { _ in }
     ) -> Outcome {
         if payload.event == "SessionEnd" { return .delete }
         let old = current ?? [:]
@@ -162,6 +190,8 @@ public enum HookEvents {
                 s["reason"] = nil
                 s["message"] = nil
                 s["subagents"] = nil
+                s["backgroundShells"] = nil
+                s["wakeupAt"] = nil
             }
         case "UserPromptSubmit":
             s["state"] = "busy"
@@ -224,6 +254,7 @@ public enum HookEvents {
                 }
                 s["subagents"] = agents.isEmpty ? nil : agents
             }
+            recordBackgroundWork(&s, payload: payload, now: now, timeZone: timeZone)
         case "SubagentStart":
             guard !payload.agentId.isEmpty else { return .none }
             if !older, s["state"] == nil || s["state"] is NSNull || (s["state"] as? Bool) == false { s["state"] = "busy" }
@@ -270,6 +301,7 @@ public enum HookEvents {
                 agents[payload.agentId] = nil
             }
             s["subagents"] = agents.isEmpty ? nil : agents
+            if !older { recordBackgroundWork(&s, payload: payload, now: now, timeZone: timeZone) }
         default:
             return .none
         }

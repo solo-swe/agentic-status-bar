@@ -8721,7 +8721,7 @@
       "description": "A subagent's final report reaches the session as a `UserPromptSubmit` whose prompt starts with `<agent-message from=` ([fixture](tests/fixtures/payloads/UserPromptSubmit-agent-message.json), [findings](tests/fixtures/README.md#background-work-while-the-turn-has-ended)). Today the hook treats it as a typed prompt: it sets `promptPreview` and `promptAt`, and `promptAt` lifts a project's mute.\n\n## Change\n- Treat prompts starting with `<agent-message` the same as `<task-notification>` (`HookEvents.swift`, next to `taskNotificationPrefix`): the event still sets `busy`, but changes neither `promptPreview` nor `promptAt`.\n- `doc/state-file-schema.md` › Events (`UserPromptSubmit`) and the PRD's hook table name both prefixes, in the same commit.\n\n## Tests\nIn `HookEventsTests`, from the new fixture: busy, no preview, no `promptAt`; a mute stays.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/HookEvents.swift",
@@ -8730,7 +8730,7 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-11-13T17:28:19Z",
-      "updated_at": "2026-11-13T17:29:31Z",
+      "updated_at": "2026-11-13T17:31:21Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "sprint_history": [
@@ -8748,7 +8748,18 @@
         "T-151"
       ],
       "started_at": "2026-11-13T17:29:31Z",
-      "started_by": "claude:d7ddfe3a"
+      "started_by": "claude:d7ddfe3a",
+      "commit": "5034c64e2080bf8330cb372d0f34253e674b83b8",
+      "completed_at": "2026-11-13T17:31:21Z",
+      "completed_by": "claude:d7ddfe3a",
+      "notes": [
+        {
+          "at": "2026-11-13T17:31:21Z",
+          "kind": "outcome",
+          "text": "Prompts starting `<agent-message` are treated like `<task-notification>`: no preview, no promptAt, no end to open waits (`HookEvents.isTyped`). mise run check passes. bench failed under load (load avg 6, start cost 10 ms vs 6 earlier; snapshot slowed too); the change adds one prefix check.",
+          "by": "claude:d7ddfe3a"
+        }
+      ]
     },
     {
       "id": "T-171",
@@ -8761,7 +8772,7 @@
       "description": "First half of the `background` state designed in T-151 (its design note; [findings](tests/fixtures/README.md#background-work-while-the-turn-has-ended)). The hook records what the engine needs; the engine (next task) decides what to show.\n\n## Change\nTwo optional, additive state file fields, written by `Stop` and `SubagentStop` when the payload has the lists (the same rules as `subagents` for older events, see Writer rules › Newer wins):\n- `backgroundShells`: `{ \"<task id>\": <epoch ms first seen> }` for each `background_tasks` entry with `type: \"shell\"` and a running status. A shell already in the file keeps its first-seen time; one no longer listed is removed; the field is dropped when empty. (`run_in_background` shells and monitors look the same; both count.)\n- `wakeupAt`: epoch ms of the earliest due time among `session_crons` entries with `recurring: false`. Their `schedule` is a cron line `M H * * *`: the next local time at that hour and minute after the event. Dropped when there is none. Recurring entries (a fixed-interval `/loop`, not captured yet) are ignored for now.\n- `SessionStart` (other than `compact`) drops both, like `subagents`.\n\n## Docs\n`doc/state-file-schema.md`: the two fields and the event rows, in the same commit.\n\n## Tests\nEvent-order tests in `HookEventsTests` from `Stop-background-tasks.json`, `SubagentStop-background-tasks.json` and `Stop-session-crons.json`: first-seen time kept across two `Stop`s, a shell gone from the list removed, a stopped shell (missing from the next `Stop`) removed, `wakeupAt` across midnight, an older `SubagentStop` changing nothing.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/HookEvents.swift",
@@ -8770,9 +8781,9 @@
         "doc/state-file-schema.md"
       ],
       "created_at": "2026-11-13T17:28:19Z",
-      "updated_at": "2026-11-13T17:28:19Z",
+      "updated_at": "2026-11-13T17:31:23Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:d7ddfe3a",
       "sprint_history": [
         {
           "sprint": "Background work",
@@ -8785,7 +8796,9 @@
       ],
       "related": [
         "T-151"
-      ]
+      ],
+      "started_at": "2026-11-13T17:31:23Z",
+      "started_by": "claude:d7ddfe3a"
     },
     {
       "id": "T-172",

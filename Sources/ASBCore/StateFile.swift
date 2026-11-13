@@ -27,6 +27,10 @@ public struct StateFile: Equatable, Sendable {
     public var subagents: [String: Subagent]
     /// Agents with a prompt open: agent ID (`main` for the session's own agent) → reason.
     public var waitingAgents: [String: String] = [:]
+    /// Running background shells and monitors: task ID → when the hook first saw it (epoch ms).
+    public var backgroundShells: [String: Int64] = [:]
+    /// When the session's next one-shot scheduled prompt (a `/loop` wakeup) is due (epoch ms).
+    public var wakeupAt: Int64?
 
     /// A subagent waits on a prompt: other agents keep working meanwhile, so their activity says
     /// nothing about the wait.
@@ -83,6 +87,10 @@ public struct StateFile: Equatable, Sendable {
         if let waiting = object["waitingAgents"] as? [String: Any] {
             s.waitingAgents = waiting.compactMapValues { $0 as? String }
         }
+        if let shells = object["backgroundShells"] as? [String: Any] {
+            s.backgroundShells = shells.compactMapValues { number($0).map(Int64.init) }
+        }
+        s.wakeupAt = number(object["wakeupAt"]).map(Int64.init)
         return s
     }
 

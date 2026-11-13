@@ -47,6 +47,8 @@ One JSON object per Claude Code session, on one line, named after the session ID
 | `subagents` | object | no | SubagentStart, SubagentStop, Stop | Running subagents: `{ "<agent_id>": { "type": string, "since": epoch ms, "background": true } }`; `background` marks one Claude Code's task registry listed as a background task. Removed when empty |
 | `waitingAgents` | object | no | PermissionRequest, and the events that end a wait | The agents with a prompt open: `{ "<agent_id>": "permission" or "question" }`, `"main"` for the session's own agent. Removed when none waits (see Agents waiting on a prompt) |
 | `afterWaiting` | `"busy"`, `"idle"` | with `waitingAgents` | the same | The state the session goes back to once no agent waits |
+| `backgroundShells` | object | no | Stop, SubagentStop | Running background shells and monitors: `{ "<task id>": <epoch ms first seen> }` (see Background work). Removed when empty |
+| `wakeupAt` | integer, epoch ms | no | Stop, SubagentStop | When the session's next one-shot scheduled prompt (a `/loop` wakeup) is due (see Background work) |
 
 ¹ A file created by an early `SubagentStart` gets `state: "busy"`.
 ² Files written before `eventAt` existed lack it until their next write.
@@ -61,15 +63,15 @@ Example:
 
 | Hook event | Effect |
 | --- | --- |
-| `SessionStart` | Records the session details (see Metadata). `state = "idle"` and drops `reason`, `message`, `subagents`, except when `source` is `"compact"` and the file already has a state. Deletes other state files with the same `pid`. |
+| `SessionStart` | Records the session details (see Metadata). `state = "idle"` and drops `reason`, `message`, `subagents`, `backgroundShells` and `wakeupAt`, except when `source` is `"compact"` and the file already has a state. Deletes other state files with the same `pid`. |
 | `UserPromptSubmit` | `state = "busy"`, drops `reason` and `message`. Sets `promptPreview` and `promptAt` unless the prompt starts with `<task-notification>` (a background-task result) or `<agent-message` (a subagent's final report): Claude Code sends those, the user didn't type them. With `store_prompt_preview=0`, drops `promptPreview`. |
 | `PreToolUse` | `state = "busy"`, drops `reason` and `message`, sets `lastTool`. |
 | `PostToolUse` | `state = "busy"`, drops `reason` and `message`. |
 | `PermissionRequest` | `waitingAgents[agent_id or "main"]` = `"question"` if `tool_name` is `AskUserQuestion`, else `"permission"`; `state = "waiting"` with that `reason`, drops `message`. When no agent was waiting yet, `afterWaiting` = the current state (`idle` stays `idle`, anything else is `busy`). |
 | `Notification` | `permission_prompt` → `waiting`, `reason` `"question"` if `lastTool` is `AskUserQuestion`, else `"permission"`, and `message`. `elicitation_dialog` → `waiting`, `"question"`, `message`. `idle_prompt` → `idle`, drops `reason` and `message`. Without `notification_type`, a message containing "needs your permission" counts as `permission_prompt` and "waiting for your input" as `idle_prompt`. Other types change nothing. |
-| `Stop` | `state = "idle"`, drops `reason` and `message`. With `background_tasks` (see Background subagents), `subagents` becomes exactly the running background subagents it lists. |
+| `Stop` | `state = "idle"`, drops `reason` and `message`. With `background_tasks` (see Background subagents), `subagents` becomes exactly the running background subagents it lists. Records `backgroundShells` and `wakeupAt` (see Background work). |
 | `SubagentStart` | Adds `subagents[agent_id] = {type (or "agent" when empty), since: now}` unless the agent is already listed (a resumed subagent keeps its entry); sets `state = "busy"` only if the file had none, or if it was `waiting` with `lastTool` `Agent` or `Task` and the agent is new (the approved tool started it; clears `reason` and `message`). Ignored without `agent_id`. |
-| `SubagentStop` | Without `background_tasks`: removes `subagents[agent_id]`. With it: keeps the agent (marked `background`) while the registry still lists it, else removes it; also removes other `background` agents the registry no longer lists and adds listed ones that are missing. `subagents` is dropped when empty. Ignored without `agent_id` or with an empty `agent_type` (one such stop follows every `Stop`). |
+| `SubagentStop` | Without `background_tasks`: removes `subagents[agent_id]`. With it: keeps the agent (marked `background`) while the registry still lists it, else removes it; also removes other `background` agents the registry no longer lists and adds listed ones that are missing. `subagents` is dropped when empty. Ignored without `agent_id` or with an empty `agent_type` (one such stop follows every `Stop`). Unless older, records `backgroundShells` and `wakeupAt` (see Background work). |
 | `SessionEnd` | Deletes the file. |
 
 ### Background subagents
@@ -84,6 +86,22 @@ killed with TaskStop, which fire no `SubagentStop`. Foreground subagents are nev
 them alone, and at `Stop` none can be running. An older `SubagentStop` (see Newer wins) only keeps or removes its own
 agent. Payloads without `background_tasks` (older Claude Code, or the registry wasn't reachable) use the plain
 add/remove rules.
+
+### Background work
+
+What a session waits on after its turn ended, other than subagents (tests/fixtures/README.md › Background work while
+the turn has ended). `Stop` and `SubagentStop` record it from their payload; a list the payload lacks leaves its
+field as it is.
+
+- `backgroundShells`: each `background_tasks` entry with `type: "shell"` and an `id`, unless its `status` is a
+  finished one (as for subagents). A `run_in_background` shell and a `Monitor` look the same here, so both count. A
+  shell already recorded keeps its first-seen time; one the list no longer has is dropped (a stopped shell just
+  leaves the list).
+- `wakeupAt`: the earliest due time among the `session_crons` entries with `recurring: false` and a `schedule` of
+  the form `M H * * *`: the next time, in the hook's local time zone, at that hour and minute (a minute that is
+  under way counts as not passed). Recurring entries and other schedules are ignored; dropped when none is left.
+
+The hook only records them; what a reader shows from them is its own decision.
 
 ### Agents waiting on a prompt
 
