@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 166,
+    "next_id": 167,
     "workflow": {
       "type": "direct"
     },
@@ -8400,6 +8400,35 @@
           "by": "claude:5f67a194"
         }
       ]
+    },
+    {
+      "id": "T-166",
+      "name": "Fix: a replaced session stays listed as a second row",
+      "type": "bugfix",
+      "priority": "P1",
+      "labels": [
+        "hook",
+        "checks"
+      ],
+      "description": "The app showed two `agentic-task-manager` rows while only one session was running in that project.\n\n## What was seen (2026-11-13)\n\nBoth state files have `herdrPane` `w8:p1`:\n\n| Session | pid | Process | Last hook write | State |\n| --- | --- | --- | --- | --- |\n| `34798264…` (old) | 20122 | `claude --resume …`, the TUI started Nov 6, still alive | 15 h ago | busy |\n| `0f56a916…` (new) | 23627 | `claude bg-spare`, under `claude bg-pty-host` under daemon 23335, a child of 20122 | now | busy, no `termBundleId` |\n\n- The PIDs differ, so the `SessionStart` cleanup of other files with the same `pid` ([state-file-schema.md](doc/state-file-schema.md#:~:text=Deletes%20other%20state%20files%20with%20the%20same)) doesn't remove the old file.\n- C1 keeps it: pid 20122 still runs with the same `procStart`.\n- C5 doesn't mark it uncertain. Likely because the daemon (a child of 20122) started after `stateSince`, which counts as activity.\n\n## Work\n\n1. Confirm the cause: find out how Claude Code moves a session into a `bg-spare` process (capture payloads with `debug_hook_log`, see [tests/fixtures/README.md](tests/fixtures/README.md)). Don't guess.\n2. Agree the fix with the user before writing it into docs or code.\n3. Fix it, with unit tests, an event-order test or a conformance case, and an update to the schema doc or PRD in the same commit.\n4. `mise run check` passes.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "in_progress",
+      "dependencies": [],
+      "files": [
+        "doc/state-file-schema.md",
+        "doc/PRD.md"
+      ],
+      "created_at": "2026-11-13T11:03:59Z",
+      "updated_at": "2026-11-13T11:04:11Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "claude:d7ddfe3a",
+      "components": [
+        "core",
+        "docs"
+      ],
+      "started_at": "2026-11-13T11:04:11Z",
+      "started_by": "claude:d7ddfe3a"
     }
   ]
 }

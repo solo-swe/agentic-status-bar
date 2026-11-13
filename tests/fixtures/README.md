@@ -39,6 +39,22 @@ permission prompt while the other kept reading files; once approved, once denied
   nothing in the session's own transcript.
 - While the subagent waited, the `claude` process's only child was `caffeinate`: C4 has nothing to see.
 
+## A session parked into a background job
+
+Seen with Claude Code 2.1.319 and 2.1.321 on 2026-11-13 (T-166), in Claude Code's session registry
+(`~/.claude/sessions/<pid>.json`), sanitized in `registry/`:
+
+- A TUI session (`registry/parked-tui.json`) was handed off to a background job. Its process kept running, and its
+  registry entry kept its `sessionId` and gained `parkedJobId`, the job's ID.
+- The job (`registry/parked-job.json`) runs as a new session in a `claude bg-spare` process (under
+  `claude bg-pty-host`, under a Claude Code daemon that is a child of the TUI process). Its entry has `kind` `bg` and
+  `jobId` equal to `parkedJobId`. Its session ID starts with the job ID. Its hooks recorded the same `herdrPane` but
+  no `termBundleId`.
+- The parked session got no `SessionEnd`, and its last hook write was 24 s before the job started. C1 keeps it (its
+  process lives) and C5 doesn't mark it stale (the daemon is a child started after `stateSince`), so it showed as a
+  second busy row until C6.
+- How a job comes back to the TUI was not captured.
+
 ## Environment seen by hooks
 
 | Variable | Interactive CLI | `claude -p` |

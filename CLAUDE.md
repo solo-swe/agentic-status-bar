@@ -7,7 +7,7 @@ SwiftUI app.
 ## Where things are
 
 - `doc/README.md`: index of all documents. Start here.
-- `doc/PRD.md`: requirements, the state model and the reconciliation checks C1–C5. `doc/state-file-schema.md` and
+- `doc/PRD.md`: requirements, the state model and the reconciliation checks C1–C6. `doc/state-file-schema.md` and
   `doc/snapshot-schema.md`: the two formats, which the hook, the app and the tests share.
 - `doc/design/`: design notes and proposals (the Swift architecture, the desktop companion, agent providers, focus
   targets). Read the ones a change touches before changing code.

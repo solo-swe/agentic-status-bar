@@ -108,6 +108,46 @@ private func only(_ r: Engine.Reconciled) throws -> ReconciledSession {
     #expect(derived.sessionName == nil)
 }
 
+@Test func c6DropsASessionItsProcessParked() {
+    let r = reconcile(
+        state: #""state":"busy","updatedAt":1000"#,
+        registry: #"{"pid":4242,"sessionId":"s1","status":"busy","statusUpdatedAt":900,"parkedJobId":"0f56a916"}"#)
+    #expect(r.sessions.isEmpty)
+    #expect(r.deadFiles.isEmpty)
+}
+
+@Test func c6KeepsASessionWhenTheParkedEntryIsForAnotherSession() throws {
+    let s = try only(reconcile(
+        state: #""state":"busy","updatedAt":1000"#,
+        registry: #"{"pid":4242,"sessionId":"someone-else","status":"busy","parkedJobId":"0f56a916"}"#))
+    #expect(s.shown == "busy")
+}
+
+@Test func c6IgnoresAnEmptyOrNonStringParkedJobId() throws {
+    for parked in [#""""#, "null", "42"] {
+        let s = try only(reconcile(
+            state: #""state":"busy","updatedAt":1000"#,
+            registry: #"{"pid":4242,"sessionId":"s1","status":"busy","parkedJobId":\#(parked)}"#))
+        #expect(s.shown == "busy")
+    }
+}
+
+@Test func c6IsOffWhenUseRegistryIs0() throws {
+    let s = try only(reconcile(
+        state: #""state":"busy","updatedAt":1000"#,
+        registry: #"{"pid":4242,"sessionId":"s1","status":"busy","parkedJobId":"0f56a916"}"#,
+        config: "use_registry=0\n"))
+    #expect(s.shown == "busy")
+}
+
+@Test func c6NeverTouchesSessionsWithoutPid() {
+    let entries = RegistryEntry.parse([
+        RawFile(path: "r", contents: Data(#"{"pid":4242,"sessionId":"s1","parkedJobId":"j"}"#.utf8)),
+    ])
+    let sessions = Checks.parked([ReconciledSession(StateFile(path: "state/s1.json", sessionId: "s1"))], entries: entries)
+    #expect(sessions.count == 1)
+}
+
 @Test func corruptRegistryFilesAreIgnored() throws {
     let r = reconcile(state: #""state":"busy","updatedAt":1000"#, registry: "garbage")
     #expect(try only(r).shown == "busy")

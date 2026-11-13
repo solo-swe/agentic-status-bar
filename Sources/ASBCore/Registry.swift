@@ -13,6 +13,8 @@ public struct RegistryEntry: Equatable, Sendable {
     public var waitingFor: String?
     public var name: String?
     public var nameSource: String?
+    /// The background job this process handed its session to (C6), when it is a non-empty string.
+    public var parkedJobId: String?
 
     /// Registry entries keyed by PID. Files that don't parse or have no `pid` are skipped; with two
     /// entries for one PID, the later file wins.
@@ -32,7 +34,8 @@ public struct RegistryEntry: Equatable, Sendable {
                 statusUpdatedAt: (object["statusUpdatedAt"] as? NSNumber).map { $0.int64Value },
                 waitingFor: object["waitingFor"] as? String,
                 name: object["name"] as? String,
-                nameSource: object["nameSource"] as? String)
+                nameSource: object["nameSource"] as? String,
+                parkedJobId: (object["parkedJobId"] as? String).flatMap { $0.isEmpty ? nil : $0 })
         }
         return entries
     }

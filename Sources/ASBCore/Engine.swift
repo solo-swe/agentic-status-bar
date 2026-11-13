@@ -102,7 +102,7 @@ public struct SnapshotResult: Sendable, Equatable {
 
 /// Computes snapshots. Pure: no file system, clock or process access.
 public enum Engine {
-    /// The snapshot for `inputs`: the state files reconciled (C1 to C5), filtered by session type and
+    /// The snapshot for `inputs`: the state files reconciled (C1 to C6), filtered by session type and
     /// marked by the active mutes, as header and rows; plus what the caller should clean up.
     ///
     ///     let inputs = live.gather()
@@ -130,22 +130,22 @@ public enum Engine {
         public var registrySchemaIssue: Bool
     }
 
-    /// Parses the state files and runs the checks (C1 to C5) on them.
+    /// Parses the state files and runs the checks (C1 to C6) on them.
     public static func reconcile(_ inputs: SnapshotInputs) -> Reconciled {
         let config = Config.parse(inputs.configText)
         let parsed = ParsedStates.parse(inputs.stateFiles)
         var (sessions, dead) = Checks.liveness(
             parsed.sessions.map(ReconciledSession.init), processes: inputs.processes, timeZone: inputs.timeZone)
         var schemaIssue = false
-        if config.useRegistry {
-            (sessions, schemaIssue) = Checks.registry(sessions, entries: RegistryEntry.parse(inputs.registryFiles))
-        }
+        let registry = config.useRegistry ? RegistryEntry.parse(inputs.registryFiles) : [:]
+        (sessions, schemaIssue) = Checks.registry(sessions, entries: registry)
         sessions = Checks.interrupts(sessions, transcripts: inputs.transcripts)
         sessions = Checks.approvedTools(sessions, processes: inputs.processes)
         sessions = Checks.subagents(sessions, now: inputs.now)
         sessions = Checks.staleness(
             sessions, staleMinutes: config.staleMinutes, now: inputs.now,
             transcripts: inputs.transcripts, processes: inputs.processes)
+        sessions = Checks.parked(sessions, entries: registry)
         return Reconciled(
             sessions: sessions, invalidCount: parsed.invalidCount, deadFiles: dead, registrySchemaIssue: schemaIssue)
     }

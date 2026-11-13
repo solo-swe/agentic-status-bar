@@ -1,0 +1,27 @@
+{
+  "description": "C6: a session its process parked into a background job is dropped; the job's own session stays, and no file is deleted (tests/fixtures/README.md: A session parked into a background job)",
+  "input": {
+    "clock": {"now_ms": 1792891080000, "tz": "America/Los_Angeles"},
+    "config": "stale_minutes=0\n",
+    "processes": [{"pid": 4242, "ppid": 1, "start": 1792426323, "comm": "claude"},
+                  {"pid": 5151, "ppid": 1, "start": 1792890000, "comm": "claude"}],
+    "state": {"s1.json": {"v": 1, "sessionId": "s1", "pid": 4242, "procStart": "Mon Oct 19 09:12:03 2026", "cwd": "/x/proj",
+                          "state": "busy", "updatedAt": 1792890000000, "stateSince": 1792890000000},
+              "s2.json": {"v": 1, "sessionId": "s2", "pid": 5151, "cwd": "/x/proj",
+                          "state": "busy", "updatedAt": 1792890960000, "stateSince": 1792890960000}},
+    "registry": {"4242.json": {"pid": 4242, "sessionId": "s1", "kind": "interactive", "status": "busy",
+                               "statusUpdatedAt": 1792889990000, "parkedJobId": "s2"},
+                 "5151.json": {"pid": 5151, "sessionId": "s2", "kind": "bg", "jobId": "s2", "status": "busy",
+                               "statusUpdatedAt": 1792890900000}}
+  },
+  "expected": {
+    "activeMutes": 0, "generatedAt": 1792891080000, "invalidFiles": 0, "version": 1,
+    "header": {"state": "busy", "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "count": 1},
+    "sessions": [
+      {"sessionId": "s2", "project": "proj", "title": "", "cwd": "/x/proj", "kind": "interactive",
+       "shown": "busy", "since": 1792890960000, "label": "proj                                            ",
+       "word": "working", "detail": "2m", "muted": false, "focusable": false,
+       "symbol": "sparkle", "color": "#6E6E73,#AEAEB2", "subagents": []}
+    ]
+  }
+}

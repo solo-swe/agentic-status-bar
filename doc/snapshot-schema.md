@@ -53,7 +53,7 @@ Sessions of hidden kinds (filters) are left out entirely.
 | `title` | string | herdr terminal title, else a user-given session name, else the prompt preview; `""` when none |
 | `cwd` | string | Absent when unknown |
 | `kind` | string | `interactive`, `headless`, `ide` or `desktop` |
-| `shown` | string | `waiting`, `idle`, `uncertain`, `busy` or `subagents` (after checks C1–C5) |
+| `shown` | string | `waiting`, `idle`, `uncertain`, `busy` or `subagents` (after checks C1–C6) |
 | `reason` | string | `permission` or `question` when waiting |
 | `since` | integer, epoch ms | Since when the session is in `shown` |
 | `label` | string | `project — title` (or `project`), `\|` replaced by `│`, `:name:` broken with a zero-width space, cut to 48 characters with `…` or padded with spaces to 48. Shaped for a fixed-width text menu (the SwiftBar plugin's); the app builds its row text from `project` and `title` instead |

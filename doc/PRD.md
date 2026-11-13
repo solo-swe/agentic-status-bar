@@ -159,14 +159,14 @@ Not Now. Running sessions pick the hooks up when they restart.
 ## Architecture
 
 Hooks are the only writers of state; the app reads that state whenever it changes (and every 5 seconds), corrects it
-with checks C1 to C5, and shows it.
+with checks C1 to C6, and shows it.
 
 ```mermaid
 flowchart LR
     session["Claude Code session<br/><small>fires hook events on prompt,<br/>tool, notification, stop, end</small>"]
     hook["asb hook<br/><small>async, atomic write, exit 0</small>"]
     files["State files<br/><small>~/.claude/agentic-status-bar/</small>"]
-    registry["Session registry<br/><small>~/.claude/sessions/PID.json<br/>optional, feeds C2</small>"]
+    registry["Session registry<br/><small>~/.claude/sessions/PID.json<br/>optional, feeds C2, C6</small>"]
     signals["Processes + transcript<br/><small>libproc, child processes, tail<br/>feeds C1, C3, C4, C5</small>"]
     app["Agentic Status Bar<br/><small>watches the folder, every 5 s<br/>ASBCore: checks, snapshot</small>"]
     menu["Menu bar, session list,<br/>notifications"]
@@ -192,7 +192,7 @@ flowchart LR
 - **The app** (SwiftUI and AppKit, macOS 14+): a `SessionStore` watches the state dir, the registry dir and the
   config folder (changes coalesced to one recompute per 200 ms), recomputes off the main thread, and publishes the
   snapshot to the status item, the popover and the notifier.
-- **Optional inputs:** Claude Code's session registry (C2) and the transcript tail (C3). Both are read-only, and the
+- **Optional inputs:** Claude Code's session registry (C2, C6) and the transcript tail (C3). Both are read-only, and the
   app works fully without them.
 
 **Focus on click (v1: herdr only, fail-safe)**
@@ -266,7 +266,7 @@ desktop. Subagents are a fourth toggle applied to the nested rows.
 
 ## Reconciliation checks
 
-On every snapshot the app corrects each hook state with five checks, in this order; the first check that changes or
+On every snapshot the app corrects each hook state with six checks, in this order; the first check that changes or
 removes a session wins for that session.
 
 | # | Check | Fixes | Signal | Result | Reliability |
@@ -276,6 +276,7 @@ removes a session wins for that session.
 | C3 | Turn ended | Esc during a turn, a denied permission (no `Stop` fires), or a missed `Stop` | State busy or waiting, and after the latest user prompt the transcript tail has the marker `[Request interrupted by user` or a `system`/`turn_duration` entry | busy/waiting → idle; only the marker counts as an interrupt that hides subagents | Heuristic: transcript format is undocumented. Misses Esc before any output (C2/C5 cover it) |
 | C4 | Approved tool running | Permission approved, tool still running (no event until `PostToolUse`) | State waiting, and the `claude` PID has a child process started after `stateSince` | waiting → busy | Heuristic: works for Bash and process-spawning tools only |
 | C5 | Staleness | Anything else the hooks missed | State busy (or waiting on subagents), no hook write, transcript unchanged and no new child process for longer than the threshold (default 30 min) | → uncertain ("?") | Never wrong; only admits doubt |
+| C6 | Parked | A session handed off to a background job: its process lives on and no `SessionEnd` fires | `~/.claude/sessions/<pid>.json` with matching `sessionId` and a non-empty `parkedJobId` | Drop row; the file stays until C1 | Exact when present; undocumented format |
 
 **Notes**
 
@@ -293,7 +294,10 @@ removes a session wins for that session.
   that ended normally (C3) say nothing about the wait and don't override it. Only an interrupt (C3) does.
 - **C5 threshold** is configurable (10, 30, 60 min or off). Waiting and idle states are never marked stale; a long
   wait is real.
-- Checks C2 to C5 never write the state file; corrections live only in the snapshot, so the next real hook event
+- **C6 handoff:** the background job runs as a new session in another process (a `claude bg-spare`), which has its
+  own state file and row. Like C2, C6 is off with `use_registry=0`. If the registry stops naming a job, the row comes
+  back. See `tests/fixtures/README.md` › A session parked into a background job.
+- Checks C2 to C6 never write the state file; corrections live only in the snapshot, so the next real hook event
   always takes over.
 
 ## Installation and configuration

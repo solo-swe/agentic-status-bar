@@ -2,7 +2,7 @@
 
 | Document | What it covers |
 | --- | --- |
-| [PRD.md](PRD.md) | What the app does and why: goals, UX, architecture, the state model, the reconciliation checks C1–C5, non-functional requirements, risks |
+| [PRD.md](PRD.md) | What the app does and why: goals, UX, architecture, the state model, the reconciliation checks C1–C6, non-functional requirements, risks |
 | [state-file-schema.md](state-file-schema.md) | The per-session state file the hook writes: fields, how each hook event changes it, writer and reader rules, the config file |
 | [snapshot-schema.md](snapshot-schema.md) | The snapshot the engine computes for the menu bar, the list and `asb snapshot --json` |
 | [RELEASING.md](RELEASING.md) | How a release is built, signed, notarized, published and delivered; one-time setup; checking a release; failures |

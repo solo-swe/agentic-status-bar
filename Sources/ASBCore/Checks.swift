@@ -27,7 +27,7 @@ public struct ReconciledSession: Equatable, Sendable {
     }
 }
 
-/// The reconciliation checks C1 to C5, run in that order by `Engine.reconcile`. Each takes the
+/// The reconciliation checks C1 to C6, run in that order by `Engine.reconcile`. Each takes the
 /// sessions and returns them with its decision applied.
 public enum Checks {
     /// C1: a session whose claude process is gone, or whose PID now belongs to a process with a

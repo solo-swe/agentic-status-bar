@@ -41,7 +41,7 @@ The `@main` entry point (`Sources/asb/ASB.swift`) has no lines to count. Coverag
 
 | Path | What |
 | --- | --- |
-| `Sources/ASBCore/` | The logic, Foundation only: state files, hook events, checks C1–C5, mutes, themes, the menu model, config, install |
+| `Sources/ASBCore/` | The logic, Foundation only: state files, hook events, checks C1–C6, mutes, themes, the menu model, config, install |
 | `Sources/asb/` | The `asb` CLI: `hook`, `snapshot`, `action`, `install`, `uninstall` |
 | `App/` | The macOS app: `project.yml` (XcodeGen), `Sources/`, `Tests/` |
 | `tests/ASBCoreTests/` | Swift Testing tests for `ASBCore` |
