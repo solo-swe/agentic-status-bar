@@ -93,6 +93,20 @@ private func has(_ state: [String: Any]?, _ key: String) -> Bool { state?[key] !
     #expect(num(s, "promptAt") == 1000)
 }
 
+@Test func aSubagentReportKeepsThePreviewAndPromptTime() throws {
+    let (_, s) = try run(["UserPromptSubmit", "UserPromptSubmit-agent-message"])
+    #expect(str(s, "state") == "busy")
+    #expect(str(s, "promptPreview") == "Add rate limiting to the auth routes")
+    #expect(num(s, "promptAt") == 1000)
+}
+
+@Test func onlyTypedPromptsCountAsTyped() {
+    #expect(HookEvents.isTyped("Add rate limiting"))
+    #expect(HookEvents.isTyped("/loop check the deploy"))
+    #expect(!HookEvents.isTyped("<task-notification>\n<task-id>x</task-id>"))
+    #expect(!HookEvents.isTyped("<agent-message from=\"a1\">\nreport\n</agent-message>"))
+}
+
 @Test func noPreviewIsStoredWhenStorePromptPreviewIs0() throws {
     let (_, s) = try run(["UserPromptSubmit"], start: ["promptPreview": "old"], storePreview: false)
     #expect(str(s, "state") == "busy" && !has(s, "promptPreview"))
@@ -389,6 +403,14 @@ private var busyWithTwo: [String: Any] { ["state": "busy", "subagents": [
     #expect(waiting(s) == ["a": "permission"] && str(s, "afterWaiting") == "busy")
     let question = play([try event("PermissionRequest-subagent", agent: "a", tool: "AskUserQuestion")], start: busyWithTwo)
     #expect(str(question.last!, "reason") == "question")
+}
+
+@Test func aSubagentReportDoesNotEndAnotherAgentsWait() throws {
+    let states = play([
+        try event("PermissionRequest-subagent", agent: "a"),
+        try event("UserPromptSubmit-agent-message"),
+    ], start: busyWithTwo)
+    #expect(str(states[1], "state") == "waiting" && waiting(states[1]) == ["a": "permission"])
 }
 
 @Test func aSubagentWaitOutlastsOtherAgentsTheParentsStopAndTaskResults() throws {

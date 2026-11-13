@@ -62,7 +62,7 @@ Example:
 | Hook event | Effect |
 | --- | --- |
 | `SessionStart` | Records the session details (see Metadata). `state = "idle"` and drops `reason`, `message`, `subagents`, except when `source` is `"compact"` and the file already has a state. Deletes other state files with the same `pid`. |
-| `UserPromptSubmit` | `state = "busy"`, drops `reason` and `message`. Sets `promptPreview` and `promptAt` unless the prompt starts with `<task-notification>` (a background-task result). With `store_prompt_preview=0`, drops `promptPreview`. |
+| `UserPromptSubmit` | `state = "busy"`, drops `reason` and `message`. Sets `promptPreview` and `promptAt` unless the prompt starts with `<task-notification>` (a background-task result) or `<agent-message` (a subagent's final report): Claude Code sends those, the user didn't type them. With `store_prompt_preview=0`, drops `promptPreview`. |
 | `PreToolUse` | `state = "busy"`, drops `reason` and `message`, sets `lastTool`. |
 | `PostToolUse` | `state = "busy"`, drops `reason` and `message`. |
 | `PermissionRequest` | `waitingAgents[agent_id or "main"]` = `"question"` if `tool_name` is `AskUserQuestion`, else `"permission"`; `state = "waiting"` with that `reason`, drops `message`. When no agent was waiting yet, `afterWaiting` = the current state (`idle` stays `idle`, anything else is `busy`). |

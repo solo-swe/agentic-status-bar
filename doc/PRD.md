@@ -218,7 +218,7 @@ and never write. A session that ends has its file deleted.
 | Hook event | Writes | Also records |
 | --- | --- | --- |
 | `SessionStart` | idle | PID and start time of the `claude` process, cwd, entrypoint, terminal app bundle ID, herdr pane ID, transcript path |
-| `UserPromptSubmit` | busy | prompt preview (first 80 chars, for the title fallback) and `promptAt`; prompts starting `<task-notification>` are background-task results and change neither |
+| `UserPromptSubmit` | busy | prompt preview (first 80 chars, for the title fallback) and `promptAt`; prompts starting `<task-notification>` (background-task results) or `<agent-message` (a subagent's report) change neither |
 | `PreToolUse` | busy | tool name |
 | `PostToolUse` | busy | — |
 | `Notification` (`permission_prompt`) | waiting | reason = permission, message; reason = question instead when `lastTool` is `AskUserQuestion` |

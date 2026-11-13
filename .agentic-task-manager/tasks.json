@@ -8721,7 +8721,7 @@
       "description": "A subagent's final report reaches the session as a `UserPromptSubmit` whose prompt starts with `<agent-message from=` ([fixture](tests/fixtures/payloads/UserPromptSubmit-agent-message.json), [findings](tests/fixtures/README.md#background-work-while-the-turn-has-ended)). Today the hook treats it as a typed prompt: it sets `promptPreview` and `promptAt`, and `promptAt` lifts a project's mute.\n\n## Change\n- Treat prompts starting with `<agent-message` the same as `<task-notification>` (`HookEvents.swift`, next to `taskNotificationPrefix`): the event still sets `busy`, but changes neither `promptPreview` nor `promptAt`.\n- `doc/state-file-schema.md` › Events (`UserPromptSubmit`) and the PRD's hook table name both prefixes, in the same commit.\n\n## Tests\nIn `HookEventsTests`, from the new fixture: busy, no preview, no `promptAt`; a mute stays.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/HookEvents.swift",
@@ -8730,9 +8730,9 @@
         "doc/PRD.md"
       ],
       "created_at": "2026-11-13T17:28:19Z",
-      "updated_at": "2026-11-13T17:28:19Z",
+      "updated_at": "2026-11-13T17:29:31Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:d7ddfe3a",
       "sprint_history": [
         {
           "sprint": "Background work",
@@ -8746,7 +8746,9 @@
       ],
       "related": [
         "T-151"
-      ]
+      ],
+      "started_at": "2026-11-13T17:29:31Z",
+      "started_by": "claude:d7ddfe3a"
     },
     {
       "id": "T-171",

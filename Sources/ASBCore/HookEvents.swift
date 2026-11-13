@@ -85,8 +85,14 @@ public struct HookPayload: Equatable, Sendable {
 
 /// How one hook event changes a session's state file (doc/state-file-schema.md › Events).
 public enum HookEvents {
-    /// Prompts that start with this are background-task results, not something the user typed.
-    public static let taskNotificationPrefix = "<task-notification>"
+    /// Prompts that Claude Code sends on its own, not something the user typed: background-task results
+    /// and a subagent's final report.
+    public static let generatedPromptPrefixes = ["<task-notification>", "<agent-message"]
+
+    /// Whether the user typed `prompt` (it doesn't start with one of `generatedPromptPrefixes`).
+    public static func isTyped(_ prompt: String) -> Bool {
+        !generatedPromptPrefixes.contains { prompt.hasPrefix($0) }
+    }
     /// Characters of the prompt kept as the row title fallback.
     public static let previewLength = 80
     /// The `waitingAgents` key for the session's own agent (subagents use their `agent_id`).
@@ -125,7 +131,7 @@ public enum HookEvents {
         switch payload.event {
         case "SessionStart" where payload.source == "compact", "SubagentStart", "PermissionRequest", "Notification": break
         case "SessionStart": holding = [:]
-        case "UserPromptSubmit" where !payload.prompt.hasPrefix(taskNotificationPrefix): holding = [:]
+        case "UserPromptSubmit" where isTyped(payload.prompt): holding = [:]
         default: holding[agent] = nil
         }
         // A subagent the task registry no longer lists has finished (or was killed) and waits no more.
@@ -161,13 +167,13 @@ public enum HookEvents {
             s["state"] = "busy"
             s["reason"] = nil
             s["message"] = nil
-            let fromTask = payload.prompt.hasPrefix(taskNotificationPrefix)
-            if storePromptPreview && !fromTask && !payload.prompt.isEmpty {
+            let typed = isTyped(payload.prompt)
+            if storePromptPreview && typed && !payload.prompt.isEmpty {
                 s["promptPreview"] = preview(payload.prompt)
             } else if !storePromptPreview {
                 s["promptPreview"] = nil
             }
-            if !fromTask { s["promptAt"] = now }
+            if typed { s["promptAt"] = now }
         case "PreToolUse":
             s["state"] = "busy"
             s["reason"] = nil
