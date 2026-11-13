@@ -8505,7 +8505,7 @@
       "description": "Release v0.3.1 following [doc/RELEASING.md](doc/RELEASING.md) › Each release. A patch release:\n\n- a session Claude Code parked into a background job no longer shows as a second row (C6, T-166);\n- the app follows a moved `state_dir` right away (T-158);\n- no force unwraps left (T-157, T-163);\n- the comment and test cleanup and the 99% coverage gate (T-142 to T-149, T-156, T-162);\n- the dev tooling and the release scripts on mise (T-152 to T-155).\n\n## Steps\n1. Set `ASBVersion.current` and `MARKETING_VERSION` to `0.3.1` (build number above 0.3.0's), and the README's build example.\n2. `mise run check`, commit, push, CI green.\n3. Tag `v0.3.1` only with the user's go, and watch the release run.\n4. Check the draft with the release-check skill (T-150).\n5. The user publishes it as the latest release.\n6. Check the downloads without a login and the Homebrew workflow; an installed v0.3.0 should offer the update.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-155",
         "T-150"
@@ -8516,7 +8516,7 @@
         "README.md"
       ],
       "created_at": "2026-11-13T11:19:19Z",
-      "updated_at": "2026-11-13T11:50:51Z",
+      "updated_at": "2026-11-13T14:00:14Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "sprint_history": [
@@ -8539,11 +8539,43 @@
           "kind": "note",
           "text": "At step 4, run `/check-release 0.3.1` (T-150). If any of its commands still asks for permission, fix that pattern in `.claude/skills/check-release/SKILL.md` within the allow list the user approved, and say so.",
           "by": "claude:d7ddfe3a"
+        },
+        {
+          "at": "2026-11-13T12:26:41Z",
+          "kind": "answer",
+          "text": "Notarization failed with HTTP 403: an Apple Developer agreement is missing or expired. Please accept it at developer.apple.com/account (Account Holder). Then say so, and the failed release job (run 43421480980) gets rerun with the v0.3.1 tag as it is. → Accepted the Apple agreement online; rerun the release job.",
+          "by": "claude:d7ddfe3a"
+        },
+        {
+          "at": "2026-11-13T13:59:56Z",
+          "kind": "answer",
+          "text": "The v0.3.1 draft passed every check. Please publish it as the latest release (not a pre-release), then say so for the published checks. → Published v0.3.1 as the latest release.",
+          "by": "claude:d7ddfe3a"
+        },
+        {
+          "at": "2026-11-13T14:00:14Z",
+          "kind": "outcome",
+          "text": "v0.3.1 published: the draft passed /check-release (no prompts reported), downloads return 200 without a login, the Homebrew workflow ran (first run on mise). Notarization first needed a renewed Apple agreement.",
+          "by": "claude:d7ddfe3a"
         }
       ],
-      "started_at": "2026-11-13T11:49:30Z",
+      "commit": "362a3a9a6aaa69f363beaa40c7ccef5c8c27b748",
+      "blocks": [
+        {
+          "from": "2026-11-13T12:03:37Z",
+          "to": "2026-11-13T12:26:41Z",
+          "on": "user"
+        },
+        {
+          "from": "2026-11-13T13:00:27Z",
+          "to": "2026-11-13T13:59:56Z",
+          "on": "user"
+        }
+      ],
+      "started_at": "2026-11-13T13:59:56Z",
       "started_by": "claude:d7ddfe3a",
-      "commit": "362a3a9a6aaa69f363beaa40c7ccef5c8c27b748"
+      "completed_at": "2026-11-13T14:00:14Z",
+      "completed_by": "claude:d7ddfe3a"
     },
     {
       "id": "T-168",
