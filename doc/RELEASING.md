@@ -145,7 +145,7 @@ Once the secrets are set, delete the exported `.p12` and `.p8` from your disk an
 2. Run the checks (`mise run check`), commit, push, and wait for CI.
 3. Tag and push the tag: `git tag -a v0.3.0 -m v0.3.0 && git push origin v0.3.0`.
 4. Watch the release run (`gh run list --workflow release.yml`, `gh run watch <id>`). It drafts the release.
-5. Check the draft (Checking a release, below) and edit its notes; they're generated from the commits.
+5. Check the draft (`/check-release <version>`, see Checking a release) and edit its notes; they're generated from the commits.
 6. Publish it with **Set as the latest release** on and **Set as a pre-release** off.
 7. Check the published release: the downloads work without a GitHub login, and the Homebrew workflow ran and the tap
    has the new version.
@@ -154,6 +154,11 @@ A dry run on your Mac: `mise run release:package 0.0.0` builds and signs ad hoc,
 Such builds don't update themselves (they have no public key).
 
 ## Checking a release
+
+The project skill `check-release` (`.claude/skills/check-release/SKILL.md`) runs these checks for a version and
+reports a table, without permission prompts: `/check-release 0.3.1` on the draft, `/check-release 0.3.1 published`
+after publishing. It leaves to you the two that need your keychain or change your machine: the appcast signature
+and `brew`. By hand:
 
 On the draft, after `gh release download v0.3.0 --dir <empty folder>` and `ditto -x -k
 agentic-status-bar-0.3.0.zip unzipped`:

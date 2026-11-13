@@ -11,7 +11,8 @@ SwiftUI app.
   `doc/snapshot-schema.md`: the two formats, which the hook, the app and the tests share.
 - `doc/design/`: design notes and proposals (the Swift architecture, the desktop companion, agent providers, focus
   targets). Read the ones a change touches before changing code.
-- `doc/RELEASING.md`: how a release is built, signed, published and checked.
+- `doc/RELEASING.md`: how a release is built, signed, published and checked. The `check-release` skill runs the
+  checks without prompts.
 - `tests/conformance/`: the snapshot engine's behavior as data (see its README). `tests/fixtures/`: captured,
   sanitized hook payloads and transcripts, with what was learned from them.
 - `.agentic-task-manager/tasks.json`: the task list (atm). Read and change it only through atm (`atm show`,

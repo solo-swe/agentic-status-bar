@@ -7702,7 +7702,7 @@
       "description": "During the v0.3.0 release, each check in `doc/RELEASING.md` › Checking a release asked for permission: downloading the draft (`gh release download`), unzipping it (`ditto`), `spctl --assess` on the DMG and the app, `codesign --verify --deep --strict`, `xcrun stapler validate`, `plutil -p` on the Info.plist, `gh variable get SPARKLE_PUBLIC_KEY`, Sparkle's `sign_update --verify`, and after publishing `curl -fsSIL` on the appcast and the zip and `gh run list --workflow homebrew.yml`.\n\n## Change\n- A project skill in `.claude/skills/` (e.g. `check-release`) that runs these checks for a given version in a scratch folder and reports a table of results.\n- Its `allowed-tools` lists exactly those read-only commands, so they run without prompts. **Agree the exact allow list with the user before writing it**: it changes what runs without asking. Don't widen `.claude/settings.json`.\n- Point `doc/RELEASING.md` › Checking a release and `CLAUDE.md` at the skill.\n\n## Done when\nThe user approved the allow list, and the skill ran the checks of the next release without a prompt.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [],
       "files": [
         ".claude/skills/check-release/SKILL.md",
@@ -7710,7 +7710,7 @@
         "CLAUDE.md"
       ],
       "created_at": "2026-11-01T10:14:33Z",
-      "updated_at": "2026-11-13T11:17:32Z",
+      "updated_at": "2026-11-13T11:41:32Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "components": [
@@ -7724,7 +7724,9 @@
           "from": "2026-11-13T11:17:32Z"
         }
       ],
-      "sprint": "v0.3.1"
+      "sprint": "v0.3.1",
+      "started_at": "2026-11-13T11:41:32Z",
+      "started_by": "claude:d7ddfe3a"
     },
     {
       "id": "T-151",
@@ -7926,7 +7928,7 @@
       "description": "The last step of `doc/design/dev-tooling.md` › Layout: move the release scripts to mise tasks and the release workflows to mise.\n\n## Change\n- `git mv` `scripts/package.sh` → `mise-tasks/release/package.sh` (`release:package <version>`), `scripts/appcast.sh` → `release/appcast.sh`, `scripts/homebrew-cask.sh` → `release/cask.sh`, each with a `#MISE description` header (arguments pass through to the script, as in the other tasks); the scripts that call each other use the new paths.\n- `.github/workflows/release.yml` and `homebrew.yml`: `jdx/mise-action` (same pinned versions as `ci.yml`), `MISE_TRUSTED_CONFIG_PATHS`, and the `.xcode-version` step instead of `brew install` and the newest Xcode, then the tasks. Secrets and their handling stay exactly as they are.\n- `doc/RELEASING.md`, `CONTRIBUTING.md` › Releases and Layout, and this design note (status: built).\n\n## Checks\n`mise run release:package 0.0.0` makes an unsigned dry run as before; `mise run lint` passes. The workflows themselves are checked at the next release, with the user.\n",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "T-153"
       ],
@@ -7942,7 +7944,7 @@
         "doc/design/dev-tooling.md"
       ],
       "created_at": "2026-11-01T22:13:44Z",
-      "updated_at": "2026-11-13T11:30:16Z",
+      "updated_at": "2026-11-13T11:36:52Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "components": [
@@ -7958,7 +7960,18 @@
       "sprint": "v0.3.1",
       "with": "user",
       "started_at": "2026-11-13T11:30:16Z",
-      "started_by": "claude:d7ddfe3a"
+      "started_by": "claude:d7ddfe3a",
+      "commit": "899155f4b6a21d5b550fd4096c67c095ecb1e733",
+      "completed_at": "2026-11-13T11:36:52Z",
+      "completed_by": "claude:d7ddfe3a",
+      "notes": [
+        {
+          "at": "2026-11-13T11:36:52Z",
+          "kind": "outcome",
+          "text": "Release scripts are mise tasks (release:package, release:appcast, release:cask); release.yml uses the pinned Xcode and mise tools; homebrew.yml (Linux) sets up mise without installing tools. Dry run and mise run check pass; the workflows are checked at the v0.3.1 release (T-167).",
+          "by": "claude:d7ddfe3a"
+        }
+      ]
     },
     {
       "id": "T-156",
