@@ -1,7 +1,7 @@
 #!/bin/sh
 #MISE description="Time asb hook (under 10 ms) and asb snapshot on 10 sessions (under 30 ms)"
 # Times `asb hook` (median under 10 ms; the shell hook took 19 to 20 ms) and `asb snapshot`
-# on 10 sessions (under 30 ms). Exits 1 if a target is missed.
+# on 10 sessions (under 30 ms), and shows asb's start cost for comparison. Exits 1 if a target is missed.
 
 cd "$(dirname "$0")/.." || exit 1
 repo="$(pwd)"
@@ -58,15 +58,26 @@ time_runs() {
     }' "$1" "$2"
 }
 
-# report NAME TARGET — reads durations on stdin, prints median and p95, fails over target.
-report() {
+# stats — reads durations on stdin, sets _median and _p95.
+stats() {
   sort -n > "$tmp/times"
   _count="$(wc -l < "$tmp/times" | tr -d ' ')"
   _median="$(sed -n "$(( (_count + 1) / 2 ))p" "$tmp/times")"
   _p95="$(sed -n "$(( (_count * 95 + 99) / 100 ))p" "$tmp/times")"
+}
+
+# report NAME TARGET — reads durations on stdin, prints median and p95, fails over target.
+report() {
+  stats
   if [ "$_median" -le "$2" ]; then _verdict=ok; else _verdict=FAIL; fi
   printf '%-7s median %4s ms  p95 %4s ms  (target %s ms)  %s\n' "$1" "$_median" "$_p95" "$2" "$_verdict"
   [ "$_verdict" = ok ]
+}
+
+# inform NAME — reads durations on stdin, prints median and p95 without a target.
+inform() {
+  stats
+  printf '%-7s median %4s ms  p95 %4s ms  (no target)\n' "$1" "$_median" "$_p95"
 }
 
 # asb, built for release (as it ships).
@@ -78,6 +89,9 @@ fi
 asb="$repo/.build/release/asb"
 
 status=0
+# Starting asb with no payload: most of the hook's time, and what load on the machine slows down.
+# Compare it with the hook's line to tell a slow machine from slow code.
+time_runs "$HOOK_RUNS" "'$asb' hook < /dev/null" | inform start
 # The hook gets a real Claude-style payload; its state file is the 11th session.
 time_runs "$HOOK_RUNS" "'$asb' hook < '$repo/tests/fixtures/payloads/PreToolUse.json'" \
   | report hook "$HOOK_TARGET_MS" || status=1
