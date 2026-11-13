@@ -7702,7 +7702,7 @@
       "description": "During the v0.3.0 release, each check in `doc/RELEASING.md` › Checking a release asked for permission: downloading the draft (`gh release download`), unzipping it (`ditto`), `spctl --assess` on the DMG and the app, `codesign --verify --deep --strict`, `xcrun stapler validate`, `plutil -p` on the Info.plist, `gh variable get SPARKLE_PUBLIC_KEY`, Sparkle's `sign_update --verify`, and after publishing `curl -fsSIL` on the appcast and the zip and `gh run list --workflow homebrew.yml`.\n\n## Change\n- A project skill in `.claude/skills/` (e.g. `check-release`) that runs these checks for a given version in a scratch folder and reports a table of results.\n- Its `allowed-tools` lists exactly those read-only commands, so they run without prompts. **Agree the exact allow list with the user before writing it**: it changes what runs without asking. Don't widen `.claude/settings.json`.\n- Point `doc/RELEASING.md` › Checking a release and `CLAUDE.md` at the skill.\n\n## Done when\nThe user approved the allow list, and the skill ran the checks of the next release without a prompt.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         ".claude/skills/check-release/SKILL.md",
@@ -7710,7 +7710,7 @@
         "CLAUDE.md"
       ],
       "created_at": "2026-11-01T10:14:33Z",
-      "updated_at": "2026-11-13T11:41:32Z",
+      "updated_at": "2026-11-13T11:43:59Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "components": [
@@ -7726,7 +7726,18 @@
       ],
       "sprint": "v0.3.1",
       "started_at": "2026-11-13T11:41:32Z",
-      "started_by": "claude:d7ddfe3a"
+      "started_by": "claude:d7ddfe3a",
+      "commit": "3273435def8f6d885d1a6d2cfdc45a494b4703ac",
+      "completed_at": "2026-11-13T11:43:59Z",
+      "completed_by": "claude:d7ddfe3a",
+      "notes": [
+        {
+          "at": "2026-11-13T11:43:59Z",
+          "kind": "outcome",
+          "text": "check-release skill with the allow list the user approved (no sign_update or brew: those stay manual). Docs point at it. The no-prompt run is checked at the v0.3.1 release (noted on T-167).",
+          "by": "claude:d7ddfe3a"
+        }
+      ]
     },
     {
       "id": "T-151",
@@ -8494,7 +8505,7 @@
       "description": "Release v0.3.1 following [doc/RELEASING.md](doc/RELEASING.md) › Each release. A patch release:\n\n- a session Claude Code parked into a background job no longer shows as a second row (C6, T-166);\n- the app follows a moved `state_dir` right away (T-158);\n- no force unwraps left (T-157, T-163);\n- the comment and test cleanup and the 99% coverage gate (T-142 to T-149, T-156, T-162);\n- the dev tooling and the release scripts on mise (T-152 to T-155).\n\n## Steps\n1. Set `ASBVersion.current` and `MARKETING_VERSION` to `0.3.1` (build number above 0.3.0's), and the README's build example.\n2. `mise run check`, commit, push, CI green.\n3. Tag `v0.3.1` only with the user's go, and watch the release run.\n4. Check the draft with the release-check skill (T-150).\n5. The user publishes it as the latest release.\n6. Check the downloads without a login and the Homebrew workflow; an installed v0.3.0 should offer the update.",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-155",
         "T-150"
@@ -8505,7 +8516,7 @@
         "README.md"
       ],
       "created_at": "2026-11-13T11:19:19Z",
-      "updated_at": "2026-11-13T11:19:30Z",
+      "updated_at": "2026-11-13T11:49:30Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "sprint_history": [
@@ -8521,7 +8532,17 @@
         "core",
         "app",
         "docs"
-      ]
+      ],
+      "notes": [
+        {
+          "at": "2026-11-13T11:43:58Z",
+          "kind": "note",
+          "text": "At step 4, run `/check-release 0.3.1` (T-150). If any of its commands still asks for permission, fix that pattern in `.claude/skills/check-release/SKILL.md` within the allow list the user approved, and say so.",
+          "by": "claude:d7ddfe3a"
+        }
+      ],
+      "started_at": "2026-11-13T11:49:30Z",
+      "started_by": "claude:d7ddfe3a"
     },
     {
       "id": "T-168",
