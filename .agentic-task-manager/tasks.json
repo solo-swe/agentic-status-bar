@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 169,
+    "next_id": 170,
     "workflow": {
       "type": "direct"
     },
@@ -323,10 +323,21 @@
       },
       {
         "id": "v0.3.1",
-        "state": "active",
+        "state": "closed",
         "goal": "Ship the parked-session fix (C6) as v0.3.1, with smoother release tooling",
         "release": "v0.3.1",
-        "start": "2026-11-13T11:22:04Z"
+        "start": "2026-11-13T11:22:04Z",
+        "end": "2026-11-13T14:14:05Z",
+        "report": {
+          "done": [
+            "T-150",
+            "T-155",
+            "T-167",
+            "T-168"
+          ],
+          "carried": [],
+          "added": []
+        }
       }
     ],
     "releases": [
@@ -8621,6 +8632,30 @@
           "text": "No code change needed: the hook is 9 ms median on a quiet machine; the 12–16 ms came from load. About 7 ms of it is process start (start line now shown by bench.sh, as agreed). mise run bench and mise run check pass.",
           "by": "claude:d7ddfe3a"
         }
+      ]
+    },
+    {
+      "id": "T-169",
+      "name": "Tests: make the herdr gather test reliable under load",
+      "type": "test",
+      "priority": "P2",
+      "labels": [
+        "swift-core"
+      ],
+      "description": "`gatherAsksHerdrForItsAgentsWhenItIsInstalled` in [LiveInputsTests.swift](tests/ASBCoreTests/LiveInputsTests.swift) failed once on 2026-11-13 under the parallel load of `mise run check` (it passed on the rerun and in every other run that day): `herdrList` was nil.\n\n## Cause\nThe test runs a fake `herdr` shell script through `LiveInputs.gather`, which gives herdr the default `herdrTimeout` of 1 s ([Inputs.swift](Sources/ASBCore/Inputs.swift)). With four suites building and testing at once, starting the script can take longer than that, and the result counts as a timeout.\n\n## Change\nIn that test, set `herdrTimeout` on the `LiveInputs` to a generous value (for example 10 s). The production default stays 1 s. Check other tests that run a fake herdr for the same pattern and give them the same treatment.\n\n## Done when\n`mise run check` passes; the test keeps checking that herdr's output is read.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "tests/ASBCoreTests/LiveInputsTests.swift"
+      ],
+      "created_at": "2026-11-13T14:14:19Z",
+      "updated_at": "2026-11-13T14:14:19Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce",
+      "components": [
+        "core"
       ]
     }
   ]
