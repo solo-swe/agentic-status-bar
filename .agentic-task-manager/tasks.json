@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 170,
+    "next_id": 175,
     "workflow": {
       "type": "direct"
     },
@@ -7767,14 +7767,14 @@
       "description": "A session whose turn ended while it waits on its own background work (a `Monitor` watching CI, a `ScheduleWakeup` / `/loop`) shows as **idle** today, although it doesn't need the user. Find out what Claude Code sends in that case, so a new state can be designed from captured payloads, not guesses.\n\n## Where it stands\n- `Stop` and `SubagentStop` carry `background_tasks`; `HookPayload.parse` (`Sources/ASBCore/HookEvents.swift`) already reads every entry, but `isRunningSubagent` keeps only `type == \"subagent\"`, so shells and monitors are dropped.\n- The only `shell` entry in the repo (`backgroundTasksAreRead` in `tests/ASBCoreTests/HookEventsTests.swift`) was written from the docs; the captured `Stop.json` has an empty list. `session_crons` is in the payload but unused and never captured non-empty.\n\n## Decisions so far (with the user, 2026-11-01)\n- **A new sibling state**, not a wider `subagents` state: subagents and background tasks may grow different features later (showing a task's command, focusing a subagent). Details are not settled.\n- **Only monitors and scheduled wakeups count**, not `run_in_background` shells: a dev or preview server almost always runs in the background and would keep the session looking busy forever, hiding the idle case.\n- **A process fallback** like C4 is wanted where it applies: drop the state when the background work is gone even if no hook fires.\n- **`/loop` and `ScheduleWakeup` (`session_crons`)**: in scope in principle, but more information is needed first; this spike gathers it.\n\n## Steps\n1. Make sure the installed hook binary has `debug_hook_log` (a dev build updates the stable `asb` copy), and turn it on in the config.\n2. With the user, in a real session, end a turn while each of these is running, one at a time: a `Monitor`, a `ScheduleWakeup` (and a `/loop` without an interval), a `run_in_background` Bash (for comparison), and a background subagent alongside one of them.\n3. Let each finish on its own, and once stop one early (TaskStop, or kill the process).\n4. Turn `debug_hook_log` off and delete the log once the payloads are copied.\n\n## Record\n- The `background_tasks` entry for each kind: `type`, `status`, `id` and the other fields (`command`, `description`, ...), and whether `ScheduleWakeup` and `/loop` appear there or in `session_crons`, and in what shape.\n- What happens when the work finishes while the session is idle: does Claude Code start a turn by itself (`UserPromptSubmit` with a `<task-notification>` prompt, then a new `Stop` with the updated list)? For a wakeup, what fires when it is due?\n- What fires, if anything, when the work is stopped early or dies.\n- The `claude` process's children for each kind (`ps -o pid,ppid,lstart,comm`): is a monitor a child process? Is anything visible for a scheduled wakeup? This decides where the process fallback can work.\n- Whether `SubagentStop`'s `background_tasks` lists the parent's monitors too.\n\n## Output\n- Sanitized payloads in `tests/fixtures/payloads/` (made-up IDs, paths, commands), e.g. `Stop-background-monitor.json`, `Stop-session-crons.json`.\n- Findings in `tests/fixtures/README.md`.\n- A short design note as this task's note: the state's name, symbol and wording, how it ranks and counts (like busy?), how it interacts with `subagents`, waiting, C3 and C5, the process fallback, and whether `session_crons` is covered. Settle it with the user, then create the implementation tasks (hook, engine, conformance cases, PRD and schema docs, app).",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "tests/fixtures/README.md",
         "tests/fixtures/payloads/"
       ],
       "created_at": "2026-11-01T21:09:37Z",
-      "updated_at": "2026-11-13T16:37:43Z",
+      "updated_at": "2026-11-13T17:28:23Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "components": [
@@ -7789,7 +7789,24 @@
       ],
       "sprint": "Background work",
       "started_at": "2026-11-13T16:37:43Z",
-      "started_by": "claude:d7ddfe3a"
+      "started_by": "claude:d7ddfe3a",
+      "commit": "869cdc67a86d355038a1f7ffeb06f35add050198",
+      "notes": [
+        {
+          "at": "2026-11-13T17:23:56Z",
+          "kind": "note",
+          "text": "Design (agreed 2026-11-13): new state `background`, word \"waiting on background work\", symbol `hourglass`, ranks and counts like busy. Applies to an idle session with a background `shell` first seen under 30 min ago (dropped once its bash child of claude is gone) or a `session_crons` wakeup not yet due. Not while subagents run or the session waits; no C5. Plus: ignore `<agent-message` prompts like `<task-notification>`.",
+          "by": "claude:d7ddfe3a"
+        },
+        {
+          "at": "2026-11-13T17:28:23Z",
+          "kind": "outcome",
+          "text": "Captured shells, monitors, a background subagent, TaskStop and a /loop wakeup; findings and 4 fixtures in tests/fixtures. Design agreed with the user (see note); implementation tasks T-170 to T-174. debug_hook_log is off again and the log deleted.",
+          "by": "claude:d7ddfe3a"
+        }
+      ],
+      "completed_at": "2026-11-13T17:28:23Z",
+      "completed_by": "claude:d7ddfe3a"
     },
     {
       "id": "T-152",
@@ -8691,6 +8708,198 @@
           "text": "The herdr gather test and the echo success case wait up to 10 s (slowMachineTimeout) instead of 1–2 s; the production default stays 1 s and the timeout case (sleep, 0.3 s) is unchanged. Actions tests use a fake runner, so no change there. mise run check passes.",
           "by": "claude:d7ddfe3a"
         }
+      ]
+    },
+    {
+      "id": "T-170",
+      "name": "Hook: ignore agent-message prompts like task notifications",
+      "type": "bugfix",
+      "priority": "P2",
+      "labels": [
+        "hook"
+      ],
+      "description": "A subagent's final report reaches the session as a `UserPromptSubmit` whose prompt starts with `<agent-message from=` ([fixture](tests/fixtures/payloads/UserPromptSubmit-agent-message.json), [findings](tests/fixtures/README.md#background-work-while-the-turn-has-ended)). Today the hook treats it as a typed prompt: it sets `promptPreview` and `promptAt`, and `promptAt` lifts a project's mute.\n\n## Change\n- Treat prompts starting with `<agent-message` the same as `<task-notification>` (`HookEvents.swift`, next to `taskNotificationPrefix`): the event still sets `busy`, but changes neither `promptPreview` nor `promptAt`.\n- `doc/state-file-schema.md` › Events (`UserPromptSubmit`) and the PRD's hook table name both prefixes, in the same commit.\n\n## Tests\nIn `HookEventsTests`, from the new fixture: busy, no preview, no `promptAt`; a mute stays.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "Sources/ASBCore/HookEvents.swift",
+        "tests/ASBCoreTests/HookEventsTests.swift",
+        "doc/state-file-schema.md",
+        "doc/PRD.md"
+      ],
+      "created_at": "2026-11-13T17:28:19Z",
+      "updated_at": "2026-11-13T17:28:19Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce",
+      "sprint_history": [
+        {
+          "sprint": "Background work",
+          "from": "2026-11-13T17:28:19Z"
+        }
+      ],
+      "sprint": "Background work",
+      "components": [
+        "core",
+        "docs"
+      ],
+      "related": [
+        "T-151"
+      ]
+    },
+    {
+      "id": "T-171",
+      "name": "Hook: record background shells and scheduled wakeups",
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "hook"
+      ],
+      "description": "First half of the `background` state designed in T-151 (its design note; [findings](tests/fixtures/README.md#background-work-while-the-turn-has-ended)). The hook records what the engine needs; the engine (next task) decides what to show.\n\n## Change\nTwo optional, additive state file fields, written by `Stop` and `SubagentStop` when the payload has the lists (the same rules as `subagents` for older events, see Writer rules › Newer wins):\n- `backgroundShells`: `{ \"<task id>\": <epoch ms first seen> }` for each `background_tasks` entry with `type: \"shell\"` and a running status. A shell already in the file keeps its first-seen time; one no longer listed is removed; the field is dropped when empty. (`run_in_background` shells and monitors look the same; both count.)\n- `wakeupAt`: epoch ms of the earliest due time among `session_crons` entries with `recurring: false`. Their `schedule` is a cron line `M H * * *`: the next local time at that hour and minute after the event. Dropped when there is none. Recurring entries (a fixed-interval `/loop`, not captured yet) are ignored for now.\n- `SessionStart` (other than `compact`) drops both, like `subagents`.\n\n## Docs\n`doc/state-file-schema.md`: the two fields and the event rows, in the same commit.\n\n## Tests\nEvent-order tests in `HookEventsTests` from `Stop-background-tasks.json`, `SubagentStop-background-tasks.json` and `Stop-session-crons.json`: first-seen time kept across two `Stop`s, a shell gone from the list removed, a stopped shell (missing from the next `Stop`) removed, `wakeupAt` across midnight, an older `SubagentStop` changing nothing.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "Sources/ASBCore/HookEvents.swift",
+        "Sources/ASBCore/StateFile.swift",
+        "tests/ASBCoreTests/HookEventsTests.swift",
+        "doc/state-file-schema.md"
+      ],
+      "created_at": "2026-11-13T17:28:19Z",
+      "updated_at": "2026-11-13T17:28:19Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce",
+      "sprint_history": [
+        {
+          "sprint": "Background work",
+          "from": "2026-11-13T17:28:19Z"
+        }
+      ],
+      "sprint": "Background work",
+      "components": [
+        "core"
+      ],
+      "related": [
+        "T-151"
+      ]
+    },
+    {
+      "id": "T-172",
+      "name": "Engine: show the background state",
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "checks",
+        "swift-core"
+      ],
+      "description": "Second half of the `background` state designed in T-151 (its design note). Derived only in the snapshot, like `subagents` and `uncertain`.\n\n## Rule\nA session shows `background` when, after C1 to C4 and the subagents state, it is `idle` (not waiting, no running subagents) and either:\n- it has a `backgroundShells` entry first seen less than 30 minutes ago **and** its `claude` process still has a `bash` child (the process fallback: no child, no shell); or\n- its `wakeupAt` is still ahead of now.\n\n`since` is the earliest first-seen time, or the file's `stateSince` for a wakeup. C5 doesn't apply to it (the 30 minutes and the due time bound it).\n\n## Look\nWord \"waiting on background work\", symbol `hourglass`, busy's color; it ranks and counts like `busy`. Config keys `icon_background` and `color_background` (the `<state>` list in the state file schema's config table).\n\n## Docs and tests\n- `doc/snapshot-schema.md` (`shown`, `word`), `doc/state-file-schema.md` (config keys), the PRD's state model and checks.\n- Conformance cases written by hand from these rules: a recent shell, a shell older than 30 min (idle), a shell without a bash child (idle), a pending wakeup, a passed wakeup (idle), waiting and subagents winning, a theme override.\n- Unit tests for the new check.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-171"
+      ],
+      "files": [
+        "Sources/ASBCore/Checks.swift",
+        "Sources/ASBCore/Engine.swift",
+        "Sources/ASBCore/MenuModel.swift",
+        "Sources/ASBCore/Themes.swift",
+        "Sources/ASBCore/Config.swift",
+        "tests/conformance/",
+        "doc/snapshot-schema.md",
+        "doc/state-file-schema.md",
+        "doc/PRD.md"
+      ],
+      "created_at": "2026-11-13T17:28:19Z",
+      "updated_at": "2026-11-13T17:28:19Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce",
+      "sprint_history": [
+        {
+          "sprint": "Background work",
+          "from": "2026-11-13T17:28:19Z"
+        }
+      ],
+      "sprint": "Background work",
+      "components": [
+        "core",
+        "docs"
+      ],
+      "related": [
+        "T-151"
+      ]
+    },
+    {
+      "id": "T-173",
+      "name": "App: show the background state",
+      "type": "feature",
+      "priority": "P2",
+      "labels": [
+        "app",
+        "companion"
+      ],
+      "description": "The app shows the `background` state the engine now derives (T-151's design note).\n\n## Change\n- Settings: `background` in the symbol and color pickers, next to the other states (`SettingsView.swift`).\n- Help: the state in the legend (`HelpView.swift`).\n- Notifications: none for `background` (it doesn't need the user), and a session moving from `background` to idle notifies as idle does today.\n- The companion: the calm busy routine while the most urgent state is `background`.\n\n## Tests\nView-model and notification-rule tests in `App/Tests/`. `mise run app:test` passes.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-172"
+      ],
+      "files": [
+        "App/Sources/SettingsView.swift",
+        "App/Sources/HelpView.swift",
+        "App/Tests/"
+      ],
+      "created_at": "2026-11-13T17:28:19Z",
+      "updated_at": "2026-11-13T17:28:19Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce",
+      "sprint_history": [
+        {
+          "sprint": "Background work",
+          "from": "2026-11-13T17:28:19Z"
+        }
+      ],
+      "sprint": "Background work",
+      "components": [
+        "app"
+      ],
+      "related": [
+        "T-151"
+      ]
+    },
+    {
+      "id": "T-174",
+      "name": "Live check: the background state in the dev build",
+      "type": "test",
+      "priority": "P2",
+      "labels": [
+        "app"
+      ],
+      "description": "With the user, in the dev build (`mise run app:run`, which updates the stable `asb` copy): in a real session, end a turn while a `Monitor` runs, then while a dynamic `/loop` waits on its wakeup, and once with a `run_in_background` dev server running past 30 minutes (or a shortened check). The row shows the hourglass and \"waiting on background work\", goes idle when the work ends or after 30 minutes, and the menu bar ranks it like busy. Record what was seen as this task's note; anything wrong becomes a follow-up task.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-173"
+      ],
+      "files": [],
+      "created_at": "2026-11-13T17:28:19Z",
+      "updated_at": "2026-11-13T17:28:19Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "Hakan Serce",
+      "sprint_history": [
+        {
+          "sprint": "Background work",
+          "from": "2026-11-13T17:28:19Z"
+        }
+      ],
+      "sprint": "Background work",
+      "with": "user",
+      "related": [
+        "T-151"
       ]
     }
   ]
