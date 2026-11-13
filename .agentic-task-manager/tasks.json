@@ -8516,7 +8516,7 @@
         "README.md"
       ],
       "created_at": "2026-11-13T11:19:19Z",
-      "updated_at": "2026-11-13T11:49:30Z",
+      "updated_at": "2026-11-13T11:50:51Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "sprint_history": [
@@ -8542,7 +8542,8 @@
         }
       ],
       "started_at": "2026-11-13T11:49:30Z",
-      "started_by": "claude:d7ddfe3a"
+      "started_by": "claude:d7ddfe3a",
+      "commit": "362a3a9a6aaa69f363beaa40c7ccef5c8c27b748"
     },
     {
       "id": "T-168",
