@@ -9,13 +9,13 @@ fails. Everything here runs from a tag; nothing is built on a laptop for a relea
 git tag v0.3.0 ─push─▶ .github/workflows/release.yml (macOS runner)
                          │ imports the Developer ID certificate, writes the notary and Sparkle keys
                          ▼
-                       scripts/package.sh 0.3.0
+                       mise run release:package 0.3.0
                          │ checks: the tag matches ASBVersion.current; the Sparkle key pair matches
                          │ builds the app (XcodeGen + xcodebuild), writes SUPublicEDKey into it
                          │ signs inside out: Sparkle's helpers, Sparkle.framework, asb, the app
                          │ notarizes the zip, staples the app, zips again; builds, signs, notarizes, staples the DMG
                          ▼
-                       scripts/appcast.sh ─▶ appcast.xml (the zip, signed with the Sparkle key)
+                       release:appcast ─▶ appcast.xml (the zip, signed with the Sparkle key)
                          ▼
                        draft GitHub release: agentic-status-bar-0.3.0.zip, .dmg, appcast.xml
                          │
@@ -24,7 +24,7 @@ git tag v0.3.0 ─push─▶ .github/workflows/release.yml (macOS runner)
           ┌──────────────┴──────────────────────────────┐
           ▼                                              ▼
 installed apps (Sparkle) read                    .github/workflows/homebrew.yml (on release: published)
-releases/latest/download/appcast.xml,            computes the zip's sha256 (scripts/homebrew-cask.sh) and
+releases/latest/download/appcast.xml,            computes the zip's sha256 (release:cask) and
 download the zip, check its signature,           pushes Casks/agentic-status-bar.rb to solo-swe/homebrew-tap
 install it                                       with the deploy key
 ```
@@ -85,7 +85,7 @@ appstoreconnect.apple.com:
 ### 4. Sparkle update key
 
 An EdDSA key pair: the private key signs each update, the public key is built into the app, which installs only
-updates signed with it. Build the app once so Sparkle's tools are downloaded (`scripts/package.sh 0.0.0`), then:
+updates signed with it. Build the app once so Sparkle's tools are downloaded (`mise run release:package 0.0.0`), then:
 
 ```sh
 bin=.build/release-xcode/SourcePackages/artifacts/sparkle/Sparkle/bin
@@ -142,7 +142,7 @@ Once the secrets are set, delete the exported `.p12` and `.p8` from your disk an
 
 1. Set the version: `ASBVersion.current` in `Sources/ASBCore/Version.swift` and `MARKETING_VERSION` in
    `App/project.yml`, and the version in the README's build-it-yourself example.
-2. Run the checks (`mise run test`, `mise run app:test`, `mise run lint`), commit, push, and wait for CI.
+2. Run the checks (`mise run check`), commit, push, and wait for CI.
 3. Tag and push the tag: `git tag -a v0.3.0 -m v0.3.0 && git push origin v0.3.0`.
 4. Watch the release run (`gh run list --workflow release.yml`, `gh run watch <id>`). It drafts the release.
 5. Check the draft (Checking a release, below) and edit its notes; they're generated from the commits.
@@ -150,7 +150,7 @@ Once the secrets are set, delete the exported `.p12` and `.p8` from your disk an
 7. Check the published release: the downloads work without a GitHub login, and the Homebrew workflow ran and the tap
    has the new version.
 
-A dry run on your Mac: `scripts/package.sh 0.0.0` builds and signs ad hoc, skips notarization, and makes no appcast.
+A dry run on your Mac: `mise run release:package 0.0.0` builds and signs ad hoc, skips notarization, and makes no appcast.
 Such builds don't update themselves (they have no public key).
 
 ## Checking a release

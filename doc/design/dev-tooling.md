@@ -1,7 +1,7 @@
 # Developer tooling: mise for tools and tasks
 
-Status (2026-11-01): **built** for the tools, Xcode, the checks and `check` (T-152 to T-154); the release tasks are
-next (T-155).
+Status (2026-11-13): **built**: the tools, Xcode, the checks and `check` (T-152 to T-154), and the release tasks
+and workflows (T-155).
 
 ## Decisions
 
@@ -55,14 +55,17 @@ and each script checks for its own tools.
 | `bench` | `mise-tasks/bench.sh` | `tests/bench.sh` |
 | `coverage` | `mise-tasks/coverage.sh` (the threshold as its argument, default 99) | new (T-147) |
 | `check` | `mise.toml` (`depends` on `lint`, `test --summary`, `coverage`, `app:test`) | new |
-| `release:package`, `release:appcast`, `release:cask` | `mise-tasks/release/*.sh` | `scripts/package.sh`, `appcast.sh`, `homebrew-cask.sh` (a later task) |
+| `release:package`, `release:appcast`, `release:cask` | `mise-tasks/release/*.sh` | `scripts/package.sh`, `appcast.sh`, `homebrew-cask.sh` |
 
 `tests/` keeps the tests, fixtures and conformance cases; `scripts/` keeps the Swift helper scripts. Tasks run from the
 repository root, which mise sets as their working directory.
 
+The release workflow installs the pinned tools and Xcode like CI. The Homebrew workflow runs on Linux, where
+`mise.toml`'s `xcodegen` has no build, so it sets up mise without installing tools (`install: false`,
+`MISE_TASK_RUN_AUTO_INSTALL=false`); `release:cask` needs none.
+
 ## Open points
 
-- The release scripts move last, in their own task, checked with an unsigned `release:package 0.0.0` dry run.
 - The agents' permission allowlist (`.claude/settings.json`) moves from script paths to `mise run *`; the user makes
   that change.
 

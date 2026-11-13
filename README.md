@@ -145,7 +145,7 @@ and notarized by Apple. Builds run on Apple silicon Macs. Or build the app yours
 ```sh
 git clone https://github.com/solo-swe/agentic-status-bar.git ~/code/agentic-status-bar
 cd ~/code/agentic-status-bar
-scripts/package.sh 0.3.0
+mise-tasks/release/package.sh 0.3.0
 open dist/agentic-status-bar-0.3.0.dmg
 ```
 

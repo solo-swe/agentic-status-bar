@@ -9,17 +9,23 @@ on:
 permissions:
   contents: write
 
+# The tools come from mise.toml and Xcode from .xcode-version (doc/design/dev-tooling.md).
+env:
+  MISE_TRUSTED_CONFIG_PATHS: ${{ github.workspace }}
+
 jobs:
   release:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v7
 
-      - name: Select the newest Xcode
-        run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+      - name: Select the pinned Xcode
+        run: sudo xcode-select -s "/Applications/Xcode_$(cat .xcode-version).app"
 
-      - name: Install XcodeGen
-        run: brew install xcodegen
+      - name: Install the pinned tools
+        uses: jdx/mise-action@v5.2.5
+        with:
+          version: 2026.10.25
 
       - name: Import the Developer ID certificate
         env:
@@ -55,7 +61,7 @@ jobs:
           # The public half of SPARKLE_ED_PRIVATE_KEY; the app checks updates against it.
           SPARKLE_PUBLIC_KEY: ${{ vars.SPARKLE_PUBLIC_KEY }}
           SPARKLE_KEY_FILE: ${{ runner.temp }}/sparkle.key
-        run: scripts/package.sh "${GITHUB_REF_NAME#v}"
+        run: mise run release:package "${GITHUB_REF_NAME#v}"
 
       - name: Draft the GitHub release
         env:

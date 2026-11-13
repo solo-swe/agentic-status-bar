@@ -49,7 +49,8 @@ The `@main` entry point (`Sources/asb/ASB.swift`) has no lines to count. Coverag
 | `tests/conformance/` | The snapshot engine's behavior as data: input files and the expected snapshot (see its README) |
 | `tests/fixtures/` | Captured Claude Code hook payloads and transcripts (see its README) |
 | `mise.toml`, `mise-tasks/` | The pinned development tools and the checks as mise tasks (`doc/design/dev-tooling.md`) |
-| `scripts/package.sh`, `appcast.sh`, `homebrew-cask.sh` | Build, sign, notarize and package a release; its update feed; its Homebrew cask (see `doc/RELEASING.md`) |
+| `mise-tasks/release/` | `release:package`, `release:appcast`, `release:cask`: build, sign, notarize and package a release; its update feed; its Homebrew cask (see `doc/RELEASING.md`) |
+| `scripts/` | Swift helper scripts: the Sparkle key check, the icon and the social preview |
 | `doc/README.md` | Index of the documents |
 | `doc/guides/` | How code is written here: Swift, the app, the hook, shell scripts |
 | `doc/PRD.md` | Product requirements |
@@ -96,4 +97,4 @@ workflow makes, and publish it as the latest release. Publishing offers the upda
 Homebrew tap. [doc/RELEASING.md](doc/RELEASING.md) has the whole process: how it flows, the one-time setup with every
 secret, a checklist, how to check a release, what to do when a step fails, and replacing keys.
 
-`scripts/package.sh 0.0.0` makes an unsigned dry run locally.
+`mise run release:package 0.0.0` makes an unsigned dry run locally.

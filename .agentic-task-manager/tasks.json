@@ -7926,7 +7926,7 @@
       "description": "The last step of `doc/design/dev-tooling.md` › Layout: move the release scripts to mise tasks and the release workflows to mise.\n\n## Change\n- `git mv` `scripts/package.sh` → `mise-tasks/release/package.sh` (`release:package <version>`), `scripts/appcast.sh` → `release/appcast.sh`, `scripts/homebrew-cask.sh` → `release/cask.sh`, each with a `#MISE description` header (arguments pass through to the script, as in the other tasks); the scripts that call each other use the new paths.\n- `.github/workflows/release.yml` and `homebrew.yml`: `jdx/mise-action` (same pinned versions as `ci.yml`), `MISE_TRUSTED_CONFIG_PATHS`, and the `.xcode-version` step instead of `brew install` and the newest Xcode, then the tasks. Secrets and their handling stay exactly as they are.\n- `doc/RELEASING.md`, `CONTRIBUTING.md` › Releases and Layout, and this design note (status: built).\n\n## Checks\n`mise run release:package 0.0.0` makes an unsigned dry run as before; `mise run lint` passes. The workflows themselves are checked at the next release, with the user.\n",
       "requirements": [],
       "use_cases": [],
-      "status": "todo",
+      "status": "in_progress",
       "dependencies": [
         "T-153"
       ],
@@ -7942,7 +7942,7 @@
         "doc/design/dev-tooling.md"
       ],
       "created_at": "2026-11-01T22:13:44Z",
-      "updated_at": "2026-11-13T11:19:20Z",
+      "updated_at": "2026-11-13T11:30:16Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "components": [
@@ -7956,7 +7956,9 @@
         }
       ],
       "sprint": "v0.3.1",
-      "with": "user"
+      "with": "user",
+      "started_at": "2026-11-13T11:30:16Z",
+      "started_by": "claude:d7ddfe3a"
     },
     {
       "id": "T-156",
@@ -8519,7 +8521,7 @@
       "description": "`mise run bench` fails on the hook: `asb hook` median 12–16 ms, p95 55–710 ms, against the 10 ms target (`asb snapshot` passes). Measured on 2026-11-13 on `main`, also before T-166, so the overrun predates it.\n\n## Work\n1. Find where the time goes: process start, the PID walk and metadata, locking, the write, or load on the machine (compare runs on a quiet machine).\n2. If it's the code, make it faster without changing behaviour (the hook guide: [doc/guides/hook.md](doc/guides/hook.md)).\n3. If it's the machine or the benchmark, propose a change to the budget or to `mise-tasks/bench.sh` and agree it with the user before changing it.\n\n## Done when\n`mise run bench` passes, and `mise run check` passes.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "Sources/ASBCore/Hook.swift",
@@ -8527,7 +8529,7 @@
         "mise-tasks/bench.sh"
       ],
       "created_at": "2026-11-13T11:19:19Z",
-      "updated_at": "2026-11-13T11:24:30Z",
+      "updated_at": "2026-11-13T11:28:06Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "sprint_history": [
@@ -8541,7 +8543,18 @@
         "core"
       ],
       "started_at": "2026-11-13T11:24:30Z",
-      "started_by": "claude:d7ddfe3a"
+      "started_by": "claude:d7ddfe3a",
+      "commit": "192f9f9d21fbd35e0642c400d575a94ba061c2cf",
+      "completed_at": "2026-11-13T11:28:06Z",
+      "completed_by": "claude:d7ddfe3a",
+      "notes": [
+        {
+          "at": "2026-11-13T11:28:06Z",
+          "kind": "outcome",
+          "text": "No code change needed: the hook is 9 ms median on a quiet machine; the 12–16 ms came from load. About 7 ms of it is process start (start line now shown by bench.sh, as agreed). mise run bench and mise run check pass.",
+          "by": "claude:d7ddfe3a"
+        }
+      ]
     }
   ]
 }

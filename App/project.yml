@@ -17,7 +17,7 @@ packages:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    # Release builds take the version from scripts/package.sh, which checks it against ASBVersion.current.
+    # Release builds take the version from release:package, which checks it against ASBVersion.current.
     MARKETING_VERSION: "0.3.0"
     CURRENT_PROJECT_VERSION: "1"
 
@@ -64,9 +64,9 @@ targets:
         LSUIElement: true
         LSMinimumSystemVersion: "14.0"
         NSHumanReadableCopyright: "© 2026 Hakan Serce. MIT License."
-        # Sparkle: the feed is the appcast attached to the latest published release (scripts/appcast.sh).
+        # Sparkle: the feed is the appcast attached to the latest published release (release:appcast).
         SUFeedURL: https://github.com/solo-swe/agentic-status-bar/releases/latest/download/appcast.xml
-        # The EdDSA public key: empty here, so local builds don't update themselves; scripts/package.sh
+        # The EdDSA public key: empty here, so local builds don't update themselves; release:package
         # writes SPARKLE_PUBLIC_KEY into release builds (CONTRIBUTING.md › Releases).
         SUPublicEDKey: ""
         SUEnableAutomaticChecks: true

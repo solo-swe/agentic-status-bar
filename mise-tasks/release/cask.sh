@@ -1,13 +1,14 @@
 #!/bin/sh
+#MISE description="Print the Homebrew cask for a release (version and the zip's sha256)"
 # Print the Homebrew cask for a release, for the tap solo-swe/homebrew-tap (Casks/agentic-status-bar.rb).
 #
-#   scripts/homebrew-cask.sh <version> <sha256 of agentic-status-bar-<version>.zip>
+#   mise run release:cask <version> <sha256 of agentic-status-bar-<version>.zip>
 #
 # .github/workflows/homebrew.yml runs it when a release is published and pushes the result to the tap.
 set -eu
 
-version="${1:?usage: scripts/homebrew-cask.sh <version> <sha256>}"
-sha256="${2:?usage: scripts/homebrew-cask.sh <version> <sha256>}"
+version="${1:?usage: mise run release:cask <version> <sha256>}"
+sha256="${2:?usage: mise run release:cask <version> <sha256>}"
 
 cat <<EOF
 cask "agentic-status-bar" do

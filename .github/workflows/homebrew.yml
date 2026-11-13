@@ -15,6 +15,11 @@ on:
 permissions:
   contents: read
 
+# The cask task needs no tools, and mise.toml's xcodegen has no Linux build: set up mise without installing any.
+env:
+  MISE_TRUSTED_CONFIG_PATHS: ${{ github.workspace }}
+  MISE_TASK_RUN_AUTO_INSTALL: "false"
+
 jobs:
   cask:
     runs-on: ubuntu-latest
@@ -24,6 +29,12 @@ jobs:
       TAG: ${{ github.event.release.tag_name || inputs.tag }}
     steps:
       - uses: actions/checkout@v7
+
+      - name: Set up mise
+        uses: jdx/mise-action@v5.2.5
+        with:
+          version: 2026.10.25
+          install: false
 
       - name: Checksum the release zip
         env:
@@ -43,7 +54,7 @@ jobs:
           export GIT_SSH_COMMAND="ssh -i $RUNNER_TEMP/tap-key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
           git clone git@github.com:solo-swe/homebrew-tap.git "$RUNNER_TEMP/tap"
           mkdir -p "$RUNNER_TEMP/tap/Casks"
-          scripts/homebrew-cask.sh "$VERSION" "$SHA256" > "$RUNNER_TEMP/tap/Casks/agentic-status-bar.rb"
+          mise run --quiet release:cask "$VERSION" "$SHA256" > "$RUNNER_TEMP/tap/Casks/agentic-status-bar.rb"
           cd "$RUNNER_TEMP/tap"
           git add Casks/agentic-status-bar.rb
           if git diff --cached --quiet; then

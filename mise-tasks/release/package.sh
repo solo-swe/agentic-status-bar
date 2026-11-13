@@ -1,17 +1,18 @@
 #!/bin/sh
+#MISE description="Build, sign, notarize and package the app as dist/*.zip and dist/*.dmg (ad-hoc without IDENTITY)"
 # Build the app for release, sign it and the embedded asb, notarize and staple, and package
 # dist/agentic-status-bar-<version>.zip (only the .app) and dist/agentic-status-bar-<version>.dmg.
 #
-#   scripts/package.sh <version>
+#   mise run release:package <version>
 #
 # IDENTITY: the signing identity, default "-" (ad-hoc: no notarization, for a local dry run).
 # With a Developer ID identity, notarization needs NOTARY_KEY (path of the .p8 API key),
 # NOTARY_KEY_ID and NOTARY_ISSUER. See doc/RELEASING.md.
 # SPARKLE_PUBLIC_KEY: the EdDSA public key built into the app, so it can update itself (empty: no updates).
 set -eu
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
-version="${1:?usage: scripts/package.sh <version>}"
+version="${1:?usage: mise run release:package <version>}"
 identity="${IDENTITY:--}"
 
 # One version for the app, asb and the tag: ASBVersion.current. A signed release must match it.
@@ -102,6 +103,6 @@ echo "Packaged $dist/$name.zip and $dist/$name.dmg"
 
 # The appcast, when there's a key to sign the update with.
 if [ -n "${SPARKLE_KEY_FILE:-}" ]; then
-  scripts/appcast.sh "$version" "${BUILD_NUMBER:-1}" "$dist/$name.zip" > "$dist/appcast.xml"
+  mise-tasks/release/appcast.sh "$version" "${BUILD_NUMBER:-1}" "$dist/$name.zip" > "$dist/appcast.xml"
   echo "Wrote $dist/appcast.xml"
 fi
