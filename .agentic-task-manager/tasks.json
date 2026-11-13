@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 167,
+    "next_id": 169,
     "workflow": {
       "type": "direct"
     },
@@ -320,6 +320,13 @@
             "T-165"
           ]
         }
+      },
+      {
+        "id": "v0.3.1",
+        "state": "active",
+        "goal": "Ship the parked-session fix (C6) as v0.3.1, with smoother release tooling",
+        "release": "v0.3.1",
+        "start": "2026-11-13T11:22:04Z"
       }
     ],
     "releases": [
@@ -327,6 +334,10 @@
         "id": "v0.3.0",
         "state": "planned",
         "name": "Desktop companion"
+      },
+      {
+        "id": "v0.3.1",
+        "state": "planned"
       }
     ],
     "components": [
@@ -7699,14 +7710,21 @@
         "CLAUDE.md"
       ],
       "created_at": "2026-11-01T10:14:33Z",
-      "updated_at": "2026-11-01T10:14:33Z",
+      "updated_at": "2026-11-13T11:17:32Z",
       "created_by": "Hakan Serce",
-      "updated_by": "Hakan Serce",
+      "updated_by": "claude:d7ddfe3a",
       "components": [
         "release",
         "docs"
       ],
-      "with": "user"
+      "with": "user",
+      "sprint_history": [
+        {
+          "sprint": "v0.3.1",
+          "from": "2026-11-13T11:17:32Z"
+        }
+      ],
+      "sprint": "v0.3.1"
     },
     {
       "id": "T-151",
@@ -7924,13 +7942,21 @@
         "doc/design/dev-tooling.md"
       ],
       "created_at": "2026-11-01T22:13:44Z",
-      "updated_at": "2026-11-01T22:28:36Z",
+      "updated_at": "2026-11-13T11:19:20Z",
       "created_by": "Hakan Serce",
-      "updated_by": "claude:5f67a194",
+      "updated_by": "claude:d7ddfe3a",
       "components": [
         "release",
         "docs"
-      ]
+      ],
+      "sprint_history": [
+        {
+          "sprint": "v0.3.1",
+          "from": "2026-11-13T11:17:32Z"
+        }
+      ],
+      "sprint": "v0.3.1",
+      "with": "user"
     },
     {
       "id": "T-156",
@@ -8413,14 +8439,14 @@
       "description": "The app showed two `agentic-task-manager` rows while only one session was running in that project.\n\n## What was seen (2026-11-13)\n\nBoth state files have `herdrPane` `w8:p1`:\n\n| Session | pid | Process | Last hook write | State |\n| --- | --- | --- | --- | --- |\n| `34798264…` (old) | 20122 | `claude --resume …`, the TUI started Nov 6, still alive | 15 h ago | busy |\n| `0f56a916…` (new) | 23627 | `claude bg-spare`, under `claude bg-pty-host` under daemon 23335, a child of 20122 | now | busy, no `termBundleId` |\n\n- The PIDs differ, so the `SessionStart` cleanup of other files with the same `pid` ([state-file-schema.md](doc/state-file-schema.md#:~:text=Deletes%20other%20state%20files%20with%20the%20same)) doesn't remove the old file.\n- C1 keeps it: pid 20122 still runs with the same `procStart`.\n- C5 doesn't mark it uncertain. Likely because the daemon (a child of 20122) started after `stateSince`, which counts as activity.\n\n## Work\n\n1. Confirm the cause: find out how Claude Code moves a session into a `bg-spare` process (capture payloads with `debug_hook_log`, see [tests/fixtures/README.md](tests/fixtures/README.md)). Don't guess.\n2. Agree the fix with the user before writing it into docs or code.\n3. Fix it, with unit tests, an event-order test or a conformance case, and an update to the schema doc or PRD in the same commit.\n4. `mise run check` passes.",
       "requirements": [],
       "use_cases": [],
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "files": [
         "doc/state-file-schema.md",
         "doc/PRD.md"
       ],
       "created_at": "2026-11-13T11:03:59Z",
-      "updated_at": "2026-11-13T11:04:11Z",
+      "updated_at": "2026-11-13T11:19:21Z",
       "created_by": "Hakan Serce",
       "updated_by": "claude:d7ddfe3a",
       "components": [
@@ -8428,7 +8454,92 @@
         "docs"
       ],
       "started_at": "2026-11-13T11:04:11Z",
-      "started_by": "claude:d7ddfe3a"
+      "started_by": "claude:d7ddfe3a",
+      "commit": "e7e74d78be364886a2d7aadd1bf60252eb853bf5",
+      "completed_at": "2026-11-13T11:10:14Z",
+      "completed_by": "claude:d7ddfe3a",
+      "notes": [
+        {
+          "at": "2026-11-13T11:10:14Z",
+          "kind": "outcome",
+          "text": "C6: the snapshot drops a session whose registry entry (same pid and sessionId) has a parkedJobId; the file stays until C1. mise run check passes. mise run bench: the hook is over its 10 ms target on main too (12 ms), not caused by this change.",
+          "by": "claude:d7ddfe3a"
+        }
+      ],
+      "release": "v0.3.1"
+    },
+    {
+      "id": "T-167",
+      "name": "Release: v0.3.1",
+      "type": "infra",
+      "priority": "P1",
+      "labels": [
+        "release"
+      ],
+      "description": "Release v0.3.1 following [doc/RELEASING.md](doc/RELEASING.md) › Each release. A patch release:\n\n- a session Claude Code parked into a background job no longer shows as a second row (C6, T-166);\n- the app follows a moved `state_dir` right away (T-158);\n- no force unwraps left (T-157, T-163);\n- the comment and test cleanup and the 99% coverage gate (T-142 to T-149, T-156, T-162);\n- the dev tooling and the release scripts on mise (T-152 to T-155).\n\n## Steps\n1. Set `ASBVersion.current` and `MARKETING_VERSION` to `0.3.1` (build number above 0.3.0's), and the README's build example.\n2. `mise run check`, commit, push, CI green.\n3. Tag `v0.3.1` only with the user's go, and watch the release run.\n4. Check the draft with the release-check skill (T-150).\n5. The user publishes it as the latest release.\n6. Check the downloads without a login and the Homebrew workflow; an installed v0.3.0 should offer the update.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [
+        "T-155",
+        "T-150"
+      ],
+      "files": [
+        "Sources/ASBCore/Version.swift",
+        "App/project.yml",
+        "README.md"
+      ],
+      "created_at": "2026-11-13T11:19:19Z",
+      "updated_at": "2026-11-13T11:19:30Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "claude:d7ddfe3a",
+      "sprint_history": [
+        {
+          "sprint": "v0.3.1",
+          "from": "2026-11-13T11:19:19Z"
+        }
+      ],
+      "sprint": "v0.3.1",
+      "release": "v0.3.1",
+      "with": "user",
+      "components": [
+        "core",
+        "app",
+        "docs"
+      ]
+    },
+    {
+      "id": "T-168",
+      "name": "Hook: get asb hook back under its 10 ms budget",
+      "type": "bugfix",
+      "priority": "P2",
+      "labels": [
+        "hook"
+      ],
+      "description": "`mise run bench` fails on the hook: `asb hook` median 12–16 ms, p95 55–710 ms, against the 10 ms target (`asb snapshot` passes). Measured on 2026-11-13 on `main`, also before T-166, so the overrun predates it.\n\n## Work\n1. Find where the time goes: process start, the PID walk and metadata, locking, the write, or load on the machine (compare runs on a quiet machine).\n2. If it's the code, make it faster without changing behaviour (the hook guide: [doc/guides/hook.md](doc/guides/hook.md)).\n3. If it's the machine or the benchmark, propose a change to the budget or to `mise-tasks/bench.sh` and agree it with the user before changing it.\n\n## Done when\n`mise run bench` passes, and `mise run check` passes.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "todo",
+      "dependencies": [],
+      "files": [
+        "Sources/ASBCore/Hook.swift",
+        "Sources/ASBCore/HookMetadata.swift",
+        "mise-tasks/bench.sh"
+      ],
+      "created_at": "2026-11-13T11:19:19Z",
+      "updated_at": "2026-11-13T11:19:31Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "claude:d7ddfe3a",
+      "sprint_history": [
+        {
+          "sprint": "v0.3.1",
+          "from": "2026-11-13T11:19:19Z"
+        }
+      ],
+      "sprint": "v0.3.1",
+      "components": [
+        "core"
+      ]
     }
   ]
 }
