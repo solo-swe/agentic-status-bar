@@ -341,9 +341,31 @@
       },
       {
         "id": "Background work",
-        "state": "active",
+        "state": "closed",
         "goal": "Capture background-work payloads and design the new state; fix the flaky herdr test",
-        "start": "2026-11-13T14:20:02Z"
+        "start": "2026-11-13T14:20:02Z",
+        "end": "2026-11-14T13:49:41Z",
+        "report": {
+          "done": [
+            "T-151",
+            "T-169",
+            "T-170",
+            "T-171",
+            "T-172",
+            "T-173",
+            "T-174",
+            "T-175"
+          ],
+          "carried": [],
+          "added": [
+            "T-170",
+            "T-171",
+            "T-172",
+            "T-173",
+            "T-174",
+            "T-175"
+          ]
+        }
       }
     ],
     "releases": [
