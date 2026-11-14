@@ -4,7 +4,7 @@
     "id": "fbc92785",
     "created": "2026-10-25",
     "description": "macOS menu-bar app that shows in one item whether any running Claude Code agent needs attention (waiting, idle, busy), driven by Claude Code hooks plus reconciliation checks; ships with the asb CLI. Source: doc/PRD.md",
-    "next_id": 176,
+    "next_id": 177,
     "workflow": {
       "type": "direct"
     },
@@ -9070,6 +9070,32 @@
           "by": "claude:d7ddfe3a"
         }
       ]
+    },
+    {
+      "id": "T-176",
+      "name": "Release v0.4.0",
+      "type": "infra",
+      "priority": "P1",
+      "labels": [
+        "release"
+      ],
+      "description": "Release v0.4.0 (the background state and the Parked check C6) following [doc/RELEASING.md](doc/RELEASING.md) › Each release: bump `ASBVersion.current`, `MARKETING_VERSION` and the README example, `mise run check`, push, tag `v0.4.0` with the user's go, watch the release run, check the draft (`/check-release 0.4.0`); the user publishes it, then `/check-release 0.4.0 published`.",
+      "requirements": [],
+      "use_cases": [],
+      "status": "in_progress",
+      "dependencies": [],
+      "files": [
+        "Sources/ASBCore/Version.swift",
+        "App/project.yml",
+        "README.md"
+      ],
+      "created_at": "2026-11-14T13:58:24Z",
+      "updated_at": "2026-11-14T13:58:27Z",
+      "created_by": "Hakan Serce",
+      "updated_by": "claude:d7ddfe3a",
+      "with": "user",
+      "started_at": "2026-11-14T13:58:27Z",
+      "started_by": "claude:d7ddfe3a"
     }
   ]
 }
